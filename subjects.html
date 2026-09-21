@@ -11,9 +11,165 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Team Phantom Official Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Subject Syllabus Data Map
+    const curriculumData = {
+      "cds-math": {
+        title: "CDS Mathematics Specialist",
+        subjects: [
+          { name: "Lectures", desc: "Comprehensive Theory & Core Concepts" },
+          { name: "Mock", desc: "Timed Tactical Test Papers & Solutions" }
+        ]
+      },
+      "cds-kilo": {
+        title: "CDS Kilo Squadron",
+        subjects: [
+          { name: "Physics", desc: "Mechanics, Optics, Thermodynamics & Electricity" },
+          { name: "Chemistry", desc: "Physical, Inorganic & Organic Fundamental Principles" },
+          { name: "Biology", desc: "Cell Biology, Physiology & Environmental Systems" },
+          { name: "Physical Geography", desc: "Geomorphology, Climatology & Oceanography" },
+          { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Resources" },
+          { name: "Human Geography", desc: "Demography, Settlements & Economic Activity" },
+          { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Empires" },
+          { name: "Medieval History", desc: "Delhi Sultanate, Mughals & Regional Kingdoms" },
+          { name: "Modern History", desc: "Freedom Struggle, British Rule & Constitutional Growth" },
+          { name: "Polity", desc: "Constitution, Governance, Preamble & Judiciary" }
+        ]
+      },
+      "afcat": {
+        title: "AFCAT Juliet Squadron",
+        subjects: [
+          { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery" },
+          { name: "Reasoning", desc: "Verbal & Spatial Tactical Reasoning Drills" }
+        ]
+      },
+      "capf": {
+        title: "CAPF India Squadron",
+        subjects: [
+          { name: "Math", desc: "Quantitative Aptitude & Problem Solving" },
+          { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports" },
+          { name: "Mentor Session" , desc: "mentors class" }
+        ]
+      }
+    };
+
+    let unsubscribeSnapshot = null;
+
+    // Session Verification & Realtime Single Device Guard
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        window.location.href = "index.html";
+        return;
+      }
+
+      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
+        if (!docSnap.exists()) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          signOut(auth).then(() => window.location.href = "index.html");
+          return;
+        }
+
+        const data = docSnap.data();
+        const localToken = localStorage.getItem("phantom_session_token");
+
+        // Status check
+        if (data.status !== "active") {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          alert("Notice: Cadet account is currently not active or pending verification.");
+          signOut(auth).then(() => window.location.href = "index.html");
+          return;
+        }
+
+        // Single device session token verification
+        if (data.activeSession && localToken && data.activeSession !== localToken) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+          signOut(auth).then(() => {
+            localStorage.removeItem("phantom_session_token");
+            localStorage.removeItem("phantom_uid");
+            window.location.href = "index.html";
+          });
+          return;
+        }
+
+        // Render Subjects based on query string
+        renderBatchCurriculum(data.allowedBatches || []);
+      });
+    });
+
+    function renderBatchCurriculum(allowedBatches) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const batchParam = urlParams.get('batch') || 'cds-math';
+
+      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
+      if (!isCombo && !allowedBatches.includes(batchParam)) {
+        alert("ACCESS DENIED: You are not authorized for this specific squadron.");
+        window.location.href = "classroom.html";
+        return;
+      }
+
+      const currentCurriculum = curriculumData[batchParam] || curriculumData["cds-math"];
+      document.getElementById('batchHeading').innerText = currentCurriculum.title;
+      document.getElementById('batchBadge').innerText = "SQUADRON: " + batchParam.toUpperCase();
+
+      const container = document.getElementById('subjectsContainer');
+      container.innerHTML = "";
+
+      currentCurriculum.subjects.forEach((subj, index) => {
+        const card = document.createElement('div');
+        card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
+        card.onclick = () => openSubjectModule(batchParam, subj.name);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #0${index + 1}</span>
+              <span class="w-2 h-2 rounded-full bg-amber-500/80 group-hover:scale-125 transition"></span>
+            </div>
+            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition">${subj.name}</h3>
+            <p class="text-[11px] text-neutral-400 font-body mt-1 leading-snug">${subj.desc}</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-neutral-800 flex items-center justify-between">
+            <span class="text-[10px] font-mono text-amber-400">STATUS: READY</span>
+            <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openSubjectModule(batch, subjectName) {
+      window.location.href = "chapters.html?batch=" + encodeURIComponent(batch) + "&subject=" + encodeURIComponent(subjectName);
+    }
+
+    window.terminateCadetSession = function() {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      signOut(auth).then(() => {
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "index.html";
+      });
+    };
+  </script>
 
   <style>
     body {
@@ -77,7 +233,7 @@
         <a href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
           &larr; BACK TO SQUADRONS
         </a>
-        <button onclick="terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
+        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
           LOGOUT
         </button>
       </div>
@@ -119,142 +275,5 @@
     </p>
   </footer>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-      authDomain: "team-phantom-enrollment.firebaseapp.com",
-      projectId: "team-phantom-enrollment",
-      storageBucket: "team-phantom-enrollment.firebasestorage.app",
-      messagingSenderId: "658049687096",
-      appId: "1:658049687096:web:8464788a43126a6bced0cd"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Subject Syllabus Data Map
-    const curriculumData = {
-      "cds-math": {
-        title: "CDS Mathematics Specialist",
-        subjects: [
-          { name: "Lectures", desc: "Comprehensive Theory & Core Concepts" },
-          { name: "Mock", desc: "Timed Tactical Test Papers & Solutions" }
-        ]
-      },
-      "cds-kilo": {
-        title: "CDS Kilo Squadron",
-        subjects: [
-          { name: "Physics", desc: "Mechanics, Optics, Thermodynamics & Electricity" },
-          { name: "Chemistry", desc: "Physical, Inorganic & Organic Fundamental Principles" },
-          { name: "Biology", desc: "Cell Biology, Physiology & Environmental Systems" },
-          { name: "Physical Geography", desc: "Geomorphology, Climatology & Oceanography" },
-          { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Resources" },
-          { name: "Human Geography", desc: "Demography, Settlements & Economic Activity" },
-          { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Empires" },
-          { name: "Medieval History", desc: "Delhi Sultanate, Mughals & Regional Kingdoms" },
-          { name: "Modern History", desc: "Freedom Struggle, British Rule & Constitutional Growth" },
-          { name: "Polity", desc: "Constitution, Governance, Preamble & Judiciary" }
-        ]
-      },
-      "afcat": {
-        title: "AFCAT Juliet Squadron",
-        subjects: [
-          { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery" },
-          { name: "Reasoning", desc: "Verbal & Spatial Tactical Reasoning Drills" }
-        ]
-      },
-      "capf": {
-        title: "CAPF India Squadron",
-        subjects: [
-          { name: "Math", desc: "Quantitative Aptitude & Problem Solving" },
-          { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports" },
-          { name: "Mentor Session" , desc: "mentors class" }
-      
-        ]
-      }
-    };
-
-    // Session Verification
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      db.collection("cadets").doc(user.uid).onSnapshot((docSnap) => {
-        if (!docSnap.exists || docSnap.data().status !== "active") {
-          auth.signOut().then(() => window.location.href = "index.html");
-          return;
-        }
-
-        const data = docSnap.data();
-        const localToken = localStorage.getItem("phantom_session_token");
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          alert("SESSION TERMINATED: Logged in from another device.");
-          auth.signOut().then(() => {
-            localStorage.clear();
-            window.location.href = "index.html";
-          });
-          return;
-        }
-
-        // Render Subjects based on query string
-        renderBatchCurriculum(data.allowedBatches || []);
-      });
-    });
-
-    function renderBatchCurriculum(allowedBatches) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const batchParam = urlParams.get('batch') || 'cds-math';
-
-      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
-      if (!isCombo && !allowedBatches.includes(batchParam)) {
-        alert("ACCESS DENIED: You are not authorized for this specific squadron.");
-        window.location.href = "classroom.html";
-        return;
-      }
-
-      const currentCurriculum = curriculumData[batchParam] || curriculumData["cds-math"];
-      document.getElementById('batchHeading').innerText = currentCurriculum.title;
-      document.getElementById('batchBadge').innerText = "SQUADRON: " + batchParam.toUpperCase();
-
-      const container = document.getElementById('subjectsContainer');
-      container.innerHTML = "";
-
-      currentCurriculum.subjects.forEach((subj, index) => {
-        const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
-        card.onclick = () => openSubjectModule(batchParam, subj.name);
-
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #0${index + 1}</span>
-              <span class="w-2 h-2 rounded-full bg-amber-500/80 group-hover:scale-125 transition"></span>
-            </div>
-            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition">${subj.name}</h3>
-            <p class="text-[11px] text-neutral-400 font-body mt-1 leading-snug">${subj.desc}</p>
-          </div>
-          <div class="mt-4 pt-2 border-t border-neutral-800 flex items-center justify-between">
-            <span class="text-[10px] font-mono text-amber-400">STATUS: READY</span>
-            <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function openSubjectModule(batch, subjectName) {
-  window.location.href = "chapters.html?batch=" + encodeURIComponent(batch) + "&subject=" + encodeURIComponent(subjectName);
-}
-
-    function terminateCadetSession() {
-      auth.signOut().then(() => {
-        localStorage.clear();
-        window.location.href = "index.html";
-      });
-    }
-  </script>
 </body>
 </html>
