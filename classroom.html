@@ -30,14 +30,17 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let unsubscribeSnapshot = null;
+
     onAuthStateChanged(auth, (user) => {
       if (!user) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
         window.location.href = "index.html";
         return;
       }
 
       // Realtime Single-Device & Access Verification Listener
-      onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
+      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
         if (!docSnap.exists()) {
           signOut(auth).then(() => window.location.href = "index.html");
           return;
@@ -54,10 +57,13 @@
         }
 
         // Single device session token verification
+        // Agar database ka token local token se alag hai toh session terminate karein
         if (data.activeSession && localToken && data.activeSession !== localToken) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
           signOut(auth).then(() => {
-            localStorage.clear();
+            localStorage.removeItem("phantom_session_token");
+            localStorage.removeItem("phantom_uid");
             window.location.href = "index.html";
           });
           return;
@@ -110,12 +116,14 @@
     }
 
     function openBatchLectures(batchId) {
-  window.location.href = "subjects.html?batch=" + batchId;
-}
+      window.location.href = "subjects.html?batch=" + batchId;
+    }
 
     window.logoutCadet = function() {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
       signOut(auth).then(() => {
-        localStorage.clear();
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
         window.location.href = "index.html";
       });
     };
