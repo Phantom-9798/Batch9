@@ -4,6 +4,75 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tactical Lecture Player</title>
+  
+  <!-- Firebase v10 Modular SDK for Single-Device Guard -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let unsubscribeSnapshot = null;
+
+    // Realtime Single Device Guard inside Video Player
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        window.location.href = "index.html";
+        return;
+      }
+
+      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
+        if (!docSnap.exists()) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          signOut(auth).then(() => window.location.href = "index.html");
+          return;
+        }
+
+        const data = docSnap.data();
+        const localToken = localStorage.getItem("phantom_session_token");
+
+        // Account status check
+        if (data.status !== "active") {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          if (window.player && typeof window.player.pauseVideo === 'function') {
+            window.player.pauseVideo();
+          }
+          alert("Notice: Cadet account is currently not active or pending verification.");
+          signOut(auth).then(() => window.location.href = "index.html");
+          return;
+        }
+
+        // Single device session token mismatch check
+        if (data.activeSession && localToken && data.activeSession !== localToken) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          if (window.player && typeof window.player.pauseVideo === 'function') {
+            window.player.pauseVideo();
+          }
+          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+          signOut(auth).then(() => {
+            localStorage.removeItem("phantom_session_token");
+            localStorage.removeItem("phantom_uid");
+            window.location.href = "index.html";
+          });
+          return;
+        }
+      });
+    });
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body {
@@ -278,7 +347,7 @@
     const lectureTitle = urlParams.get('title') || 'MENTOR SESSION';
     document.getElementById('lectureTitle').innerText = lectureTitle;
 
-    let player = null;
+    window.player = null;
     let isReady = false;
     let updateTimer = null;
     let isDraggingSeek = false;
@@ -289,9 +358,8 @@
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    function onYouTubeIframeAPIReady() {
-      // Clean params: Removed problematic 'origin' parameter that caused configuration error
-      player = new YT.Player('ytPlayer', {
+    window.onYouTubeIframeAPIReady = function() {
+      window.player = new YT.Player('ytPlayer', {
         videoId: videoId,
         playerVars: {
           autoplay: 1,
@@ -305,7 +373,7 @@
           onStateChange: onPlayerStateChange
         }
       });
-    }
+    };
 
     function onPlayerReady(event) {
       isReady = true;
@@ -326,21 +394,21 @@
 
     // Toggle Play/Pause
     function togglePlay() {
-      if (!player || !isReady) return;
-      const state = player.getPlayerState();
+      if (!window.player || !isReady) return;
+      const state = window.player.getPlayerState();
       if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
+        window.player.pauseVideo();
       } else {
-        player.playVideo();
+        window.player.playVideo();
       }
     }
     document.getElementById('playBtn').addEventListener('click', togglePlay);
 
     // Skip Functions
     function skipTime(seconds) {
-      if (!player || !isReady) return;
-      const current = player.getCurrentTime() || 0;
-      player.seekTo(Math.max(current + seconds, 0), true);
+      if (!window.player || !isReady) return;
+      const current = window.player.getCurrentTime() || 0;
+      window.player.seekTo(Math.max(current + seconds, 0), true);
     }
     document.getElementById('rewindBtn').addEventListener('click', () => skipTime(-10));
     document.getElementById('forwardBtn').addEventListener('click', () => skipTime(10));
@@ -395,19 +463,19 @@
 
     // Speed Selector
     document.getElementById('speedSelect').addEventListener('change', (e) => {
-      if (!player || !isReady) return;
-      player.setPlaybackRate(parseFloat(e.target.value));
+      if (!window.player || !isReady) return;
+      window.player.setPlaybackRate(parseFloat(e.target.value));
     });
 
     // Quality Selector
     document.getElementById('qualitySelect').addEventListener('change', (e) => {
-      if (!player || !isReady) return;
+      if (!window.player || !isReady) return;
       const val = e.target.value;
       const targetQuality = (val === 'auto') ? 'default' : val;
-      const currentTime = player.getCurrentTime() || 0;
+      const currentTime = window.player.getCurrentTime() || 0;
 
-      if (typeof player.loadVideoById === 'function') {
-        player.loadVideoById({
+      if (typeof window.player.loadVideoById === 'function') {
+        window.player.loadVideoById({
           videoId: videoId,
           startSeconds: currentTime,
           suggestedQuality: targetQuality
@@ -418,12 +486,12 @@
     // Mute / Unmute
     const muteBtn = document.getElementById('muteBtn');
     muteBtn.addEventListener('click', () => {
-      if (!player || !isReady) return;
-      if (player.isMuted()) {
-        player.unMute();
+      if (!window.player || !isReady) return;
+      if (window.player.isMuted()) {
+        window.player.unMute();
         muteBtn.innerText = '🔊';
       } else {
-        player.mute();
+        window.player.mute();
         muteBtn.innerText = '🔇';
       }
     });
@@ -437,9 +505,9 @@
 
     // Update Progress
     function updateProgress() {
-      if (!player || !isReady || isDraggingSeek || typeof player.getCurrentTime !== 'function') return;
-      const current = player.getCurrentTime() || 0;
-      const duration = player.getDuration() || 0;
+      if (!window.player || !isReady || isDraggingSeek || typeof window.player.getCurrentTime !== 'function') return;
+      const current = window.player.getCurrentTime() || 0;
+      const duration = window.player.getDuration() || 0;
       document.getElementById('timeDisplay').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
       if (duration > 0) {
         const pct = (current / duration) * 100;
@@ -452,15 +520,15 @@
     const seekContainer = document.getElementById('seekContainer');
 
     function executeSeek(e) {
-      if (!player || !isReady || typeof player.getDuration !== 'function') return;
+      if (!window.player || !isReady || typeof window.player.getDuration !== 'function') return;
       const rect = seekContainer.getBoundingClientRect();
       const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
       const percentage = clickX / rect.width;
-      const targetTime = player.getDuration() * percentage;
+      const targetTime = window.player.getDuration() * percentage;
 
       document.getElementById('seekProgress').style.width = (percentage * 100) + '%';
       document.getElementById('seekThumb').style.left = (percentage * 100) + '%';
-      player.seekTo(targetTime, true);
+      window.player.seekTo(targetTime, true);
     }
 
     seekContainer.addEventListener('mousedown', (e) => {
