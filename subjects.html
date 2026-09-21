@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM PHANTOM | Tactical Curriculum & Modules</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Military Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: #04070b;
+    }
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
+
+    .tactical-bg {
+      background: 
+        radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
+        radial-gradient(circle at 85% 60%, rgba(234, 179, 8, 0.14) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%),
+        url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=2000&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .hud-grid {
+      background-image: 
+        linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .armor-panel {
+      background: rgba(10, 15, 22, 0.92);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+    }
+  </style>
+</head>
+
+<body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
+
+  <!-- TOP HEADER -->
+  <header class="w-full pt-6 pb-4 px-4 border-b border-neutral-800/80 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      
+      <!-- LOGO & BRANDING -->
+      <div class="flex items-center gap-4">
+        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center">
+          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
+        </div>
+        <div>
+          <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-yellow-300">
+            TEAM PHANTOM
+          </h1>
+          <p class="font-orbitron text-[10px] sm:text-xs text-neutral-400 tracking-widest uppercase">
+            TACTICAL CURRICULUM CONSOLE
+          </p>
+        </div>
+      </div>
+
+      <!-- NAVIGATION & CADET INFO -->
+      <div class="flex items-center gap-3">
+        <a href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
+          &larr; BACK TO SQUADRONS
+        </a>
+        <button onclick="terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
+          LOGOUT
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CURRICULUM SECTION -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+    
+    <!-- SQUADRON SUMMARY CARD -->
+    <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="batchBadge">
+          SELECTED SQUADRON
+        </div>
+        <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="batchHeading">
+          LOADING SQUADRON...
+        </h2>
+        <p class="text-xs text-neutral-400 font-body mt-1">Select a core subject or module below to access tactical briefings and study dossiers.</p>
+      </div>
+      <div class="flex items-center gap-2 bg-black/60 border border-emerald-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        AIRSPACE CLEAR &bull; AUTHORIZED
+      </div>
+    </div>
+
+    <!-- SUBJECT TABS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="subjectsContainer">
+      <!-- Subjects dynamically rendered via JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-black/95 border-t border-neutral-900 py-3.5 px-4 text-center">
+    <p class="text-[11px] font-body text-neutral-500 tracking-wider">
+      &copy; 2026 TEAM PHANTOM. ALL RIGHTS RESERVED.
+    </p>
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Subject Syllabus Data Map
+    const curriculumData = {
+      "cds-math": {
+        title: "CDS Mathematics Specialist",
+        subjects: [
+          { name: "Lectures", desc: "Comprehensive Theory & Core Concepts" },
+          { name: "Mock", desc: "Timed Tactical Test Papers & Solutions" }
+        ]
+      },
+      "cds-kilo": {
+        title: "CDS Kilo Squadron",
+        subjects: [
+          { name: "Physics", desc: "Mechanics, Optics, Thermodynamics & Electricity" },
+          { name: "Chemistry", desc: "Physical, Inorganic & Organic Fundamental Principles" },
+          { name: "Biology", desc: "Cell Biology, Physiology & Environmental Systems" },
+          { name: "Physical Geography", desc: "Geomorphology, Climatology & Oceanography" },
+          { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Resources" },
+          { name: "Human Geography", desc: "Demography, Settlements & Economic Activity" },
+          { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Empires" },
+          { name: "Medieval History", desc: "Delhi Sultanate, Mughals & Regional Kingdoms" },
+          { name: "Modern History", desc: "Freedom Struggle, British Rule & Constitutional Growth" },
+          { name: "Polity", desc: "Constitution, Governance, Preamble & Judiciary" }
+        ]
+      },
+      "afcat": {
+        title: "AFCAT Juliet Squadron",
+        subjects: [
+          { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery" },
+          { name: "Reasoning", desc: "Verbal & Spatial Tactical Reasoning Drills" }
+        ]
+      },
+      "capf": {
+        title: "CAPF India Squadron",
+        subjects: [
+          { name: "Math", desc: "Quantitative Aptitude & Problem Solving" },
+          { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports" },
+          { name: "Mentor Session" , desc: "mentors class" }
+      
+        ]
+      }
+    };
+
+    // Session Verification
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      db.collection("cadets").doc(user.uid).onSnapshot((docSnap) => {
+        if (!docSnap.exists || docSnap.data().status !== "active") {
+          auth.signOut().then(() => window.location.href = "index.html");
+          return;
+        }
+
+        const data = docSnap.data();
+        const localToken = localStorage.getItem("phantom_session_token");
+        if (data.activeSession && localToken && data.activeSession !== localToken) {
+          alert("SESSION TERMINATED: Logged in from another device.");
+          auth.signOut().then(() => {
+            localStorage.clear();
+            window.location.href = "index.html";
+          });
+          return;
+        }
+
+        // Render Subjects based on query string
+        renderBatchCurriculum(data.allowedBatches || []);
+      });
+    });
+
+    function renderBatchCurriculum(allowedBatches) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const batchParam = urlParams.get('batch') || 'cds-math';
+
+      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
+      if (!isCombo && !allowedBatches.includes(batchParam)) {
+        alert("ACCESS DENIED: You are not authorized for this specific squadron.");
+        window.location.href = "classroom.html";
+        return;
+      }
+
+      const currentCurriculum = curriculumData[batchParam] || curriculumData["cds-math"];
+      document.getElementById('batchHeading').innerText = currentCurriculum.title;
+      document.getElementById('batchBadge').innerText = "SQUADRON: " + batchParam.toUpperCase();
+
+      const container = document.getElementById('subjectsContainer');
+      container.innerHTML = "";
+
+      currentCurriculum.subjects.forEach((subj, index) => {
+        const card = document.createElement('div');
+        card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
+        card.onclick = () => openSubjectModule(batchParam, subj.name);
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #0${index + 1}</span>
+              <span class="w-2 h-2 rounded-full bg-amber-500/80 group-hover:scale-125 transition"></span>
+            </div>
+            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition">${subj.name}</h3>
+            <p class="text-[11px] text-neutral-400 font-body mt-1 leading-snug">${subj.desc}</p>
+          </div>
+          <div class="mt-4 pt-2 border-t border-neutral-800 flex items-center justify-between">
+            <span class="text-[10px] font-mono text-amber-400">STATUS: READY</span>
+            <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openSubjectModule(batch, subjectName) {
+  window.location.href = "chapters.html?batch=" + encodeURIComponent(batch) + "&subject=" + encodeURIComponent(subjectName);
+}
+
+    function terminateCadetSession() {
+      auth.signOut().then(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
+  </script>
+</body>
+</html>

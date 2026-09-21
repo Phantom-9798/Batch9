@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tactical Lecture Player</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background-color: #050811;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .header {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #1f2937;
+      margin-bottom: 18px;
+    }
+    .header h1 { font-size: 1.1rem; color: #f59e0b; letter-spacing: 1px; }
+    .back-btn {
+      background: #1f2937;
+      color: #fff;
+      border: 1px solid #374151;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .back-btn:hover { background: #374151; }
+
+    .player-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+      border: 1px solid #1f2937;
+    }
+
+    /* Iframe Crop to permanently hide YouTube branding and header */
+    .iframe-crop {
+      position: absolute;
+      top: -65px;
+      left: 0;
+      width: 100%;
+      height: calc(100% + 130px);
+      pointer-events: none;
+    }
+    .iframe-crop iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Double Tap & Single Tap Overlay */
+    .gesture-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 60px);
+      display: flex;
+      z-index: 20;
+    }
+    .tap-zone {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Tap Feedback Animation */
+    .tap-indicator {
+      position: absolute;
+      top: 50%;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      color: #f59e0b;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .left-indicator { left: 25%; transform: translate(-50%, -50%) scale(0.8); }
+    .right-indicator { right: 25%; transform: translate(50%, -50%) scale(0.8); }
+    .left-indicator.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .right-indicator.show { opacity: 1; transform: translate(50%, -50%) scale(1); }
+
+    /* Custom Tactical Controls Bar */
+    .custom-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      background: linear-gradient(180deg, rgba(10,15,28,0.94) 0%, rgba(5,8,17,1) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 16px 8px 16px;
+      z-index: 50;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Seek / Timeline Bar */
+    .seek-container {
+      position: relative;
+      width: 100%;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+    .seek-track {
+      position: relative;
+      width: 100%;
+      height: 5px;
+      background: rgba(255,255,255,0.22);
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+    .seek-container:hover .seek-track {
+      height: 8px;
+    }
+    .seek-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: #f59e0b;
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .seek-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border: 2px solid #f59e0b;
+      border-radius: 50%;
+      pointer-events: none;
+      transition: transform 0.15s ease;
+    }
+    .seek-container:hover .seek-thumb {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .control-group { display: flex; align-items: center; gap: 10px; }
+    .btn {
+      background: none;
+      border: none;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.12); color: #f59e0b; }
+    .time-text { font-size: 0.8rem; color: #9ca3af; font-family: monospace; }
+
+    select.hud-select {
+      background: #111827;
+      color: #f59e0b;
+      border: 1px solid #374151;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1 id="lectureTitle">MENTOR SESSION</h1>
+    <button class="back-btn" onclick="window.history.back()">&larr; Back to Lectures</button>
+  </div>
+
+  <div class="player-wrapper" id="playerWrapper">
+    <!-- Double-Tap & Click Gestures -->
+    <div class="gesture-layer">
+      <div class="tap-zone" id="leftZone">
+        <div class="tap-indicator left-indicator" id="leftFeedback">&#8634; 10s</div>
+      </div>
+      <div class="tap-zone" id="rightZone">
+        <div class="tap-indicator right-indicator" id="rightFeedback">&#8635; 10s</div>
+      </div>
+    </div>
+
+    <!-- YouTube Frame Container -->
+    <div class="iframe-crop">
+      <div id="ytPlayer"></div>
+    </div>
+
+    <!-- Custom Controls Bar -->
+    <div class="custom-controls">
+      <div class="seek-container" id="seekContainer">
+        <div class="seek-track">
+          <div class="seek-progress" id="seekProgress"></div>
+          <div class="seek-thumb" id="seekThumb"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div class="control-group">
+          <button class="btn" id="playBtn">▶ Play</button>
+          <button class="btn" id="rewindBtn" title="Rewind 10s">&#8634; 10s</button>
+          <button class="btn" id="forwardBtn" title="Forward 10s">&#8635; 10s</button>
+          <span class="time-text" id="timeDisplay">00:00 / 00:00</span>
+        </div>
+
+        <div class="control-group">
+          <!-- Quality Selector -->
+          <label for="qualitySelect" style="font-size: 0.75rem; color: #9ca3af;">Quality:</label>
+          <select class="hud-select" id="qualitySelect">
+            <option value="auto" selected>Auto</option>
+            <option value="hd1080">1080p</option>
+            <option value="hd720">720p</option>
+            <option value="large">480p</option>
+            <option value="medium">360p</option>
+          </select>
+
+          <!-- Speed Selector -->
+          <label for="speedSelect" style="font-size: 0.75rem; color: #9ca3af;">Speed:</label>
+          <select class="hud-select" id="speedSelect">
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1.0x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2.0x</option>
+          </select>
+
+          <button class="btn" id="muteBtn">🔊</button>
+          <button class="btn" id="fsBtn" title="Fullscreen">&#x26F6;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YouTube IFrame API Script -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('v') || 'pC6cxRQu3P4';
+    const lectureTitle = urlParams.get('title') || 'MENTOR SESSION';
+    document.getElementById('lectureTitle').innerText = lectureTitle;
+
+    let player = null;
+    let isReady = false;
+    let updateTimer = null;
+    let isDraggingSeek = false;
+
+    // Load API dynamically
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onYouTubeIframeAPIReady() {
+      // Clean params: Removed problematic 'origin' parameter that caused configuration error
+      player = new YT.Player('ytPlayer', {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          rel: 0,
+          enablejsapi: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      isReady = true;
+      try {
+        event.target.playVideo();
+      } catch (e) {}
+      updateTimer = setInterval(updateProgress, 300);
+    }
+
+    function onPlayerStateChange(event) {
+      const playBtn = document.getElementById('playBtn');
+      if (event.data === YT.PlayerState.PLAYING) {
+        playBtn.innerText = '⏸ Pause';
+      } else {
+        playBtn.innerText = '▶ Play';
+      }
+    }
+
+    // Toggle Play/Pause
+    function togglePlay() {
+      if (!player || !isReady) return;
+      const state = player.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+    }
+    document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+    // Skip Functions
+    function skipTime(seconds) {
+      if (!player || !isReady) return;
+      const current = player.getCurrentTime() || 0;
+      player.seekTo(Math.max(current + seconds, 0), true);
+    }
+    document.getElementById('rewindBtn').addEventListener('click', () => skipTime(-10));
+    document.getElementById('forwardBtn').addEventListener('click', () => skipTime(10));
+
+    // Screen Gestures
+    let leftTapCount = 0;
+    let rightTapCount = 0;
+    let leftTapTimer = null;
+    let rightTapTimer = null;
+
+    const leftZone = document.getElementById('leftZone');
+    const rightZone = document.getElementById('rightZone');
+    const leftFeedback = document.getElementById('leftFeedback');
+    const rightFeedback = document.getElementById('rightFeedback');
+
+    function showIndicator(el) {
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 500);
+    }
+
+    leftZone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      leftTapCount++;
+      if (leftTapCount === 1) {
+        leftTapTimer = setTimeout(() => {
+          togglePlay();
+          leftTapCount = 0;
+        }, 260);
+      } else if (leftTapCount === 2) {
+        clearTimeout(leftTapTimer);
+        skipTime(-10);
+        showIndicator(leftFeedback);
+        leftTapCount = 0;
+      }
+    });
+
+    rightZone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rightTapCount++;
+      if (rightTapCount === 1) {
+        rightTapTimer = setTimeout(() => {
+          togglePlay();
+          rightTapCount = 0;
+        }, 260);
+      } else if (rightTapCount === 2) {
+        clearTimeout(rightTapTimer);
+        skipTime(10);
+        showIndicator(rightFeedback);
+        rightTapCount = 0;
+      }
+    });
+
+    // Speed Selector
+    document.getElementById('speedSelect').addEventListener('change', (e) => {
+      if (!player || !isReady) return;
+      player.setPlaybackRate(parseFloat(e.target.value));
+    });
+
+    // Quality Selector
+    document.getElementById('qualitySelect').addEventListener('change', (e) => {
+      if (!player || !isReady) return;
+      const val = e.target.value;
+      const targetQuality = (val === 'auto') ? 'default' : val;
+      const currentTime = player.getCurrentTime() || 0;
+
+      if (typeof player.loadVideoById === 'function') {
+        player.loadVideoById({
+          videoId: videoId,
+          startSeconds: currentTime,
+          suggestedQuality: targetQuality
+        });
+      }
+    });
+
+    // Mute / Unmute
+    const muteBtn = document.getElementById('muteBtn');
+    muteBtn.addEventListener('click', () => {
+      if (!player || !isReady) return;
+      if (player.isMuted()) {
+        player.unMute();
+        muteBtn.innerText = '🔊';
+      } else {
+        player.mute();
+        muteBtn.innerText = '🔇';
+      }
+    });
+
+    // Time Formatter
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    // Update Progress
+    function updateProgress() {
+      if (!player || !isReady || isDraggingSeek || typeof player.getCurrentTime !== 'function') return;
+      const current = player.getCurrentTime() || 0;
+      const duration = player.getDuration() || 0;
+      document.getElementById('timeDisplay').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+      if (duration > 0) {
+        const pct = (current / duration) * 100;
+        document.getElementById('seekProgress').style.width = pct + '%';
+        document.getElementById('seekThumb').style.left = pct + '%';
+      }
+    }
+
+    // Timeline Drag & Click
+    const seekContainer = document.getElementById('seekContainer');
+
+    function executeSeek(e) {
+      if (!player || !isReady || typeof player.getDuration !== 'function') return;
+      const rect = seekContainer.getBoundingClientRect();
+      const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const percentage = clickX / rect.width;
+      const targetTime = player.getDuration() * percentage;
+
+      document.getElementById('seekProgress').style.width = (percentage * 100) + '%';
+      document.getElementById('seekThumb').style.left = (percentage * 100) + '%';
+      player.seekTo(targetTime, true);
+    }
+
+    seekContainer.addEventListener('mousedown', (e) => {
+      isDraggingSeek = true;
+      executeSeek(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingSeek) executeSeek(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDraggingSeek) isDraggingSeek = false;
+    });
+
+    // Fullscreen
+    const wrapper = document.getElementById('playerWrapper');
+    document.getElementById('fsBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        wrapper.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>
