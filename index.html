@@ -18,7 +18,8 @@
       createUserWithEmailAndPassword, 
       signInWithEmailAndPassword,
       sendPasswordResetEmail,
-      onAuthStateChanged
+      onAuthStateChanged,
+      signOut
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { 
       getFirestore, 
@@ -155,12 +156,14 @@
           const cadetSnap = await getDoc(cadetDocRef);
 
           if (!cadetSnap.exists()) {
+            await signOut(auth);
             throw new Error("Cadet record not registered in tactical database.");
           }
 
           const cadetData = cadetSnap.data();
 
           if (cadetData.status !== "active") {
+            await signOut(auth);
             statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed shadow-lg";
             statusAlert.innerHTML = `
               <div class="flex items-center gap-2 font-orbitron font-bold text-red-400 mb-1 text-sm tracking-wide">
