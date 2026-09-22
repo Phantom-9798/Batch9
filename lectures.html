@@ -31,9 +31,10 @@
     const db = getFirestore(app);
 
     // =========================================================================
-    // ONLY MENTOR SESSIONS 03, 04 & 05
+    // ISOLATED LECTURE DATABASE (NO COLLAPSE / NO CROSS-SHOWING)
     // =========================================================================
     const lectureDatabase = {
+      // 1. SIRF AUR SIRF CAPF MENTOR SESSION KE LIYE
       "ch-mentor-sessions": [
         {
           lectureNo: "03",
@@ -59,7 +60,15 @@
           videoId: "vxh_UIChO7M",
           pdfUrl: "#"
         }
-      ]
+      ],
+
+      // 2. CDS MATH CHAPTERS (Jab upload karna ho toh yahan add karein)
+      "ch-ratio": [],
+      "ch-percent": [],
+
+      // 3. AFCAT CHAPTERS
+      "ch-coding": [],
+      "ch-blood": []
     };
 
     let currentBatch = "capf";
@@ -112,13 +121,8 @@
       const urlParams = new URLSearchParams(window.location.search);
       currentBatch = urlParams.get('batch') || 'capf';
       currentSubject = urlParams.get('subject') || 'Mentorship Sessions';
-      const chapterName = urlParams.get('chapter') || 'CAPF Strategy & Orientation';
-      let chapterId = urlParams.get('chapterId') || 'ch-mentor-sessions';
-
-      // Always route to mentor sessions for CAPF Mentorship
-      if (chapterId.includes("mentor") || chapterName.toLowerCase().includes("mentor") || currentSubject.toLowerCase().includes("mentor") || currentBatch === "capf") {
-        chapterId = "ch-mentor-sessions";
-      }
+      const chapterName = urlParams.get('chapter') || 'Briefing Dossier';
+      const chapterId = urlParams.get('chapterId') || '';
 
       // Security check for batch access
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
@@ -134,10 +138,28 @@
       const container = document.getElementById('lecturesContainer');
       container.innerHTML = "";
 
-      // Fetch lectures list
-      const lectures = lectureDatabase[chapterId] || lectureDatabase["ch-mentor-sessions"];
+      // Strict Lookup: Sirf wahi lectures milenge jo exact chapterId me honge
+      const lectures = lectureDatabase[chapterId] || [];
 
       document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
+
+      // Agar chapter me video nahi hai toh clean UI message show hoga
+      if (lectures.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-500/30">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-4 text-2xl">
+              ⏳
+            </div>
+            <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2">
+              IT WILL BE UPLOADED VERY SOON
+            </h3>
+            <p class="text-xs text-neutral-400 font-body max-w-md mx-auto">
+              Tactical lectures and video briefings for "${chapterName}" are currently under preparation.
+            </p>
+          </div>
+        `;
+        return;
+      }
 
       lectures.forEach((lec) => {
         const card = document.createElement('div');
@@ -162,10 +184,10 @@
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-            <button onclick="playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
+            <button onclick="window.playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
               WATCH LECTURE
             </button>
-            <button onclick="openClassNotes('${lec.pdfUrl}', '${lec.title.replace(/'/g, "\\'")}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
+            <button onclick="window.openClassNotes('${lec.pdfUrl}', '${lec.title.replace(/'/g, "\\'")}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
               NOTES (PDF)
             </button>
           </div>
@@ -174,20 +196,20 @@
       });
     }
 
-    // Direct & Clean Play Router: Passes videoId directly to player.html
+    // Direct Play Router
     window.playLectureVideo = function(videoId, title) {
-      if (!videoId || videoId === "#") {
-        alert("Tactical stream link for '" + title + "' will be uploaded shortly.");
+      if (!videoId || videoId === "#" || videoId === "") {
+        alert("It will be uploaded very soon.");
         return;
       }
       
-      const cleanTitle = title || "MENTOR SESSION";
+      const cleanTitle = title || "TACTICAL SESSION";
       window.location.href = `player.html?v=${encodeURIComponent(videoId)}&title=${encodeURIComponent(cleanTitle)}`;
     };
 
     window.openClassNotes = function(url, title) {
-      if (!url || url === "#") {
-        alert("Study notes dossier for '" + title + "' will be uploaded shortly.");
+      if (!url || url === "#" || url === "") {
+        alert("Study notes dossier: It will be uploaded very soon.");
         return;
       }
       window.open(url, "_blank");
