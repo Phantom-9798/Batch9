@@ -64,7 +64,29 @@
       cursor: none;
     }
 
-    /* NEXIELD (VIMEO) - NO BLACK MASK, PURE CROP */
+    /* TOP-RIGHT SPEED CONTROL HUD */
+    .tactical-top-hud {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(4, 7, 11, 0.88);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 4px 8px;
+      border-radius: 6px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      transition: opacity 0.35s ease;
+    }
+
+    #phantomConsoleScreen.controls-hidden .tactical-top-hud {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* NEXIELD (VIMEO) */
     .nexield-wrapper {
       position: relative;
       width: 100%;
@@ -82,7 +104,6 @@
       border: none;
     }
 
-    /* केवल एकदम कोने के FS बटन को कवर करेगा, Speed/Settings बटन खुला रहेगा */
     .nexield-fs-interceptor {
       position: absolute;
       bottom: 0;
@@ -240,12 +261,24 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- सेंटर फुलस्क्रीन / एग्ज़िट बटन (YouTube मोड में एक्टिव रहेगा) -->
+        <!-- TOP-RIGHT SPEED CONTROL HUD (SHIFTED TO TOP) -->
+        <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
+          <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
+          <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+            <option value="1" class="bg-black">1.0x</option>
+            <option value="1.25" class="bg-black">1.25x</option>
+            <option value="1.5" class="bg-black">1.5x</option>
+            <option value="1.75" class="bg-black">1.75x</option>
+            <option value="2" class="bg-black">2.0x</option>
+          </select>
+        </div>
+
+        <!-- CENTER FULLSCREEN / EXIT BUTTON (YOUTUBE) -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
 
-        <!-- डायनामिक वीडियो एरिया -->
+        <!-- DYNAMIC VIDEO AREA -->
         <div id="playerRoot" class="w-full h-full relative"></div>
 
       </div>
@@ -287,11 +320,12 @@
 
       const playerRoot = document.getElementById("playerRoot");
       const centerBtn = document.getElementById("centerFsBtn");
+      const topSpeedHud = document.getElementById("topSpeedHud");
 
-      // CASE 1: NEXIELD (Clean Crop, Settings/Speed fully accessible)
+      // CASE 1: NEXIELD (Speed / Settings fully managed by native controls)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        // Nexield मोड में बीच वाला बड़ा बटन हटा दें
         if (centerBtn) centerBtn.style.display = "none";
+        if (topSpeedHud) topSpeedHud.style.display = "none";
 
         playerRoot.innerHTML = `
           <div class="nexield-wrapper">
@@ -307,6 +341,7 @@
       // CASE 2: YOUTUBE (CUSTOM HUD WITH REAL CONTROLS)
       else {
         if (centerBtn) centerBtn.style.display = "block";
+        if (topSpeedHud) topSpeedHud.style.display = "flex";
 
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -343,17 +378,6 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
-                    <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
-                    <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
-                      <option value="1" class="bg-black">1.0x</option>
-                      <option value="1.25" class="bg-black">1.25x</option>
-                      <option value="1.5" class="bg-black">1.5x</option>
-                      <option value="1.75" class="bg-black">1.75x</option>
-                      <option value="2" class="bg-black">2.0x</option>
-                    </select>
-                  </div>
-
                   <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
                     <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
                     <select onchange="updateVideoQuality(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
@@ -414,7 +438,6 @@
         }
       }
 
-      // माउस मूव पर कंट्रोल्स दिखाना और टाइमर रीसेट करना
       const screenEl = document.getElementById("phantomConsoleScreen");
       screenEl.addEventListener("mousemove", () => {
         showControls();
