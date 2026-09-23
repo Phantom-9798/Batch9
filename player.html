@@ -6,6 +6,7 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,6 +20,7 @@
     }
     .font-stencil { font-family: 'Black Ops One', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
 
     .tactical-bg {
       background: 
@@ -40,58 +42,24 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* मुख्य वीडियो फ्रेम */
-    #tacticalViewport {
+    /* स्मार्ट व्यूकंटेनर */
+    .viewport-shield {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000000;
-      border-radius: 0.75rem;
       overflow: hidden;
+      border-radius: 0.75rem;
     }
 
-    #tacticalPlayer {
+    .viewport-shield iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
 
-    /* 1. ऊपर का चैनल नाम और शेयर बटन ब्लॉक करने वाला मास्क */
-    .top-anti-channel-shield {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 58px;
-      z-index: 25;
-      background: linear-gradient(180deg, rgba(4, 7, 11, 0.98) 50%, rgba(4, 7, 11, 0) 100%);
-      pointer-events: auto; /* क्लिक ब्लॉक */
-      display: none;
-    }
-
-    /* 2. नीचे दाईं तरफ YouTube लोगो पर क्लिक ब्लॉक करने वाली शील्ड 
-          (Settings/Gear और Fullscreen को खुला छोड़कर सिर्फ लोगो को लॉक करता है) */
-    .bottom-youtube-blocker {
-      position: absolute;
-      bottom: 0;
-      right: 48px; /* Fullscreen बटन को खुला छोड़ता है */
-      width: 82px;  /* सिर्फ YouTube लिखे हुए लोगो को कवर करता है */
-      height: 44px; /* कंट्रोल बार की ऊंचाई */
-      z-index: 25;
-      background: transparent;
-      cursor: default;
-      pointer-events: auto; /* क्लिक ब्लॉक: YouTube पर रीडायरेक्ट नहीं होने देगा */
-      display: none;
-    }
-
-    /* YouTube मोड में शील्ड्स एक्टिव रहेंगी */
-    #tacticalViewport.is-youtube .top-anti-channel-shield,
-    #tacticalViewport.is-youtube .bottom-youtube-blocker {
-      display: block;
-    }
-
-    /* Nexield के लिए ऊपर का 4% हल्का क्रॉप */
-    #tacticalViewport.is-nexield #tacticalPlayer {
+    /* Nexield के लिए ऊपर का फालतू टेक्स्ट छुपाने वाली क्लास */
+    .viewport-shield.crop-active iframe {
       height: 106% !important;
       position: absolute;
       top: -3.8% !important;
@@ -102,7 +70,7 @@
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- TOP HEADER -->
+  <!-- TOP CONSOLE HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -111,7 +79,7 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE PROTECTED AIRSPACE</p>
+          <p class="text-[10px] text-neutral-400 font-mono">ENCRYPTED FEED &bull; AIRSPACE AUTHORIZED</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
@@ -124,13 +92,7 @@
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       
-      <div id="tacticalViewport">
-        <!-- ऊपर: चैनल नेम और शेयर बटन को छुपाने व क्लिक ब्लॉक करने वाली शील्ड -->
-        <div class="top-anti-channel-shield"></div>
-
-        <!-- नीचे: YouTube लोगो पर क्लिक ब्लॉक करने वाली शील्ड (रीडायरेक्ट बंद) -->
-        <div class="bottom-youtube-blocker" title="Protected Stream"></div>
-
+      <div class="viewport-shield" id="videoFrameContainer">
         <iframe 
           id="tacticalPlayer" 
           src="" 
@@ -160,8 +122,9 @@
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
+      // URL पैरामीटर को प्राथमिकता दें (ताकि OTA YouTube लेक्चर्स तुरंत लोड हों)
       const finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
+      const finalTitle = urlTitle || storedTitle || "TACTICAL SESSION";
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
@@ -173,21 +136,17 @@
       }
 
       const playerFrame = document.getElementById("tacticalPlayer");
-      const viewport = document.getElementById("tacticalViewport");
+      const container = document.getElementById("videoFrameContainer");
 
-      // CASE 1: Nexield / Vimeo Stream (AFCAT Chapters)
+      // 1. अगर Nexield / Web Stream Link है:
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        viewport.classList.remove("is-youtube");
-        viewport.classList.add("is-nexield");
+        container.classList.add("crop-active"); // सिर्फ Nexield में ऊपर का टेक्स्ट छिपाएगा
         playerFrame.src = finalVideo;
       } 
-      // CASE 2: YouTube Video ID (CDS OTA Chapters)
+      // 2. अगर CDS OTA का YouTube Video ID है:
       else {
-        viewport.classList.remove("is-nexield");
-        viewport.classList.add("is-youtube");
-        // controls=1 (ताकि स्पीड और क्वालिटी की सेटिंग्स चालू रहें)
-        // modestbranding=1, rel=0
-        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&controls=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=0`;
+        container.classList.remove("crop-active"); // YouTube को नॉर्मल 16:9 में चलाएगा
+        playerFrame.src = `https://www.youtube.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
       }
     });
 
