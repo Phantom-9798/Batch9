@@ -8,7 +8,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -23,6 +23,7 @@
     .tactical-bg {
       background: 
         radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
         linear-gradient(180deg, rgba(4, 7, 13, 0.96) 0%, rgba(2, 4, 7, 0.99) 100%);
     }
 
@@ -39,6 +40,7 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
+    /* मुख्य वीडियो फ्रेम: 16:9 में लॉक */
     #tacticalViewport {
       position: relative;
       width: 100%;
@@ -48,57 +50,63 @@
       border-radius: 0.75rem;
     }
 
-    #tacticalViewport:fullscreen,
-    #tacticalViewport:-webkit-full-screen {
-      width: 100vw !important;
-      height: 100vh !important;
-      border-radius: 0 !important;
-    }
-
-    /* YouTube: ऊपर से 10% बाहर धकेला गया (चैनल नेम और शेयर बटन स्क्रीन से बाहर) */
+    /* 1. YouTube Mode: ऊपर से 11% शिफ्ट ताकि चैनल नेम और शेयर बटन कट जाए, 
+          लेकिन नीचे का कंट्रोल बार (गियर, स्पीड, प्ले/पॉज़) पूरी तरह विजिबल रहे */
     #tacticalViewport.mode-youtube iframe {
       position: absolute;
       width: 100% !important;
-      height: 114% !important;
-      top: -10% !important;
+      height: 111% !important;
+      top: -11% !important;
       left: 0;
       border: none;
     }
 
-    /* Nexield: ऊपर से 4% बाहर */
+    /* 2. Nexield Mode: ऊपर से 4% शिफ्ट ताकि 'AFCAT CLASS' कट जाए */
     #tacticalViewport.mode-nexield iframe {
       position: absolute;
       width: 100% !important;
-      height: 106% !important;
+      height: 105% !important;
       top: -3.8% !important;
       left: 0;
       border: none;
     }
 
-    /* ऊपर का शेयर ब्लॉक स्ट्रिप */
-    .top-anti-share {
+    /* टॉप एंटी-लीक शील्ड: ऊपर शेयर बटन और चैनल लिंक पर क्लिक पूरी तरह ब्लॉक */
+    .top-anti-leak-shield {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 48px;
-      z-index: 30;
-      background: linear-gradient(180deg, #000000 40%, rgba(0,0,0,0) 100%);
-      pointer-events: auto;
+      height: 52px;
+      z-index: 25;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 100%);
+      pointer-events: auto; /* क्लिक ब्लॉक */
+      display: none;
     }
 
-    /* एक्टिव स्पीड बटन का कलर */
-    .speed-btn.active {
-      background-color: #10b981 !important;
-      color: #000000 !important;
-      font-weight: 800;
+    /* YouTube लोगो क्लिक शील्ड: नीचे दाईं तरफ YouTube लोगो पर क्लिक ब्लॉक */
+    .bottom-anti-yt-shield {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 90px;
+      height: 38px;
+      z-index: 25;
+      background: transparent;
+      pointer-events: auto; /* क्लिक ब्लॉक */
+      display: none;
+    }
+
+    #tacticalViewport.mode-youtube .top-anti-leak-shield,
+    #tacticalViewport.mode-youtube .bottom-anti-yt-shield {
+      display: block;
     }
   </style>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- HEADER -->
+  <!-- TOP HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -107,23 +115,25 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE AIRSPACE TRANSMISSION</p>
+          <p class="text-[10px] text-neutral-400 font-mono">ENCRYPTED AIRSPACE FEED</p>
         </div>
       </div>
-      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg transition cursor-pointer">
+      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
         &larr; BACK TO LECTURES
       </button>
     </div>
   </header>
 
-  <!-- MAIN CONSOLE -->
-  <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full flex flex-col items-center justify-center gap-4">
-    
-    <!-- VIDEO VIEWPORT -->
+  <!-- MAIN VIDEO VIEWPORT -->
+  <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
+      
       <div id="tacticalViewport">
-        <!-- Top Shield to block Title/Share -->
-        <div class="top-anti-share" id="topShield"></div>
+        <!-- टॉप शील्ड: चैनल नेम और शेयर बटन ब्लॉक -->
+        <div class="top-anti-leak-shield"></div>
+        
+        <!-- बॉटम शील्ड: यूट्यूब लोगो क्लिक ब्लॉक -->
+        <div class="bottom-anti-yt-shield"></div>
 
         <iframe 
           id="tacticalPlayer" 
@@ -132,44 +142,18 @@
           allowfullscreen="true">
         </iframe>
       </div>
-    </div>
-
-    <!-- TACTICAL QUICK-CONTROLS HUD (SPEED & FULLSCREEN) -->
-    <div class="w-full armor-panel rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-black/80">
-      
-      <!-- SPEED CONTROLLER -->
-      <div class="flex items-center gap-2" id="speedControlGroup">
-        <span class="text-xs font-orbitron text-neutral-400 tracking-wider">SPEED:</span>
-        <div class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-700/80 rounded-lg p-1">
-          <button onclick="setPlaybackSpeed(1, this)" class="speed-btn active px-2.5 py-1 text-xs font-mono rounded bg-neutral-800 hover:text-emerald-400 transition">1.0x</button>
-          <button onclick="setPlaybackSpeed(1.25, this)" class="speed-btn px-2.5 py-1 text-xs font-mono rounded bg-neutral-800 hover:text-emerald-400 transition">1.25x</button>
-          <button onclick="setPlaybackSpeed(1.5, this)" class="speed-btn px-2.5 py-1 text-xs font-mono rounded bg-neutral-800 hover:text-emerald-400 transition">1.5x</button>
-          <button onclick="setPlaybackSpeed(2, this)" class="speed-btn px-2.5 py-1 text-xs font-mono rounded bg-neutral-800 hover:text-emerald-400 transition">2.0x</button>
-        </div>
-      </div>
-
-      <!-- STATUS & FULLSCREEN -->
-      <div class="flex items-center gap-3">
-        <span class="text-[11px] font-mono text-emerald-400/80 hidden sm:inline">&bull; 1080P HD SYNCED</span>
-        <button onclick="toggleTacticalFullscreen()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black text-xs font-orbitron font-extrabold rounded-lg tracking-wider transition shadow cursor-pointer">
-          FULLSCREEN [⛶]
-        </button>
-      </div>
 
     </div>
-
   </main>
 
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-neutral-900 py-3 px-4 text-center">
     <p class="text-[11px] font-mono text-emerald-500/80 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; LEAK-PROOF TACTICAL TERMINAL
+      &copy; 2026 TEAM PHANTOM &bull; ANTI-LEAK STREAM TERMINAL
     </p>
   </footer>
 
   <script>
-    let playerIframe = null;
-
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
       const urlVideo = urlParams.get("v") || urlParams.get("stream");
@@ -190,56 +174,25 @@
         return;
       }
 
+      const playerFrame = document.getElementById("tacticalPlayer");
       const viewport = document.getElementById("tacticalViewport");
-      playerIframe = document.getElementById("tacticalPlayer");
-      const topShield = document.getElementById("topShield");
 
-      // CASE 1: Nexield / Vimeo Stream
+      // CASE 1: Nexield / Vimeo Stream (AFCAT Chapters)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        viewport.classList.add("mode-nexield");
         viewport.classList.remove("mode-youtube");
-        topShield.style.display = "none"; // Nexield me khud ke controls aate hain
-        playerIframe.src = finalVideo;
+        viewport.classList.add("mode-nexield");
+        playerFrame.src = finalVideo;
       } 
-      // CASE 2: YouTube Video ID (CDS OTA)
+      // CASE 2: YouTube Video ID (CDS OTA Chapters)
       else {
-        viewport.classList.add("mode-youtube");
         viewport.classList.remove("mode-nexield");
-        topShield.style.display = "block"; // Top Share & Channel Block
-
-        // enablejsapi=1 lagaya hai taaki humare custom speed buttons kaam karein
-        playerIframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1&fs=0&iv_load_policy=3`;
+        viewport.classList.add("mode-youtube");
+        // controls=1 (पूरी तरह एक्टिव) | modestbranding=1 | showinfo=0
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&controls=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=0`;
       }
     });
 
-    // YouTube Playback Speed Controller via postMessage (100% Reliable)
-    function setPlaybackSpeed(speed, btnElement) {
-      // Button styling active
-      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-      if (btnElement) btnElement.classList.add('active');
-
-      // YouTube API ko direct command bhejna
-      if (playerIframe && playerIframe.contentWindow) {
-        playerIframe.contentWindow.postMessage(JSON.stringify({
-          event: 'command',
-          func: 'setPlaybackRate',
-          args: [speed]
-        }), '*');
-      }
-    }
-
-    // Fullscreen Handler
-    function toggleTacticalFullscreen() {
-      const target = document.getElementById("tacticalViewport");
-      if (!document.fullscreenElement) {
-        if (target.requestFullscreen) target.requestFullscreen();
-        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-      }
-    }
-
-    // Disable Inspect Shortcuts
+    // Disable Inspect & Developer Tools shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
         e.preventDefault();
