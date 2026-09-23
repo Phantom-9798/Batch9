@@ -61,7 +61,7 @@
       border-radius: 0 !important;
     }
 
-    /* Nexield Mode: जो परफेक्ट चल रहा था */
+    /* Nexield Mode: जो पहले से बिल्कुल सही चल रहा है */
     .nexield-frame {
       position: absolute;
       width: 100% !important;
@@ -71,7 +71,7 @@
       border: none;
     }
 
-    /* YouTube Clean Engine: ऊपर व नीचे 15% ज़ूम व कट ताकि लोगो/शेयर कट जाएं */
+    /* YouTube Clean Engine: ऊपर व नीचे से कट ताकि लोगो व शेयर बाहर रहें */
     .yt-wrapper {
       position: relative;
       width: 100%;
@@ -83,19 +83,50 @@
       position: absolute;
       width: 100% !important;
       height: 140% !important;
-      top: -20% !important; /* ऊपर का शेयर बटन, चैनल नाम 100% बाहर कट गया */
+      top: -20% !important;
       left: 0;
-      pointer-events: none; /* अंदर के YouTube लोगो/शेयर पर कोई क्लिक नहीं कर सकता */
+      pointer-events: none;
     }
 
-    /* YouTube Tactical Control Overlay */
+    /* स्क्रीन के बिल्कुल बीच का फुलस्क्रीन बटन (Hover करने पर स्मूथली दिखेगा) */
+    .center-fs-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 45;
+      background: rgba(16, 185, 129, 0.9);
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    #phantomConsoleScreen:hover .center-fs-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .center-fs-btn:hover {
+      background: #10b981;
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    /* नीचे का क्लीन टैक्टिकल कंट्रोल बार */
     .yt-controls-bar {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.95) 80%);
-      padding: 10px 14px;
+      background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.96) 75%);
+      padding: 10px 16px 8px 16px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -108,7 +139,7 @@
       opacity: 1;
     }
 
-    /* कस्टम प्रोग्रेस बार */
+    /* प्रोग्रेस बार */
     .progress-bar-container {
       width: 100%;
       height: 5px;
@@ -124,21 +155,6 @@
       width: 0%;
       border-radius: 3px;
     }
-
-    /* कस्टम फुलस्क्रीन बटन */
-    .tactical-fs-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      z-index: 40;
-      background: rgba(16, 185, 129, 0.9);
-      color: #000;
-      padding: 5px 11px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -153,7 +169,7 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE PROTECTED STREAM</p>
+          <p class="text-[10px] text-neutral-400 font-mono">SECURE AIRSPACE FEED</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
@@ -167,13 +183,13 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       
       <div id="phantomConsoleScreen">
-        <!-- डायनामिक प्लेयर कंटेनर -->
-        <div id="playerRoot" class="w-full h-full relative"></div>
-
-        <!-- फुलस्क्रीन टॉगल -->
-        <button id="fsBtn" class="tactical-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
+        <!-- 1. सेंटर में फुलस्क्रीन बटन (स्क्रीन के बीचों-बीच) -->
+        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
+
+        <!-- 2. डायनामिक वीडियो एरिया -->
+        <div id="playerRoot" class="w-full h-full relative"></div>
       </div>
 
     </div>
@@ -214,7 +230,7 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // =========================================================================
-      // CASE 1: NEXIELD (VIMEO STREAM) - 100% वैसा ही जैसा आपको पसंद आया
+      // CASE 1: NEXIELD (VIMEO STREAM) - बिल्कुल अनटच्ड और सेफ
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         playerRoot.innerHTML = `
@@ -227,51 +243,80 @@
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE (ZERO BRANDING + BUILT-IN SPEED/QUALITY CONTROLS)
+      // CASE 2: YOUTUBE (ZERO LOGO, ZERO SHARE, WITH SPEED & QUALITY TOGGLES)
       // =========================================================================
       else {
         playerRoot.innerHTML = `
           <div class="yt-wrapper" onclick="togglePlayState()">
             <div id="ytEmbedFrame"></div>
             
-            <!-- TACTICAL CONTROL BAR (Speed, Time, Play/Pause) -->
+            <!-- TACTICAL HUD CONTROLS (Aligned without Overlapping) -->
             <div class="yt-controls-bar" onclick="event.stopPropagation()">
+              
+              <!-- Progress Bar -->
               <div class="progress-bar-container" onclick="seekVideo(event)">
                 <div class="progress-fill" id="pFill"></div>
               </div>
 
+              <!-- Controls Row -->
               <div class="flex items-center justify-between text-xs font-mono pt-1">
+                
+                <!-- Left: Play/Pause & Duration -->
                 <div class="flex items-center gap-3">
-                  <button onclick="togglePlayState()" id="playBtn" class="text-emerald-400 font-bold text-sm">▶ PLAY</button>
+                  <button onclick="togglePlayState()" id="playBtn" class="text-emerald-400 font-bold text-xs uppercase px-2 py-1 bg-black/60 rounded border border-emerald-600/30">
+                    ▶ PLAY
+                  </button>
                   <span id="timeDisplay" class="text-neutral-400 text-[11px]">00:00 / 00:00</span>
                 </div>
 
-                <!-- SPEED SELECTOR (1x, 1.25x, 1.5x, 2x) -->
+                <!-- Right: Speed, Quality & Mini-Fullscreen (Sab Ek Saath) -->
                 <div class="flex items-center gap-2">
-                  <span class="text-neutral-400 text-[10px] uppercase font-orbitron">Speed:</span>
-                  <select onchange="changeSpeed(this.value)" class="bg-black/90 border border-emerald-500/40 text-emerald-400 rounded px-1.5 py-0.5 text-xs outline-none cursor-pointer">
-                    <option value="1">1.0x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="1.75">1.75x</option>
-                    <option value="2">2.0x</option>
-                  </select>
+                  
+                  <!-- SPEED SELECTOR -->
+                  <div class="flex items-center gap-1">
+                    <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
+                    <select onchange="changeSpeed(this.value)" class="bg-black/90 border border-emerald-500/40 text-emerald-400 rounded px-1.5 py-0.5 text-[11px] outline-none cursor-pointer">
+                      <option value="1">1.0x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="1.75">1.75x</option>
+                      <option value="2">2.0x</option>
+                    </select>
+                  </div>
+
+                  <!-- QUALITY SELECTOR -->
+                  <div class="flex items-center gap-1">
+                    <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
+                    <select onchange="changeQuality(this.value)" class="bg-black/90 border border-emerald-500/40 text-emerald-400 rounded px-1.5 py-0.5 text-[11px] outline-none cursor-pointer">
+                      <option value="auto">Auto</option>
+                      <option value="hd1080">1080p</option>
+                      <option value="hd720">720p</option>
+                      <option value="large">480p</option>
+                      <option value="medium">360p</option>
+                    </select>
+                  </div>
+
+                  <!-- MINI FULLSCREEN BUTTON (Bar ke andar) -->
+                  <button onclick="toggleTacticalFullscreen()" class="ml-1 px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-orbitron font-extrabold rounded tracking-wider cursor-pointer">
+                    [⛶]
+                  </button>
+
                 </div>
               </div>
             </div>
           </div>
         `;
 
-        // Load YouTube API
+        // Initialize YouTube Engine
         window.onYouTubeIframeAPIReady = () => {
           ytPlayer = new YT.Player('ytEmbedFrame', {
             videoId: finalVideo,
             playerVars: {
               autoplay: 1,
-              controls: 0,        // YouTube के डिफ़ॉल्ट कंट्रोल्स बंद (लोगो व शेयर गायब)
+              controls: 0,
               disablekb: 0,
-              fs: 0,              // नेटिव फुलस्क्रीन बंद
-              modestbranding: 1,  // लोगो बंद
+              fs: 0,
+              modestbranding: 1,
               rel: 0,
               showinfo: 0,
               iv_load_policy: 3
@@ -295,14 +340,13 @@
           });
         };
 
-        // अगर API पहले से लोड हो चुकी हो:
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
       }
     });
 
-    // YouTube Controller Functions
+    // YouTube Handlers
     function togglePlayState() {
       if (!ytPlayer) return;
       if (isPlaying) {
@@ -315,6 +359,15 @@
     function changeSpeed(val) {
       if (!ytPlayer) return;
       ytPlayer.setPlaybackRate(parseFloat(val));
+    }
+
+    function changeQuality(val) {
+      if (!ytPlayer) return;
+      if (val === 'auto') {
+        ytPlayer.setPlaybackQuality('default');
+      } else {
+        ytPlayer.setPlaybackQuality(val);
+      }
     }
 
     function seekVideo(e) {
@@ -337,7 +390,7 @@
             if (fill) fill.style.width = pct + "%";
             
             const timeDisp = document.getElementById("timeDisplay");
-            if (timeDisp) timeDisp.innerText = `${formatTime(curr)} / ${formatTime(dur)}`;
+            if (timeDisp) timeDisp.innerText = `${formatTime(curr)} /${formatTime(dur)}`;
           }
         }
       }, 500);
@@ -349,26 +402,26 @@
       return `${min}:${sec < 10 ? '0' : ''}${sec}`;
     }
 
-    // Fullscreen Toggle
+    // Tactical Fullscreen Controller
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
-      const fsBtn = document.getElementById("fsBtn");
+      const centerBtn = document.getElementById("centerFsBtn");
 
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (target.requestFullscreen) target.requestFullscreen();
         else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-        fsBtn.innerText = "[✕ EXIT]";
+        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
       } else {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        fsBtn.innerText = "[⛶ FULLSCREEN]";
+        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
       }
     }
 
     document.addEventListener("fullscreenchange", () => {
-      const fsBtn = document.getElementById("fsBtn");
-      if (!document.fullscreenElement) {
-        fsBtn.innerText = "[⛶ FULLSCREEN]";
+      const centerBtn = document.getElementById("centerFsBtn");
+      if (!document.fullscreenElement && centerBtn) {
+        centerBtn.innerText = "[⛶ FULLSCREEN]";
       }
     });
 
