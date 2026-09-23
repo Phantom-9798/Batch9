@@ -57,7 +57,6 @@
         }
 
         // Single device session token verification
-        // Agar database ka token local token se alag hai toh session terminate karein
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
@@ -115,8 +114,9 @@
       }
     }
 
+    // Redirect to batch-mode.html to choose between Live and Recorded
     function openBatchLectures(batchId) {
-      window.location.href = "subjects.html?batch=" + batchId;
+      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
     }
 
     window.logoutCadet = function() {
@@ -138,7 +138,6 @@
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-body { font-family: 'Inter', sans-serif; }
 
-    /* Tri-Service Military Atmosphere */
     .tactical-bg {
       background: 
         radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
@@ -194,7 +193,7 @@
           <div class="font-mono text-[11px] text-neutral-400" id="cadetEmailDisplay">Verifying...</div>
         </div>
         <div class="h-8 w-[1px] bg-neutral-800 hidden sm:block"></div>
-        <button onclick="window.logoutCadet()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition shadow-md">
+        <button onclick="window.logoutCadet()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition shadow-md cursor-pointer">
           TERMINATE SESSION
         </button>
       </div>
