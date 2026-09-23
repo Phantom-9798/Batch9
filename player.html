@@ -6,11 +6,6 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Plyr Video Engine & Styling -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.min.js"></script>
-
   <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,9 +23,9 @@
 
     .tactical-bg {
       background: 
-        radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
-        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
-        linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%);
+        radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
+        linear-gradient(180deg, rgba(4, 7, 13, 0.96) 0%, rgba(2, 4, 7, 0.99) 100%);
     }
 
     .hud-grid {
@@ -43,40 +38,38 @@
     .armor-panel {
       background: rgba(10, 15, 22, 0.95);
       border: 1px solid rgba(16, 185, 129, 0.4);
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* ==========================================================================
-       CUSTOM TACTICAL GREEN CONTROLS (Replacing generic white icons)
-       ========================================================================== */
-    :root {
-      /* मेन एक्सेंट कलर (Military Emerald Green) */
-      --plyr-color-main: #10b981; 
-      --plyr-video-background: #000000;
-      --plyr-video-controls-background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.95) 100%);
-      --plyr-control-icon-size: 16px;
-      --plyr-font-family: 'Orbitron', sans-serif;
-      --plyr-menu-background: rgba(10, 15, 22, 0.95);
-      --plyr-menu-color: #10b981;
-    }
-
-    /* स्पीड और सेटिंग्स मेन्यू का कस्टम लुक */
-    .plyr__menu__container {
-      border: 1px solid rgba(16, 185, 129, 0.5) !important;
-      backdrop-filter: blur(8px);
-      border-radius: 8px !important;
-      font-family: 'Rajdhani', sans-serif !important;
-      font-weight: 700;
-    }
-
-    .plyr__control--overlaid {
-      background: rgba(16, 185, 129, 0.85) !important;
-      color: #000000 !important;
-    }
-
-    .plyr--video {
-      border-radius: 0.75rem;
+    /* स्मार्ट क्रॉप कंटेनर: ऊपर का AFCAT टेक्स्ट काटने के लिए */
+    .viewport-shield {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
       overflow: hidden;
+      border-radius: 0.75rem;
+    }
+
+    .viewport-shield iframe {
+      width: 100%;
+      height: 106%;
+      position: absolute;
+      top: -3.8%; /* ऊपर का फालतू टेक्स्ट स्क्रीन से बाहर शिफ्ट */
+      left: 0;
+      border: none;
+    }
+
+    /* टॉप मास्किंग स्ट्रिप */
+    .tactical-top-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 38px;
+      background: linear-gradient(180deg, rgba(4, 7, 11, 0.98) 0%, rgba(4, 7, 11, 0) 100%);
+      pointer-events: none;
+      z-index: 20;
     }
   </style>
 </head>
@@ -84,7 +77,7 @@
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
   <!-- TOP CONSOLE HEADER -->
-  <header class="w-full pt-6 pb-4 px-4 border-b border-neutral-800/80 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+  <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -95,7 +88,7 @@
           <p class="text-[10px] text-neutral-400 font-mono">ENCRYPTED FEED &bull; AIRSPACE AUTHORIZED</p>
         </div>
       </div>
-      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
+      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
         &larr; BACK TO LECTURES
       </button>
     </div>
@@ -103,100 +96,65 @@
 
   <!-- MAIN VIDEO VIEWPORT -->
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
-    <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl">
-      <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-inner flex items-center justify-center">
-        
-        <!-- Video Tag controlled by Plyr & HLS Engine -->
-        <video 
-          id="tacticalVideo" 
-          playsinline 
-          controls 
-          class="w-full h-full object-contain">
-        </video>
+    <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
+      
+      <div class="viewport-shield" id="videoFrameContainer">
+        <!-- ऊपर के टेक्स्ट को छुपाने वाली ओवरले बार -->
+        <div class="tactical-top-mask"></div>
 
+        <iframe 
+          id="tacticalPlayer" 
+          src="" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true"
+          referrerpolicy="no-referrer">
+        </iframe>
       </div>
+
     </div>
   </main>
 
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-neutral-900 py-3 px-4 text-center">
-    <p class="text-[11px] font-mono text-neutral-500 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; PROPRIETARY MILITARY CONSOLE
+    <p class="text-[11px] font-mono text-emerald-500/80 tracking-wider">
+      &copy; 2026 TEAM PHANTOM &bull; ANTI-LEAK STREAM TERMINAL
     </p>
   </footer>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // 1. Session Storage चेक करें
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
+      // 2. Fallback URL Params
       const urlParams = new URLSearchParams(window.location.search);
       const urlVideo = urlParams.get("v") || urlParams.get("stream");
       const urlTitle = urlParams.get("title");
 
       const finalVideo = storedVideo || urlVideo;
-      const finalTitle = storedTitle || urlTitle || "TACTICAL SQUADRON CLASS";
+      const finalTitle = storedTitle || urlTitle;
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
       }
 
       if (!finalVideo) {
-        alert("Session error: Video target missing.");
+        alert("Session error: Video link not found.");
         return;
       }
 
-      const videoElement = document.getElementById("tacticalVideo");
+      const playerFrame = document.getElementById("tacticalPlayer");
 
-      // Custom Controls Setup (Speed, Fullscreen, Volume, Clean Tactical Timeline)
-      const defaultOptions = {
-        controls: [
-          'play-large',
-          'play',
-          'progress',
-          'current-time',
-          'duration',
-          'mute',
-          'volume',
-          'settings',
-          'fullscreen'
-        ],
-        settings: ['speed'],
-        speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 2] }
-      };
-
-      // 1. Agar Direct HLS Stream (.m3u8) ho
-      if (finalVideo.includes(".m3u8") || finalVideo.includes("vimeocdn.com")) {
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(finalVideo);
-          hls.attachMedia(videoElement);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            new Plyr(videoElement, defaultOptions);
-          });
-        } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
-          videoElement.src = finalVideo;
-          new Plyr(videoElement, defaultOptions);
-        }
+      // A. Agar Nexield / Direct Link hai:
+      if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
+        playerFrame.src = finalVideo;
       } 
-      // 2. Agar YouTube Video ID ho
-      else if (!finalVideo.startsWith("http")) {
-        const parent = videoElement.parentElement;
-        parent.innerHTML = `
-          <div class="plyr__video-embed w-full h-full" id="ytPlayer">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1"
-              allowfullscreen
-              allow="autoplay">
-            </iframe>
-          </div>
-        `;
-        new Plyr('#ytPlayer', defaultOptions);
-      } 
-      // 3. Fallback MP4
+      // B. Agar YouTube Video ID hai (CDS OTA lectures):
       else {
-        videoElement.src = finalVideo;
-        new Plyr(videoElement, defaultOptions);
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
       }
     });
 
