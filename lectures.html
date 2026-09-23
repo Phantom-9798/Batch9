@@ -175,6 +175,7 @@
       currentSubject = urlParams.get('subject') || 'Mentorship Sessions';
       const chapterName = urlParams.get('chapter') || 'Briefing Dossier';
       const chapterId = urlParams.get('chapterId') || '';
+      const mode = urlParams.get('mode') || 'live';
 
       // Security check for batch access
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
@@ -184,29 +185,37 @@
         return;
       }
 
-      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${currentSubject.toUpperCase()}`;
+      const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
+      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • ${currentSubject.toUpperCase()}`;
       document.getElementById('chapterHeading').innerText = chapterName;
 
       const container = document.getElementById('lecturesContainer');
       container.innerHTML = "";
 
-      // Strict Lookup
-      const lectures = lectureDatabase[chapterId] || [];
+      // Strict Lookup: Agar mode recorded hai toh khali array treat hoga
+      let lectures = [];
+      if (mode === 'recorded') {
+        lectures = [];
+      } else {
+        lectures = lectureDatabase[chapterId] || [];
+      }
 
       document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
 
-      // Show message if empty
+      // Show message if empty (Shows "IT WILL BE UPLOADED VERY SOON")
       if (lectures.length === 0) {
         container.innerHTML = `
           <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-500/30">
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-4 text-2xl">
               ⏳
             </div>
-            <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2">
+            <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2 uppercase">
               IT WILL BE UPLOADED VERY SOON
             </h3>
             <p class="text-xs text-neutral-400 font-body max-w-md mx-auto">
-              Tactical lectures and video briefings for "${chapterName}" are currently under preparation.
+              ${mode === 'recorded' 
+                ? 'Recorded syllabus dossiers and complete video archives are currently under preparation.' 
+                : `Tactical lectures and video briefings for "${chapterName}" are currently under preparation.`}
             </p>
           </div>
         `;
@@ -268,7 +277,9 @@
     };
 
     window.navigateBackToChapters = function() {
-      window.location.href = `chapters.html?batch=${encodeURIComponent(currentBatch)}&subject=${encodeURIComponent(currentSubject)}`;
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode') || 'live';
+      window.location.href = `chapters.html?batch=${encodeURIComponent(currentBatch)}&subject=${encodeURIComponent(currentSubject)}&mode=${encodeURIComponent(mode)}`;
     };
 
     window.terminateCadetSession = function() {
