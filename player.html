@@ -44,7 +44,6 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* मुख्य व्यूकंटेनर */
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
@@ -65,80 +64,7 @@
       cursor: none;
     }
 
-    /* NEXIELD FRAME & SHIELDS */
-    .nexield-box {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-    }
-
-    .nexield-frame {
-      position: absolute;
-      width: 100% !important;
-      height: 100% !important;
-      top: 0;
-      left: 0;
-      border: none;
-      z-index: 10;
-    }
-
-    /* ऊपर का AFCAT Class टाइटल छुपाने वाला स्लिम मास्क */
-    .nexield-top-mask {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 44px;
-      background: linear-gradient(180deg, #000 65%, transparent 100%);
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    /* कोने का सेफ फुलस्क्रीन ट्रिगर */
-    .nexield-safe-fs-btn {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 32px;
-      height: 36px;
-      z-index: 25;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    /* सेंटर फुलस्क्रीन और एग्ज़िट बटन (NEXIELD + YOUTUBE DONO MEIN) */
-    .center-fs-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 40;
-      background: rgba(16, 185, 129, 0.95);
-      color: #000;
-      padding: 11px 24px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
-      opacity: 1;
-      transition: opacity 0.3s ease, transform 0.2s ease;
-    }
-
-    #phantomConsoleScreen.controls-hidden .center-fs-btn {
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
-    .center-fs-btn:hover {
-      background: #10b981;
-      transform: translate(-50%, -50%) scale(1.06);
-    }
-
-    /* YOUTUBE ENGINE */
+    /* TOP-RIGHT SPEED CONTROL HUD (NEXIELD + YOUTUBE DONO MEIN) */
     .tactical-top-hud {
       position: absolute;
       top: 12px;
@@ -160,6 +86,48 @@
       pointer-events: none !important;
     }
 
+    /* NEXIELD (VIMEO) */
+    .nexield-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .nexield-frame {
+      position: absolute;
+      width: 100% !important;
+      height: 100% !important;
+      top: 0;
+      left: 0;
+      border: none;
+      z-index: 10;
+    }
+
+    .nexield-top-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(180deg, #000 65%, transparent 100%);
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .nexield-safe-fs-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 36px;
+      z-index: 25;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* YOUTUBE ENGINE */
     .yt-custom-container {
       position: relative;
       width: 100%;
@@ -207,6 +175,35 @@
     .skip-alert-badge.show {
       opacity: 1;
       transform: scale(1.1);
+    }
+
+    .center-fs-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 35;
+      background: rgba(16, 185, 129, 0.95);
+      color: #000;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    #phantomConsoleScreen.controls-hidden .center-fs-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .center-fs-btn:hover {
+      background: #10b981;
+      transform: translate(-50%, -50%) scale(1.06);
     }
 
     .tactical-custom-bar {
@@ -273,10 +270,10 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- YOUTUBE TOP-RIGHT SPEED HUD -->
-        <div id="topSpeedHud" class="tactical-top-hud" style="display: none;" onclick="event.stopPropagation()">
+        <!-- TOP-RIGHT SPEED CONTROL HUD (NEXIELD AUR YOUTUBE DONO ME DIKHEGA) -->
+        <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
-          <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
             <option value="1" class="bg-black">1.0x</option>
             <option value="1.25" class="bg-black">1.25x</option>
             <option value="1.5" class="bg-black">1.5x</option>
@@ -285,8 +282,8 @@
           </select>
         </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON (NEXIELD + YOUTUBE DONO MEIN KAAM KAREGA) -->
-        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
+        <!-- CENTER FULLSCREEN / EXIT BUTTON (YOUTUBE ONLY) -->
+        <button id="centerFsBtn" class="center-fs-btn font-orbitron" style="display: none;" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
 
@@ -309,6 +306,7 @@
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
+    let isNexield = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -335,22 +333,21 @@
       const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Top Title Mask + Safe Center Fullscreen)
+      // CASE 1: NEXIELD (Clean Top Title Mask + Top Speed HUD Active)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        // सेंटर बटन चालू रहेगा, सिर्फ यूट्यूब वाला टॉप स्पीड HUD बंद रहेगा
-        if (centerBtn) centerBtn.style.display = "block";
-        if (topSpeedHud) topSpeedHud.style.display = "none";
+        isNexield = true;
+        if (centerBtn) centerBtn.style.display = "none";
+        if (topSpeedHud) topSpeedHud.style.display = "flex"; // Speed HUD active rahega
 
         playerRoot.innerHTML = `
           <div class="nexield-box">
-            <!-- ऊपर का AFCAT title छुपाने वाला मास्क -->
             <div class="nexield-top-mask"></div>
             
-            <!-- कोने का सेफ ट्रिगर (Zero domain alert) -->
             <div class="nexield-safe-fs-btn" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
 
             <iframe 
+              id="nexieldIframe"
               src="${finalVideo}" 
               class="nexield-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
@@ -362,6 +359,7 @@
       // CASE 2: YOUTUBE ENGINE
       // =========================================================================
       else {
+        isNexield = false;
         if (centerBtn) centerBtn.style.display = "block";
         if (topSpeedHud) topSpeedHud.style.display = "flex";
 
@@ -460,15 +458,11 @@
         }
       }
 
-      // माउस मूव पर कंट्रोल्स दिखाना और 2.5s का ऑटो-हाइड टाइमर रीसेट करना
       const screenEl = document.getElementById("phantomConsoleScreen");
       screenEl.addEventListener("mousemove", () => {
         showControls();
         resetAutoHideTimer();
       });
-
-      // शुरुआत में भी 2.5 सेकंड बाद बटन ऑटो-हाइड होगा
-      resetAutoHideTimer();
     });
 
     function showControls() {
@@ -484,6 +478,29 @@
       hideControlsTimeout = setTimeout(() => {
         hideControls();
       }, 2500);
+    }
+
+    // SPEED CONTROLLER (NEXIELD & YOUTUBE DONO KE LIYE)
+    function updateVideoSpeed(rate) {
+      const spd = parseFloat(rate);
+
+      // Nexield (Vimeo Player postMessage API)
+      if (isNexield) {
+        const iframe = document.getElementById("nexieldIframe");
+        if (iframe && iframe.contentWindow) {
+          // Standard HTML5 iframe controller call
+          iframe.contentWindow.postMessage(JSON.stringify({
+            method: 'setPlaybackRate',
+            value: spd
+          }), '*');
+        }
+      } 
+      // YouTube
+      else if (ytInstance && ytInstance.setPlaybackRate) {
+        ytInstance.setPlaybackRate(spd);
+      }
+
+      resetAutoHideTimer();
     }
 
     // Skip & Tap Logic (YouTube)
@@ -542,12 +559,6 @@
       else ytInstance.playVideo();
     }
 
-    function updateVideoSpeed(rate) {
-      if (!ytInstance) return;
-      ytInstance.setPlaybackRate(parseFloat(rate));
-      resetAutoHideTimer();
-    }
-
     function updateVideoQuality(quality) {
       if (!ytInstance) return;
       const target = quality === 'auto' ? 'default' : quality;
@@ -588,7 +599,7 @@
       return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
-    // Fullscreen / Exit Controller (Both Nexield & YouTube)
+    // Fullscreen Controller
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
