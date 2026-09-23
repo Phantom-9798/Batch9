@@ -57,23 +57,40 @@
         { id: "ch-cds-mock-01", name: "Tactical Mock 01", desc: "Timed test series analysis and worked solutions." }
       ],
 
-      // 3. AFCAT SQUADRON
+      // 3. AFCAT SQUADRON (ALL MODULES INTEGRATED)
       "afcat-math": [
         { id: "ch-afcat-math-01", name: "Probability", desc: "Fundamental rules, coins, dice, cards & condition probability." },
-        { id: "ch-afcat-math-02", name: "Statistics", desc: "Stats." },
-        { id: "ch-afcat-math-03", name: "Height and distance", desc: "Trigonometry." }
-      ],
-      "afcat-english vocabulary": [
-        { id: "ch-afcat-english vocabulary-01", name: "Idioms." },
-        { id: "ch-afcat-english vocabulary-02", name: "One word substitution." },
-        { id: "ch-afcat-english vocabulary-03", name: "Homonyms." }
+        { id: "ch-afcat-math-02", name: "Statistics", desc: "Mean, median, mode, variance & standard deviation." },
+        { id: "ch-afcat-math-03", name: "Height and Distance", desc: "Trigonometric elevations, depressions & angle properties." }
       ],
       "afcat-reasoning": [
-        { id: "ch-afcat-reasoning-01", name: "Intro." },
-        { id: "ch-afcat-reasoning-02", name: "Coding Decoding", desc: "code decode." }
+        { id: "ch-afcat-reasoning-01", name: "Reasoning Foundation", desc: "Verbal, spatial patterns & operational syllabus briefing." },
+        { id: "ch-afcat-reasoning-02", name: "Coding Decoding", desc: "Letter, number, mixed coding drills & pattern identification." }
       ],
-      "afcat-batcheet": [
-        { id: "ch-afcat-batcheet-01", name: "Intro." }
+      "afcat-englishvocabulary": [
+        { id: "ch-afcat-eng-vocab-01", name: "Idioms & Phrases", desc: "High-yield AFCAT idioms with usage analysis." },
+        { id: "ch-afcat-eng-vocab-02", name: "One Word Substitution", desc: "Essential substitutions, roots & memory mnemonics." },
+        { id: "ch-afcat-eng-vocab-03", name: "Synonyms & Antonyms", desc: "Targeted word list, contextual usage & eliminate drills." }
+      ],
+      "afcat-englishgrammar": [
+        { id: "ch-afcat-eng-gram-01", name: "Parts of Speech Mastery", desc: "Noun, Pronoun, Verb, Adverb & Modifier identification." },
+        { id: "ch-afcat-eng-gram-02", name: "Tense & Conditionals", desc: "Timeline rules, auxiliary verbs & error detection." },
+        { id: "ch-afcat-eng-gram-03", name: "Voice & Narration", desc: "Active-passive mechanics & direct-indirect conversions." }
+      ],
+      "afcat-englishpractice": [
+        { id: "ch-afcat-eng-prac-01", name: "Reading Comprehension", desc: "Theme deduction, inference logic & speed passage skimming." },
+        { id: "ch-afcat-eng-prac-02", name: "Error Spotting Drills", desc: "Timed mixed grammatical question drills." }
+      ],
+      "afcat-generalawareness": [
+        { id: "ch-afcat-ga-01", name: "Indian Defense & Missiles", desc: "Tri-service commands, equipment, badges & air defense wings." },
+        { id: "ch-afcat-ga-02", name: "Static GK Masterlist", desc: "First in India, national parks, capitals & monuments." }
+      ],
+      "afcat-currentaffairs": [
+        { id: "ch-afcat-ca-01", name: "Defense Exercises & Operations", desc: "Joint military/airforce war-games & tactical protocols." },
+        { id: "ch-afcat-ca-02", name: "Monthly Current Affairs Recap", desc: "Key national, sports & international summits breakdown." }
+      ],
+      "afcat-gformexplanation": [
+        { id: "ch-afcat-gform-01", name: "Mock Test Form Explanations", desc: "Section-by-section video solutions of assigned Google Forms." }
       ],
 
       // =========================================================================
@@ -196,7 +213,6 @@
       const cleanBatch = activeBatch.toLowerCase().trim();
       const cleanSubject = activeSubject.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      // Recorded batch specific routing
       let lookupKey = `${cleanBatch}-${cleanSubject}`;
       if (cleanBatch === 'cds-kilo' && activeMode === 'recorded') {
         lookupKey = `cds-kilo-recorded-${cleanSubject}`;
@@ -209,7 +225,6 @@
       const container = document.getElementById('chaptersContainer');
       container.innerHTML = "";
 
-      // Fallback for pending subjects without explicit chapters
       const chapters = chapterDatabase[lookupKey] || [
         {
           id: `${lookupKey}-pending`,
@@ -239,7 +254,7 @@
               ${chapter.name}
             </h3>
             <p class="text-xs text-neutral-400 font-body leading-relaxed">
-              ${chapter.desc}
+              ${chapter.desc || 'Comprehensive tactical video session.'}
             </p>
           </div>
 
