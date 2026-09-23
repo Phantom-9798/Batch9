@@ -57,9 +57,9 @@
         { id: "ch-cds-mock-01", name: "Tactical Mock 01", desc: "Timed test series analysis and worked solutions." }
       ],
 
-      // 3. AFCAT JULIET
+      // 3. AFCAT
       "afcat-math": [
-        { id: "ch-afcat-math-01", name: "Probability", desc: "Probability." }
+        { id: "ch-afcat-math-01", name: "Probability", desc: "Fundamental rules, coins, dice, cards & condition probability." }
       ],
       "afcat-reasoning": [
         { id: "ch-afcat-coding", name: "Coding and Decoding", desc: "Letter-number shifts, reverse patterns & matrix codes." },
@@ -69,6 +69,7 @@
 
     let activeBatch = "capf";
     let activeSubject = "Mentor Session";
+    let activeMode = "live";
     let unsubscribeSnapshot = null;
 
     onAuthStateChanged(auth, (user) => {
@@ -114,6 +115,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       activeBatch = urlParams.get('batch') || 'capf';
       activeSubject = urlParams.get('subject') || 'Mentor Session';
+      activeMode = urlParams.get('mode') || 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
       if (!isCombo && !allowedBatches.includes(activeBatch)) {
@@ -122,13 +124,13 @@
         return;
       }
 
-      // Batch + Subject ko milakar accurate key generate hogi (Koi force override nahi)
       const cleanBatch = activeBatch.toLowerCase().trim();
       const cleanSubject = activeSubject.toLowerCase().replace(/[^a-z0-9]/g, '');
       const lookupKey = `${cleanBatch}-${cleanSubject}`;
 
-      document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${activeSubject.toUpperCase()}`;
-      document.getElementById('subjectHeading').innerText = activeSubject;
+      const modeText = activeMode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
+      document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${modeText} • ${activeSubject.toUpperCase()}`;
+      document.getElementById('subjectHeading').innerText = activeMode === 'recorded' ? `${activeSubject} (RECORDED)` : activeSubject;
 
       const container = document.getElementById('chaptersContainer');
       container.innerHTML = "";
@@ -146,7 +148,7 @@
       chapters.forEach((chapter, index) => {
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition group cursor-pointer";
-        card.onclick = () => openChapterLectures(chapter.name, chapter.id, activeSubject);
+        card.onclick = () => openChapterLectures(chapter.name, chapter.id, activeSubject, activeMode);
 
         card.innerHTML = `
           <div>
@@ -177,12 +179,12 @@
       });
     }
 
-    function openChapterLectures(chapterName, chapterId, subjectName) {
-      window.location.href = `lectures.html?batch=${encodeURIComponent(activeBatch)}&subject=${encodeURIComponent(subjectName)}&chapter=${encodeURIComponent(chapterName)}&chapterId=${encodeURIComponent(chapterId)}`;
+    function openChapterLectures(chapterName, chapterId, subjectName, mode) {
+      window.location.href = `lectures.html?batch=${encodeURIComponent(activeBatch)}&subject=${encodeURIComponent(subjectName)}&chapter=${encodeURIComponent(chapterName)}&chapterId=${encodeURIComponent(chapterId)}&mode=${encodeURIComponent(mode)}`;
     }
 
     window.navigateBackToSubjects = function() {
-      window.location.href = "subjects.html?batch=" + encodeURIComponent(activeBatch);
+      window.location.href = `subjects.html?batch=${encodeURIComponent(activeBatch)}&mode=${encodeURIComponent(activeMode)}`;
     };
 
     window.terminateCadetSession = function() {
