@@ -200,6 +200,28 @@
         }
       ],
 
+      // AFCAT REASONING CHAPTERS
+      "ch-afcat-reasoning-01": [
+        {
+          lectureNo: "01",
+          title: "Anurag Bhaiya - Intro Session",
+          desc: "Reasoning exam pattern, orientation and approach blueprint.",
+          duration: "Intro Class",
+          videoId: "https://vimpd.nexield.in/?title=1.%20Anurag%20Bhaiya%20-%20Intro%20Class&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58609e0eef1b54bb9d69eb6a3f6f8f74cb2015c4bdb58a6ce5cd3abfb1d66bd2b104253736b72d9bea535242dbb080752d55e64002a6a21dd8995565aa87c170dba5f9c7035dd84b317fc9211b0d441dde45f18edcd9b29a198ad5c084cba7091598c5c66cf63e47438a7e9eac84a47fe74e2f9d1ab72afc6fdfce075c2821b39c46f077077f2adbf78f421fb66a3f7702",
+          pdfUrl: "#"
+        }
+      ],
+      "ch-afcat-reasoning-02": [
+        {
+          lectureNo: "01",
+          title: "Coding Decoding Class 1",
+          desc: "Letter coding, numerical patterns & substitution tactics.",
+          duration: "HD Session",
+          videoId: "https://vimpd.nexield.in/?title=2.%20Coding%20Decoding%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58fc09e9d2b749955b98baabec0eee36d7cf9f4b647f37734e282fea2f1a4b1edc32e89e508a504d0ed342a157b277688640ab22efe983f465c3c0dbceed53098a8fda069be7b6796358a6017f5500546bf16546fd501abd4b52ca01fe9c6a19748323b8c19de496cdad002c0bd0a63d6e8932215eac3ccb58abd0c32dfa52b13f237c79bdf8691d41f2d6062a3bbf8e36",
+          pdfUrl: "#"
+        }
+      ],
+
       // =========================================================================
       // 4. CDS OTA RECORDED SQUADRON LECTURE ARCHIVE
       // =========================================================================
@@ -542,6 +564,10 @@
           chapterId = 'ch-afcat-eng-vocab-01';
         } else if (cleanName.includes('substitution') || cleanName.includes('one word')) {
           chapterId = 'ch-afcat-eng-vocab-02';
+        } else if (cleanName.includes('coding') || cleanName.includes('decode')) {
+          chapterId = 'ch-afcat-reasoning-02';
+        } else if (cleanName.includes('intro') || cleanName.includes('anurag')) {
+          chapterId = 'ch-afcat-reasoning-01';
         }
       }
 
