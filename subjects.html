@@ -30,71 +30,147 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Standard Live Syllabus Data Map
+    // Master CDS OTA Subjects with Thematic Images (Live & Recorded)
+    const cdsOtaFullSubjects = [
+      {
+        name: "Physical Geography",
+        desc: "Geomorphology, Atmospheric Systems, Climatology & Oceanography.",
+        image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Indian Geography",
+        desc: "Physiography, Drainage Networks, Climate Systems & Natural Resources.",
+        image: "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Modern History",
+        desc: "Freedom Struggle, British Era, National Movement & Constitutional Evolution.",
+        image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Medieval History",
+        desc: "Delhi Sultanate, Mughal Administration, Architecture & Regional Dynasties.",
+        image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Ancient History",
+        desc: "Indus Valley Civilization, Vedic Period, Mauryan & Gupta Empires.",
+        image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "GS Muster",
+        desc: "High-Yield Integrated General Studies Drill Archive & Revision Sets.",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "English Grammar",
+        desc: "Rules of Grammar, Parts of Speech, Sentence Correction & Syntax Rules.",
+        image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Vocabulary",
+        desc: "Synonyms, Antonyms, Idioms, Phrasal Verbs & Contextual Word Mastery.",
+        image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Economics",
+        desc: "Macroeconomics, Indian Economy, Monetary Policy, Fiscal Budgets & Banking.",
+        image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "English Practice",
+        desc: "Comprehension Drills, Spotting Errors & Timed Practice Exercise Sets.",
+        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Polity",
+        desc: "Indian Constitution, Preamble, Fundamental Rights, Parliament & Judiciary.",
+        image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Biology",
+        desc: "Cell Biology, Human Physiology, Nutrition, Diseases & Ecological Cycles.",
+        image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Chemistry",
+        desc: "Chemical Equations, Elements, Compounds, Bonding & Applied Science.",
+        image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Physics",
+        desc: "Optics, Motion, Electricity, Magnetism, Sound & Thermodynamic Laws.",
+        image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "One Pager",
+        desc: "High-Yield Summary Cheat Sheets, Mind Maps & Quick Formula Notes.",
+        image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
+      }
+    ];
+
+    // Standard Batches Map
     const curriculumData = {
       "cds-math": {
         title: "CDS Mathematics Specialist",
         subjects: [
-          { name: "Lectures", desc: "Comprehensive Theory & Core Concepts" },
-          { name: "Mock", desc: "Timed Tactical Test Papers & Solutions" }
+          { 
+            name: "Lectures", 
+            desc: "Comprehensive Theory & Core Concepts",
+            image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
+          },
+          { 
+            name: "Mock", 
+            desc: "Timed Tactical Test Papers & Solutions",
+            image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80"
+          }
         ]
       },
       "cds-kilo": {
         title: "CDS OTA Squadron",
-        subjects: [
-          { name: "Physics", desc: "Mechanics, Optics, Thermodynamics & Electricity" },
-          { name: "Chemistry", desc: "Physical, Inorganic & Organic Fundamental Principles" },
-          { name: "Biology", desc: "Cell Biology, Physiology & Environmental Systems" },
-          { name: "Physical Geography", desc: "Geomorphology, Climatology & Oceanography" },
-          { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Resources" },
-          { name: "Human Geography", desc: "Demography, Settlements & Economic Activity" },
-          { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Empires" },
-          { name: "Medieval History", desc: "Delhi Sultanate, Mughals & Regional Kingdoms" },
-          { name: "Modern History", desc: "Freedom Struggle, British Rule & Constitutional Growth" },
-          { name: "Polity", desc: "Constitution, Governance, Preamble & Judiciary" }
-        ]
+        subjects: cdsOtaFullSubjects
       },
       "afcat": {
         title: "AFCAT Squadron",
         subjects: [
-          { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery" },
-          { name: "Reasoning", desc: "Verbal & Spatial Tactical Reasoning Drills" }
+          { 
+            name: "Math", 
+            desc: "Numerical Ability, Speed Arithmetic & Data Mastery",
+            image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
+          },
+          { 
+            name: "Reasoning", 
+            desc: "Verbal & Spatial Tactical Reasoning Drills",
+            image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
+          }
         ]
       },
       "capf": {
         title: "CAPF Squadron",
         subjects: [
-          { name: "Math", desc: "Quantitative Aptitude & Problem Solving" },
-          { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports" },
-          { name: "Mentor Session", desc: "Strategic Mentorship Classes & Tactical Roadmaps" }
+          { 
+            name: "Math", 
+            desc: "Quantitative Aptitude & Problem Solving",
+            image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
+          },
+          { 
+            name: "English", 
+            desc: "Grammar, Précis, Essay & Analytical Reports",
+            image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
+          },
+          { 
+            name: "Mentor Session", 
+            desc: "Strategic Mentorship Classes & Tactical Roadmaps",
+            image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
+          }
         ]
       }
     };
 
-    // SPECIAL: ONLY CDS OTA RECORDED SUBJECTS LIST
-    const cdsOtaRecordedSubjects = [
-      { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems & Oceanography" },
-      { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Natural Resources" },
-      { name: "Modern History", desc: "Freedom Struggle, British Era & Nationalist Movements" },
-      { name: "Medieval History", desc: "Delhi Sultanate, Mughal Empire & Regional Dynasties" },
-      { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Periods" },
-      { name: "GS Muster", desc: "High-Yield Integrated General Studies Drill Archive" },
-      { name: "English Grammar", desc: "Rules of Grammar, Parts of Speech & Syntax Mastery" },
-      { name: "Vocabulary", desc: "Synonyms, Antonyms, Idioms & Contextual Word Power" },
-      { name: "Economics", desc: "Macroeconomics, Indian Economy, Monetary Policy & Fiscal Systems" },
-      { name: "English Practice", desc: "Comprehension, Spotting Errors & Tactical Practice Sets" },
-      { name: "Polity", desc: "Indian Constitution, Governance, Rights & Judiciary" },
-      { name: "Biology", desc: "Cell Biology, Human Systems, Diseases & Ecology" },
-      { name: "Chemistry", desc: "Chemical Reactions, Elements, Compounds & Everyday Chemistry" },
-      { name: "Physics", desc: "Optics, Motion, Electricity, Magnetism & Wave Mechanics" },
-      { name: "One Pager", desc: "High-Yield Cheat Sheets, Formula Maps & Quick Recap Notes" }
-    ];
-
     let unsubscribeSnapshot = null;
-    let currentBatchParam = "cds-math";
+    let currentBatchParam = "cds-kilo";
     let currentModeParam = "live";
 
-    // Session Verification & Realtime Single Device Guard
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -112,7 +188,6 @@
         const data = docSnap.data();
         const localToken = localStorage.getItem("phantom_session_token");
 
-        // Status check
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active or pending verification.");
@@ -120,7 +195,6 @@
           return;
         }
 
-        // Single device session token verification
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
@@ -132,14 +206,13 @@
           return;
         }
 
-        // Render Subjects based on query string
         renderBatchCurriculum(data.allowedBatches || []);
       });
     });
 
     function renderBatchCurriculum(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
-      currentBatchParam = urlParams.get('batch') || 'cds-math';
+      currentBatchParam = urlParams.get('batch') || 'cds-kilo';
       currentModeParam = urlParams.get('mode') || 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
@@ -149,7 +222,7 @@
         return;
       }
 
-      const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-math"];
+      const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-kilo"];
       const modeLabel = currentModeParam === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
 
       document.getElementById('batchHeading').innerText = `${currentCurriculum.title} (${modeLabel})`;
@@ -163,29 +236,52 @@
       const container = document.getElementById('subjectsContainer');
       container.innerHTML = "";
 
-      // DHYAN: Sirf CDS OTA (cds-kilo) aur Recorded Mode ho tabhi ye list load hogi
-      let activeSubjectsList = currentCurriculum.subjects;
-      if (currentBatchParam === "cds-kilo" && currentModeParam === "recorded") {
-        activeSubjectsList = cdsOtaRecordedSubjects;
-      }
+      // CDS OTA me live ya recorded dono me 15 subjects load honge
+      const activeSubjectsList = (currentBatchParam === "cds-kilo") ? cdsOtaFullSubjects : currentCurriculum.subjects;
 
       activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
+        card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group shadow-lg";
         card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
 
         card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #${(index + 1).toString().padStart(2, '0')}</span>
-              <span class="w-2 h-2 rounded-full ${currentModeParam === 'recorded' ? 'bg-amber-400' : 'bg-emerald-400'} group-hover:scale-125 transition"></span>
+          <!-- CARD TOP IMAGE -->
+          <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
+            <img 
+              src="${subj.image}" 
+              alt="${subj.name}" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" 
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+            
+            <div class="absolute top-2.5 left-2.5">
+              <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-wider text-amber-400 font-bold uppercase">
+                MODULE #${(index + 1).toString().padStart(2, '0')}
+              </span>
             </div>
-            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition">${subj.name}</h3>
-            <p class="text-[11px] text-neutral-400 font-body mt-1 leading-snug">${subj.desc}</p>
+            
+            <div class="absolute top-2.5 right-2.5">
+              <span class="w-2.5 h-2.5 rounded-full ${currentModeParam === 'recorded' ? 'bg-amber-400' : 'bg-emerald-400'} inline-block shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
+            </div>
           </div>
-          <div class="mt-4 pt-2 border-t border-neutral-800 flex items-center justify-between">
-            <span class="text-[10px] font-mono text-amber-400">${currentModeParam === 'recorded' ? 'ARCHIVE DOSSIER' : 'STATUS: READY'}</span>
-            <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
+
+          <!-- CARD BOTTOM DETAILS -->
+          <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
+            <div>
+              <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1">
+                ${subj.name}
+              </h3>
+              <p class="text-[11px] text-neutral-400 font-body leading-snug mb-3">
+                ${subj.desc}
+              </p>
+            </div>
+            <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
+              <span class="text-[10px] font-mono text-amber-400">
+                ${currentModeParam === 'recorded' ? 'RECORDED ARCHIVE' : 'STATUS: READY'}
+              </span>
+              <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
+            </div>
           </div>
         `;
         container.appendChild(card);
@@ -288,7 +384,7 @@
         <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="batchHeading">
           LOADING SQUADRON...
         </h2>
-        <p class="text-xs text-neutral-400 font-body mt-1">Select a core subject or module below to access tactical briefings and study dossiers.</p>
+        <p class="text-xs text-neutral-400 font-body mt-1">Select an authorized module below to access tactical briefings and study dossiers.</p>
       </div>
       <div class="flex items-center gap-2 bg-black/60 border border-emerald-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -296,9 +392,9 @@
       </div>
     </div>
 
-    <!-- SUBJECT TABS GRID -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="subjectsContainer">
-      <!-- Subjects dynamically rendered via JavaScript -->
+    <!-- SUBJECT TABS GRID (WITH VISUAL TOP IMAGES) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="subjectsContainer">
+      <!-- Subjects dynamically rendered with top image via JavaScript -->
     </div>
 
   </main>
