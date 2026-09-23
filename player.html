@@ -6,6 +6,10 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Plyr Video Engine -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.min.js"></script>
+
   <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +24,6 @@
     }
     .font-stencil { font-family: 'Black Ops One', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
-    .font-body { font-family: 'Inter', sans-serif; }
 
     .tactical-bg {
       background: 
@@ -42,7 +45,6 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* स्मार्ट व्यूकंटेनर */
     .viewport-shield {
       position: relative;
       width: 100%;
@@ -52,18 +54,19 @@
       border-radius: 0.75rem;
     }
 
-    .viewport-shield iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
     /* Nexield के लिए ऊपर का फालतू टेक्स्ट छुपाने वाली क्लास */
     .viewport-shield.crop-active iframe {
       height: 106% !important;
       position: absolute;
       top: -3.8% !important;
       left: 0;
+    }
+
+    /* Team Phantom Emerald Controls */
+    :root {
+      --plyr-color-main: #10b981;
+      --plyr-video-background: #000000;
+      --plyr-control-icon-size: 16px;
     }
   </style>
 </head>
@@ -91,18 +94,9 @@
   <!-- MAIN VIDEO VIEWPORT -->
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
-      
       <div class="viewport-shield" id="videoFrameContainer">
-        <iframe 
-          id="tacticalPlayer" 
-          src="" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-          allowfullscreen="true"
-          webkitallowfullscreen="true"
-          mozallowfullscreen="true">
-        </iframe>
+        <!-- Dynamic Target Area -->
       </div>
-
     </div>
   </main>
 
@@ -122,7 +116,6 @@
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
-      // URL पैरामीटर को प्राथमिकता दें (ताकि OTA YouTube लेक्चर्स तुरंत लोड हों)
       const finalVideo = urlVideo || storedVideo;
       const finalTitle = urlTitle || storedTitle || "TACTICAL SESSION";
 
@@ -135,18 +128,38 @@
         return;
       }
 
-      const playerFrame = document.getElementById("tacticalPlayer");
       const container = document.getElementById("videoFrameContainer");
 
       // 1. अगर Nexield / Web Stream Link है:
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        container.classList.add("crop-active"); // सिर्फ Nexield में ऊपर का टेक्स्ट छिपाएगा
-        playerFrame.src = finalVideo;
+        container.classList.add("crop-active");
+        container.innerHTML = `
+          <iframe 
+            src="${finalVideo}" 
+            class="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+            allowfullscreen>
+          </iframe>
+        `;
       } 
-      // 2. अगर CDS OTA का YouTube Video ID है:
+      // 2. अगर CDS OTA YouTube Video ID है (Cleaned Interface):
       else {
-        container.classList.remove("crop-active"); // YouTube को नॉर्मल 16:9 में चलाएगा
-        playerFrame.src = `https://www.youtube.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
+        container.classList.remove("crop-active");
+        container.innerHTML = `
+          <div class="plyr__video-embed w-full h-full" id="cleanYoutubePlayer">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1"
+              allowfullscreen
+              allow="autoplay">
+            </iframe>
+          </div>
+        `;
+        
+        // Plyr Custom Controller Initialize (Hides Channel Branding)
+        new Plyr('#cleanYoutubePlayer', {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+          youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+        });
       }
     });
 
