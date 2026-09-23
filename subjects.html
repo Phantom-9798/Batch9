@@ -40,7 +40,7 @@
         ]
       },
       "cds-kilo": {
-        title: "CDS Kilo Squadron",
+        title: "CDS OTA Squadron",
         subjects: [
           { name: "Physics", desc: "Mechanics, Optics, Thermodynamics & Electricity" },
           { name: "Chemistry", desc: "Physical, Inorganic & Organic Fundamental Principles" },
@@ -55,23 +55,25 @@
         ]
       },
       "afcat": {
-        title: "AFCAT Juliet Squadron",
+        title: "AFCAT Squadron",
         subjects: [
           { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery" },
           { name: "Reasoning", desc: "Verbal & Spatial Tactical Reasoning Drills" }
         ]
       },
       "capf": {
-        title: "CAPF India Squadron",
+        title: "CAPF Squadron",
         subjects: [
           { name: "Math", desc: "Quantitative Aptitude & Problem Solving" },
           { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports" },
-          { name: "Mentor Session" , desc: "mentors class" }
+          { name: "Mentor Session", desc: "Strategic Mentorship Classes & Tactical Roadmaps" }
         ]
       }
     };
 
     let unsubscribeSnapshot = null;
+    let currentBatchParam = "cds-math";
+    let currentModeParam = "live";
 
     // Session Verification & Realtime Single Device Guard
     onAuthStateChanged(auth, (user) => {
@@ -118,18 +120,26 @@
 
     function renderBatchCurriculum(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
-      const batchParam = urlParams.get('batch') || 'cds-math';
+      currentBatchParam = urlParams.get('batch') || 'cds-math';
+      currentModeParam = urlParams.get('mode') || 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
-      if (!isCombo && !allowedBatches.includes(batchParam)) {
+      if (!isCombo && !allowedBatches.includes(currentBatchParam)) {
         alert("ACCESS DENIED: You are not authorized for this specific squadron.");
         window.location.href = "classroom.html";
         return;
       }
 
-      const currentCurriculum = curriculumData[batchParam] || curriculumData["cds-math"];
-      document.getElementById('batchHeading').innerText = currentCurriculum.title;
-      document.getElementById('batchBadge').innerText = "SQUADRON: " + batchParam.toUpperCase();
+      const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-math"];
+      const modeLabel = currentModeParam === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
+
+      document.getElementById('batchHeading').innerText = `${currentCurriculum.title} (${modeLabel})`;
+      document.getElementById('batchBadge').innerText = `${currentBatchParam.toUpperCase()} • ${modeLabel}`;
+
+      const backBtn = document.getElementById('backToModesBtn');
+      if (backBtn) {
+        backBtn.href = `batch-mode.html?batch=${encodeURIComponent(currentBatchParam)}`;
+      }
 
       const container = document.getElementById('subjectsContainer');
       container.innerHTML = "";
@@ -137,7 +147,7 @@
       currentCurriculum.subjects.forEach((subj, index) => {
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
-        card.onclick = () => openSubjectModule(batchParam, subj.name);
+        card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
 
         card.innerHTML = `
           <div>
@@ -157,8 +167,8 @@
       });
     }
 
-    function openSubjectModule(batch, subjectName) {
-      window.location.href = "chapters.html?batch=" + encodeURIComponent(batch) + "&subject=" + encodeURIComponent(subjectName);
+    function openSubjectModule(batch, subjectName, mode) {
+      window.location.href = `chapters.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
     }
 
     window.terminateCadetSession = function() {
@@ -230,10 +240,10 @@
 
       <!-- NAVIGATION & CADET INFO -->
       <div class="flex items-center gap-3">
-        <a href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
-          &larr; BACK TO SQUADRONS
+        <a id="backToModesBtn" href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
+          &larr; BACK TO MODES
         </a>
-        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition">
+        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
           LOGOUT
         </button>
       </div>
