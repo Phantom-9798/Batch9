@@ -60,21 +60,38 @@
       border-radius: 0 !important;
     }
 
-    /* TOP-RIGHT SPEED CONTROL HUD */
-    .tactical-top-hud {
+    /* TOP-RIGHT PERMANENT HUD BAR (SPEED + FULLSCREEN) */
+    .tactical-permanent-hud {
       position: absolute;
       top: 12px;
       right: 14px;
-      z-index: 50;
+      z-index: 60;
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(4, 7, 11, 0.92);
+      gap: 8px;
+      background: rgba(4, 7, 11, 0.9);
       border: 1px solid rgba(16, 185, 129, 0.5);
       padding: 5px 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
-      transition: opacity 0.3s ease;
+      border-radius: 8px;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.85);
+      pointer-events: auto !important;
+      opacity: 1 !important; /* Hamesha visible rahega */
+    }
+
+    .fs-hud-btn {
+      background: rgba(16, 185, 129, 0.9);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 5px;
+      letter-spacing: 0.05em;
+      transition: background 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+    .fs-hud-btn:hover {
+      background: #10b981;
+      transform: scale(1.04);
     }
 
     /* NEXIELD FRAME */
@@ -107,38 +124,7 @@
       pointer-events: none;
     }
 
-    /* CENTER FULLSCREEN & EXIT BUTTON */
-    .center-fs-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 50;
-      background: rgba(16, 185, 129, 0.95);
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
-      opacity: 1;
-      transition: opacity 0.3s ease, transform 0.2s ease;
-    }
-
-    .center-fs-btn:hover {
-      background: #10b981;
-      transform: translate(-50%, -50%) scale(1.06);
-    }
-
-    /* CONTROLS AUTO-HIDE CLASS */
-    .hud-hidden {
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
-    /* YOUTUBE STYLES */
+    /* YOUTUBE ENGINE */
     .yt-custom-container {
       position: relative;
       width: 100%;
@@ -203,6 +189,11 @@
       transition: opacity 0.35s ease;
     }
 
+    .hud-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
     .tactical-progress-track {
       width: 100%;
       height: 6px;
@@ -247,22 +238,26 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- TOP-RIGHT SPEED CONTROL HUD -->
-        <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
-          <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
-          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
-            <option value="1" class="bg-black">1.0x</option>
-            <option value="1.25" class="bg-black">1.25x</option>
-            <option value="1.5" class="bg-black">1.5x</option>
-            <option value="1.75" class="bg-black">1.75x</option>
-            <option value="2" class="bg-black">2.0x</option>
-          </select>
-        </div>
+        <!-- PERMANENT TOP-RIGHT HUD (SPEED + FULLSCREEN FIXED) -->
+        <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
+          <div class="flex items-center gap-1.5">
+            <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
+            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+              <option value="1" class="bg-black">1.0x</option>
+              <option value="1.25" class="bg-black">1.25x</option>
+              <option value="1.5" class="bg-black">1.5x</option>
+              <option value="1.75" class="bg-black">1.75x</option>
+              <option value="2" class="bg-black">2.0x</option>
+            </select>
+          </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON -->
-        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
-          [⛶ FULLSCREEN]
-        </button>
+          <div class="h-4 w-[1px] bg-neutral-700"></div>
+
+          <!-- PERMANENT FULLSCREEN TRIGGER -->
+          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen()" class="fs-hud-btn font-orbitron">
+            [⛶ FULLSCREEN]
+          </button>
+        </div>
 
         <!-- DYNAMIC VIDEO AREA -->
         <div id="playerRoot" class="w-full h-full relative"></div>
@@ -306,16 +301,12 @@
       }
 
       const playerRoot = document.getElementById("playerRoot");
-      const centerBtn = document.getElementById("centerFsBtn");
-      const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Top Title Mask + Safe Fullscreen + Speed HUD)
+      // CASE 1: NEXIELD (Clean Top Title Mask + Permanent Top HUD)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         isNexield = true;
-        centerBtn.style.display = "block";
-        topSpeedHud.style.display = "flex";
 
         playerRoot.innerHTML = `
           <div class="nexield-box">
@@ -334,8 +325,6 @@
       // =========================================================================
       else {
         isNexield = false;
-        centerBtn.style.display = "block";
-        topSpeedHud.style.display = "flex";
 
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -382,10 +371,6 @@
                       <option value="medium" class="bg-black">360p</option>
                     </select>
                   </div>
-
-                  <button id="miniFsBtn" onclick="toggleTacticalFullscreen()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-orbitron font-extrabold rounded tracking-wider transition cursor-pointer">
-                    [⛶]
-                  </button>
                 </div>
               </div>
             </div>
@@ -430,40 +415,25 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-      }
 
-      // माउस और टच मूवमेंट हैंडलर (कंट्रोल्स को वापस लाने के लिए)
-      const screenEl = document.getElementById("phantomConsoleScreen");
-      
-      const wakeControls = () => {
-        showControls();
+        const screenEl = document.getElementById("phantomConsoleScreen");
+        screenEl.addEventListener("mousemove", () => {
+          showControls();
+          resetAutoHideTimer();
+        });
+
         resetAutoHideTimer();
-      };
-
-      screenEl.addEventListener("mousemove", wakeControls);
-      screenEl.addEventListener("mouseenter", wakeControls);
-      screenEl.addEventListener("touchstart", wakeControls);
-
-      resetAutoHideTimer();
+      }
     });
 
+    // YouTube Bottom Controls Auto-hide
     function showControls() {
-      const centerBtn = document.getElementById("centerFsBtn");
-      const topSpeedHud = document.getElementById("topSpeedHud");
       const ytBar = document.getElementById("ytCustomBar");
-
-      if (centerBtn) centerBtn.classList.remove("hud-hidden");
-      if (topSpeedHud) topSpeedHud.classList.remove("hud-hidden");
       if (ytBar) ytBar.classList.remove("hud-hidden");
     }
 
     function hideControls() {
-      const centerBtn = document.getElementById("centerFsBtn");
-      const topSpeedHud = document.getElementById("topSpeedHud");
       const ytBar = document.getElementById("ytCustomBar");
-
-      if (centerBtn) centerBtn.classList.add("hud-hidden");
-      if (topSpeedHud) topSpeedHud.classList.add("hud-hidden");
       if (ytBar) ytBar.classList.add("hud-hidden");
     }
 
@@ -471,10 +441,10 @@
       clearTimeout(hideControlsTimeout);
       hideControlsTimeout = setTimeout(() => {
         hideControls();
-      }, 3000); // 3 सेकंड बाद स्मूथली हाइड होगा
+      }, 3000);
     }
 
-    // SPEED CONTROLLER (NEXIELD & YOUTUBE)
+    // SPEED CONTROLLER
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
 
@@ -489,9 +459,32 @@
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
-
-      resetAutoHideTimer();
     }
+
+    // FULLSCREEN & EXIT CONTROLLER (PERMANENT TOP BUTTON)
+    function toggleTacticalFullscreen() {
+      const target = document.getElementById("phantomConsoleScreen");
+      const fsBtn = document.getElementById("permanentFsBtn");
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (target.requestFullscreen) target.requestFullscreen();
+        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+        if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const fsBtn = document.getElementById("permanentFsBtn");
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
+      } else {
+        if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
+      }
+    });
 
     // Skip & Tap Logic (YouTube)
     let leftTimer = null, rightTimer = null;
@@ -556,7 +549,6 @@
       if (ytInstance.getCurrentTime) {
         ytInstance.seekTo(ytInstance.getCurrentTime(), true);
       }
-      resetAutoHideTimer();
     }
 
     function seekVideoTrack(e) {
@@ -564,7 +556,6 @@
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       ytInstance.seekTo(pos * ytInstance.getDuration(), true);
-      resetAutoHideTimer();
     }
 
     function startTimerSync() {
@@ -588,41 +579,6 @@
       const s = Math.floor(sec % 60);
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
-
-    // FULLSCREEN / EXIT CONTROLLER
-    function toggleTacticalFullscreen() {
-      const target = document.getElementById("phantomConsoleScreen");
-      const centerBtn = document.getElementById("centerFsBtn");
-      const miniFsBtn = document.getElementById("miniFsBtn");
-
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (target.requestFullscreen) target.requestFullscreen();
-        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
-        if (miniFsBtn) miniFsBtn.innerText = "[✕]";
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
-        if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
-      }
-      showControls();
-      resetAutoHideTimer();
-    }
-
-    document.addEventListener("fullscreenchange", () => {
-      const centerBtn = document.getElementById("centerFsBtn");
-      const miniFsBtn = document.getElementById("miniFsBtn");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
-        if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
-      } else {
-        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
-        if (miniFsBtn) miniFsBtn.innerText = "[✕]";
-      }
-      showControls();
-      resetAutoHideTimer();
-    });
 
     // Disable Inspect Shortcuts
     document.addEventListener("keydown", (e) => {
