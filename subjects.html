@@ -30,7 +30,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Subject Syllabus Data Map
+    // Standard Live Syllabus Data Map
     const curriculumData = {
       "cds-math": {
         title: "CDS Mathematics Specialist",
@@ -70,6 +70,25 @@
         ]
       }
     };
+
+    // SPECIAL: ONLY CDS OTA RECORDED SUBJECTS LIST
+    const cdsOtaRecordedSubjects = [
+      { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems & Oceanography" },
+      { name: "Indian Geography", desc: "Physiography, Drainage, Climate & Natural Resources" },
+      { name: "Modern History", desc: "Freedom Struggle, British Era & Nationalist Movements" },
+      { name: "Medieval History", desc: "Delhi Sultanate, Mughal Empire & Regional Dynasties" },
+      { name: "Ancient History", desc: "Indus Valley, Vedic Age, Mauryan & Gupta Periods" },
+      { name: "GS Muster", desc: "High-Yield Integrated General Studies Drill Archive" },
+      { name: "English Grammar", desc: "Rules of Grammar, Parts of Speech & Syntax Mastery" },
+      { name: "Vocabulary", desc: "Synonyms, Antonyms, Idioms & Contextual Word Power" },
+      { name: "Economics", desc: "Macroeconomics, Indian Economy, Monetary Policy & Fiscal Systems" },
+      { name: "English Practice", desc: "Comprehension, Spotting Errors & Tactical Practice Sets" },
+      { name: "Polity", desc: "Indian Constitution, Governance, Rights & Judiciary" },
+      { name: "Biology", desc: "Cell Biology, Human Systems, Diseases & Ecology" },
+      { name: "Chemistry", desc: "Chemical Reactions, Elements, Compounds & Everyday Chemistry" },
+      { name: "Physics", desc: "Optics, Motion, Electricity, Magnetism & Wave Mechanics" },
+      { name: "One Pager", desc: "High-Yield Cheat Sheets, Formula Maps & Quick Recap Notes" }
+    ];
 
     let unsubscribeSnapshot = null;
     let currentBatchParam = "cds-math";
@@ -144,7 +163,13 @@
       const container = document.getElementById('subjectsContainer');
       container.innerHTML = "";
 
-      currentCurriculum.subjects.forEach((subj, index) => {
+      // DHYAN: Sirf CDS OTA (cds-kilo) aur Recorded Mode ho tabhi ye list load hogi
+      let activeSubjectsList = currentCurriculum.subjects;
+      if (currentBatchParam === "cds-kilo" && currentModeParam === "recorded") {
+        activeSubjectsList = cdsOtaRecordedSubjects;
+      }
+
+      activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl p-4 flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group";
         card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
@@ -152,14 +177,14 @@
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #0${index + 1}</span>
-              <span class="w-2 h-2 rounded-full bg-amber-500/80 group-hover:scale-125 transition"></span>
+              <span class="text-[10px] font-orbitron tracking-widest text-neutral-400">MODULE #${(index + 1).toString().padStart(2, '0')}</span>
+              <span class="w-2 h-2 rounded-full ${currentModeParam === 'recorded' ? 'bg-amber-400' : 'bg-emerald-400'} group-hover:scale-125 transition"></span>
             </div>
             <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition">${subj.name}</h3>
             <p class="text-[11px] text-neutral-400 font-body mt-1 leading-snug">${subj.desc}</p>
           </div>
           <div class="mt-4 pt-2 border-t border-neutral-800 flex items-center justify-between">
-            <span class="text-[10px] font-mono text-amber-400">STATUS: READY</span>
+            <span class="text-[10px] font-mono text-amber-400">${currentModeParam === 'recorded' ? 'ARCHIVE DOSSIER' : 'STATUS: READY'}</span>
             <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
           </div>
         `;
