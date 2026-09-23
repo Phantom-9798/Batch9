@@ -326,7 +326,7 @@
             </div>
             <div class="relative">
               <input type="password" id="cadetPassword" required minlength="6" placeholder="••••••••" class="w-full bg-neutral-900/95 border border-neutral-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 pr-12">
-              <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-neutral-400 hover:text-amber-400 font-mono focus:outline-none">
+              <button type="button" onclick="togglePasswordVisibility(event)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-neutral-400 hover:text-amber-400 font-mono focus:outline-none">
                 SHOW
               </button>
             </div>
@@ -349,11 +349,11 @@
               </label>
               <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 hover:border-amber-500/50 cursor-pointer transition">
                 <input type="checkbox" name="cadetBatches" value="afcat" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-                <span class="text-neutral-200 font-bold">AFCAT Batch</span>
+                <span class="text-neutral-200 font-bold">AFCAT</span>
               </label>
               <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 hover:border-amber-500/50 cursor-pointer transition">
                 <input type="checkbox" name="cadetBatches" value="capf" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-                <span class="text-neutral-200 font-bold">CAPF Batch</span>
+                <span class="text-neutral-200 font-bold">CAPF</span>
               </label>
               <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-amber-950/20 border border-amber-500/40 hover:border-amber-500 cursor-pointer transition">
                 <input type="checkbox" name="cadetBatches" value="combo" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
@@ -415,9 +415,9 @@
       }
     }
 
-    function togglePasswordVisibility() {
+    function togglePasswordVisibility(e) {
       const passwordInput = document.getElementById('cadetPassword');
-      const btn = event.target;
+      const btn = e ? e.currentTarget || e.target : document.querySelector("button[onclick*='togglePasswordVisibility']");
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         btn.innerText = 'HIDE';
