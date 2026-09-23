@@ -44,6 +44,7 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
+    /* मुख्य व्यूकंटेनर - फुलस्क्रीन यही होगा ताकि vimpd का नाम न आए */
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
@@ -64,9 +65,7 @@
       cursor: none;
     }
 
-    /* =========================================================================
-       NEXIELD ENGINE (Clean & 100% Working Native Speed + Quality)
-       ========================================================================= */
+    /* NEXIELD FRAME & SHIELDS */
     .nexield-box {
       position: relative;
       width: 100%;
@@ -85,7 +84,7 @@
       z-index: 10;
     }
 
-    /* ऊपर का 'AFCAT Class' टाइटल छुपाने वाला स्लिम मिलिट्री मास्क */
+    /* ऊपर का AFCAT Class टाइटल छुपाने वाला स्लिम मास्क */
     .nexield-top-mask {
       position: absolute;
       top: 0;
@@ -97,9 +96,19 @@
       pointer-events: none;
     }
 
-    /* =========================================================================
-       YOUTUBE CUSTOM ENGINE
-       ========================================================================= */
+    /* कोने के फुलस्क्रीन आइकॉन पर हमारा ट्रिगर (ताकि vimpd का अलर्ट न आए, Speed बटन पूरी तरह आज़ाद रहे) */
+    .nexield-safe-fs-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 36px;
+      z-index: 30;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* YOUTUBE ENGINE */
     .tactical-top-hud {
       position: absolute;
       top: 12px;
@@ -263,7 +272,7 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- YOUTUBE TOP-RIGHT SPEED HUD (NEXIELD MEIN AUTOMATIC HIDE RAHEGA) -->
+        <!-- YOUTUBE TOP-RIGHT SPEED HUD -->
         <div id="topSpeedHud" class="tactical-top-hud" style="display: none;" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
           <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
@@ -325,28 +334,30 @@
       const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Top Title Mask + Real Quality & Speed Settings)
+      // CASE 1: NEXIELD (NO VIMPD POPUP + FULL SPEED/QUALITY WORKING)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         if (centerBtn) centerBtn.style.display = "none";
         if (topSpeedHud) topSpeedHud.style.display = "none";
 
+        // allowfullscreen="false" rakha gaya hai taaki iframe ka native vimpd popup na trigger ho
         playerRoot.innerHTML = `
           <div class="nexield-box">
-            <!-- ऊपर का AFCAT title छुपाने वाला मास्क -->
             <div class="nexield-top-mask"></div>
             
+            <!-- Ye corner interceptor seedha hamare container ko fullscreen karega (Zero Domain Alert) -->
+            <div class="nexield-safe-fs-btn" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
+
             <iframe 
               src="${finalVideo}" 
               class="nexield-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowfullscreen="true">
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE ENGINE (CUSTOM HUD + SPEED + QUALITY)
+      // CASE 2: YOUTUBE ENGINE
       // =========================================================================
       else {
         if (centerBtn) centerBtn.style.display = "block";
@@ -445,13 +456,13 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-
-        const screenEl = document.getElementById("phantomConsoleScreen");
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          resetAutoHideTimer();
-        });
       }
+
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      screenEl.addEventListener("mousemove", () => {
+        showControls();
+        resetAutoHideTimer();
+      });
     });
 
     function showControls() {
@@ -568,10 +579,10 @@
     function formatSeconds(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${sec}`;
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Fullscreen Controller
+    // Fullscreen Controller (Main Container Fullscreen - Zero Origin Pop-up)
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
