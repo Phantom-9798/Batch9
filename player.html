@@ -74,8 +74,11 @@
           id="tacticalPlayer" 
           src="" 
           class="w-full h-full border-0" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-          allowfullscreen>
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true"
+          referrerpolicy="no-referrer">
         </iframe>
 
       </div>
@@ -91,26 +94,37 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // 1. Session Storage से डेटा निकालें (URL से टूटने का खतरा खत्म)
+      const storedVideo = sessionStorage.getItem("phantom_current_video");
+      const storedTitle = sessionStorage.getItem("phantom_current_title");
+
+      // 2. URL Parameters (Fallback)
       const urlParams = new URLSearchParams(window.location.search);
-      const streamUrl = urlParams.get("stream");
-      const youtubeId = urlParams.get("v");
-      const title = urlParams.get("title");
+      const urlVideo = urlParams.get("v") || urlParams.get("stream");
+      const urlTitle = urlParams.get("title");
+
+      const finalVideo = storedVideo || urlVideo;
+      const finalTitle = storedTitle || urlTitle || "TACTICAL SESSION";
+
+      const titleElem = document.getElementById("playerTitle");
       const playerFrame = document.getElementById("tacticalPlayer");
 
-      if (title) {
-        document.getElementById("playerTitle").innerText = decodeURIComponent(title);
+      if (titleElem && finalTitle) {
+        titleElem.innerText = decodeURIComponent(finalTitle);
       }
 
-      // 1. Agar Nexield / Direct Stream link hai:
-      if (streamUrl) {
-        playerFrame.src = decodeURIComponent(streamUrl);
-      } 
-      // 2. Agar Normal YouTube video ID hai:
-      else if (youtubeId) {
-        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?autoplay=1&rel=0&modestbranding=1`;
-      } 
-      else {
-        alert("Session error: Invalid video stream.");
+      if (!finalVideo) {
+        alert("Session error: Video stream not found.");
+        return;
+      }
+
+      // 3. चेक करें कि लिंक Nexield / Web URL है या YouTube ID
+      if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
+        // Direct Nexield Player Stream
+        playerFrame.src = finalVideo;
+      } else {
+        // YouTube Player
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
       }
     });
 
