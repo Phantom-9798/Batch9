@@ -6,11 +6,6 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Plyr Engine (Hides YouTube Branding & Adds Native Speed/Quality) -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.min.js"></script>
-
-  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -45,7 +40,8 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    .player-container {
+    /* मुख्य वीडियो फ्रेम */
+    #tacticalViewport {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -54,33 +50,52 @@
       overflow: hidden;
     }
 
-    /* Nexield Crop: सिर्फ ऊपर का AFCAT टेक्स्ट छुपाने के लिए */
-    .nexield-frame {
+    #tacticalPlayer {
       width: 100%;
-      height: 106%;
-      position: absolute;
-      top: -3.8%;
-      left: 0;
+      height: 100%;
       border: none;
     }
 
-    /* Plyr Clean Tactical Styling (No YouTube colors, pure Emerald) */
-    :root {
-      --plyr-color-main: #10b981;
-      --plyr-video-background: #000000;
-      --plyr-control-icon-size: 17px;
-      --plyr-font-family: 'Rajdhani', sans-serif;
+    /* 1. ऊपर का चैनल नाम और शेयर बटन ब्लॉक करने वाला मास्क */
+    .top-anti-channel-shield {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 58px;
+      z-index: 25;
+      background: linear-gradient(180deg, rgba(4, 7, 11, 0.98) 50%, rgba(4, 7, 11, 0) 100%);
+      pointer-events: auto; /* क्लिक ब्लॉक */
+      display: none;
     }
 
-    .plyr--video {
-      height: 100% !important;
-      width: 100% !important;
-      border-radius: 0.75rem;
+    /* 2. नीचे दाईं तरफ YouTube लोगो पर क्लिक ब्लॉक करने वाली शील्ड 
+          (Settings/Gear और Fullscreen को खुला छोड़कर सिर्फ लोगो को लॉक करता है) */
+    .bottom-youtube-blocker {
+      position: absolute;
+      bottom: 0;
+      right: 48px; /* Fullscreen बटन को खुला छोड़ता है */
+      width: 82px;  /* सिर्फ YouTube लिखे हुए लोगो को कवर करता है */
+      height: 44px; /* कंट्रोल बार की ऊंचाई */
+      z-index: 25;
+      background: transparent;
+      cursor: default;
+      pointer-events: auto; /* क्लिक ब्लॉक: YouTube पर रीडायरेक्ट नहीं होने देगा */
+      display: none;
     }
 
-    /* Hide YouTube Endscreen & Related Videos completely */
-    .ytp-endscreen-paginate, .ytp-chrome-top, .ytp-watermark {
-      display: none !important;
+    /* YouTube मोड में शील्ड्स एक्टिव रहेंगी */
+    #tacticalViewport.is-youtube .top-anti-channel-shield,
+    #tacticalViewport.is-youtube .bottom-youtube-blocker {
+      display: block;
+    }
+
+    /* Nexield के लिए ऊपर का 4% हल्का क्रॉप */
+    #tacticalViewport.is-nexield #tacticalPlayer {
+      height: 106% !important;
+      position: absolute;
+      top: -3.8% !important;
+      left: 0;
     }
   </style>
 </head>
@@ -96,7 +111,7 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE PROTECTED STREAM</p>
+          <p class="text-[10px] text-neutral-400 font-mono">SECURE PROTECTED AIRSPACE</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
@@ -107,10 +122,25 @@
 
   <!-- MAIN VIDEO VIEWPORT -->
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
-    <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl">
-      <div class="player-container" id="videoWrapper">
-        <!-- JS से डायनामिक प्लेयर लोड होगा -->
+    <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
+      
+      <div id="tacticalViewport">
+        <!-- ऊपर: चैनल नेम और शेयर बटन को छुपाने व क्लिक ब्लॉक करने वाली शील्ड -->
+        <div class="top-anti-channel-shield"></div>
+
+        <!-- नीचे: YouTube लोगो पर क्लिक ब्लॉक करने वाली शील्ड (रीडायरेक्ट बंद) -->
+        <div class="bottom-youtube-blocker" title="Protected Stream"></div>
+
+        <iframe 
+          id="tacticalPlayer" 
+          src="" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true">
+        </iframe>
       </div>
+
     </div>
   </main>
 
@@ -142,54 +172,22 @@
         return;
       }
 
-      const wrapper = document.getElementById("videoWrapper");
+      const playerFrame = document.getElementById("tacticalPlayer");
+      const viewport = document.getElementById("tacticalViewport");
 
       // CASE 1: Nexield / Vimeo Stream (AFCAT Chapters)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        wrapper.innerHTML = `
-          <iframe 
-            src="${finalVideo}" 
-            class="nexield-frame" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-            allowfullscreen>
-          </iframe>
-        `;
+        viewport.classList.remove("is-youtube");
+        viewport.classList.add("is-nexield");
+        playerFrame.src = finalVideo;
       } 
-      // CASE 2: YouTube Video (CDS OTA Chapters) -> Plyr Custom Engine
+      // CASE 2: YouTube Video ID (CDS OTA Chapters)
       else {
-        wrapper.innerHTML = `
-          <div class="plyr__video-embed w-full h-full" id="tacticalPlyrContainer">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1"
-              allowfullscreen
-              allow="autoplay">
-            </iframe>
-          </div>
-        `;
-
-        // Plyr Controls: Speed और Quality को इनेबल किया गया है, शेयर और यूट्यूब लोगो को ब्लॉक किया गया है
-        new Plyr('#tacticalPlyrContainer', {
-          controls: [
-            'play-large',
-            'play',
-            'progress',
-            'current-time',
-            'duration',
-            'mute',
-            'volume',
-            'settings',
-            'fullscreen'
-          ],
-          settings: ['speed', 'quality'],
-          speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 1.75, 2] },
-          youtube: { 
-            noCookie: true, 
-            rel: 0, 
-            showinfo: 0, 
-            iv_load_policy: 3, 
-            modestbranding: 1 
-          }
-        });
+        viewport.classList.remove("is-nexield");
+        viewport.classList.add("is-youtube");
+        // controls=1 (ताकि स्पीड और क्वालिटी की सेटिंग्स चालू रहें)
+        // modestbranding=1, rel=0
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&controls=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=0`;
       }
     });
 
