@@ -82,12 +82,13 @@
       border: none;
     }
 
+    /* केवल एकदम कोने के FS बटन को कवर करेगा, Speed/Settings बटन खुला रहेगा */
     .nexield-fs-interceptor {
       position: absolute;
       bottom: 0;
       right: 0;
-      width: 52px;
-      height: 48px;
+      width: 38px;
+      height: 40px;
       z-index: 30;
       background: transparent;
       cursor: pointer;
@@ -239,7 +240,7 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- सेंटर फुलस्क्रीन / एग्ज़िट बटन -->
+        <!-- सेंटर फुलस्क्रीन / एग्ज़िट बटन (YouTube मोड में एक्टिव रहेगा) -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
@@ -285,9 +286,13 @@
       }
 
       const playerRoot = document.getElementById("playerRoot");
+      const centerBtn = document.getElementById("centerFsBtn");
 
-      // CASE 1: NEXIELD (Clean Crop, No Black Mask)
+      // CASE 1: NEXIELD (Clean Crop, Settings/Speed fully accessible)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
+        // Nexield मोड में बीच वाला बड़ा बटन हटा दें
+        if (centerBtn) centerBtn.style.display = "none";
+
         playerRoot.innerHTML = `
           <div class="nexield-wrapper">
             <div class="nexield-fs-interceptor" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
@@ -301,6 +306,8 @@
       } 
       // CASE 2: YOUTUBE (CUSTOM HUD WITH REAL CONTROLS)
       else {
+        if (centerBtn) centerBtn.style.display = "block";
+
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
