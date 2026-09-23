@@ -41,8 +41,8 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* स्मार्ट कट-आउट व्यूकंटेनर: चैनल नाम और लोगो को काटने के लिए */
-    .viewport-box {
+    /* स्मार्ट व्यूकंटेनर */
+    #tacticalViewport {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -51,18 +51,28 @@
       border-radius: 0.75rem;
     }
 
-    /* YouTube के लिए 120% ओवरस्कैन: ऊपर का टाइटल और नीचे का लोगो कट जाएगा */
-    .viewport-box.youtube-clean iframe {
+    /* फुलस्क्रीन मोड में ओवरफ्लो और साइज कंट्रोल */
+    #tacticalViewport:fullscreen,
+    #tacticalViewport:-webkit-full-screen,
+    #tacticalViewport:-moz-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+    }
+
+    /* 1. YouTube Mode: 122% हाइट और -11% टॉप से चैनल नेम और लोगो बाहर कट जाएगा */
+    #tacticalViewport.mode-youtube iframe {
       position: absolute;
       width: 100% !important;
       height: 122% !important;
-      top: -11% !important; /* ऊपर का चैनल नाम और शेयर बटन स्क्रीन से बाहर */
+      top: -11% !important;
       left: 0;
       border: none;
     }
 
-    /* Nexield के लिए 106% ओवरस्कैन: ऊपर का AFCAT टेक्स्ट बाहर */
-    .viewport-box.nexield-clean iframe {
+    /* 2. Nexield Mode: 106% हाइट और -3.8% टॉप से ऊपर का AFCAT टेक्स्ट कट जाएगा */
+    #tacticalViewport.mode-nexield iframe {
       position: absolute;
       width: 100% !important;
       height: 106% !important;
@@ -71,34 +81,65 @@
       border: none;
     }
 
-    /* ऊपर और नीचे का प्रोटेक्शन गार्ड (लोगो और चैनल क्लिक डिसेबल) */
-    .top-guard {
+    /* YouTube शेयर बटन और चैनल टाइटल पर क्लिक रोकने वाला मास्क */
+    .shield-top-mask {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 52px;
+      height: 55px;
       z-index: 30;
-      background: linear-gradient(180deg, #04070b 0%, rgba(4, 7, 11, 0) 100%);
-      pointer-events: auto; /* चैनल पर क्लिक होने से रोकेगा */
+      background: linear-gradient(180deg, #000000 35%, rgba(0, 0, 0, 0) 100%);
+      pointer-events: auto; /* क्लिक ब्लॉक */
+      display: none;
     }
 
-    .bottom-right-guard {
+    /* YouTube लोगो और लिंक पर क्लिक रोकने वाला बॉटम मास्क */
+    .shield-bottom-mask {
       position: absolute;
       bottom: 0;
       right: 0;
-      width: 120px;
+      width: 130px;
       height: 48px;
       z-index: 30;
       background: transparent;
-      pointer-events: auto; /* YouTube लोगो पर क्लिक होने से रोकेगा */
+      pointer-events: auto; /* क्लिक ब्लॉक */
+      display: none;
+    }
+
+    /* मोड एक्टिव होने पर मास्क दिखाना */
+    #tacticalViewport.mode-youtube .shield-top-mask,
+    #tacticalViewport.mode-youtube .shield-bottom-mask {
+      display: block;
+    }
+
+    /* कस्टम फुलस्क्रीन बटन */
+    .tactical-fs-toggle {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 40;
+      background: rgba(16, 185, 129, 0.9);
+      color: #000000;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s ease;
+    }
+    .tactical-fs-toggle:hover {
+      background: #10b981;
+      transform: scale(1.05);
     }
   </style>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- TOP CONSOLE HEADER -->
+  <!-- TOP HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -120,19 +161,21 @@
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       
-      <div class="viewport-box" id="videoBox">
-        <!-- ऊपर और नीचे का सुरक्षा कवच (ताकि कोई चैनल पर न पहुंचे) -->
-        <div class="top-guard"></div>
-        <div class="bottom-right-guard"></div>
+      <div id="tacticalViewport">
+        <!-- एंटी-शेयर और एंटी-लोगो सुरक्षा कवच -->
+        <div class="shield-top-mask"></div>
+        <div class="shield-bottom-mask"></div>
+
+        <!-- कस्टम फुलस्क्रीन बटन (फुलस्क्रीन में भी ब्रांडिंग छिपाए रखेगा) -->
+        <button id="fsBtn" class="tactical-fs-toggle font-orbitron" onclick="handleCustomFullscreen()">
+          [⛶ FULLSCREEN]
+        </button>
 
         <iframe 
           id="tacticalPlayer" 
           src="" 
-          class="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-          allowfullscreen="true"
-          webkitallowfullscreen="true"
-          mozallowfullscreen="true">
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen="true">
         </iframe>
       </div>
 
@@ -142,7 +185,7 @@
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-neutral-900 py-3 px-4 text-center">
     <p class="text-[11px] font-mono text-emerald-500/80 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; ANTI-LEAK STREAM TERMINAL
+      &copy; 2026 TEAM PHANTOM &bull; LEAK-PROTECTED LECTURE TERMINAL
     </p>
   </footer>
 
@@ -156,7 +199,7 @@
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
       const finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TACTICAL SESSION";
+      const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
@@ -168,24 +211,60 @@
       }
 
       const playerFrame = document.getElementById("tacticalPlayer");
-      const videoBox = document.getElementById("videoBox");
+      const viewport = document.getElementById("tacticalViewport");
+      const fsBtn = document.getElementById("fsBtn");
 
-      // 1. अगर Nexield / Direct Link है:
+      // CASE 1: Nexield / Vimeo Stream URL
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        videoBox.classList.remove("youtube-clean");
-        videoBox.classList.add("nexield-clean");
+        viewport.classList.remove("mode-youtube");
+        viewport.classList.add("mode-nexield");
+        // Nexield के पास अपना फुलस्क्रीन होता है, इसलिए कस्टम बटन को छिपा सकते हैं
+        fsBtn.style.display = "none";
         playerFrame.src = finalVideo;
       } 
-      // 2. अगर CDS OTA का YouTube Video है:
+      // CASE 2: YouTube Video ID (CDS OTA Lectures)
       else {
-        videoBox.classList.remove("nexield-clean");
-        videoBox.classList.add("youtube-clean");
-        // YouTube embed with minimal parameters + controls active
-        playerFrame.src = `https://www.youtube.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=0`;
+        viewport.classList.remove("mode-nexield");
+        viewport.classList.add("mode-youtube");
+        fsBtn.style.display = "block";
+
+        // YouTube को fs=0 (नेटिव फुलस्क्रीन बंद) करके लोड करेंगे
+        // ताकि हमारा कस्टम फुलस्क्रीन कंटेनर ऊपर-नीचे की मास्किंग को बनाए रखे
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1&fs=0&controls=1&showinfo=0&iv_load_policy=3&disablekb=0`;
       }
     });
 
-    // Disable Inspect Shortcuts
+    // कस्टम टैक्टिकल फुलस्क्रीन लॉजिक (ज़ूम और मास्क को फुलस्क्रीन में भी बरकरार रखता है)
+    function handleCustomFullscreen() {
+      const target = document.getElementById("tacticalViewport");
+      const fsBtn = document.getElementById("fsBtn");
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (target.requestFullscreen) {
+          target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        }
+        fsBtn.innerText = "[✕ EXIT]";
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        fsBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    }
+
+    // फुलस्क्रीन चेंज इवेंट पर बटन टेक्स्ट अपडेट
+    document.addEventListener("fullscreenchange", () => {
+      const fsBtn = document.getElementById("fsBtn");
+      if (!document.fullscreenElement) {
+        fsBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    });
+
+    // Inspect और शॉर्टकट्स ब्लॉक
     document.addEventListener("keydown", (e) => {
       if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
         e.preventDefault();
