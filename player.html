@@ -6,11 +6,6 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Plyr Video Engine -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.min.js"></script>
-
-  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -45,7 +40,8 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    .viewport-shield {
+    /* मुख्य प्रोटेक्टेड व्यूकंटेनर */
+    #phantomConsoleScreen {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -54,26 +50,91 @@
       border-radius: 0.75rem;
     }
 
-    /* Nexield के लिए ऊपर का फालतू टेक्स्ट छुपाने वाली क्लास */
-    .viewport-shield.crop-active iframe {
-      height: 106% !important;
-      position: absolute;
-      top: -3.8% !important;
-      left: 0;
+    /* जब छात्र फुलस्क्रीन करे तो कंटेनर खुद बड़ा होगा (ताकि Nexield का पॉपअप न आए) */
+    #phantomConsoleScreen:fullscreen,
+    #phantomConsoleScreen:-webkit-full-screen,
+    #phantomConsoleScreen:-moz-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
     }
 
-    /* Team Phantom Emerald Controls */
-    :root {
-      --plyr-color-main: #10b981;
-      --plyr-video-background: #000000;
-      --plyr-control-icon-size: 16px;
+    /* YOUTUBE: ऊपर से 11% बाहर (चैनल नाम व शेयर बटन गायब), नीचे से लोगो गायब */
+    #phantomConsoleScreen.is-youtube iframe {
+      position: absolute;
+      width: 100% !important;
+      height: 114% !important;
+      top: -11% !important;
+      left: 0;
+      border: none;
+    }
+
+    /* NEXIELD: ऊपर से 4.2% बाहर ('AFCAT CLASS' और वॉटरमार्क कटकर गायब) */
+    #phantomConsoleScreen.is-nexield iframe {
+      position: absolute;
+      width: 100% !important;
+      height: 106% !important;
+      top: -4.2% !important;
+      left: 0;
+      border: none;
+    }
+
+    /* 1. TOP SHIELD: चैनल नाम व शेयर बटन पर क्लिक 100% ब्लॉक */
+    .shield-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      z-index: 35;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.98) 40%, rgba(0, 0, 0, 0) 100%);
+      pointer-events: auto;
+    }
+
+    /* 2. BOTTOM YOUTUBE LOGO SHIELD: यूट्यूब लोगो पर क्लिक ब्लॉक (ताकि कोई रीडायरेक्ट न हो) */
+    .shield-bottom-logo {
+      position: absolute;
+      bottom: 0;
+      right: 52px; /* Settings और Fullscreen खुला रहेगा */
+      width: 85px;  /* सिर्फ YouTube लिखे लोगो को कवर करेगा */
+      height: 44px;
+      z-index: 35;
+      background: transparent;
+      pointer-events: auto;
+      display: none;
+    }
+
+    #phantomConsoleScreen.is-youtube .shield-bottom-logo {
+      display: block;
+    }
+
+    /* 3. TACTICAL OVERLAY FULLSCREEN TOGGLE (Nexield नोटिफिकेशन ब्लॉक करने के लिए) */
+    .tactical-fs-trigger {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 40;
+      background: rgba(16, 185, 129, 0.9);
+      color: #000;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s ease;
+    }
+    .tactical-fs-trigger:hover {
+      background: #10b981;
+      transform: scale(1.04);
     }
   </style>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- TOP CONSOLE HEADER -->
+  <!-- TOP HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -82,7 +143,7 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">ENCRYPTED FEED &bull; AIRSPACE AUTHORIZED</p>
+          <p class="text-[10px] text-neutral-400 font-mono">SECURE PROTECTED AIRSPACE</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
@@ -94,9 +155,27 @@
   <!-- MAIN VIDEO VIEWPORT -->
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
-      <div class="viewport-shield" id="videoFrameContainer">
-        <!-- Dynamic Target Area -->
+      
+      <div id="phantomConsoleScreen">
+        <!-- Top Shield (चैनल नाम व शेयर बटन ब्लॉक) -->
+        <div class="shield-top"></div>
+
+        <!-- YouTube Logo Block (रीडायरेक्ट ब्लॉक) -->
+        <div class="shield-bottom-logo"></div>
+
+        <!-- Custom Team Phantom Fullscreen Button -->
+        <button id="customFsBtn" class="tactical-fs-trigger font-orbitron" onclick="toggleTacticalFullscreen()">
+          [⛶ FULLSCREEN]
+        </button>
+
+        <iframe 
+          id="tacticalPlayer" 
+          src="" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen="false">
+        </iframe>
       </div>
+
     </div>
   </main>
 
@@ -117,7 +196,7 @@
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
       const finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TACTICAL SESSION";
+      const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
@@ -128,42 +207,54 @@
         return;
       }
 
-      const container = document.getElementById("videoFrameContainer");
+      const playerFrame = document.getElementById("tacticalPlayer");
+      const screen = document.getElementById("phantomConsoleScreen");
 
-      // 1. अगर Nexield / Web Stream Link है:
+      // CASE 1: Nexield (Vimeo Stream)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        container.classList.add("crop-active");
-        container.innerHTML = `
-          <iframe 
-            src="${finalVideo}" 
-            class="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-            allowfullscreen>
-          </iframe>
-        `;
+        screen.classList.remove("is-youtube");
+        screen.classList.add("is-nexield");
+        playerFrame.src = finalVideo;
       } 
-      // 2. अगर CDS OTA YouTube Video ID है (Cleaned Interface):
+      // CASE 2: YouTube Video (CDS OTA)
       else {
-        container.classList.remove("crop-active");
-        container.innerHTML = `
-          <div class="plyr__video-embed w-full h-full" id="cleanYoutubePlayer">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1"
-              allowfullscreen
-              allow="autoplay">
-            </iframe>
-          </div>
-        `;
-        
-        // Plyr Custom Controller Initialize (Hides Channel Branding)
-        new Plyr('#cleanYoutubePlayer', {
-          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-          youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-        });
+        screen.classList.remove("is-nexield");
+        screen.classList.add("is-youtube");
+        // controls=1 (स्पीड और क्वालिटी सेटिंग्स चालू), modestbranding=1, rel=0, fs=0 (नेटिव फुलस्क्रीन बंद ताकि कस्टम फुलस्क्रीन चले)
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&controls=1&rel=0&modestbranding=1&fs=0&iv_load_policy=3&disablekb=0`;
       }
     });
 
-    // Disable Inspect Shortcuts
+    // Custom Tactical Fullscreen (Nexield के 'Nexield vimpd' पॉपअप को रोकने का समाधान)
+    function toggleTacticalFullscreen() {
+      const target = document.getElementById("phantomConsoleScreen");
+      const fsBtn = document.getElementById("customFsBtn");
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (target.requestFullscreen) {
+          target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        }
+        fsBtn.innerText = "[✕ EXIT]";
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        fsBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const fsBtn = document.getElementById("customFsBtn");
+      if (!document.fullscreenElement) {
+        fsBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    });
+
+    // Disable Inspect & Shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
         e.preventDefault();
