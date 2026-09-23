@@ -87,7 +87,7 @@
     }
 
     /* =========================================================================
-       NEXIELD (VIMEO) - 100% UNBLOCKED & DIRECT INTERACTION
+       NEXIELD (VIMEO) - PRECISION POSITIONING
        ========================================================================= */
     .nexield-wrapper {
       position: relative;
@@ -101,12 +101,23 @@
     .nexield-frame {
       position: absolute;
       width: 100% !important;
-      height: 105% !important;
-      top: -3.5% !important;
+      height: 106% !important;
+      top: -4.5% !important; /* Title bahar rahega */
       left: 0;
       border: none;
       z-index: 15;
-      pointer-events: auto !important; /* Saare clicks directly player ko jayenge */
+    }
+
+    /* Precision Interceptor: Sirf extreme corner cover karega, Speed button bilkul chhua nahi jayega */
+    .nexield-fs-interceptor {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 28px;
+      height: 28px;
+      z-index: 25;
+      background: transparent;
+      cursor: pointer;
     }
 
     /* =========================================================================
@@ -128,7 +139,6 @@
       pointer-events: none;
     }
 
-    /* SCREEN TAP ZONES FOR 10s SKIP (ONLY ACTIVE IN YOUTUBE) */
     .tap-zone {
       position: absolute;
       top: 45px;
@@ -162,7 +172,6 @@
       transform: scale(1.1);
     }
 
-    /* CENTER FULLSCREEN & EXIT BUTTON (YOUTUBE) */
     .center-fs-btn {
       position: absolute;
       top: 50%;
@@ -192,7 +201,6 @@
       transform: translate(-50%, -50%) scale(1.06);
     }
 
-    /* TACTICAL CONTROL BAR (YOUTUBE) */
     .tactical-custom-bar {
       position: absolute;
       bottom: 0;
@@ -257,7 +265,7 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- TOP-RIGHT SPEED CONTROL HUD (ONLY FOR YOUTUBE) -->
+        <!-- TOP-RIGHT SPEED CONTROL HUD (YOUTUBE) -->
         <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
           <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
@@ -269,7 +277,7 @@
           </select>
         </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON (ONLY FOR YOUTUBE) -->
+        <!-- CENTER FULLSCREEN / EXIT BUTTON (YOUTUBE) -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
@@ -319,26 +327,26 @@
       const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Native Controls, Speed Menu 100% Accessible)
+      // CASE 1: NEXIELD (Clean Native Controls + Anti-Domain Fullscreen)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        // Nexield me saari custom overlays band taaki speed menu bina rukaawat khule
         if (centerBtn) centerBtn.style.display = "none";
         if (topSpeedHud) topSpeedHud.style.display = "none";
 
         playerRoot.innerHTML = `
           <div class="nexield-wrapper">
+            <!-- Sirf extreme corner cover karta hai: speed button ko bilkul nahi chhedta -->
+            <div class="nexield-fs-interceptor" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
             <iframe 
               src="${finalVideo}" 
               class="nexield-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowfullscreen="true">
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE (CUSTOM HUD WITH TOP SPEED & QUALITY CONTROLS)
+      // CASE 2: YOUTUBE
       // =========================================================================
       else {
         if (centerBtn) centerBtn.style.display = "block";
@@ -437,13 +445,13 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-
-        const screenEl = document.getElementById("phantomConsoleScreen");
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          resetAutoHideTimer();
-        });
       }
+
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      screenEl.addEventListener("mousemove", () => {
+        showControls();
+        resetAutoHideTimer();
+      });
     });
 
     function showControls() {
@@ -461,7 +469,7 @@
       }, 2500);
     }
 
-    // Skip & Tap Logic (YouTube Only)
+    // Skip & Tap Logic (YouTube)
     let leftTimer = null, rightTimer = null;
     let leftClicks = 0, rightClicks = 0;
 
@@ -563,7 +571,7 @@
       return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
-    // Fullscreen / Exit Handler
+    // Fullscreen Controller
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
