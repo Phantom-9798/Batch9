@@ -61,7 +61,7 @@
       border-radius: 0 !important;
     }
 
-    /* Nexield Mode: जो पहले से बिल्कुल सही चल रहा है */
+    /* Nexield Mode */
     .nexield-frame {
       position: absolute;
       width: 100% !important;
@@ -88,7 +88,45 @@
       pointer-events: none;
     }
 
-    /* स्क्रीन के बिल्कुल बीच का फुलस्क्रीन बटन (Hover करने पर स्मूथली दिखेगा) */
+    /* स्क्रीन पर 10s आगे/पीछे करने वाले दो ज़ोन (Left & Right) */
+    .touch-tap-zone {
+      position: absolute;
+      top: 0;
+      bottom: 50px;
+      width: 50%;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .touch-zone-left { left: 0; }
+    .touch-zone-right { right: 0; }
+
+    /* 10 Second Skip Animation Badge */
+    .skip-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16, 185, 129, 0.85);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.6);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+    }
+    .skip-badge.active {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    /* सेंटर फुलस्क्रीन बटन (स्क्रीन के बीचों-बीच) */
     .center-fs-btn {
       position: absolute;
       top: 50%;
@@ -119,7 +157,7 @@
       transform: translate(-50%, -50%) scale(1.08);
     }
 
-    /* नीचे का क्लीन टैक्टिकल कंट्रोल बार */
+    /* कंट्रोल बार */
     .yt-controls-bar {
       position: absolute;
       bottom: 0;
@@ -160,7 +198,7 @@
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- HEADER -->
+  <!-- TOP HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -183,12 +221,12 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       
       <div id="phantomConsoleScreen">
-        <!-- 1. सेंटर में फुलस्क्रीन बटन (स्क्रीन के बीचों-बीच) -->
+        <!-- सेंटर में फुलस्क्रीन बटन -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
 
-        <!-- 2. डायनामिक वीडियो एरिया -->
+        <!-- डायनामिक वीडियो एरिया -->
         <div id="playerRoot" class="w-full h-full relative"></div>
       </div>
 
@@ -206,6 +244,8 @@
     let ytPlayer = null;
     let isPlaying = false;
     let progressInterval = null;
+    let leftTapTimer = null;
+    let rightTapTimer = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -243,14 +283,24 @@
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE (ZERO LOGO, ZERO SHARE, WITH SPEED & QUALITY TOGGLES)
+      // CASE 2: YOUTUBE (ZERO LOGO, DOUBLE TAP 10s SKIP, REAL QUALITY FORCE)
       // =========================================================================
       else {
         playerRoot.innerHTML = `
-          <div class="yt-wrapper" onclick="togglePlayState()">
+          <div class="yt-wrapper">
             <div id="ytEmbedFrame"></div>
             
-            <!-- TACTICAL HUD CONTROLS (Aligned without Overlapping) -->
+            <!-- LEFT 10S TAP ZONE -->
+            <div class="touch-tap-zone touch-zone-left" onclick="handleZoneClick('left')">
+              <div class="skip-badge" id="badgeLeft">&#171; 10s</div>
+            </div>
+
+            <!-- RIGHT 10S TAP ZONE -->
+            <div class="touch-tap-zone touch-zone-right" onclick="handleZoneClick('right')">
+              <div class="skip-badge" id="badgeRight">10s &#187;</div>
+            </div>
+
+            <!-- TACTICAL HUD CONTROLS -->
             <div class="yt-controls-bar" onclick="event.stopPropagation()">
               
               <!-- Progress Bar -->
@@ -263,13 +313,13 @@
                 
                 <!-- Left: Play/Pause & Duration -->
                 <div class="flex items-center gap-3">
-                  <button onclick="togglePlayState()" id="playBtn" class="text-emerald-400 font-bold text-xs uppercase px-2 py-1 bg-black/60 rounded border border-emerald-600/30">
+                  <button onclick="togglePlayState()" id="playBtn" class="text-emerald-400 font-bold text-xs uppercase px-2.5 py-1 bg-black/60 rounded border border-emerald-600/30">
                     ▶ PLAY
                   </button>
                   <span id="timeDisplay" class="text-neutral-400 text-[11px]">00:00 / 00:00</span>
                 </div>
 
-                <!-- Right: Speed, Quality & Mini-Fullscreen (Sab Ek Saath) -->
+                <!-- Right: Speed, Quality & Mini-Fullscreen -->
                 <div class="flex items-center gap-2">
                   
                   <!-- SPEED SELECTOR -->
@@ -284,10 +334,10 @@
                     </select>
                   </div>
 
-                  <!-- QUALITY SELECTOR -->
+                  <!-- QUALITY SELECTOR (REAL ENGINE FORCED) -->
                   <div class="flex items-center gap-1">
                     <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
-                    <select onchange="changeQuality(this.value)" class="bg-black/90 border border-emerald-500/40 text-emerald-400 rounded px-1.5 py-0.5 text-[11px] outline-none cursor-pointer">
+                    <select onchange="changeQualityForced(this.value)" class="bg-black/90 border border-emerald-500/40 text-emerald-400 rounded px-1.5 py-0.5 text-[11px] outline-none cursor-pointer">
                       <option value="auto">Auto</option>
                       <option value="hd1080">1080p</option>
                       <option value="hd720">720p</option>
@@ -296,7 +346,7 @@
                     </select>
                   </div>
 
-                  <!-- MINI FULLSCREEN BUTTON (Bar ke andar) -->
+                  <!-- MINI FULLSCREEN BUTTON -->
                   <button onclick="toggleTacticalFullscreen()" class="ml-1 px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-orbitron font-extrabold rounded tracking-wider cursor-pointer">
                     [⛶]
                   </button>
@@ -307,7 +357,7 @@
           </div>
         `;
 
-        // Initialize YouTube Engine
+        // Load YouTube Engine
         window.onYouTubeIframeAPIReady = () => {
           ytPlayer = new YT.Player('ytEmbedFrame', {
             videoId: finalVideo,
@@ -346,7 +396,63 @@
       }
     });
 
-    // YouTube Handlers
+    // =========================================================================
+    // SCREEN DOUBLE TAP / SINGLE CLICK LOGIC (YOUTUBE LIKE 10S FORWARD / REWIND)
+    // =========================================================================
+    let clickCountLeft = 0;
+    let clickCountRight = 0;
+
+    function handleZoneClick(side) {
+      if (side === 'left') {
+        clickCountLeft++;
+        if (clickCountLeft === 1) {
+          leftTapTimer = setTimeout(() => {
+            // Single Click = Play / Pause
+            togglePlayState();
+            clickCountLeft = 0;
+          }, 280);
+        } else if (clickCountLeft === 2) {
+          // Double Click = Rewind 10s
+          clearTimeout(leftTapTimer);
+          skipSeconds(-10);
+          showSkipBadge('badgeLeft');
+          clickCountLeft = 0;
+        }
+      } else if (side === 'right') {
+        clickCountRight++;
+        if (clickCountRight === 1) {
+          rightTapTimer = setTimeout(() => {
+            // Single Click = Play / Pause
+            togglePlayState();
+            clickCountRight = 0;
+          }, 280);
+        } else if (clickCountRight === 2) {
+          // Double Click = Fast Forward 10s
+          clearTimeout(rightTapTimer);
+          skipSeconds(10);
+          showSkipBadge('badgeRight');
+          clickCountRight = 0;
+        }
+      }
+    }
+
+    function skipSeconds(sec) {
+      if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+      const current = ytPlayer.getCurrentTime();
+      const target = Math.max(0, current + sec);
+      ytPlayer.seekTo(target, true);
+    }
+
+    function showSkipBadge(id) {
+      const badge = document.getElementById(id);
+      if (!badge) return;
+      badge.classList.add('active');
+      setTimeout(() => {
+        badge.classList.remove('active');
+      }, 550);
+    }
+
+    // Play/Pause Controller
     function togglePlayState() {
       if (!ytPlayer) return;
       if (isPlaying) {
@@ -356,20 +462,27 @@
       }
     }
 
+    // Speed Controller
     function changeSpeed(val) {
       if (!ytPlayer) return;
       ytPlayer.setPlaybackRate(parseFloat(val));
     }
 
-    function changeQuality(val) {
+    // Quality Controller (Buffer flush & force reload of target stream)
+    function changeQualityForced(val) {
       if (!ytPlayer) return;
-      if (val === 'auto') {
-        ytPlayer.setPlaybackQuality('default');
-      } else {
-        ytPlayer.setPlaybackQuality(val);
+      
+      const targetQuality = val === 'auto' ? 'default' : val;
+      ytPlayer.setPlaybackQuality(targetQuality);
+
+      // यूट्यूब स्ट्रीम पर नई क्वालिटी फोर्स करने के लिए री-सीक ट्रिक
+      if (ytPlayer.getCurrentTime) {
+        const currentTime = ytPlayer.getCurrentTime();
+        ytPlayer.seekTo(currentTime, true); // तुरंत बफ़र रीलोड करके नया रेज़ोल्यूशन पकड़ेगा
       }
     }
 
+    // Progress Bar Seeking
     function seekVideo(e) {
       if (!ytPlayer) return;
       const rect = e.currentTarget.getBoundingClientRect();
@@ -378,6 +491,7 @@
       ytPlayer.seekTo(pos * duration, true);
     }
 
+    // Timeline Tracker
     function startProgressTracker() {
       if (progressInterval) clearInterval(progressInterval);
       progressInterval = setInterval(() => {
@@ -390,7 +504,7 @@
             if (fill) fill.style.width = pct + "%";
             
             const timeDisp = document.getElementById("timeDisplay");
-            if (timeDisp) timeDisp.innerText = `${formatTime(curr)} /${formatTime(dur)}`;
+            if (timeDisp) timeDisp.innerText = `${formatTime(curr)} / ${formatTime(dur)}`;
           }
         }
       }, 500);
