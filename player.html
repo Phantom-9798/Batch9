@@ -60,7 +60,12 @@
       border-radius: 0 !important;
     }
 
-    /* Nexield (Vimeo) - जैसा सही चल रहा था */
+    /* जब कंट्रोल्स इनएक्टिव हों तो माउस कर्सर भी छिपाएँ */
+    #phantomConsoleScreen.controls-hidden {
+      cursor: none;
+    }
+
+    /* Nexield (Vimeo) - Unchanged & Safe */
     .nexield-frame {
       position: absolute;
       width: 100% !important;
@@ -78,14 +83,13 @@
       overflow: hidden;
     }
 
-    /* YouTube के लोगो और शेयर बटन को स्क्रीन से बाहर काटने के लिए ओवरस्कैन */
     #ytPlayerFrame {
       position: absolute;
       width: 100% !important;
       height: 136% !important;
       top: -18% !important;
       left: 0;
-      pointer-events: none; /* अंदर के YouTube लोगो/शेयर पर कोई क्लिक नहीं */
+      pointer-events: none;
     }
 
     /* स्क्रीन 10s टैप जोन (Left & Right) */
@@ -123,7 +127,7 @@
       transform: scale(1.1);
     }
 
-    /* सेंटर फुलस्क्रीन बटन */
+    /* सेंटर फुलस्क्रीन बटन - स्मूथ ऑटो हाइड */
     .center-fs-btn {
       position: absolute;
       top: 50%;
@@ -139,14 +143,16 @@
       letter-spacing: 0.08em;
       cursor: pointer;
       box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s ease;
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.2s ease;
     }
 
-    #phantomConsoleScreen:hover .center-fs-btn {
-      opacity: 1;
-      pointer-events: auto;
+    /* फुलस्क्रीन होते ही या ऑटो-हाइड होने पर बीच का बटन पूरी तरह गायब */
+    #phantomConsoleScreen.controls-hidden .center-fs-btn,
+    #phantomConsoleScreen:fullscreen .center-fs-btn,
+    #phantomConsoleScreen:-webkit-full-screen .center-fs-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
 
     .center-fs-btn:hover {
@@ -154,7 +160,7 @@
       transform: translate(-50%, -50%) scale(1.06);
     }
 
-    /* कस्टम मिलिट्री कंट्रोल बार */
+    /* कस्टम मिलिट्री कंट्रोल बार - ऑटो हाइड */
     .tactical-custom-bar {
       position: absolute;
       bottom: 0;
@@ -166,12 +172,14 @@
       flex-direction: column;
       gap: 6px;
       z-index: 40;
-      opacity: 0;
-      transition: opacity 0.25s ease;
+      opacity: 1;
+      transition: opacity 0.35s ease;
     }
 
-    #phantomConsoleScreen:hover .tactical-custom-bar {
-      opacity: 1;
+    /* 2.5 सेकंड बाद नीचे का बार भी 100% गायब */
+    #phantomConsoleScreen.controls-hidden .tactical-custom-bar {
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
 
     /* प्रोग्रेस बार */
@@ -242,6 +250,7 @@
     let ytInstance = null;
     let isPlaying = false;
     let timerSync = null;
+    let hideControlsTimeout = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -266,7 +275,7 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // =========================================================================
-      // CASE 1: NEXIELD (VIMEO STREAM) - बिल्कुल अनटच्ड
+      // CASE 1: NEXIELD (VIMEO STREAM) - बिल्कुल वैसा ही, सुरक्षित
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         playerRoot.innerHTML = `
@@ -279,14 +288,14 @@
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE (PROPRIETARY TACTICAL FRAME - 0% BRANDING)
+      // CASE 2: YOUTUBE (PROPRIETARY TACTICAL FRAME - AUTO-HIDE HUD)
       // =========================================================================
       else {
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
 
-            <!-- Double Tap 10s Zones -->
+            <!-- Double Tap 10s Zones on Screen -->
             <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
               <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
             </div>
@@ -306,15 +315,24 @@
               <!-- Controls Row -->
               <div class="flex items-center justify-between text-xs font-mono pt-1">
                 
-                <!-- Play/Pause & Real-Time Counter -->
-                <div class="flex items-center gap-3">
+                <!-- Left: Play/Pause, 10s Backward, Timing, 10s Forward -->
+                <div class="flex items-center gap-2">
                   <button onclick="toggleVideoPlay()" id="playTrigger" class="text-emerald-400 font-bold text-xs uppercase px-2.5 py-1 bg-black/70 rounded border border-emerald-600/40 hover:bg-emerald-950 transition cursor-pointer">
                     ▶ PLAY
                   </button>
-                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px]">00:00 / 00:00</span>
+
+                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-emerald-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-emerald-500/50 transition cursor-pointer">
+                    « 10s
+                  </button>
+
+                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px] px-1">00:00 / 00:00</span>
+
+                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-emerald-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-emerald-500/50 transition cursor-pointer">
+                    10s »
+                  </button>
                 </div>
 
-                <!-- Speed, Quality & Mini-Fullscreen -->
+                <!-- Right: Speed, Quality & Mini-Fullscreen -->
                 <div class="flex items-center gap-2">
                   
                   <!-- SPEED SELECTOR -->
@@ -342,7 +360,7 @@
                   </div>
 
                   <!-- MINI FULLSCREEN TRIGGER -->
-                  <button onclick="toggleTacticalFullscreen()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-orbitron font-extrabold rounded tracking-wider transition cursor-pointer">
+                  <button id="miniFsBtn" onclick="toggleTacticalFullscreen()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-orbitron font-extrabold rounded tracking-wider transition cursor-pointer">
                     [⛶]
                   </button>
 
@@ -370,15 +388,18 @@
               onReady: (e) => {
                 e.target.playVideo();
                 startTimerSync();
+                resetAutoHideTimer();
               },
               onStateChange: (e) => {
                 const btn = document.getElementById("playTrigger");
                 if (e.data === YT.PlayerState.PLAYING) {
                   isPlaying = true;
                   if (btn) btn.innerText = "⏸ PAUSE";
+                  resetAutoHideTimer();
                 } else {
                   isPlaying = false;
                   if (btn) btn.innerText = "▶ PLAY";
+                  showControls(); // पॉज होने पर कंट्रोल्स दिखेंगे
                 }
               }
             }
@@ -388,16 +409,48 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
+
+        // =========================================================================
+        // MOUSE MOVE PAR CONTROLS DIKHANA & 2.5s BAAD HIDE KARNA
+        // =========================================================================
+        const screenEl = document.getElementById("phantomConsoleScreen");
+        screenEl.addEventListener("mousemove", () => {
+          showControls();
+          if (isPlaying) {
+            resetAutoHideTimer();
+          }
+        });
       }
     });
 
-    // =========================================================================
-    // DOUBLE TAP SKIP & PLAY/PAUSE LOGIC
-    // =========================================================================
+    // Auto-Hide Controllers
+    function showControls() {
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      screenEl.classList.remove("controls-hidden");
+    }
+
+    function hideControls() {
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      screenEl.classList.add("controls-hidden");
+    }
+
+    function resetAutoHideTimer() {
+      clearTimeout(hideControlsTimeout);
+      hideControlsTimeout = setTimeout(() => {
+        if (isPlaying) {
+          hideControls();
+        }
+      }, 2500); // 2.5 सेकंड बाद पूरा HUD गायब
+    }
+
+    // Double Tap Skip & Play/Pause Logic
     let leftTimer = null, rightTimer = null;
     let leftClicks = 0, rightClicks = 0;
 
     function handleTapZone(side) {
+      showControls();
+      resetAutoHideTimer();
+
       if (side === 'left') {
         leftClicks++;
         if (leftClicks === 1) {
@@ -452,6 +505,7 @@
     function updateVideoSpeed(rate) {
       if (!ytInstance) return;
       ytInstance.setPlaybackRate(parseFloat(rate));
+      resetAutoHideTimer();
     }
 
     function updateVideoQuality(quality) {
@@ -459,11 +513,11 @@
       const target = quality === 'auto' ? 'default' : quality;
       ytInstance.setPlaybackQuality(target);
       
-      // Resync stream buffer to force resolution change
       if (ytInstance.getCurrentTime) {
         const cTime = ytInstance.getCurrentTime();
         ytInstance.seekTo(cTime, true);
       }
+      resetAutoHideTimer();
     }
 
     function seekVideoTrack(e) {
@@ -472,6 +526,7 @@
       const pos = (e.clientX - rect.left) / rect.width;
       const duration = ytInstance.getDuration();
       ytInstance.seekTo(pos * duration, true);
+      resetAutoHideTimer();
     }
 
     function startTimerSync() {
@@ -495,29 +550,30 @@
     function formatSeconds(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+      return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
     // Tactical Fullscreen Controller
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
-      const centerBtn = document.getElementById("centerFsBtn");
+      const miniFsBtn = document.getElementById("miniFsBtn");
 
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (target.requestFullscreen) target.requestFullscreen();
         else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
+        if (miniFsBtn) miniFsBtn.innerText = "[✕]";
       } else {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
+        if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
       }
+      resetAutoHideTimer();
     }
 
     document.addEventListener("fullscreenchange", () => {
-      const centerBtn = document.getElementById("centerFsBtn");
-      if (!document.fullscreenElement && centerBtn) {
-        centerBtn.innerText = "[⛶ FULLSCREEN]";
+      const miniFsBtn = document.getElementById("miniFsBtn");
+      if (!document.fullscreenElement && miniFsBtn) {
+        miniFsBtn.innerText = "[⛶]";
       }
     });
 
