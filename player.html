@@ -64,7 +64,7 @@
       cursor: none;
     }
 
-    /* TOP-RIGHT SPEED CONTROL HUD (NEXIELD + YOUTUBE DONO MEIN) */
+    /* TOP-RIGHT SPEED CONTROL HUD */
     .tactical-top-hud {
       position: absolute;
       top: 12px;
@@ -177,12 +177,13 @@
       transform: scale(1.1);
     }
 
+    /* CENTER FULLSCREEN & EXIT BUTTON (NEXIELD + YOUTUBE DONO ME ACTIVE) */
     .center-fs-btn {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 35;
+      z-index: 40;
       background: rgba(16, 185, 129, 0.95);
       color: #000;
       padding: 10px 22px;
@@ -270,7 +271,7 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- TOP-RIGHT SPEED CONTROL HUD (NEXIELD AUR YOUTUBE DONO ME DIKHEGA) -->
+        <!-- TOP-RIGHT SPEED CONTROL HUD (NEXIELD + YOUTUBE DONO ME ACTIVE) -->
         <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
           <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
@@ -282,8 +283,8 @@
           </select>
         </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON (YOUTUBE ONLY) -->
-        <button id="centerFsBtn" class="center-fs-btn font-orbitron" style="display: none;" onclick="toggleTacticalFullscreen()">
+        <!-- CENTER FULLSCREEN / EXIT BUTTON (NEXIELD + YOUTUBE DONO ME ACTIVE) -->
+        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
 
@@ -333,12 +334,12 @@
       const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Top Title Mask + Top Speed HUD Active)
+      // CASE 1: NEXIELD (Clean Top Title Mask + Safe Fullscreen + Speed HUD)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         isNexield = true;
-        if (centerBtn) centerBtn.style.display = "none";
-        if (topSpeedHud) topSpeedHud.style.display = "flex"; // Speed HUD active rahega
+        if (centerBtn) centerBtn.style.display = "block"; // Center button active
+        if (topSpeedHud) topSpeedHud.style.display = "flex"; // Speed HUD active
 
         playerRoot.innerHTML = `
           <div class="nexield-box">
@@ -463,6 +464,8 @@
         showControls();
         resetAutoHideTimer();
       });
+
+      resetAutoHideTimer();
     });
 
     function showControls() {
@@ -480,23 +483,19 @@
       }, 2500);
     }
 
-    // SPEED CONTROLLER (NEXIELD & YOUTUBE DONO KE LIYE)
+    // SPEED CONTROLLER
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
 
-      // Nexield (Vimeo Player postMessage API)
       if (isNexield) {
         const iframe = document.getElementById("nexieldIframe");
         if (iframe && iframe.contentWindow) {
-          // Standard HTML5 iframe controller call
           iframe.contentWindow.postMessage(JSON.stringify({
             method: 'setPlaybackRate',
             value: spd
           }), '*');
         }
-      } 
-      // YouTube
-      else if (ytInstance && ytInstance.setPlaybackRate) {
+      } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
 
@@ -599,7 +598,7 @@
       return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
-    // Fullscreen Controller
+    // Fullscreen Controller (NEXIELD + YOUTUBE DONO MEIN)
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
