@@ -20,6 +20,7 @@
     }
     .font-stencil { font-family: 'Black Ops One', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
 
     .tactical-bg {
       background: 
@@ -41,7 +42,7 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* स्मार्ट क्रॉप कंटेनर: ऊपर का AFCAT टेक्स्ट काटने के लिए */
+    /* स्मार्ट व्यूकंटेनर */
     .viewport-shield {
       position: relative;
       width: 100%;
@@ -53,23 +54,16 @@
 
     .viewport-shield iframe {
       width: 100%;
-      height: 106%;
-      position: absolute;
-      top: -3.8%; /* ऊपर का फालतू टेक्स्ट स्क्रीन से बाहर शिफ्ट */
-      left: 0;
+      height: 100%;
       border: none;
     }
 
-    /* टॉप मास्किंग स्ट्रिप */
-    .tactical-top-mask {
+    /* Nexield के लिए ऊपर का फालतू टेक्स्ट छुपाने वाली क्लास */
+    .viewport-shield.crop-active iframe {
+      height: 106% !important;
       position: absolute;
-      top: 0;
+      top: -3.8% !important;
       left: 0;
-      width: 100%;
-      height: 38px;
-      background: linear-gradient(180deg, rgba(4, 7, 11, 0.98) 0%, rgba(4, 7, 11, 0) 100%);
-      pointer-events: none;
-      z-index: 20;
     }
   </style>
 </head>
@@ -99,17 +93,13 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       
       <div class="viewport-shield" id="videoFrameContainer">
-        <!-- ऊपर के टेक्स्ट को छुपाने वाली ओवरले बार -->
-        <div class="tactical-top-mask"></div>
-
         <iframe 
           id="tacticalPlayer" 
           src="" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
           allowfullscreen="true"
           webkitallowfullscreen="true"
-          mozallowfullscreen="true"
-          referrerpolicy="no-referrer">
+          mozallowfullscreen="true">
         </iframe>
       </div>
 
@@ -125,36 +115,38 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // 1. Session Storage चेक करें
-      const storedVideo = sessionStorage.getItem("phantom_current_video");
-      const storedTitle = sessionStorage.getItem("phantom_current_title");
-
-      // 2. Fallback URL Params
       const urlParams = new URLSearchParams(window.location.search);
       const urlVideo = urlParams.get("v") || urlParams.get("stream");
       const urlTitle = urlParams.get("title");
 
-      const finalVideo = storedVideo || urlVideo;
-      const finalTitle = storedTitle || urlTitle;
+      const storedVideo = sessionStorage.getItem("phantom_current_video");
+      const storedTitle = sessionStorage.getItem("phantom_current_title");
+
+      // URL पैरामीटर को प्राथमिकता दें (ताकि OTA YouTube लेक्चर्स तुरंत लोड हों)
+      const finalVideo = urlVideo || storedVideo;
+      const finalTitle = urlTitle || storedTitle || "TACTICAL SESSION";
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
       }
 
       if (!finalVideo) {
-        alert("Session error: Video link not found.");
+        alert("Session error: Video target not found.");
         return;
       }
 
       const playerFrame = document.getElementById("tacticalPlayer");
+      const container = document.getElementById("videoFrameContainer");
 
-      // A. Agar Nexield / Direct Link hai:
+      // 1. अगर Nexield / Web Stream Link है:
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
+        container.classList.add("crop-active"); // सिर्फ Nexield में ऊपर का टेक्स्ट छिपाएगा
         playerFrame.src = finalVideo;
       } 
-      // B. Agar YouTube Video ID hai (CDS OTA lectures):
+      // 2. अगर CDS OTA का YouTube Video ID है:
       else {
-        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
+        container.classList.remove("crop-active"); // YouTube को नॉर्मल 16:9 में चलाएगा
+        playerFrame.src = `https://www.youtube.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1`;
       }
     });
 
