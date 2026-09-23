@@ -6,7 +6,8 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- YouTube IFrame API -->
+  <!-- Vimeo SDK (Nexield Control ke liye) & YouTube IFrame API -->
+  <script src="https://player.vimeo.com/api/player.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <!-- Military Fonts -->
@@ -44,6 +45,7 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
+    /* Master Player Viewport */
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
@@ -64,18 +66,18 @@
       cursor: none;
     }
 
-    /* TOP-RIGHT SPEED CONTROL HUD (FOR YOUTUBE) */
+    /* Top Speed HUD */
     .tactical-top-hud {
       position: absolute;
-      top: 12px;
+      top: 14px;
       right: 14px;
       z-index: 45;
       display: flex;
       align-items: center;
       gap: 6px;
       background: rgba(4, 7, 11, 0.88);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 4px 8px;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 4px 10px;
       border-radius: 6px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
       transition: opacity 0.35s ease;
@@ -86,65 +88,39 @@
       pointer-events: none !important;
     }
 
-    /* =========================================================================
-       NEXIELD (VIMEO) - PRECISION POSITIONING
-       ========================================================================= */
-    .nexield-wrapper {
+    /* Master Frame Wrapper (Nexield & YouTube dono ke liye) */
+    .media-crop-box {
       position: relative;
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #000;
-      z-index: 10;
     }
 
-    .nexield-frame {
+    /* Upar ka AFCAT aur niche ka default bar dono crop karke bahar nikal diye */
+    .media-crop-box iframe {
       position: absolute;
       width: 100% !important;
-      height: 106% !important;
-      top: -4.5% !important; /* Title bahar rahega */
+      height: 114% !important;
+      top: -6.5% !important; /* Upar ka AFCAT text 100% screen se bahar */
       left: 0;
       border: none;
-      z-index: 15;
+      pointer-events: none; /* Andar ke kisi button par direct click nahi hoga */
     }
 
-    /* Precision Interceptor: Sirf extreme corner cover karega, Speed button bilkul chhua nahi jayega */
-    .nexield-fs-interceptor {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 28px;
-      height: 28px;
-      z-index: 25;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    /* =========================================================================
-       YOUTUBE CUSTOM ENGINE
-       ========================================================================= */
-    .yt-custom-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    #ytPlayerFrame {
-      position: absolute;
-      width: 100% !important;
+    /* YouTube ke liye alag overscan */
+    .yt-box-crop iframe {
       height: 136% !important;
       top: -18% !important;
-      left: 0;
-      pointer-events: none;
     }
 
+    /* Tap Zones for 10s skip */
     .tap-zone {
       position: absolute;
       top: 45px;
       bottom: 60px;
       width: 48%;
-      z-index: 25;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -172,6 +148,7 @@
       transform: scale(1.1);
     }
 
+    /* Center Fullscreen / Exit */
     .center-fs-btn {
       position: absolute;
       top: 50%;
@@ -201,12 +178,13 @@
       transform: translate(-50%, -50%) scale(1.06);
     }
 
+    /* Bottom HUD Controls */
     .tactical-custom-bar {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%);
+      background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.98) 65%);
       padding: 10px 16px 8px 16px;
       display: flex;
       flex-direction: column;
@@ -265,10 +243,10 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- TOP-RIGHT SPEED CONTROL HUD (YOUTUBE) -->
+        <!-- TOP-RIGHT SPEED CONTROL HUD (NEXIELD + YOUTUBE DONO ME KAAM KAREGA) -->
         <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
-          <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+          <select id="speedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
             <option value="1" class="bg-black">1.0x</option>
             <option value="1.25" class="bg-black">1.25x</option>
             <option value="1.5" class="bg-black">1.5x</option>
@@ -277,7 +255,7 @@
           </select>
         </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON (YOUTUBE) -->
+        <!-- CENTER FULLSCREEN / EXIT BUTTON -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
@@ -298,6 +276,8 @@
 
   <script>
     let ytInstance = null;
+    let vimeoInstance = null;
+    let currentEngine = "nexield"; // 'nexield' or 'yt'
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
@@ -323,37 +303,105 @@
       }
 
       const playerRoot = document.getElementById("playerRoot");
-      const centerBtn = document.getElementById("centerFsBtn");
-      const topSpeedHud = document.getElementById("topSpeedHud");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Native Controls + Anti-Domain Fullscreen)
+      // CASE 1: NEXIELD (PROPRIETARY HUD + CROPPED TITLE & NATIVE BAR)
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        if (centerBtn) centerBtn.style.display = "none";
-        if (topSpeedHud) topSpeedHud.style.display = "none";
+        currentEngine = "nexield";
 
         playerRoot.innerHTML = `
-          <div class="nexield-wrapper">
-            <!-- Sirf extreme corner cover karta hai: speed button ko bilkul nahi chhedta -->
-            <div class="nexield-fs-interceptor" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
+          <div class="media-crop-box">
             <iframe 
+              id="nexieldEmbed"
               src="${finalVideo}" 
-              class="nexield-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+              allow="autoplay; fullscreen">
             </iframe>
+
+            <!-- 10s Double Tap Zones -->
+            <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
+              <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
+            </div>
+
+            <div class="tap-zone tap-zone-right" onclick="handleTapZone('right')">
+              <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
+            </div>
+
+            <!-- TACTICAL CONTROL BAR -->
+            <div class="tactical-custom-bar" onclick="event.stopPropagation()">
+              <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
+                <div class="tactical-progress-fill" id="trackFill"></div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs font-mono pt-1">
+                <div class="flex items-center gap-2">
+                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-emerald-400 font-bold text-xs uppercase px-2.5 py-1 bg-black/70 rounded border border-emerald-600/40 hover:bg-emerald-950 transition cursor-pointer">
+                    ▶ PLAY
+                  </button>
+
+                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-emerald-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-emerald-500/50 transition cursor-pointer">
+                    « 10s
+                  </button>
+
+                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px] px-1">00:00 / 00:00</span>
+
+                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-emerald-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-emerald-500/50 transition cursor-pointer">
+                    10s »
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
+                    <span class="text-neutral-400 text-[10px] font-orbitron">FEED:</span>
+                    <span class="text-emerald-400 font-bold text-xs">NEXIELD HD</span>
+                  </div>
+
+                  <button id="miniFsBtn" onclick="toggleTacticalFullscreen()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-orbitron font-extrabold rounded tracking-wider transition cursor-pointer">
+                    [⛶]
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         `;
+
+        // Connect Vimeo Player Controller
+        const iframe = document.getElementById('nexieldEmbed');
+        vimeoInstance = new Vimeo.Player(iframe);
+
+        vimeoInstance.on('play', () => {
+          isPlaying = true;
+          const btn = document.getElementById("playTrigger");
+          if (btn) btn.innerText = "⏸ PAUSE";
+          resetAutoHideTimer();
+        });
+
+        vimeoInstance.on('pause', () => {
+          isPlaying = false;
+          const btn = document.getElementById("playTrigger");
+          if (btn) btn.innerText = "▶ PLAY";
+          showControls();
+        });
+
+        vimeoInstance.on('timeupdate', (data) => {
+          const c = data.seconds;
+          const d = data.duration;
+          if (d > 0) {
+            const fill = document.getElementById("trackFill");
+            if (fill) fill.style.width = ((c / d) * 100) + "%";
+            const counter = document.getElementById("timeCounter");
+            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
+          }
+        });
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE
+      // CASE 2: YOUTUBE ENGINE
       // =========================================================================
       else {
-        if (centerBtn) centerBtn.style.display = "block";
-        if (topSpeedHud) topSpeedHud.style.display = "flex";
+        currentEngine = "yt";
 
         playerRoot.innerHTML = `
-          <div class="yt-custom-container">
+          <div class="media-crop-box yt-box-crop">
             <div id="ytPlayerFrame"></div>
 
             <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
@@ -469,7 +517,7 @@
       }, 2500);
     }
 
-    // Skip & Tap Logic (YouTube)
+    // Skip & Tap Logic
     let leftTimer = null, rightTimer = null;
     let leftClicks = 0, rightClicks = 0;
 
@@ -507,9 +555,14 @@
     }
 
     function skipSeconds(s) {
-      if (!ytInstance || !ytInstance.getCurrentTime) return;
-      const target = Math.max(0, ytInstance.getCurrentTime() + s);
-      ytInstance.seekTo(target, true);
+      if (currentEngine === "nexield" && vimeoInstance) {
+        vimeoInstance.getCurrentTime().then(c => {
+          vimeoInstance.setCurrentTime(Math.max(0, c + s));
+        });
+      } else if (currentEngine === "yt" && ytInstance && ytInstance.getCurrentTime) {
+        const target = Math.max(0, ytInstance.getCurrentTime() + s);
+        ytInstance.seekTo(target, true);
+      }
     }
 
     function triggerBadge(id) {
@@ -520,32 +573,48 @@
     }
 
     function toggleVideoPlay() {
-      if (!ytInstance) return;
-      if (isPlaying) ytInstance.pauseVideo();
-      else ytInstance.playVideo();
+      if (currentEngine === "nexield" && vimeoInstance) {
+        if (isPlaying) vimeoInstance.pause();
+        else vimeoInstance.play();
+      } else if (currentEngine === "yt" && ytInstance) {
+        if (isPlaying) ytInstance.pauseVideo();
+        else ytInstance.playVideo();
+      }
     }
 
+    // Unified Speed Controller (Both Nexield & YouTube)
     function updateVideoSpeed(rate) {
-      if (!ytInstance) return;
-      ytInstance.setPlaybackRate(parseFloat(rate));
+      const spd = parseFloat(rate);
+      if (currentEngine === "nexield" && vimeoInstance) {
+        vimeoInstance.setPlaybackRate(spd).catch(err => console.log(err));
+      } else if (currentEngine === "yt" && ytInstance) {
+        ytInstance.setPlaybackRate(spd);
+      }
       resetAutoHideTimer();
     }
 
     function updateVideoQuality(quality) {
-      if (!ytInstance) return;
-      const target = quality === 'auto' ? 'default' : quality;
-      ytInstance.setPlaybackQuality(target);
-      if (ytInstance.getCurrentTime) {
-        ytInstance.seekTo(ytInstance.getCurrentTime(), true);
+      if (currentEngine === "yt" && ytInstance) {
+        const target = quality === 'auto' ? 'default' : quality;
+        ytInstance.setPlaybackQuality(target);
+        if (ytInstance.getCurrentTime) {
+          ytInstance.seekTo(ytInstance.getCurrentTime(), true);
+        }
       }
       resetAutoHideTimer();
     }
 
     function seekVideoTrack(e) {
-      if (!ytInstance) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
-      ytInstance.seekTo(pos * ytInstance.getDuration(), true);
+
+      if (currentEngine === "nexield" && vimeoInstance) {
+        vimeoInstance.getDuration().then(dur => {
+          vimeoInstance.setCurrentTime(pos * dur);
+        });
+      } else if (currentEngine === "yt" && ytInstance) {
+        ytInstance.seekTo(pos * ytInstance.getDuration(), true);
+      }
       resetAutoHideTimer();
     }
 
@@ -571,7 +640,7 @@
       return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
-    // Fullscreen Controller
+    // Unified Fullscreen Controller
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
