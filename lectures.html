@@ -6,7 +6,6 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -70,7 +69,6 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl">
       <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-inner flex items-center justify-center">
         
-        <!-- Iframe with complete unblocked streaming permissions -->
         <iframe 
           id="tacticalPlayer" 
           src="" 
@@ -95,9 +93,8 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const currentUrl = window.location.href;
       const urlParams = new URLSearchParams(window.location.search);
-      const streamUrl = urlParams.get("stream");
-      const youtubeId = urlParams.get("v");
       const title = urlParams.get("title");
       const playerFrame = document.getElementById("tacticalPlayer");
 
@@ -105,29 +102,36 @@
         document.getElementById("playerTitle").innerText = decodeURIComponent(title);
       }
 
-      // 1. Agar Nexield ya koi bhi direct stream URL pass hua ho
-      if (streamUrl) {
-        let finalUrl = streamUrl;
-        try {
-          finalUrl = decodeURIComponent(streamUrl);
-        } catch (e) {
-          finalUrl = streamUrl;
+      // 1. Agar Nexield Stream URL hai (chahe stream parameter me ho ya v me)
+      if (currentUrl.includes("vimpd.nexield.in")) {
+        // Pura stream link extract karna bina parameter kate:
+        const streamIdx = currentUrl.indexOf("https://vimpd.nexield.in");
+        if (streamIdx !== -1) {
+          let streamTarget = currentUrl.substring(streamIdx);
+          // Agar aage &title= laga ho toh use hatao
+          if (streamTarget.includes("&title=")) {
+            streamTarget = streamTarget.split("&title=")[0];
+          }
+          playerFrame.src = decodeURIComponent(streamTarget);
+          return;
         }
-        playerFrame.src = finalUrl;
-      } 
-      // 2. Agar Normal YouTube video ID ya YouTube link pass hua ho
-      else if (youtubeId) {
-        let cleanId = decodeURIComponent(youtubeId);
-        // Agar galti se youtubeId param me bhi pura url pass ho gaya ho:
-        if (cleanId.startsWith("http://") || cleanId.startsWith("https://")) {
-          playerFrame.src = cleanId;
-        } else {
-          playerFrame.src = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&rel=0&modestbranding=1`;
-        }
-      } 
-      else {
-        alert("Session error: Video stream not found.");
       }
+
+      // 2. Agar YouTube Video ID hai (jaise pC6cxRQu3P4)
+      const youtubeId = urlParams.get("v");
+      if (youtubeId && !youtubeId.startsWith("http")) {
+        playerFrame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?autoplay=1&rel=0&modestbranding=1`;
+        return;
+      }
+
+      // 3. Fallback direct stream param
+      const rawStream = urlParams.get("stream");
+      if (rawStream) {
+        playerFrame.src = decodeURIComponent(rawStream);
+        return;
+      }
+
+      alert("Session error: Video stream not found.");
     });
 
     // Disable Inspect & Developer Tools shortcuts
