@@ -60,33 +60,24 @@
       border-radius: 0 !important;
     }
 
-    #phantomConsoleScreen.controls-hidden {
-      cursor: none;
-    }
-
     /* TOP-RIGHT SPEED CONTROL HUD */
     .tactical-top-hud {
       position: absolute;
       top: 12px;
       right: 14px;
-      z-index: 45;
+      z-index: 50;
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(4, 7, 11, 0.88);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 4px 8px;
+      background: rgba(4, 7, 11, 0.92);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 5px 10px;
       border-radius: 6px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
-      transition: opacity 0.35s ease;
+      transition: opacity 0.3s ease;
     }
 
-    #phantomConsoleScreen.controls-hidden .tactical-top-hud {
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
-    /* NEXIELD (VIMEO) */
+    /* NEXIELD FRAME */
     .nexield-box {
       position: relative;
       width: 100%;
@@ -116,18 +107,38 @@
       pointer-events: none;
     }
 
-    .nexield-safe-fs-btn {
+    /* CENTER FULLSCREEN & EXIT BUTTON */
+    .center-fs-btn {
       position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 32px;
-      height: 36px;
-      z-index: 25;
-      background: transparent;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      background: rgba(16, 185, 129, 0.95);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.2s ease;
     }
 
-    /* YOUTUBE ENGINE */
+    .center-fs-btn:hover {
+      background: #10b981;
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+
+    /* CONTROLS AUTO-HIDE CLASS */
+    .hud-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* YOUTUBE STYLES */
     .yt-custom-container {
       position: relative;
       width: 100%;
@@ -177,36 +188,6 @@
       transform: scale(1.1);
     }
 
-    /* CENTER FULLSCREEN & EXIT BUTTON (NEXIELD + YOUTUBE DONO ME ACTIVE) */
-    .center-fs-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 40;
-      background: rgba(16, 185, 129, 0.95);
-      color: #000;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
-      opacity: 1;
-      transition: opacity 0.3s ease, transform 0.2s ease;
-    }
-
-    #phantomConsoleScreen.controls-hidden .center-fs-btn {
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
-    .center-fs-btn:hover {
-      background: #10b981;
-      transform: translate(-50%, -50%) scale(1.06);
-    }
-
     .tactical-custom-bar {
       position: absolute;
       bottom: 0;
@@ -220,11 +201,6 @@
       z-index: 40;
       opacity: 1;
       transition: opacity 0.35s ease;
-    }
-
-    #phantomConsoleScreen.controls-hidden .tactical-custom-bar {
-      opacity: 0 !important;
-      pointer-events: none !important;
     }
 
     .tactical-progress-track {
@@ -271,7 +247,7 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- TOP-RIGHT SPEED CONTROL HUD (NEXIELD + YOUTUBE DONO ME ACTIVE) -->
+        <!-- TOP-RIGHT SPEED CONTROL HUD -->
         <div id="topSpeedHud" class="tactical-top-hud" onclick="event.stopPropagation()">
           <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
           <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
@@ -283,7 +259,7 @@
           </select>
         </div>
 
-        <!-- CENTER FULLSCREEN / EXIT BUTTON (NEXIELD + YOUTUBE DONO ME ACTIVE) -->
+        <!-- CENTER FULLSCREEN / EXIT BUTTON -->
         <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
           [⛶ FULLSCREEN]
         </button>
@@ -338,15 +314,12 @@
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         isNexield = true;
-        if (centerBtn) centerBtn.style.display = "block"; // Center button active
-        if (topSpeedHud) topSpeedHud.style.display = "flex"; // Speed HUD active
+        centerBtn.style.display = "block";
+        topSpeedHud.style.display = "flex";
 
         playerRoot.innerHTML = `
           <div class="nexield-box">
             <div class="nexield-top-mask"></div>
-            
-            <div class="nexield-safe-fs-btn" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
-
             <iframe 
               id="nexieldIframe"
               src="${finalVideo}" 
@@ -361,8 +334,8 @@
       // =========================================================================
       else {
         isNexield = false;
-        if (centerBtn) centerBtn.style.display = "block";
-        if (topSpeedHud) topSpeedHud.style.display = "flex";
+        centerBtn.style.display = "block";
+        topSpeedHud.style.display = "flex";
 
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -376,7 +349,7 @@
               <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
             </div>
 
-            <div class="tactical-custom-bar" onclick="event.stopPropagation()">
+            <div class="tactical-custom-bar" id="ytCustomBar" onclick="event.stopPropagation()">
               <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
                 <div class="tactical-progress-fill" id="trackFill"></div>
               </div>
@@ -459,31 +432,49 @@
         }
       }
 
+      // माउस और टच मूवमेंट हैंडलर (कंट्रोल्स को वापस लाने के लिए)
       const screenEl = document.getElementById("phantomConsoleScreen");
-      screenEl.addEventListener("mousemove", () => {
+      
+      const wakeControls = () => {
         showControls();
         resetAutoHideTimer();
-      });
+      };
+
+      screenEl.addEventListener("mousemove", wakeControls);
+      screenEl.addEventListener("mouseenter", wakeControls);
+      screenEl.addEventListener("touchstart", wakeControls);
 
       resetAutoHideTimer();
     });
 
     function showControls() {
-      document.getElementById("phantomConsoleScreen").classList.remove("controls-hidden");
+      const centerBtn = document.getElementById("centerFsBtn");
+      const topSpeedHud = document.getElementById("topSpeedHud");
+      const ytBar = document.getElementById("ytCustomBar");
+
+      if (centerBtn) centerBtn.classList.remove("hud-hidden");
+      if (topSpeedHud) topSpeedHud.classList.remove("hud-hidden");
+      if (ytBar) ytBar.classList.remove("hud-hidden");
     }
 
     function hideControls() {
-      document.getElementById("phantomConsoleScreen").classList.add("controls-hidden");
+      const centerBtn = document.getElementById("centerFsBtn");
+      const topSpeedHud = document.getElementById("topSpeedHud");
+      const ytBar = document.getElementById("ytCustomBar");
+
+      if (centerBtn) centerBtn.classList.add("hud-hidden");
+      if (topSpeedHud) topSpeedHud.classList.add("hud-hidden");
+      if (ytBar) ytBar.classList.add("hud-hidden");
     }
 
     function resetAutoHideTimer() {
       clearTimeout(hideControlsTimeout);
       hideControlsTimeout = setTimeout(() => {
         hideControls();
-      }, 2500);
+      }, 3000); // 3 सेकंड बाद स्मूथली हाइड होगा
     }
 
-    // SPEED CONTROLLER
+    // SPEED CONTROLLER (NEXIELD & YOUTUBE)
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
 
@@ -595,10 +586,10 @@
     function formatSeconds(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${sec}`;
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Fullscreen Controller (NEXIELD + YOUTUBE DONO MEIN)
+    // FULLSCREEN / EXIT CONTROLLER
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const centerBtn = document.getElementById("centerFsBtn");
@@ -622,13 +613,15 @@
     document.addEventListener("fullscreenchange", () => {
       const centerBtn = document.getElementById("centerFsBtn");
       const miniFsBtn = document.getElementById("miniFsBtn");
-      if (!document.fullscreenElement) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
         if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
       } else {
         if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
         if (miniFsBtn) miniFsBtn.innerText = "[✕]";
       }
+      showControls();
+      resetAutoHideTimer();
     });
 
     // Disable Inspect Shortcuts
