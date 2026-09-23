@@ -64,9 +64,7 @@
       cursor: none;
     }
 
-    /* =========================================================================
-       NEXIELD PERFECT OVERRIDE (AFCAT Text & Vimpd Popup Blocked)
-       ========================================================================= */
+    /* NEXIELD (VIMEO) - NO BLACK MASK, PURE CROP */
     .nexield-wrapper {
       position: relative;
       width: 100%;
@@ -78,25 +76,12 @@
     .nexield-frame {
       position: absolute;
       width: 100% !important;
-      height: 108% !important;
-      top: -4.8% !important; /* AFCAT text screen se bahar */
+      height: 105% !important;
+      top: -3.5% !important;
       left: 0;
       border: none;
     }
 
-    /* Upar ka AFCAT Title Mask */
-    .nexield-top-mask {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 44px;
-      z-index: 25;
-      background: #000;
-      pointer-events: none;
-    }
-
-    /* Nexield ke native FS button ke upar invisible blocker jo apna FS chalayega */
     .nexield-fs-interceptor {
       position: absolute;
       bottom: 0;
@@ -108,9 +93,7 @@
       cursor: pointer;
     }
 
-    /* =========================================================================
-       YOUTUBE CUSTOM ENGINE
-       ========================================================================= */
+    /* YOUTUBE ENGINE */
     .yt-custom-container {
       position: relative;
       width: 100%;
@@ -127,6 +110,7 @@
       pointer-events: none;
     }
 
+    /* SCREEN TAP ZONES FOR 10s SKIP */
     .tap-zone {
       position: absolute;
       top: 0;
@@ -160,6 +144,37 @@
       transform: scale(1.1);
     }
 
+    /* CENTER FULLSCREEN & EXIT BUTTON */
+    .center-fs-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 35;
+      background: rgba(16, 185, 129, 0.95);
+      color: #000;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    #phantomConsoleScreen.controls-hidden .center-fs-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .center-fs-btn:hover {
+      background: #10b981;
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+
+    /* TACTICAL CONTROL BAR */
     .tactical-custom-bar {
       position: absolute;
       bottom: 0;
@@ -223,7 +238,15 @@
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
+        
+        <!-- सेंटर फुलस्क्रीन / एग्ज़िट बटन -->
+        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
+          [⛶ FULLSCREEN]
+        </button>
+
+        <!-- डायनामिक वीडियो एरिया -->
         <div id="playerRoot" class="w-full h-full relative"></div>
+
       </div>
     </div>
   </main>
@@ -263,17 +286,11 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // =========================================================================
-      // CASE 1: NEXIELD (Clean Viewport, No AFCAT text, No vimpd popup)
-      // =========================================================================
+      // CASE 1: NEXIELD (Clean Crop, No Black Mask)
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         playerRoot.innerHTML = `
           <div class="nexield-wrapper">
-            <div class="nexield-top-mask"></div>
-            
-            <!-- Bottom-right transparent interceptor for fullscreen -->
             <div class="nexield-fs-interceptor" onclick="toggleTacticalFullscreen()" title="Fullscreen"></div>
-
             <iframe 
               src="${finalVideo}" 
               class="nexield-frame" 
@@ -282,9 +299,7 @@
           </div>
         `;
       } 
-      // =========================================================================
-      // CASE 2: YOUTUBE (PROPRIETARY TACTICAL FRAME)
-      // =========================================================================
+      // CASE 2: YOUTUBE (CUSTOM HUD WITH REAL CONTROLS)
       else {
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -390,16 +405,16 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-
-        const screenEl = document.getElementById("phantomConsoleScreen");
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          if (isPlaying) resetAutoHideTimer();
-        });
       }
+
+      // माउस मूव पर कंट्रोल्स दिखाना और टाइमर रीसेट करना
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      screenEl.addEventListener("mousemove", () => {
+        showControls();
+        resetAutoHideTimer();
+      });
     });
 
-    // YouTube Controls Auto-Hide
     function showControls() {
       document.getElementById("phantomConsoleScreen").classList.remove("controls-hidden");
     }
@@ -411,11 +426,11 @@
     function resetAutoHideTimer() {
       clearTimeout(hideControlsTimeout);
       hideControlsTimeout = setTimeout(() => {
-        if (isPlaying) hideControls();
+        hideControls();
       }, 2500);
     }
 
-    // Skip & Play/Pause Logic
+    // Skip & Tap Logic
     let leftTimer = null, rightTimer = null;
     let leftClicks = 0, rightClicks = 0;
 
@@ -479,7 +494,8 @@
 
     function updateVideoQuality(quality) {
       if (!ytInstance) return;
-      ytInstance.setPlaybackQuality(quality === 'auto' ? 'default' : quality);
+      const target = quality === 'auto' ? 'default' : quality;
+      ytInstance.setPlaybackQuality(target);
       if (ytInstance.getCurrentTime) {
         ytInstance.seekTo(ytInstance.getCurrentTime(), true);
       }
@@ -513,29 +529,39 @@
     function formatSeconds(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+      return `${m}:${s < 10 ? '0' : ''}${sec}`;
     }
 
-    // Unified Fullscreen Controller
+    // Fullscreen / Exit Handler
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
+      const centerBtn = document.getElementById("centerFsBtn");
       const miniFsBtn = document.getElementById("miniFsBtn");
 
       if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         if (target.requestFullscreen) target.requestFullscreen();
         else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
         if (miniFsBtn) miniFsBtn.innerText = "[✕]";
       } else {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
         if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
       }
+      showControls();
+      resetAutoHideTimer();
     }
 
     document.addEventListener("fullscreenchange", () => {
+      const centerBtn = document.getElementById("centerFsBtn");
       const miniFsBtn = document.getElementById("miniFsBtn");
-      if (!document.fullscreenElement && miniFsBtn) {
-        miniFsBtn.innerText = "[⛶]";
+      if (!document.fullscreenElement) {
+        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
+        if (miniFsBtn) miniFsBtn.innerText = "[⛶]";
+      } else {
+        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
+        if (miniFsBtn) miniFsBtn.innerText = "[✕]";
       }
     });
 
