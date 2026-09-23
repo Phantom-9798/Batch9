@@ -6,10 +6,6 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Plyr Video Engine -->
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.min.js"></script>
-
   <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +41,8 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    .viewport-shield {
+    /* स्मार्ट कट-आउट व्यूकंटेनर: चैनल नाम और लोगो को काटने के लिए */
+    .viewport-box {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -54,19 +51,47 @@
       border-radius: 0.75rem;
     }
 
-    /* Nexield के लिए ऊपर का फालतू टेक्स्ट छुपाने वाली क्लास */
-    .viewport-shield.crop-active iframe {
-      height: 106% !important;
+    /* YouTube के लिए 120% ओवरस्कैन: ऊपर का टाइटल और नीचे का लोगो कट जाएगा */
+    .viewport-box.youtube-clean iframe {
       position: absolute;
-      top: -3.8% !important;
+      width: 100% !important;
+      height: 122% !important;
+      top: -11% !important; /* ऊपर का चैनल नाम और शेयर बटन स्क्रीन से बाहर */
       left: 0;
+      border: none;
     }
 
-    /* Team Phantom Emerald Controls */
-    :root {
-      --plyr-color-main: #10b981;
-      --plyr-video-background: #000000;
-      --plyr-control-icon-size: 16px;
+    /* Nexield के लिए 106% ओवरस्कैन: ऊपर का AFCAT टेक्स्ट बाहर */
+    .viewport-box.nexield-clean iframe {
+      position: absolute;
+      width: 100% !important;
+      height: 106% !important;
+      top: -3.8% !important;
+      left: 0;
+      border: none;
+    }
+
+    /* ऊपर और नीचे का प्रोटेक्शन गार्ड (लोगो और चैनल क्लिक डिसेबल) */
+    .top-guard {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      z-index: 30;
+      background: linear-gradient(180deg, #04070b 0%, rgba(4, 7, 11, 0) 100%);
+      pointer-events: auto; /* चैनल पर क्लिक होने से रोकेगा */
+    }
+
+    .bottom-right-guard {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 120px;
+      height: 48px;
+      z-index: 30;
+      background: transparent;
+      pointer-events: auto; /* YouTube लोगो पर क्लिक होने से रोकेगा */
     }
   </style>
 </head>
@@ -94,9 +119,23 @@
   <!-- MAIN VIDEO VIEWPORT -->
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
-      <div class="viewport-shield" id="videoFrameContainer">
-        <!-- Dynamic Target Area -->
+      
+      <div class="viewport-box" id="videoBox">
+        <!-- ऊपर और नीचे का सुरक्षा कवच (ताकि कोई चैनल पर न पहुंचे) -->
+        <div class="top-guard"></div>
+        <div class="bottom-right-guard"></div>
+
+        <iframe 
+          id="tacticalPlayer" 
+          src="" 
+          class="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+          allowfullscreen="true"
+          webkitallowfullscreen="true"
+          mozallowfullscreen="true">
+        </iframe>
       </div>
+
     </div>
   </main>
 
@@ -128,38 +167,21 @@
         return;
       }
 
-      const container = document.getElementById("videoFrameContainer");
+      const playerFrame = document.getElementById("tacticalPlayer");
+      const videoBox = document.getElementById("videoBox");
 
-      // 1. अगर Nexield / Web Stream Link है:
+      // 1. अगर Nexield / Direct Link है:
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
-        container.classList.add("crop-active");
-        container.innerHTML = `
-          <iframe 
-            src="${finalVideo}" 
-            class="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-            allowfullscreen>
-          </iframe>
-        `;
+        videoBox.classList.remove("youtube-clean");
+        videoBox.classList.add("nexield-clean");
+        playerFrame.src = finalVideo;
       } 
-      // 2. अगर CDS OTA YouTube Video ID है (Cleaned Interface):
+      // 2. अगर CDS OTA का YouTube Video है:
       else {
-        container.classList.remove("crop-active");
-        container.innerHTML = `
-          <div class="plyr__video-embed w-full h-full" id="cleanYoutubePlayer">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?origin=${window.location.origin}&iv_load_policy=3&modestbranding=1&playsinline=1&showinfo=0&rel=0&enablejsapi=1"
-              allowfullscreen
-              allow="autoplay">
-            </iframe>
-          </div>
-        `;
-        
-        // Plyr Custom Controller Initialize (Hides Channel Branding)
-        new Plyr('#cleanYoutubePlayer', {
-          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-          youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-        });
+        videoBox.classList.remove("nexield-clean");
+        videoBox.classList.add("youtube-clean");
+        // YouTube embed with minimal parameters + controls active
+        playerFrame.src = `https://www.youtube.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=0`;
       }
     });
 
