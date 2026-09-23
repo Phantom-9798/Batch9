@@ -85,23 +85,27 @@
           pdfUrl: "#"
         }
       ],
-      // 2. CAPF Internal Security
-      "ch-capf-Internal Security": [
+
+      // 2. CAPF Internal Security (Dono lectures ek hi array me fix kar diye hain)
+      "ch-capf-internal-security": [
         {
           lectureNo: "01",
           title: "Internal security challenges in 21st century",
+          desc: "Border management, insurgency & modern security threats.",
           duration: "50 Mins",
           videoId: "https://vimpd.nexield.in/?title=1.%20Internal%20security%20challenges%20in%2021st%20century&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58c741afb1f6167378494dd5a7478ed277f58fbe0b0476166a102d9a79d2fc66f6ca139a8310ed93a1fb08e5ddb034351500d3c600a928602af4cd3e1cda0489f63fa94ea40d8b98b5b7b48973e35e9708c63b96c5297861f9a90925d2f4b925b4df44ecdfadd5dd16cc4461df18ea65d53437c72f67dfd4a43cd385b9ad0d943132250937777383d69dd0626b8e38daec",
           pdfUrl: "#"
         },
         {
           lectureNo: "02",
-          title: " Kashmir Militancy",
+          title: "Kashmir Militancy",
+          desc: "Evolution, proxy war dynamics, security grid & modern scenario.",
           duration: "50 Mins",
           videoId: "https://vimpd.nexield.in/?title=2.%20Kashmir%20Militancy&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5809f02fa66023484a867999115205e5cae40c5fdea2ffd4b5a28b5d7c68d2f14277f3b6bf5a422c675f9e6d5e10bf2a30002296b2069b776fb5031533cf4bcc65b58ac6abb78b3fe882f14f8ff8c889f6d6689ad948b262ff78936396e331dd001a81bd01d62a5e0301406ed82affee2dcb9bd4101fd7a49b3cc4d673079f989dd7d2653f449641da5bbb679f53ddf21a",
           pdfUrl: "#"
         }
       ],
+
       "ch-mentor-sessions": [
         {
           lectureNo: "03",
@@ -129,11 +133,11 @@
         }
       ],
 
-      // 2. CDS Math Chapters
+      // 3. CDS Math Chapters
       "ch-cds-ratio": [],
       "ch-cds-percent": [],
 
-      // 3. AFCAT Chapters
+      // 4. AFCAT Chapters
       "ch-afcat-math-01": [
         {
           lectureNo: "01",
@@ -241,7 +245,7 @@
         }
       ],
 
-      // AFCAT REASONING CHAPTERS
+      // 5. AFCAT REASONING CHAPTERS
       "ch-afcat-reasoning-01": [
         {
           lectureNo: "01",
@@ -264,7 +268,7 @@
       ],
 
       // =========================================================================
-      // 4. CDS OTA RECORDED SQUADRON LECTURE ARCHIVE
+      // 6. CDS OTA RECORDED SQUADRON LECTURE ARCHIVE
       // =========================================================================
 
       // A. Physical Geography
@@ -609,6 +613,8 @@
           chapterId = 'ch-afcat-reasoning-02';
         } else if (cleanName.includes('intro') || cleanName.includes('anurag')) {
           chapterId = 'ch-afcat-reasoning-01';
+        } else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) {
+          chapterId = 'ch-capf-internal-security';
         }
       }
 
@@ -822,4 +828,3 @@
   </footer>
 </body>
 </html>
-
