@@ -6,6 +6,9 @@
   <title>TEAM PHANTOM | Tactical Video Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +44,6 @@
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
     }
 
-    /* मुख्य व्यूकंटेनर */
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
@@ -58,7 +60,7 @@
       border-radius: 0 !important;
     }
 
-    /* Nexield Mode (Unchanged & Safe) */
+    /* Nexield (Vimeo) - जैसा सही चल रहा था */
     .nexield-frame {
       position: absolute;
       width: 100% !important;
@@ -68,50 +70,31 @@
       border: none;
     }
 
-    /* YouTube Clean Engine */
-    .yt-box {
+    /* YouTube Custom Frame Engine */
+    .yt-custom-container {
       position: relative;
       width: 100%;
       height: 100%;
+      overflow: hidden;
     }
 
-    #tacticalPlayer {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* ऊपर का चैनल नाम और शेयर बटन ब्लॉक करने वाला ब्लैक मास्क */
-    .top-anti-share-shield {
+    /* YouTube के लोगो और शेयर बटन को स्क्रीन से बाहर काटने के लिए ओवरस्कैन */
+    #ytPlayerFrame {
       position: absolute;
-      top: 0;
+      width: 100% !important;
+      height: 136% !important;
+      top: -18% !important;
       left: 0;
-      width: 100%;
-      height: 60px;
-      z-index: 25;
-      background: linear-gradient(180deg, #04070b 55%, rgba(4, 7, 11, 0) 100%);
-      pointer-events: auto;
-    }
-
-    /* नीचे YouTube Logo Click Blocker (Settings/Gear और Fullscreen खुले रहेंगे) */
-    .bottom-anti-yt-redirect {
-      position: absolute;
-      bottom: 0;
-      right: 50px; /* Gear और Fullscreen को खुला छोड़ता है */
-      width: 85px;  /* सिर्फ 'YouTube' लिखे लोगो को ब्लॉक करता है */
-      height: 48px;
-      z-index: 25;
-      background: transparent;
-      pointer-events: auto; /* YouTube पर रीडायरेक्ट बंद */
+      pointer-events: none; /* अंदर के YouTube लोगो/शेयर पर कोई क्लिक नहीं */
     }
 
     /* स्क्रीन 10s टैप जोन (Left & Right) */
     .tap-zone {
       position: absolute;
-      top: 60px;
-      bottom: 50px;
-      width: 42%;
-      z-index: 20;
+      top: 0;
+      bottom: 55px;
+      width: 48%;
+      z-index: 25;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -125,7 +108,7 @@
       background: rgba(16, 185, 129, 0.9);
       color: #000000;
       font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 900;
       padding: 10px 18px;
       border-radius: 9999px;
@@ -133,11 +116,80 @@
       pointer-events: none;
       transform: scale(0.6);
       transition: all 0.2s ease;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.8);
     }
     .skip-alert-badge.show {
       opacity: 1;
       transform: scale(1.1);
+    }
+
+    /* सेंटर फुलस्क्रीन बटन */
+    .center-fs-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 35;
+      background: rgba(16, 185, 129, 0.9);
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    #phantomConsoleScreen:hover .center-fs-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .center-fs-btn:hover {
+      background: #10b981;
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+
+    /* कस्टम मिलिट्री कंट्रोल बार */
+    .tactical-custom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%);
+      padding: 10px 16px 8px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 40;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    #phantomConsoleScreen:hover .tactical-custom-bar {
+      opacity: 1;
+    }
+
+    /* प्रोग्रेस बार */
+    .tactical-progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tactical-progress-fill {
+      height: 100%;
+      background: #10b981;
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.15s linear;
     }
   </style>
 </head>
@@ -153,7 +205,7 @@
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
             TACTICAL STREAMING CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE AIRSPACE FEED</p>
+          <p class="text-[10px] text-neutral-400 font-mono">SECURE AIRSPACE TRANSMISSION</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
@@ -166,7 +218,15 @@
   <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
+        
+        <!-- सेंटर फुलस्क्रीन बटन -->
+        <button id="centerFsBtn" class="center-fs-btn font-orbitron" onclick="toggleTacticalFullscreen()">
+          [⛶ FULLSCREEN]
+        </button>
+
+        <!-- डायनामिक वीडियो एरिया -->
         <div id="playerRoot" class="w-full h-full relative"></div>
+
       </div>
     </div>
   </main>
@@ -179,7 +239,9 @@
   </footer>
 
   <script>
-    let ytPlayerInstance = null;
+    let ytInstance = null;
+    let isPlaying = false;
+    let timerSync = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -204,7 +266,7 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // =========================================================================
-      // CASE 1: NEXIELD (VIMEO STREAM) - बिल्कुल वैसा ही, कोई बदलाव नहीं
+      // CASE 1: NEXIELD (VIMEO STREAM) - बिल्कुल अनटच्ड
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         playerRoot.innerHTML = `
@@ -217,68 +279,247 @@
         `;
       } 
       // =========================================================================
-      // CASE 2: YOUTUBE (ORIGINAL SETTINGS + DOUBLE TAP 10s SKIP + ANTI-LEAK)
+      // CASE 2: YOUTUBE (PROPRIETARY TACTICAL FRAME - 0% BRANDING)
       // =========================================================================
       else {
         playerRoot.innerHTML = `
-          <div class="yt-box">
-            <!-- 1. Top Shield: Channel name & Share button hidden & blocked -->
-            <div class="top-anti-share-shield"></div>
+          <div class="yt-custom-container">
+            <div id="ytPlayerFrame"></div>
 
-            <!-- 2. Bottom Shield: YouTube logo redirect blocked -->
-            <div class="bottom-anti-yt-redirect"></div>
-
-            <!-- 3. Screen Double Tap Zones (10s Backward / Forward) -->
-            <div class="tap-zone tap-zone-left" ondblclick="skipTacticalVideo(-10, 'badgeRewind')">
-              <div class="skip-alert-badge" id="badgeRewind">&#171; 10s</div>
-            </div>
-            
-            <div class="tap-zone tap-zone-right" ondblclick="skipTacticalVideo(10, 'badgeForward')">
-              <div class="skip-alert-badge" id="badgeForward">10s &#187;</div>
+            <!-- Double Tap 10s Zones -->
+            <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
+              <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
             </div>
 
-            <!-- 4. Iframe with Native Settings (Gear) Enabled for REAL Quality & Speed -->
-            <iframe 
-              id="tacticalPlayer" 
-              src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(finalVideo)}?autoplay=1&controls=1&rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
-              allowfullscreen="true">
-            </iframe>
+            <div class="tap-zone tap-zone-right" onclick="handleTapZone('right')">
+              <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
+            </div>
+
+            <!-- CUSTOM MILITARY CONTROL BAR -->
+            <div class="tactical-custom-bar" onclick="event.stopPropagation()">
+              
+              <!-- Timeline Track -->
+              <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
+                <div class="tactical-progress-fill" id="trackFill"></div>
+              </div>
+
+              <!-- Controls Row -->
+              <div class="flex items-center justify-between text-xs font-mono pt-1">
+                
+                <!-- Play/Pause & Real-Time Counter -->
+                <div class="flex items-center gap-3">
+                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-emerald-400 font-bold text-xs uppercase px-2.5 py-1 bg-black/70 rounded border border-emerald-600/40 hover:bg-emerald-950 transition cursor-pointer">
+                    ▶ PLAY
+                  </button>
+                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px]">00:00 / 00:00</span>
+                </div>
+
+                <!-- Speed, Quality & Mini-Fullscreen -->
+                <div class="flex items-center gap-2">
+                  
+                  <!-- SPEED SELECTOR -->
+                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
+                    <span class="text-neutral-400 text-[10px] font-orbitron">SPD:</span>
+                    <select onchange="updateVideoSpeed(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+                      <option value="1" class="bg-black">1.0x</option>
+                      <option value="1.25" class="bg-black">1.25x</option>
+                      <option value="1.5" class="bg-black">1.5x</option>
+                      <option value="1.75" class="bg-black">1.75x</option>
+                      <option value="2" class="bg-black">2.0x</option>
+                    </select>
+                  </div>
+
+                  <!-- QUALITY SELECTOR -->
+                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
+                    <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
+                    <select onchange="updateVideoQuality(this.value)" class="bg-transparent text-emerald-400 font-bold text-xs outline-none cursor-pointer">
+                      <option value="auto" class="bg-black">Auto</option>
+                      <option value="hd1080" class="bg-black">1080p HD</option>
+                      <option value="hd720" class="bg-black">720p HD</option>
+                      <option value="large" class="bg-black">480p</option>
+                      <option value="medium" class="bg-black">360p</option>
+                    </select>
+                  </div>
+
+                  <!-- MINI FULLSCREEN TRIGGER -->
+                  <button onclick="toggleTacticalFullscreen()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-orbitron font-extrabold rounded tracking-wider transition cursor-pointer">
+                    [⛶]
+                  </button>
+
+                </div>
+              </div>
+            </div>
           </div>
         `;
 
-        // YouTube postMessage API listener for skipping
-        window.addEventListener('message', (event) => {
-          // Track iframe state if needed
-        });
+        // Initialize YouTube Engine
+        window.onYouTubeIframeAPIReady = () => {
+          ytInstance = new YT.Player('ytPlayerFrame', {
+            videoId: finalVideo,
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              disablekb: 0,
+              fs: 0,
+              modestbranding: 1,
+              rel: 0,
+              showinfo: 0,
+              iv_load_policy: 3
+            },
+            events: {
+              onReady: (e) => {
+                e.target.playVideo();
+                startTimerSync();
+              },
+              onStateChange: (e) => {
+                const btn = document.getElementById("playTrigger");
+                if (e.data === YT.PlayerState.PLAYING) {
+                  isPlaying = true;
+                  if (btn) btn.innerText = "⏸ PAUSE";
+                } else {
+                  isPlaying = false;
+                  if (btn) btn.innerText = "▶ PLAY";
+                }
+              }
+            }
+          });
+        };
+
+        if (window.YT && window.YT.Player) {
+          window.onYouTubeIframeAPIReady();
+        }
       }
     });
 
-    // 10-Second Skip Handler (Double-Click on Screen)
-    function skipTacticalVideo(seconds, badgeId) {
-      const iframe = document.getElementById("tacticalPlayer");
-      if (!iframe || !iframe.contentWindow) return;
+    // =========================================================================
+    // DOUBLE TAP SKIP & PLAY/PAUSE LOGIC
+    // =========================================================================
+    let leftTimer = null, rightTimer = null;
+    let leftClicks = 0, rightClicks = 0;
 
-      // Show animated tactical badge
-      const badge = document.getElementById(badgeId);
-      if (badge) {
-        badge.classList.add('show');
-        setTimeout(() => badge.classList.remove('show'), 550);
+    function handleTapZone(side) {
+      if (side === 'left') {
+        leftClicks++;
+        if (leftClicks === 1) {
+          leftTimer = setTimeout(() => {
+            toggleVideoPlay();
+            leftClicks = 0;
+          }, 270);
+        } else if (leftClicks === 2) {
+          clearTimeout(leftTimer);
+          skipSeconds(-10);
+          triggerBadge('skipLeftBadge');
+          leftClicks = 0;
+        }
+      } else {
+        rightClicks++;
+        if (rightClicks === 1) {
+          rightTimer = setTimeout(() => {
+            toggleVideoPlay();
+            rightClicks = 0;
+          }, 270);
+        } else if (rightClicks === 2) {
+          clearTimeout(rightTimer);
+          skipSeconds(10);
+          triggerBadge('skipRightBadge');
+          rightClicks = 0;
+        }
       }
-
-      // YouTube player ko direct seek message bhejna
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event: 'command',
-        func: seconds > 0 ? 'fastForward' : 'rewind',
-        args: [Math.abs(seconds)]
-      }), '*');
-
-      // Fallback relative seek command
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event: 'listening',
-        id: 1
-      }), '*');
     }
+
+    function skipSeconds(s) {
+      if (!ytInstance || !ytInstance.getCurrentTime) return;
+      const target = Math.max(0, ytInstance.getCurrentTime() + s);
+      ytInstance.seekTo(target, true);
+    }
+
+    function triggerBadge(id) {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 550);
+    }
+
+    function toggleVideoPlay() {
+      if (!ytInstance) return;
+      if (isPlaying) {
+        ytInstance.pauseVideo();
+      } else {
+        ytInstance.playVideo();
+      }
+    }
+
+    function updateVideoSpeed(rate) {
+      if (!ytInstance) return;
+      ytInstance.setPlaybackRate(parseFloat(rate));
+    }
+
+    function updateVideoQuality(quality) {
+      if (!ytInstance) return;
+      const target = quality === 'auto' ? 'default' : quality;
+      ytInstance.setPlaybackQuality(target);
+      
+      // Resync stream buffer to force resolution change
+      if (ytInstance.getCurrentTime) {
+        const cTime = ytInstance.getCurrentTime();
+        ytInstance.seekTo(cTime, true);
+      }
+    }
+
+    function seekVideoTrack(e) {
+      if (!ytInstance) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      const duration = ytInstance.getDuration();
+      ytInstance.seekTo(pos * duration, true);
+    }
+
+    function startTimerSync() {
+      if (timerSync) clearInterval(timerSync);
+      timerSync = setInterval(() => {
+        if (ytInstance && ytInstance.getCurrentTime) {
+          const c = ytInstance.getCurrentTime();
+          const d = ytInstance.getDuration();
+          if (d > 0) {
+            const pct = (c / d) * 100;
+            const fill = document.getElementById("trackFill");
+            if (fill) fill.style.width = pct + "%";
+            
+            const counter = document.getElementById("timeCounter");
+            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
+          }
+        }
+      }, 500);
+    }
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Tactical Fullscreen Controller
+    function toggleTacticalFullscreen() {
+      const target = document.getElementById("phantomConsoleScreen");
+      const centerBtn = document.getElementById("centerFsBtn");
+
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (target.requestFullscreen) target.requestFullscreen();
+        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+        if (centerBtn) centerBtn.innerText = "[✕ EXIT]";
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        if (centerBtn) centerBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const centerBtn = document.getElementById("centerFsBtn");
+      if (!document.fullscreenElement && centerBtn) {
+        centerBtn.innerText = "[⛶ FULLSCREEN]";
+      }
+    });
 
     // Disable Inspect Shortcuts
     document.addEventListener("keydown", (e) => {
