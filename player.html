@@ -109,7 +109,7 @@
       border-radius: 8px;
       box-shadow: 0 0 18px rgba(0, 0, 0, 0.85);
       pointer-events: auto !important;
-      opacity: 1 !important; /* Hamesha visible rahega */
+      opacity: 1 !important;
     }
 
     .fs-hud-btn {
@@ -342,14 +342,21 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const urlVideo = urlParams.get("v") || urlParams.get("stream");
+      const urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream");
       const urlTitle = urlParams.get("title");
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
-      const finalVideo = urlVideo || storedVideo;
+      let finalVideo = urlVideo || storedVideo;
       const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
+
+      // यूआरएल डिकोड सुरक्षित तरीके से करें
+      if (finalVideo) {
+        try {
+          finalVideo = decodeURIComponent(finalVideo);
+        } catch (e) {}
+      }
 
       if (finalTitle) {
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
@@ -654,7 +661,6 @@
       const wm = document.getElementById('securityWatermark');
       const timeStampEl = document.getElementById('wmTimestamp');
       
-      // Auto-update live military session time on watermark
       setInterval(() => {
         const now = new Date();
         if (timeStampEl) {
@@ -662,7 +668,6 @@
         }
       }, 1000);
 
-      // Random jitter movement inside video screen (even in fullscreen)
       setInterval(() => {
         if (wm) {
           const top = Math.floor(Math.random() * 65) + 10;
