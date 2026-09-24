@@ -125,11 +125,12 @@
 
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
-      // यूनिवर्सल लिसनर: सीधे Firestore से इस चैप्टर के सभी लेक्चर्स उठाएगा
+      // सीधे Firestore से इस चैप्टर के सभी लेक्चर्स उठाएगा
       const colRef = collection(db, "tactical_curriculum");
 
       unsubscribeCurriculum = onSnapshot(colRef, (snapshot) => {
         const dynamicLectures = [];
+        const seenVideos = new Set(); // डुप्लीकेट फ़िल्टर करने के लिए सेट
         const targetChap = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         snapshot.forEach(docSnap => {
@@ -138,19 +139,30 @@
 
           // फ्लेक्सिबल चैप्टर मैचिंग
           if (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap))) {
-            dynamicLectures.push({
-              lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
-              title: d.title,
-              desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
-              duration: d.duration || "HD Session",
-              videoId: d.url || d.videoUrl || "",
-              pdfUrl: d.pdfUrl || "#",
-              order: Number(d.order) || 999
-            });
+            const vUrl = (d.url || d.videoUrl || "").trim();
+            const cleanTitle = (d.title || "").trim().toLowerCase();
+            
+            // यूनिक पहचान: या तो वीडियो लिंक या फिर टाइटल
+            const uniqueKey = vUrl || cleanTitle;
+
+            // अगर यह लेक्चर पहले नहीं आया है, तभी जोड़ें (डुप्लीकेट ब्लॉक)
+            if (!seenVideos.has(uniqueKey)) {
+              seenVideos.add(uniqueKey);
+
+              dynamicLectures.push({
+                lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
+                title: d.title,
+                desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
+                duration: d.duration || "HD Session",
+                videoId: vUrl,
+                pdfUrl: d.pdfUrl || "#",
+                order: Number(d.order) || 999
+              });
+            }
           }
         });
 
-        // लेक्चर्स को क्रम में लगाना
+        // लेक्चर्स को क्रम में लगाना (Lecture 1, 2, 3...)
         dynamicLectures.sort((a, b) => a.order - b.order);
 
         displayLectures(dynamicLectures, chapterName, mode);
