@@ -125,12 +125,11 @@
 
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
-      // सीधे Firestore से इस चैप्टर के सभी लेक्चर्स उठाएगा
       const colRef = collection(db, "tactical_curriculum");
 
       unsubscribeCurriculum = onSnapshot(colRef, (snapshot) => {
         const dynamicLectures = [];
-        const seenVideos = new Set(); // डुप्लीकेट फ़िल्टर करने के लिए सेट
+        const seenVideos = new Set();
         const targetChap = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         snapshot.forEach(docSnap => {
@@ -142,10 +141,9 @@
             const vUrl = (d.url || d.videoUrl || "").trim();
             const cleanTitle = (d.title || "").trim().toLowerCase();
             
-            // यूनिक पहचान: या तो वीडियो लिंक या फिर टाइटल
+            // डुप्लीकेट की रोकथाम (URL या टाइटल के आधार पर)
             const uniqueKey = vUrl || cleanTitle;
 
-            // अगर यह लेक्चर पहले नहीं आया है, तभी जोड़ें (डुप्लीकेट ब्लॉक)
             if (!seenVideos.has(uniqueKey)) {
               seenVideos.add(uniqueKey);
 
@@ -162,7 +160,7 @@
           }
         });
 
-        // लेक्चर्स को क्रम में लगाना (Lecture 1, 2, 3...)
+        // लेक्चर्स को क्रम में लगाना
         dynamicLectures.sort((a, b) => a.order - b.order);
 
         displayLectures(dynamicLectures, chapterName, mode);
@@ -228,7 +226,7 @@
       });
     }
 
-    // Direct Play Router (Session Storage Guarded)
+    // Universal Router for player.html (URL Query Params + Multiple SessionStorage Keys)
     window.playLectureVideo = function(videoId, title) {
       if (!videoId || videoId === "#" || videoId === "") {
         alert("It will be uploaded very soon.");
@@ -236,10 +234,20 @@
       }
       
       const cleanTitle = title || "TACTICAL SESSION";
+
+      // Session Storage की सभी संभावित keys में वैल्यू सेट करना
       sessionStorage.setItem("phantom_current_video", videoId);
       sessionStorage.setItem("phantom_current_title", cleanTitle);
+      sessionStorage.setItem("current_video", videoId);
+      sessionStorage.setItem("videoUrl", videoId);
+      sessionStorage.setItem("video_url", videoId);
+      sessionStorage.setItem("lecture_url", videoId);
 
-      window.location.href = "player.html";
+      // URL parameters के साथ player.html खोलना
+      const encodedVideo = encodeURIComponent(videoId);
+      const encodedTitle = encodeURIComponent(cleanTitle);
+
+      window.location.href = `player.html?video=${encodedVideo}&title=${encodedTitle}&link=${encodedVideo}&url=${encodedVideo}`;
     };
 
     window.openClassNotes = function(url, title) {
