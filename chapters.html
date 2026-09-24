@@ -14,7 +14,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -81,40 +81,25 @@
     function renderChaptersList(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
       
-      // batch या squadron दोनों को स्वीकार करेगा
       activeBatch = urlParams.get('batch') || urlParams.get('squadron') || 'cds-math';
       activeSubject = urlParams.get('subject') || 'math';
       activeMode = urlParams.get('mode') || 'recorded';
 
-      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
-      if (!isCombo && !allowedBatches.includes(activeBatch)) {
-        // अनुमति चेक
-      }
-
-      const cleanBatch = activeBatch.toLowerCase().trim();
-      const cleanSubject = activeSubject.toLowerCase().replace(/[^a-z0-9]/g, '');
-
       const modeText = activeMode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-      document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${modeText} • ${activeSubject.toUpperCase()}`;
-      document.getElementById('subjectHeading').innerText = activeMode === 'recorded' ? `${activeSubject.toUpperCase()} (RECORDED VAULT)` : activeSubject.toUpperCase();
+      document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${modeText} • MATHEMATICS`;
+      document.getElementById('subjectHeading').innerText = `MATHEMATICS (${modeText})`;
 
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
-      // लचीली क्वेरी: केवल स्क्वाड्रन से फ़िल्टर ताकि कोई लेक्चर छूटे न
-      const q = query(
-        collection(db, "tactical_curriculum"),
-        where("squadron", "==", cleanBatch)
-      );
+      // यूनिवर्सल लिसनर: बिना किसी स्ट्रिक्ट फ़िल्टर के सीधा डेटा लोड करेगा
+      const colRef = collection(db, "tactical_curriculum");
 
-      unsubscribeCurriculum = onSnapshot(q, (snapshot) => {
+      unsubscribeCurriculum = onSnapshot(colRef, (snapshot) => {
         const dynamicChaptersMap = {};
 
         snapshot.forEach(docSnap => {
           const d = docSnap.data();
-          const dSub = (d.subject || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-          
-          // अगर सब्जेक्ट मैच होता है या जेनेरिक है
-          if ((!cleanSubject || dSub === cleanSubject || cleanSubject === "math" && dSub.includes("math")) && d.chapter) {
+          if (d.chapter) {
             const chap = d.chapter.trim();
             if (!dynamicChaptersMap[chap]) {
               dynamicChaptersMap[chap] = 0;
@@ -138,7 +123,7 @@
           finalChapters.push({
             id: `empty-module`,
             name: `NO CHAPTERS FOUND`,
-            desc: "Dispatched lectures could not be matched. Verify subject and squadron."
+            desc: "Firestore collection 'tactical_curriculum' is currently empty or loading."
           });
         }
 
@@ -165,7 +150,7 @@
                 CHAPTER #${(index + 1).toString().padStart(2, '0')}
               </span>
               <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded">
-                READY
+                LIVE
               </span>
             </div>
             <h3 class="font-orbitron font-bold text-lg text-white group-hover:text-amber-400 transition mb-1">
