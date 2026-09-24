@@ -48,7 +48,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Team Phantom Official Firebase Configuration
     const firebaseConfig = {
@@ -120,7 +120,7 @@
         }
       ],
 
-      // 2. CAPF Internal Security (Dono lectures ek hi array me fix kar diye hain)
+      // 2. CAPF Internal Security
       "ch-capf-internal-security": [
         {
           lectureNo: "01",
@@ -579,11 +579,13 @@
     let currentBatch = "capf";
     let currentSubject = "Mentorship Sessions";
     let unsubscribeSnapshot = null;
+    let unsubscribeCurriculum = null;
 
     // Session Security Verification & Realtime Single Device Guard
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         if (unsubscribeSnapshot) unsubscribeSnapshot();
+        if (unsubscribeCurriculum) unsubscribeCurriculum();
         window.location.href = "index.html";
         return;
       }
@@ -591,6 +593,7 @@
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
         if (!docSnap.exists()) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
+          if (unsubscribeCurriculum) unsubscribeCurriculum();
           signOut(auth).then(() => window.location.href = "index.html");
           return;
         }
@@ -601,6 +604,7 @@
         // Status check
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
+          if (unsubscribeCurriculum) unsubscribeCurriculum();
           alert("Notice: Cadet account is currently not active or pending verification.");
           signOut(auth).then(() => window.location.href = "index.html");
           return;
@@ -609,6 +613,7 @@
         // Single device session token verification
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
+          if (unsubscribeCurriculum) unsubscribeCurriculum();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
           signOut(auth).then(() => {
             localStorage.removeItem("phantom_session_token");
@@ -664,12 +669,72 @@
       document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • ${currentSubject.toUpperCase()}`;
       document.getElementById('chapterHeading').innerText = chapterName;
 
+      // 1. Static Lectures
+      const staticLectures = lectureDatabase[chapterId] ? [...lectureDatabase[chapterId]] : [];
+
+      // =========================================================================
+      // DYNAMIC FIREBASE INTEGRATION (ADMIN PORTAL SYNC)
+      // =========================================================================
+      if (unsubscribeCurriculum) unsubscribeCurriculum();
+
+      const q = query(
+        collection(db, "tactical_curriculum"),
+        where("squadron", "==", currentBatch),
+        where("mode", "==", mode)
+      );
+
+      unsubscribeCurriculum = onSnapshot(q, (snapshot) => {
+        const dynamicLectures = [];
+        const targetChap = chapterName.toLowerCase().trim();
+        const targetSub = currentSubject.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          const dChap = (d.chapter || "").toLowerCase().trim();
+          const dSub = (d.subject || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+
+          // Check if matches current chapter and subject
+          const chapMatches = (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap));
+          const subMatches = (!dSub || !targetSub || dSub === targetSub || targetSub.includes(dSub) || dSub.includes(targetSub));
+
+          if (chapMatches && subMatches) {
+            dynamicLectures.push({
+              lectureNo: String(d.order || 1).padStart(2, '0'),
+              title: d.title,
+              desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
+              duration: d.duration || "HD Session",
+              videoId: d.url,
+              pdfUrl: d.pdfUrl || "#",
+              order: d.order || 999
+            });
+          }
+        });
+
+        // Order dynamic lectures by class number
+        dynamicLectures.sort((a, b) => a.order - b.order);
+
+        // Merge: avoid duplicates
+        const combined = [...staticLectures];
+        dynamicLectures.forEach(dyn => {
+          const exists = combined.some(st => 
+            (st.title && st.title.trim().toLowerCase() === dyn.title.trim().toLowerCase()) || 
+            (st.videoId && st.videoId === dyn.videoId)
+          );
+          if (!exists) {
+            combined.push(dyn);
+          }
+        });
+
+        displayLectures(combined, chapterName, mode);
+      }, (err) => {
+        console.warn("Curriculum sync error:", err);
+        displayLectures(staticLectures, chapterName, mode);
+      });
+    }
+
+    function displayLectures(lectures, chapterName, mode) {
       const container = document.getElementById('lecturesContainer');
       container.innerHTML = "";
-
-      // Fetch Lectures
-      const lectures = lectureDatabase[chapterId] || [];
-
       document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
 
       // Show message if empty (Shows "IT WILL BE UPLOADED VERY SOON")
@@ -758,6 +823,7 @@
 
     window.terminateCadetSession = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
+      if (unsubscribeCurriculum) unsubscribeCurriculum();
       signOut(auth).then(() => {
         localStorage.removeItem("phantom_session_token");
         localStorage.removeItem("phantom_uid");
