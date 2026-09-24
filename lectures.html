@@ -3,10 +3,7 @@
 <head>
   <script>
 (() => {
-  // 1. Right Click Disable
   document.addEventListener('contextmenu', e => e.preventDefault());
-
-  // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
   document.addEventListener('keydown', e => {
     if (
       e.key === 'F12' ||
@@ -18,21 +15,6 @@
       return false;
     }
   });
-
-  // 3. DevTools Freezing Trap
-  setInterval(() => {
-    const start = performance.now();
-    debugger;
-    const end = performance.now();
-    if (end - start > 100) {
-      document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-    }
-  }, 1000);
-
-  // 4. Console Auto Clear
-  setInterval(() => {
-    console.clear();
-  }, 1500);
 })();
 </script>
   <meta charset="UTF-8" />
@@ -40,7 +22,6 @@
   <title>TEAM PHANTOM | Tactical Lecture Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,9 +29,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Team Phantom Official Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
       authDomain: "team-phantom-enrollment.firebaseapp.com",
@@ -64,112 +44,79 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentBatch = "cds-math";
-    let currentSubject = "math";
-    let unsubscribeSnapshot = null;
     let unsubscribeCurriculum = null;
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        if (unsubscribeSnapshot) unsubscribeSnapshot();
-        if (unsubscribeCurriculum) unsubscribeCurriculum();
         window.location.href = "index.html";
         return;
       }
-
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
-        if (!docSnap.exists()) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          signOut(auth).then(() => window.location.href = "index.html");
-          return;
-        }
-
-        const data = docSnap.data();
-        const localToken = localStorage.getItem("phantom_session_token");
-
-        if (data.status !== "active") {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          alert("Notice: Cadet account is currently not active or pending verification.");
-          signOut(auth).then(() => window.location.href = "index.html");
-          return;
-        }
-
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          signOut(auth).then(() => {
-            localStorage.removeItem("phantom_session_token");
-            localStorage.removeItem("phantom_uid");
-            window.location.href = "index.html";
-          });
-          return;
-        }
-
-        renderLecturesList(data.allowedBatches || []);
-      });
+      renderLecturesList();
     });
 
-    function renderLecturesList(allowedBatches) {
+    function renderLecturesList() {
       const urlParams = new URLSearchParams(window.location.search);
-      currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'cds-math';
-      currentSubject = urlParams.get('subject') || 'math';
-      const chapterName = urlParams.get('chapter') || 'Briefing Dossier';
+      const chapterName = urlParams.get('chapter') || 'Tactical Module';
       const mode = urlParams.get('mode') || 'recorded';
 
-      const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • MATHEMATICS`;
+      document.getElementById('badgeIndicator').innerText = `MATHEMATICS • ${mode.toUpperCase()} • BATCH 9`;
       document.getElementById('chapterHeading').innerText = chapterName;
 
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
+      // सीधे tactical_curriculum से डेटा खींचना
       const colRef = collection(db, "tactical_curriculum");
 
       unsubscribeCurriculum = onSnapshot(colRef, (snapshot) => {
         const dynamicLectures = [];
         const seenVideos = new Set();
-        const targetChap = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        // चैप्टर का साफ़ नाम (तुलना के लिए)
+        const cleanTarget = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         snapshot.forEach(docSnap => {
           const d = docSnap.data();
-          const dChap = (d.chapter || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+          
+          // चैप्टर नाम के सभी संभावित फ़ील्ड्स
+          const docChap = (d.chapter || d.chapterName || d.topic || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+          const docTitle = (d.title || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
-          // फ्लेक्सिबल चैप्टर मैचिंग
-          if (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap))) {
-            const vUrl = (d.url || d.videoUrl || "").trim();
-            const cleanTitle = (d.title || "").trim().toLowerCase();
-            
-            // डुप्लीकेट की रोकथाम (URL या टाइटल के आधार पर)
-            const uniqueKey = vUrl || cleanTitle;
+          // मैचिंग: या तो चैप्टर फ़ील्ड से मैच हो, या टाइटल के अंदर ही चैप्टर का नाम आ रहा हो
+          const isMatch = (docChap && (docChap.includes(cleanTarget) || cleanTarget.includes(docChap))) ||
+                          (cleanTarget.length > 3 && docTitle.includes(cleanTarget));
+
+          if (isMatch) {
+            // वीडियो लिंक के सभी संभावित फ़ील्ड्स
+            const vUrl = (d.url || d.videoUrl || d.link || d.videoId || "").trim();
+            const title = d.title || "Lecture Session";
+            const uniqueKey = vUrl || title;
 
             if (!seenVideos.has(uniqueKey)) {
               seenVideos.add(uniqueKey);
 
               dynamicLectures.push({
-                lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
-                title: d.title,
+                lectureNo: String(d.order || d.lectureNo || dynamicLectures.length + 1).padStart(2, '0'),
+                title: title,
                 desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
                 duration: d.duration || "HD Session",
                 videoId: vUrl,
                 pdfUrl: d.pdfUrl || "#",
-                order: Number(d.order) || 999
+                order: Number(d.order || d.lectureNo) || 999
               });
             }
           }
         });
 
-        // लेक्चर्स को क्रम में लगाना
+        // क्रम से लगाना (1, 2, 3...)
         dynamicLectures.sort((a, b) => a.order - b.order);
 
-        displayLectures(dynamicLectures, chapterName, mode);
+        displayLectures(dynamicLectures, chapterName);
       }, (err) => {
-        console.warn("Curriculum sync error:", err);
+        console.error("Firestore sync error:", err);
       });
     }
 
-    function displayLectures(lectures, chapterName, mode) {
+    function displayLectures(lectures, chapterName) {
       const container = document.getElementById('lecturesContainer');
       container.innerHTML = "";
       document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
@@ -184,7 +131,7 @@
               IT WILL BE UPLOADED VERY SOON
             </h3>
             <p class="text-xs text-neutral-400 font-body max-w-md mx-auto">
-              No sessions matched for "${chapterName}".
+              No sessions found matching "${chapterName}". Check Firestore documents.
             </p>
           </div>
         `;
@@ -194,6 +141,10 @@
       lectures.forEach((lec) => {
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition group shadow-lg";
+
+        // सुरक्षित तरीके से URL पास करना
+        const safeUrl = encodeURIComponent(lec.videoId);
+        const safeTitle = encodeURIComponent(lec.title);
 
         card.innerHTML = `
           <div>
@@ -214,10 +165,10 @@
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-            <button onclick="window.playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
+            <button onclick="window.playLectureDirect('${safeUrl}', '${safeTitle}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
               WATCH LECTURE
             </button>
-            <button onclick="window.openClassNotes('${lec.pdfUrl}', '${lec.title.replace(/'/g, "\\'")}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
+            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
               NOTES (PDF)
             </button>
           </div>
@@ -226,32 +177,28 @@
       });
     }
 
-    // Universal Router for player.html (URL Query Params + Multiple SessionStorage Keys)
-    window.playLectureVideo = function(videoId, title) {
-      if (!videoId || videoId === "#" || videoId === "") {
-        alert("It will be uploaded very soon.");
+    // Direct Play Router
+    window.playLectureDirect = function(encodedUrl, encodedTitle) {
+      const videoUrl = decodeURIComponent(encodedUrl);
+      const title = decodeURIComponent(encodedTitle);
+
+      if (!videoUrl || videoUrl === "#") {
+        alert("Video URL not found or pending upload.");
         return;
       }
-      
-      const cleanTitle = title || "TACTICAL SESSION";
 
-      // Session Storage की सभी संभावित keys में वैल्यू सेट करना
-      sessionStorage.setItem("phantom_current_video", videoId);
-      sessionStorage.setItem("phantom_current_title", cleanTitle);
-      sessionStorage.setItem("current_video", videoId);
-      sessionStorage.setItem("videoUrl", videoId);
-      sessionStorage.setItem("video_url", videoId);
-      sessionStorage.setItem("lecture_url", videoId);
+      // Session Storage में सुरक्षित रखना
+      sessionStorage.setItem("phantom_current_video", videoUrl);
+      sessionStorage.setItem("phantom_current_title", title);
+      sessionStorage.setItem("videoUrl", videoUrl);
+      sessionStorage.setItem("current_video", videoUrl);
 
-      // URL parameters के साथ player.html खोलना
-      const encodedVideo = encodeURIComponent(videoId);
-      const encodedTitle = encodeURIComponent(cleanTitle);
-
-      window.location.href = `player.html?video=${encodedVideo}&title=${encodedTitle}&link=${encodedVideo}&url=${encodedVideo}`;
+      // Player.html पर भेजना
+      window.location.href = `player.html?video=${encodedUrl}&title=${encodedTitle}&link=${encodedUrl}`;
     };
 
-    window.openClassNotes = function(url, title) {
-      if (!url || url === "#" || url === "") {
+    window.openClassNotes = function(url) {
+      if (!url || url === "#") {
         alert("Notes dossier: It will be uploaded very soon.");
         return;
       }
@@ -259,17 +206,13 @@
     };
 
     window.navigateBackToChapters = function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const mode = urlParams.get('mode') || 'recorded';
-      window.location.href = `chapters.html?batch=${encodeURIComponent(currentBatch)}&subject=${encodeURIComponent(currentSubject)}&mode=${encodeURIComponent(mode)}`;
+      window.history.back();
     };
 
     window.terminateCadetSession = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      if (unsubscribeCurriculum) unsubscribeCurriculum();
       signOut(auth).then(() => {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
+        localStorage.clear();
+        sessionStorage.clear();
         window.location.href = "index.html";
       });
     };
@@ -338,8 +281,6 @@
 
   <!-- MAIN LECTURE SECTION -->
   <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    
-    <!-- CHAPTER HEADER SUMMARY CARD -->
     <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
@@ -360,7 +301,6 @@
 
     <!-- LECTURES GRID -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lecturesContainer"></div>
-
   </main>
 
   <!-- FOOTER -->
@@ -369,18 +309,5 @@
       &copy; 2026 TEAM PHANTOM. MILITARY PRECISION PROTOCOL.
     </p>
   </footer>
-  <div id="securityWatermark" style="position: fixed; top: 40%; left: 30%; pointer-events: none; z-index: 999999; font-size: 15px; font-weight: bold; color: rgba(255, 0, 0, 0.25); user-select: none; transform: rotate(-25deg); transition: all 1.5s ease;">
-  OFFICIAL CANDIDATE ACCESS
-</div>
-  <script>
-  setInterval(() => {
-    const wm = document.getElementById('securityWatermark');
-    if (wm) {
-      wm.style.top = (Math.floor(Math.random() * 70) + 10) + '%';
-      wm.style.left = (Math.floor(Math.random() * 60) + 10) + '%';
-    }
-  }, 4000);
-  </script>
-
 </body>
 </html>
