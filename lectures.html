@@ -384,43 +384,48 @@
 
       if (!chapterId || !lectureDatabase[chapterId]) {
         const cleanName = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (cleanName.includes('climatology')) chapterId = 'ch-rec-phys-climatology';
-        else if (cleanName.includes('oceanography')) chapterId = 'ch-rec-phys-oceanography';
-        else if (cleanName.includes('geomorphic')) chapterId = 'ch-rec-phys-geomorphic';
-        else if (cleanName.includes('landforms')) chapterId = 'ch-rec-phys-landforms';
-        else if (cleanName.includes('earth') || cleanName.includes('internal') || cleanName.includes('volcano') || cleanName.includes('plate') || cleanName.includes('earthquake')) chapterId = 'ch-rec-phys-internal';
-        else if (cleanName.includes('physiography') || cleanName.includes('himalayas') || cleanName.includes('peninsular') || cleanName.includes('coastal')) chapterId = 'ch-rec-ind-physio';
-        else if (cleanName.includes('drainage') || cleanName.includes('rivers') || cleanName.includes('lakes')) chapterId = 'ch-rec-ind-drainage';
-        else if (cleanName.includes('resources') || cleanName.includes('soil') || cleanName.includes('vegetation') || cleanName.includes('forest')) chapterId = 'ch-rec-ind-resources';
-        else if (cleanName.includes('climate')) chapterId = 'ch-rec-ind-climate';
-        else if (cleanName.includes('infrastructure') || cleanName.includes('ports') || cleanName.includes('highway') || cleanName.includes('industries')) chapterId = 'ch-rec-ind-infra';
-        else if (cleanName.includes('advent') || cleanName.includes('europeans')) chapterId = 'ch-rec-mod-europeans';
-        else if (cleanName.includes('expansion') || cleanName.includes('wars') || cleanName.includes('carnatic') || cleanName.includes('bengal') || cleanName.includes('mysore') || cleanName.includes('maratha') || cleanName.includes('punjab')) chapterId = 'ch-rec-mod-expansion';
-        else if (cleanName.includes('economic') || cleanName.includes('uprisings') || cleanName.includes('1757') || cleanName.includes('capitalism') || cleanName.includes('charter') || cleanName.includes('revolt') || cleanName.includes('peasant')) chapterId = 'ch-rec-mod-economic';
-        else if (cleanName.includes('reforms')) chapterId = 'ch-rec-mod-reforms';
-        else if (cleanName.includes('national') || cleanName.includes('congress') || cleanName.includes('extremist') || cleanName.includes('surat') || cleanName.includes('lucknow') || cleanName.includes('rowlatt') || cleanName.includes('ncm') || cleanName.includes('cdm') || cleanName.includes('goi') || cleanName.includes('freedom') || cleanName.includes('qim')) chapterId = 'ch-rec-mod-national';
-        else if (cleanName.includes('prehistory') || cleanName.includes('ivc')) chapterId = 'ch-rec-anc-prehistory';
-        else if (cleanName.includes('vedic') || cleanName.includes('religions') || cleanName.includes('buddhism') || cleanName.includes('jainism')) chapterId = 'ch-rec-anc-vedic';
-        else if (cleanName.includes('mahajanapadas') || cleanName.includes('mauryas')) chapterId = 'ch-rec-anc-empires';
-        else if (cleanName.includes('gupta') || cleanName.includes('sangam')) chapterId = 'ch-rec-anc-gupta';
-        else if (cleanName.includes('constitutional') || cleanName.includes('framework')) chapterId = 'ch-rec-pol-foundations';
-        else if (cleanName.includes('union') || cleanName.includes('state') || cleanName.includes('executives')) chapterId = 'ch-rec-pol-executives';
-        else if (cleanName.includes('parliament') || cleanName.includes('assemblies')) chapterId = 'ch-rec-pol-legislatures';
-        else if (cleanName.includes('relations') || cleanName.includes('bodies') || cleanName.includes('emergency')) chapterId = 'ch-rec-pol-relations';
-        else if (cleanName.includes('cell') || cleanName.includes('genetics') || cleanName.includes('tissues')) chapterId = 'ch-rec-bio-cells';
-        else if (cleanName.includes('physiology')) chapterId = 'ch-rec-bio-physiology';
-        else if (cleanName.includes('health') || cleanName.includes('plant') || cleanName.includes('ecology')) chapterId = 'ch-rec-bio-health';
-        else if (cleanName.includes('core') || cleanName.includes('principles')) chapterId = 'ch-rec-chem-core';
-        else if (cleanName.includes('atomic') || cleanName.includes('carbon')) chapterId = 'ch-rec-chem-atomic';
-        else if (cleanName.includes('applied') || cleanName.includes('science')) chapterId = 'ch-rec-chem-applied';
-        else if (cleanName.includes('grammar') || cleanName.includes('mechanics')) chapterId = 'ch-rec-eng-grammar';
-        else if (cleanName.includes('mocks') || cleanName.includes('practice')) chapterId = 'ch-rec-eng-practice';
-        else if (cleanName.includes('economics') || cleanName.includes('essentials')) chapterId = 'ch-rec-eco-core';
-        else if (cleanName.includes('muster') || cleanName.includes('tactical')) chapterId = 'ch-rec-gs-muster';
-        else if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
+
+        // Yeh saare CDS Recorded/OTA ke checks hain, isliye inhein sirf 'cds-kilo' ke liye chalayein:
+        if (currentBatch === 'cds-kilo') {
+          if (cleanName.includes('climatology')) chapterId = 'ch-rec-phys-climatology';
+          else if (cleanName.includes('oceanography')) chapterId = 'ch-rec-phys-oceanography';
+          else if (cleanName.includes('geomorphic')) chapterId = 'ch-rec-phys-geomorphic';
+          else if (cleanName.includes('landforms')) chapterId = 'ch-rec-phys-landforms';
+          else if (cleanName.includes('earth') || cleanName.includes('internal') || cleanName.includes('volcano') || cleanName.includes('plate') || cleanName.includes('earthquake')) chapterId = 'ch-rec-phys-internal';
+          else if (cleanName.includes('physiography') || cleanName.includes('himalayas') || cleanName.includes('peninsular') || cleanName.includes('coastal')) chapterId = 'ch-rec-ind-physio';
+          else if (cleanName.includes('drainage') || cleanName.includes('rivers') || cleanName.includes('lakes')) chapterId = 'ch-rec-ind-drainage';
+          else if (cleanName.includes('resources') || cleanName.includes('soil') || cleanName.includes('vegetation') || cleanName.includes('forest')) chapterId = 'ch-rec-ind-resources';
+          else if (cleanName.includes('climate')) chapterId = 'ch-rec-ind-climate';
+          else if (cleanName.includes('infrastructure') || cleanName.includes('ports') || cleanName.includes('highway') || cleanName.includes('industries')) chapterId = 'ch-rec-ind-infra';
+          else if (cleanName.includes('advent') || cleanName.includes('europeans')) chapterId = 'ch-rec-mod-europeans';
+          else if (cleanName.includes('expansion') || cleanName.includes('wars') || cleanName.includes('carnatic') || cleanName.includes('bengal') || cleanName.includes('mysore') || cleanName.includes('maratha') || cleanName.includes('punjab')) chapterId = 'ch-rec-mod-expansion';
+          else if (cleanName.includes('economic') || cleanName.includes('uprisings') || cleanName.includes('1757') || cleanName.includes('capitalism') || cleanName.includes('charter') || cleanName.includes('revolt') || cleanName.includes('peasant')) chapterId = 'ch-rec-mod-economic';
+          else if (cleanName.includes('reforms')) chapterId = 'ch-rec-mod-reforms';
+          else if (cleanName.includes('national') || cleanName.includes('congress') || cleanName.includes('extremist') || cleanName.includes('surat') || cleanName.includes('lucknow') || cleanName.includes('rowlatt') || cleanName.includes('ncm') || cleanName.includes('cdm') || cleanName.includes('goi') || cleanName.includes('freedom') || cleanName.includes('qim')) chapterId = 'ch-rec-mod-national';
+          else if (cleanName.includes('prehistory') || cleanName.includes('ivc')) chapterId = 'ch-rec-anc-prehistory';
+          else if (cleanName.includes('vedic') || cleanName.includes('religions') || cleanName.includes('buddhism') || cleanName.includes('jainism')) chapterId = 'ch-rec-anc-vedic';
+          else if (cleanName.includes('mahajanapadas') || cleanName.includes('mauryas')) chapterId = 'ch-rec-anc-empires';
+          else if (cleanName.includes('gupta') || cleanName.includes('sangam')) chapterId = 'ch-rec-anc-gupta';
+          else if (cleanName.includes('constitutional') || cleanName.includes('framework')) chapterId = 'ch-rec-pol-foundations';
+          else if (cleanName.includes('union') || cleanName.includes('state') || cleanName.includes('executives')) chapterId = 'ch-rec-pol-executives';
+          else if (cleanName.includes('parliament') || cleanName.includes('assemblies')) chapterId = 'ch-rec-pol-legislatures';
+          else if (cleanName.includes('relations') || cleanName.includes('bodies') || cleanName.includes('emergency')) chapterId = 'ch-rec-pol-relations';
+          else if (cleanName.includes('cell') || cleanName.includes('genetics') || cleanName.includes('tissues')) chapterId = 'ch-rec-bio-cells';
+          else if (cleanName.includes('physiology')) chapterId = 'ch-rec-bio-physiology';
+          else if (cleanName.includes('health') || cleanName.includes('plant') || cleanName.includes('ecology')) chapterId = 'ch-rec-bio-health';
+          else if (cleanName.includes('core') || cleanName.includes('principles')) chapterId = 'ch-rec-chem-core';
+          else if (cleanName.includes('atomic') || cleanName.includes('carbon')) chapterId = 'ch-rec-chem-atomic';
+          else if (cleanName.includes('applied') || cleanName.includes('science')) chapterId = 'ch-rec-chem-applied';
+          else if (cleanName.includes('grammar') || cleanName.includes('mechanics')) chapterId = 'ch-rec-eng-grammar';
+          else if (cleanName.includes('mocks') || cleanName.includes('practice')) chapterId = 'ch-rec-eng-practice';
+          else if (cleanName.includes('economics') || cleanName.includes('essentials')) chapterId = 'ch-rec-eco-core';
+          else if (cleanName.includes('muster') || cleanName.includes('tactical')) chapterId = 'ch-rec-gs-muster';
+        }
+
+        // CAPF aur AFCAT ke apne independent checks:
+        if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
         else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) chapterId = 'ch-capf-internal-security';
       }
-
       const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
       document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • ${currentSubject.toUpperCase()}`;
       document.getElementById('chapterHeading').innerText = chapterName;
