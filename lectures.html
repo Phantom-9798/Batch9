@@ -63,220 +63,247 @@
     const db = getFirestore(app);
 
     // =========================================================================
-    // ISOLATED LECTURE DATABASE (100% COMPLETE 1-TO-1 93 CLASSES INCLUDED)
+    // ISOLATED LECTURE DATABASE (CDS OTA RECORDED VAULT WITH MAPPED YOUTUBE LINKS)
     // =========================================================================
     const lectureDatabase = {
       // ----------------- 1. CAPF SESSIONS -----------------
       "ch-capf-mentor-sessions": [
-        { lectureNo: "01", title: "Mentor Session 01 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis, official syllabus deep-dive.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.Mentorship%20Session%20-%2031%20August&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b582b8802523afdc925bd656cb06fd238640ef6e0779ada32986e6c5fdc91439d8c7e9754c9132fd4775b3e414f575b354dc94a3d0707a7659b3792a632147753a463edd2f946207a5eca660a87a2ba7a23571c408257449deab7ebbbf4af47161ca21bfcdee7828209f8a9708bac6a8095382a709a00fbfe7d34603ab8a9e6114c46eb00cf1e2d70ccf7d5ec2eeb1df93a", pdfUrl: "#" },
-        { lectureNo: "02", title: "Mentor Session 02 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis, official syllabus deep-dive.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=2.%20Mentorship%20Session%20-%201%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5829d3a3ed47820f41134038482549c8c35f263b801d8c885d4b728873d8abb735a0c9f6c26bfc0bbb6a663a14964ecc9245ae66fd68fa66db3b8c06047946e4838346fcfd6d07a57c682f2f9717a5a17a8094a068581a83dbe6eee47925b6f1112f9d6bb2cbc109e3c732d866b5039adde7a28fc27ccbd81df3af1f60fdead57afdcc57df14bc323e637aad46964022c7", pdfUrl: "#" },
-        { lectureNo: "03", title: "Mentor Session 03 : Strategic Roadmap & Timeline", desc: "Complete phase-wise preparation strategy.", duration: "45 Mins", videoId: "https://vimpd.nexield.in/?title=3.%20Mentorship%20Session%20-%205%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58116937e3a5a359762b50034e70e0e69dd362fcee53253b26861fee1d38050eb5eb442e95e0bc4822a0fa5f548b3955a38acd81233bac970a8cb32ab153af692778f790f9ffa929ac45fd01d06694fb4f9164816073e09bcccf788da77b59d7997e0ee890ca43cd97c883042ec4ec4b4d8cf13603b6af558156609c33bd42f397dbccc2d991eef031c57d572c9e712fc9", pdfUrl: "#" },
-        { lectureNo: "04", title: "Mentor Session 04 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=4.%20Mentorship%20Session%20-%209%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b580ab33dd747b4faee1e478c76400bd8d71c1f0f14c6a89e802ef87c485e27a28cb60d69c366dd0d303533c9645771ff763c9d561655990964d02c4df7c7f634227360f585e18b18a67a348f1a6fa91768944f6cd1bd44a07585ce4e4c873e7953311f707c5dc48bc5b66c6406540a858686f562a84db51aa74c92d0309a5e773d6a3cbdec8d5ccb756d321e26beb6cec1", pdfUrl: "#" },
-        { lectureNo: "05", title: "Mentor Session 05 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "https://vimpd.nexield.in/?title=5.%20Mentorship%20Session%20-%2016%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58d9885baf0232bbd6324c38ba2159087aa460ba9b9fc0d089a0e46c35739f8770b42f895ebea384cea9dfe6c68030e63bce3025ee926db26fa66a5860b39c5e3245e5327a8556d1e7d3d70e195b237a08c170d42c84b44d3db4bcb6401f4cfeb534348d7891d5b9b84a0d8860cf7f7003a78f6cae454904445917b74d2f409bb560b22e6ff29a93e99112850862cd62d0", pdfUrl: "#" },
-        { lectureNo: "06", title: "Mentor Session 06 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "https://vimpd.nexield.in/?title=6.%20Mentorship%20Session%20-%2019%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b580a9c2c680e9710d2e20a8e39a76e65841dfb1fd2153c2571279fb3a4b32c5c1eab3b216c640e5da30853da8ef6b0a32c1d0bac7ec2cd521cf12d6cbfd32a104916adca57d91dcbff0b862e594a049ce6e81694c66cdb2e52f61b61cd998dfd01e0e29ab067b2b1498dc30ef5a586dc0ae806ca9c5db0d44cbd8ea89b883383d35e9013e60b19b0569524d975b29f515d", pdfUrl: "#" }
+        { lectureNo: "01", title: "Mentor Session 01 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis, official syllabus deep-dive.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.Mentorship%20Session%20-%2031%20August&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b582b8802523afdc925bd656cb06fd238640ef6e0779ada32986e6c5fdc91439d8c7e9754c9132fd4775b3e414f575b354dc94a3d0707a7659b3792a632147753a463edd2f946207a5eca660a87a2ba7a23571c408257449deab7ebbbf4af47161ca21bfcdee7828209f8a9708bac6a8095382a709a00fbfe7d34603ab8a9e6114c46eb00cf1e2d70ccf7d5ec2eeb1df93a", pdfUrl: "#" }
       ],
       "ch-capf-internal-security": [
-        { lectureNo: "01", title: "Internal security challenges in 21st century", desc: "Border management, insurgency & modern security threats.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.%20Internal%20security%20challenges%20in%2021st%20century&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58c741afb1f6167378494dd5a7478ed277f58fbe0b0476166a102d9a79d2fc66f6ca139a8310ed93a1fb08e5ddb034351500d3c600a928602af4cd3e1cda0489f63fa94ea40d8b98b5b7b48973e35e9708c63b96c5297861f9a90925d2f4b925b4df44ecdfadd5dd16cc4461df18ea65d53437c72f67dfd4a43cd385b9ad0d943132250937777383d69dd0626b8e38daec", pdfUrl: "#" },
-        { lectureNo: "02", title: "Kashmir Militancy", desc: "Evolution, proxy war dynamics, security grid & modern scenario.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=2.%20Kashmir%20Militancy&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5809f02fa66023484a867999115205e5cae40c5fdea2ffd4b5a28b5d7c68d2f14277f3b6bf5a422c675f9e6d5e10bf2a30002296b2069b776fb5031533cf4bcc65b58ac6abb78b3fe882f14f8ff8c889f6d6689ad948b262ff78936396e331dd001a81bd01d62a5e0301406ed82affee2dcb9bd4101fd7a49b3cc4d673079f989dd7d2653f449641da5bbb679f53ddf21a", pdfUrl: "#" }
+        { lectureNo: "01", title: "Internal security challenges in 21st century", desc: "Border management, insurgency & modern security threats.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.%20Internal%20security%20challenges%20in%2021st%20century&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58c741afb1f6167378494dd5a7478ed277f58fbe0b0476166a102d9a79d2fc66f6ca139a8310ed93a1fb08e5ddb034351500d3c600a928602af4cd3e1cda0489f63fa94ea40d8b98b5b7b48973e35e9708c63b96c5297861f9a90925d2f4b925b4df44ecdfadd5dd16cc4461df18ea65d53437c72f67dfd4a43cd385b9ad0d943132250937777383d69dd0626b8e38daec", pdfUrl: "#" }
       ],
       "ch-mentor-sessions": [
-        { lectureNo: "03", title: "Mentor Session 03 : Strategic Roadmap & Timeline", desc: "Complete phase-wise preparation strategy.", duration: "45 Mins", videoId: "pC6cxRQu3P4", pdfUrl: "#" },
-        { lectureNo: "04", title: "Mentor Session 04 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis.", duration: "50 Mins", videoId: "MbwFTOEkx4c", pdfUrl: "#" },
-        { lectureNo: "05", title: "Mentor Session 05 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "vxh_UIChO7M", pdfUrl: "#" }
+        { lectureNo: "03", title: "Mentor Session 03 : Strategic Roadmap & Timeline", desc: "Complete phase-wise preparation strategy.", duration: "45 Mins", videoId: "pC6cxRQu3P4", pdfUrl: "#" }
       ],
 
       // ----------------- 2. AFCAT SESSIONS -----------------
-      "ch-afcat-math-01": [
-        { lectureNo: "01", title: "Probability 01 : Fundamentals, Dice & Coins Rules", desc: "Sample space, basic probability formulas.", duration: "72 Mins", videoId: "https://vimpd.nexield.in/?title=1.%20Probability%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b587b81b1094738d239ab7d2635a5a079dcb7c0be8b7872b1cb5a55d9f4fad20c1feed32be33f9d3f5e72fcf7d7aea7fb5cc9e883b33175b723040ec27dae21ba6462cd5a9d66827b05a97d508ac495efe73dba9655aa2302783728acbfb53db96935b293be1bcb71e254c6f245691ad67ab3b1e26bd208c55791c677049e6e1841ba9f861501ed24261f333a7ed3c3efd3", pdfUrl: "#" },
-        { lectureNo: "02", title: "Probability 02 : Fundamentals, Dice & Coins Rules", desc: "Sample space, basic probability formulas.", duration: "70 Mins", videoId: "https://vimpd.nexield.in/?title=2.%20Probability%20Class%202&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58db8e06dcc0f966b042e76216ef4e0f872ffd6ac73f51f0ca8a60f033a9819769a8a3c5aa6364fc3a9b26f77439808da29dbde564b9a20762973de2b178bb0a10ea3d2fc9c6ca31f69bde90ed5d86b6940e460c588221892e77556c8a128cea1b264f3844a1795f0d4bd0a04ecb61d766a420ea8cb4f470556c762a52f296c1cb8180b90c2d01c926d639e743ec61aeb8", pdfUrl: "#" },
-        { lectureNo: "03", title: "Probability 03 : Fundamentals, Dice & Coins Rules", desc: "Sample space, basic probability formulas.", duration: "70 Mins", videoId: "https://vimpd.nexield.in/?title=3.%20Probability%20Class%203&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58efdeab2a5586a826001538012bf1be4ac4f5f5973cc5b68fc020d5deffa1ae7c283c3a790a005fa4f5a2e929aabb22a5044d2ee8881ea1e5a4213afce83418deff2bcd4db1425bcf4e53a97c44385af5d8f9aa15079fd0712d2bb8f813777cd45408672da3d329fa3988a32bf92a40380fbfea2080bc1198367e19d9f27bb09e419f43e5809fb7566015de5d69aa4811", pdfUrl: "#" },
-        { lectureNo: "04", title: "Probability 04 solution : Fundamentals, Dice & Coins Rules", desc: "coin and calendar.", duration: "20 Mins", videoId: "https://vimpd.nexield.in/?title=7.%20Probability%20(Coin%20%26%20Calendar)%20-%20Solution&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5812e63becb279f00f2fc7e2dbb205777be611b8774db4ea723de25befabe7c06af010520e2051d430c12deb8979a44ba0db3881fbee128d713457c4e2c3d01d482ce3ef1ec3cf352dbcdbd545c6a10ff4c291554fb959914a7e3a3314e3ca9b05f69db6c2b76513084b34e8e70acad739bb4d985478b0a18a7b10875404c1cfeb36e65481d7d17b582ac2a2a2b14fe16d", pdfUrl: "#" },
-        { lectureNo: "05", title: "Probability 05 solution : Fundamentals, Dice & Coins Rules", desc: "cards and balls.", duration: "20 Mins", videoId: "https://vimpd.nexield.in/?title=8.%20Probability%20(Cards%20%26%20Balls)%20-%20Solution&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58a20f58d2652cae1ee58788a302f72df1076c5bedd2179790c66362c2d5203373e6db9213d3e2a72a41c1d08b9f693ce18790983267283587573652bb5cd299fe5edc42cd35beaf63f7bee4ea3f1ae13c72d1f34f24e3ebb78cfccf82b04195391275d1de11d9bd019b48f2130f0dcec314d77bc3d892259b91b37c9327942bdf301dd320f9ebe9e427bd38cd95e3e604", pdfUrl: "#" }
-      ],
-      "ch-afcat-math-02": [
-        { lectureNo: "01", title: "Statistics 01 : Stats", desc: "Stats.", duration: "73 Mins", videoId: "https://vimpd.nexield.in/?title=4.%20Statistics%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b588e7052779214d6a4dff9ee9a050e997647079046e72c64ffd9114caa473a55f58cbe0fa5f7c3907add06610ca83172a36d51bfb24b9e50fabc8e8c9a296951e6c2004ea5b6ef82b3b05d332696dd670fec49e83472fabd2cd2eee8aea595ff4df3ea22937fd07b304e3205bb870e941f9fada7c4b99182053a906ceda5698725e9332ba5f766c27ceeac278abb651ce7", pdfUrl: "#" },
-        { lectureNo: "02", title: "Statistics 02 : Stats", desc: "Stats.", duration: "65 Mins", videoId: "https://vimpd.nexield.in/?title=5.%20Statistics%20Class%202&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5887f6cbc8dd5ce16b825c1d14576e5093d589fb7d004233a921cfe3ed94a4b7bd10e1ebd986abf73ef62b3e72ac7ec9a12adc1b3d5e78301b3fc6097413aed31b89a1a8815959eb79871e1672400f583e4752ea569153853bd0151c405a96b0a64fc557329ae672b175aed17e4f261bd3438b6343d9d3cd811047fd306d995b8cc5faece3c1e939edd1914f166ddc653d", pdfUrl: "#" },
-        { lectureNo: "03", title: "Statistics 03 : Stats", desc: "Stats.", duration: "81 Mins", videoId: "https://vimpd.nexield.in/?title=6.%20Statistics%20Class%203&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58802002c5c1637f94dd0d50123ab41274027aae2b1033ba7fa975b231557b68cdf372c7b0add89ca06a8794aa4a2a44f8b7295be300dd58331a0984c7ceea7c491dd1319dc1be9a4b7bf695786438d8379d7e44b1c9b9a748ebee6bf16679e6e1060ccd9c81d2ad1628ac68c07bdf4dddf1e9fe36a3a5baaaf03ab3dcf790efc22fe5fe0ec2da453c38bc8166282b4ade", pdfUrl: "#" }
-      ],
-      "ch-afcat-math-03": [
-        { lectureNo: "01", title: "Height and distance 01 : Trigonometry", desc: "Trigos.", duration: "59 Mins", videoId: "https://vimpd.nexield.in/?title=7.%20Height%20And%20Distance%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5880ab66a790f7b505b4670a400a359e28dd03351b07130b6fdd7d9c8ce5bd91abb6c9f98c0504c7a88bd65cf335f46b5289f111b4b4034ea922cdea95e558a11b5a3e4c8cfeb248dec4fc4df78c451303c0a0e507d08823692259a5d4a1be26a43c652f971f24bbce6e6033a036fba5d17d186c785292108ef7a65fc62b681a0efd3260372bd613e232d2b17c72603fd6", pdfUrl: "#" }
-      ],
-      "ch-afcat-reasoning-01": [
-        { lectureNo: "01", title: "Anurag Bhaiya - Intro Session", desc: "Reasoning exam pattern.", duration: "Intro Class", videoId: "https://vimpd.nexield.in/?title=1.%20Anurag%20Bhaiya%20-%20Intro%20Class&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58609e0eef1b54bb9d69eb6a3f6f8f74cb2015c4bdb58a6ce5cd3abfb1d66bd2b104253736b72d9bea535242dbb080752d55e64002a6a21dd8995565aa87c170dba5f9c7035dd84b317fc9211b0d441dde45f18edcd9b29a198ad5c084cba7091598c5c66cf63e47438a7e9eac84a47fe74e2f9d1ab72afc6fdfce075c2821b39c46f077077f2adbf78f421fb66a3f7702", pdfUrl: "#" }
-      ],
-      "ch-afcat-reasoning-02": [
-        { lectureNo: "01", title: "Coding Decoding Class 1", desc: "Letter coding & patterns.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=2.%20Coding%20Decoding%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58fc09e9d2b749955b98baabec0eee36d7cf9f4b647f37734e282fea2f1a4b1edc32e89e508a504d0ed342a157b277688640ab22efe983f465c3c0dbceed53098a8fda069be7b6796358a6017f5500546bf16546fd501abd4b52ca01fe9c6a19748323b8c19de496cdad002c0bd0a63d6e8932215eac3ccb58abd0c32dfa52b13f237c79bdf8691d41f2d6062a3bbf8e36", pdfUrl: "#" }
+      "ch-afcat-eng-vocab-01": [
+        { lectureNo: "01", title: "Idioms & Phrases Class 01", desc: "High-yield AFCAT idioms with contextual usage analysis.", duration: "HD Session", videoId: "", pdfUrl: "#" }
       ],
 
-      // ----------------- 3. CDS MATHEMATICS RECORDED VAULT (EXACT 1-TO-1 93 CLASSES) -----------------
-      
-      // 1. Ratio and Proportion (1 to 6)
-      "ch-cds-ratio": [
-        { lectureNo: "01", title: "Ratio Class 1", desc: "Fundamental ratio concepts.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=2.%20Ratio%20Class%202&link=6fb2cb69ebffe3a113f8aa75d03d06de308834c3b01d189392e6931b0fd750ed4238f3d07e4ebfb79de416a14931d601d25d722ef8736cd15a6adeddf7d758b3390b374cefd302eaef6f5b90b97c134ed58c419e772a", pdfUrl: "#" },
-        { lectureNo: "02", title: "Ratio Class 2", desc: "Ratio properties & compound rules.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=4.%20Ratio%20Class%204&link=da7e40fea4fa6346d0e0ae59410d72df177ebf893c0ff7521fcc6fe9e07df54542a3fe50edabe8dce0a4fde76467fcdf327dc207627724e56c9602997f3ca72f951f274aa21f7f35444c42beddf6baee6843b6b2db20", pdfUrl: "#" },
-        { lectureNo: "03", title: "Ratio Class 3", desc: "Mean proportion and advanced rules.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=6.%20Ratio%20Last%20Class%20%26%20Average%20Class%201&link=f157acf1ed324125bc347cdae0b21e0b4cab8294fbc12919516fa8ef62fa9c13602299a3bf40cc47669a7f7e77e2ecec38eabec862c89bacedf7d55fec40823940afca9a3c987f8ad1bb4b6ee30ba23f7fa8470437f3", pdfUrl: "#" },
-        { lectureNo: "04", title: "Ratio Class 4", desc: "Income, expenditure & savings models.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=8.%20Average%20Class%203&link=c25890cc9f9ea98b9cb5eb49d81299a5cc9561d8a4e0588baef443b7887a27553b18f11739280acc590190de534de05152d35b19ae5a03e7e17719242308ba0930c98dc23c96fd892c3fd7d7dc5e866593e0cb3ba254", pdfUrl: "#" },
-        { lectureNo: "05", title: "Ratio Class 5", desc: "Partnership, shares & distribution.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=10.%20Time%20And%20Work%20Class%202&link=f15674376517d1dd38d3aafe293fb0462f995030d09f3edc6db14517d9b01683f8640e08b8b058e37c71481e98b6e608890ff798e7ea241da48188aba2e8069d9b30c96267eb3223df3e070edce56fdd0de21bfa1681", pdfUrl: "#" },
-        { lectureNo: "06", title: "Ratio Last Class & Average Class 1", desc: "Ratio wrap-up and Average fundamentals.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=12.%20Time%20And%20Work%20Class%204&link=8308a99de29dc5af2d311ef1644177e51449433806826a571a097e4d329b676254d3796b96d84838cd4f7fcac68583c78f972bfcb301ba5e795874ad2a6dceb824a8cfe1e1dd985192dfd92e1d7314a3e0c13cd9c196", pdfUrl: "#" }
+      // ----------------- 3. CDS OTA MAPPED SUBJECTS (YOUTUBE VIDEOS) -----------------
+      "ch-cds-ota-physical-geography": [
+        { lectureNo: "01", title: "Climatology 1", desc: "Climatology foundational concepts.", duration: "HD Session", videoId: "DYU_F-zG-1M", pdfUrl: "#" },
+        { lectureNo: "02", title: "Climatology 2", desc: "Advanced atmospheric pressure & wind systems.", duration: "HD Session", videoId: "ovDBDoofNTE", pdfUrl: "#" },
+        { lectureNo: "03", title: "Climatology 3", desc: "Atmospheric moisture and precipitation.", duration: "HD Session", videoId: "nWBKZiykPRY", pdfUrl: "#" },
+        { lectureNo: "04", title: "Climatology 4", desc: "Air masses and climate classification.", duration: "HD Session", videoId: "bWEGFZ4o8tM", pdfUrl: "#" },
+        { lectureNo: "05", title: "Climatology 5", desc: "Cyclones and global climatic belts.", duration: "HD Session", videoId: "CjOZ1CjP648", pdfUrl: "#" },
+        { lectureNo: "06", title: "Climatology Fronts", desc: "Fronts and weather disturbances.", duration: "HD Session", videoId: "ZQ44FeA5YlE", pdfUrl: "#" },
+        { lectureNo: "07", title: "Oceanography 1", desc: "Relief of ocean floor and salinity.", duration: "HD Session", videoId: "nripPA4jsao", pdfUrl: "#" },
+        { lectureNo: "08", title: "Oceanography 2", desc: "Ocean currents and tides.", duration: "HD Session", videoId: "-EM9nqDpwJs", pdfUrl: "#" },
+        { lectureNo: "09", title: "Oceanography 3", desc: "Marine resources and coral reefs.", duration: "HD Session", videoId: "8I_HDgr6_qY", pdfUrl: "#" },
+        { lectureNo: "10", title: "Geomorphic processes 1", desc: "Endogenic and exogenic forces.", duration: "HD Session", videoId: "HS8NliKfdOs", pdfUrl: "#" },
+        { lectureNo: "11", title: "Geomorphic processes 2", desc: "Weathering and mass movement.", duration: "HD Session", videoId: "LyKiD_NRqOw", pdfUrl: "#" },
+        { lectureNo: "12", title: "Landform by running water", desc: "Fluvial landforms and drainage cycles.", duration: "HD Session", videoId: "MQyDKjS8q8o", pdfUrl: "#" },
+        { lectureNo: "13", title: "Landform by ground water", desc: "Karst topography and underground features.", duration: "HD Session", videoId: "2ZDC-OIPwes", pdfUrl: "#" },
+        { lectureNo: "14", title: "Landform by glaciers", desc: "Glacial depositional and erosional landforms.", duration: "HD Session", videoId: "QgCl-ABdgAc", pdfUrl: "#" },
+        { lectureNo: "15", title: "Landform by sea wave", desc: "Coastal landforms and marine erosion.", duration: "HD Session", videoId: "DQ69YtPQzuM", pdfUrl: "#" },
+        { lectureNo: "16", title: "Landform by wind", desc: "Aeolian landforms in arid regions.", duration: "HD Session", videoId: "h8wJYqexP6I", pdfUrl: "#" },
+        { lectureNo: "17", title: "Earthquake", desc: "Seismic waves and epicenter analysis.", duration: "HD Session", videoId: "je3oICjBHSg", pdfUrl: "#" },
+        { lectureNo: "18", title: "Earth's interior", desc: "Crust, mantle, core and discontinuities.", duration: "HD Session", videoId: "17TTLgwEv88", pdfUrl: "#" },
+        { lectureNo: "19", title: "Volcanoes", desc: "Volcanic landforms and eruption types.", duration: "HD Session", videoId: "BMG9Q7jwDeI", pdfUrl: "#" },
+        { lectureNo: "20", title: "Plate tectonics", desc: "Continental drift and plate boundaries.", duration: "HD Session", videoId: "UfgnLF6c5sQ", pdfUrl: "#" },
+        { lectureNo: "21", title: "Rocks and minerals", desc: "Igneous, sedimentary, and metamorphic rocks.", duration: "HD Session", videoId: "CgAf2p6dDVI", pdfUrl: "#" }
       ],
-
-      // 2. Average (7 to 8)
-      "ch-cds-average": [
-        { lectureNo: "01", title: "Average Class 2", desc: "Weighted averages and change in value.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=14.%20Time%20And%20Distance%20Class%202&link=f0181b000add88ebec9cde054f463da5a213fde1f07f78e01110d8f87e08aa82af96fa784410e5f7609496b0aa4a445a0b971e98b117fae50a3f90f4c8738f0735338179d293a2b7df7214a1a7c15a0d9280e708d798", pdfUrl: "#" },
-        { lectureNo: "02", title: "Average Class 3", desc: "Replacement, inclusion & exclusion tactics.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=16.%20Time%20And%20Distance%20Class%204&link=8b3d5c1cb225cf51d80dad01cf338c1de8289bac2c8c782b5d56b65bfcb797dda83fdd0196a3ff415e51f0d573fc84ebd5e8dd69e9cd614018744a5ca0287ecdf764f34a7ef07300fd583d498b3fd96a9ae15dc4dd39", pdfUrl: "#" }
+      "ch-cds-ota-indian-geography": [
+        { lectureNo: "01", title: "Indian geography basic", desc: "Location, extent and neighboring countries.", duration: "HD Session", videoId: "KReGkP9nVDE", pdfUrl: "#" },
+        { lectureNo: "02", title: "Himalayas + plain", desc: "Himalayan ranges and Northern plains.", duration: "HD Session", videoId: "K-45zpv-_Vo", pdfUrl: "#" },
+        { lectureNo: "03", title: "Peninsular plateau", desc: "Central highlands and Deccan plateau.", duration: "HD Session", videoId: "5z_8E-L5vM0", pdfUrl: "#" },
+        { lectureNo: "04", title: "Coastal area + island", desc: "Western/Eastern coasts and island groups.", duration: "HD Session", videoId: "y4J7EDOM0Po", pdfUrl: "#" },
+        { lectureNo: "05", title: "Rivers", desc: "Major river systems and drainage patterns.", duration: "HD Session", videoId: "BtKIVMPrJgU", pdfUrl: "#" },
+        { lectureNo: "06", title: "All rivers", desc: "Comprehensive drainage mapping.", duration: "HD Session", videoId: "35mxgl2PaUw", pdfUrl: "#" },
+        { lectureNo: "07", title: "Soil", desc: "Major soil types in India.", duration: "HD Session", videoId: "JDDyZ3atF14", pdfUrl: "#" },
+        { lectureNo: "08", title: "Vegetation", desc: "Natural vegetation and forest types.", duration: "HD Session", videoId: "xR1SKCkVMbU", pdfUrl: "#" },
+        { lectureNo: "09", title: "Lakes", desc: "Freshwater and saline lakes across India.", duration: "HD Session", videoId: "HrDPL5C6D1M", pdfUrl: "#" },
+        { lectureNo: "10", title: "Indian ports", desc: "Major and minor seaports.", duration: "HD Session", videoId: "itAnYglQYS4", pdfUrl: "#" },
+        { lectureNo: "11", title: "Indian highway + railway", desc: "Transport corridors and networks.", duration: "HD Session", videoId: "JzUcY7JTWpI", pdfUrl: "#" },
+        { lectureNo: "12", title: "Industries + minerals", desc: "Mineral belts and industrial hubs.", duration: "HD Session", videoId: "TTsccUrqDTI", pdfUrl: "#" },
+        { lectureNo: "13", title: "USDA SOIL TAXONOMY", desc: "Scientific classification of soils.", duration: "HD Session", videoId: "VNr6d_VdHDc", pdfUrl: "#" },
+        { lectureNo: "14", title: "India state of forest report", desc: "ISFR key data and statistics.", duration: "HD Session", videoId: "_mgqQS4CWwE", pdfUrl: "#" },
+        { lectureNo: "15", title: "Indian climate", desc: "Monsoon mechanism and seasons.", duration: "HD Session", videoId: "QGqaWdb9wT8", pdfUrl: "#" },
+        { lectureNo: "16", title: "Indian climate khatam", desc: "Monsoon retreat and climatic regions.", duration: "HD Session", videoId: "_NKLSGwLpaU", pdfUrl: "#" },
+        { lectureNo: "17", title: "Jet stream + western disturbance", desc: "Upper air circulation and winter rains.", duration: "HD Session", videoId: "AlnKrCXbIIo", pdfUrl: "#" }
       ],
-
-      // 3. Time and Work (9 to 12)
-      "ch-cds-time-work": [
-        { lectureNo: "01", title: "Time And Work Class 1", desc: "Efficiency rules, LCM approach & daily rates.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=18.%20Time%20And%20Distance%20Class%206&link=4afbfe23cb2f4610188f019b003f87a9b84f7f00dc71f49d40ba22d84a9852ad1493ff62f802c47c5650029bea1d1ce727be6acc0828293ee6d896209d697ad3a1c78b22712961d48e5c031b65a5902d0a4458b51da5", pdfUrl: "#" },
-        { lectureNo: "02", title: "Time And Work Class 2", desc: "Alternate days working and leaving before completion.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=20.%20Percentage%20Class%202&link=4a865d09e1e9b55166aac47d1f113f8fac88b2f2eb10e133ddcbfc13f3d01d592ae69602e717391c9f42104e7de7a01f2cc4aac3c4cc53d4ded17884638414c910dcb4824aea47ba616eb5e81026b825a85ac9846339", pdfUrl: "#" },
-        { lectureNo: "03", title: "Time And Work Class 3", desc: "Wages distribution and equivalent worker models.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=22.%20Percentage%20Last%20Class&link=60a7c3a099cff7bc72ee0ebd340ca6fd5bf104b0a40e01a72baa366c015c5e38ccee92ab991979071f52d43b336960c6aadb432ecacfa52ab7e2c09bb1a02abbee0d7bac8e3258a68d448a30d31a80fd5f61b07dd359", pdfUrl: "#" },
-        { lectureNo: "04", title: "Time And Work Class 4", desc: "Pipes, cisterns, and leakages problems.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=24.%20Profit%20And%20Loss%20Class%202&link=7310c261c0bdf17d95eaddd30acf6a125836c1343d58d76147cb63b0f61f0d644d5a34722fdc13c52203b11e55b60dcd290963341d11ea937f5d44c804482a8b258a155ea39bf60c2fbda14cbc575c71d5ced44c3f5f", pdfUrl: "#" }
+      "ch-cds-ota-ancient-history": [
+        { lectureNo: "01", title: "Pre history 1", desc: "Paleolithic, Mesolithic, Neolithic ages.", duration: "HD Session", videoId: "dSazZu4ZPkM", pdfUrl: "#" },
+        { lectureNo: "02", title: "Pre history 2", desc: "Chalcolithic cultures and tools.", duration: "HD Session", videoId: "1YxoaTd8U4c", pdfUrl: "#" },
+        { lectureNo: "03", title: "Pre history 3", desc: "Transition to civilization.", duration: "HD Session", videoId: "uYHxaHJ8Qw0", pdfUrl: "#" },
+        { lectureNo: "04", title: "IVC 1", desc: "Harappan civilization towns and architecture.", duration: "HD Session", videoId: "nN3K2grTlnA", pdfUrl: "#" },
+        { lectureNo: "05", title: "IVC 2", desc: "Economy, trade, and society of IVC.", duration: "HD Session", videoId: "daUYVa5K-Fg", pdfUrl: "#" },
+        { lectureNo: "06", title: "IVC 3", desc: "Decline and important sites.", duration: "HD Session", videoId: "f-OyxblhAkg", pdfUrl: "#" },
+        { lectureNo: "07", title: "Vedic age", desc: "Early Vedic society and literature.", duration: "HD Session", videoId: "F0FyX2T-xpE", pdfUrl: "#" },
+        { lectureNo: "08", title: "Vedic age 2", desc: "Later Vedic period changes.", duration: "HD Session", videoId: "Y1XltG3r9cA", pdfUrl: "#" },
+        { lectureNo: "09", title: "Vedic age 3", desc: "Vedic philosophy and rituals.", duration: "HD Session", videoId: "r_-DMSm8578", pdfUrl: "#" },
+        { lectureNo: "10", title: "Vedic age 4", desc: "Polity and economy in Vedic era.", duration: "HD Session", videoId: "IdnOWDw27Ug", pdfUrl: "#" },
+        { lectureNo: "11", title: "Mahajanapadas", desc: "Rise of 16 Mahajanapadas.", duration: "HD Session", videoId: "S7RLjfBGY14", pdfUrl: "#" },
+        { lectureNo: "12", title: "Magadh dynasty", desc: "Haryanka, Shishunaga, Nanda dynasties.", duration: "HD Session", videoId: "HdDF22Z3oIA", pdfUrl: "#" },
+        { lectureNo: "13", title: "Indian darshan", desc: "Six schools of Indian philosophy.", duration: "HD Session", videoId: "dJEt7LSvQ_Y", pdfUrl: "#" },
+        { lectureNo: "14", title: "Buddhism", desc: "Life and teachings of Buddha.", duration: "HD Session", videoId: "XQe8IyW-KSU", pdfUrl: "#" },
+        { lectureNo: "15", title: "Buddhism 2", desc: "Buddhist councils and texts.", duration: "HD Session", videoId: "B1Hc3GpHRmc", pdfUrl: "#" },
+        { lectureNo: "16", title: "Jainism", desc: "Tirthankaras and Mahavira teachings.", duration: "HD Session", videoId: "vaeP5xI47Ds", pdfUrl: "#" },
+        { lectureNo: "17", title: "Vedic age pyq + Jainism", desc: "Previous years questions practice.", duration: "HD Session", videoId: "teispyzxdtY", pdfUrl: "#" },
+        { lectureNo: "18", title: "Mauryan Empire", desc: "Chandragupta Maurya and Bindusara.", duration: "HD Session", videoId: "VbPl2uDeQg8", pdfUrl: "#" },
+        { lectureNo: "19", title: "Mauryan Empire 2", desc: "Ashoka the Great and Dhamma.", duration: "HD Session", videoId: "a7goOIgcFoM", pdfUrl: "#" },
+        { lectureNo: "20", title: "Mauryan Empire 3", desc: "Administration and edicts.", duration: "HD Session", videoId: "MLQQuG4vrR8", pdfUrl: "#" },
+        { lectureNo: "21", title: "Mauryan Empire 4", desc: "Art, architecture and decline.", duration: "HD Session", videoId: "v3JlQyjt7fw", pdfUrl: "#" },
+        { lectureNo: "22", title: "Post Mauryan period", desc: "Shungas, Kanvas, Satavahanas.", duration: "HD Session", videoId: "2-9OBTxt4Tg", pdfUrl: "#" },
+        { lectureNo: "23", title: "Post mauryan period 2", desc: "Indo-Greeks, Shakas, Kushanas.", duration: "HD Session", videoId: "ImGJcuK1SDI", pdfUrl: "#" },
+        { lectureNo: "24", title: "Sangam age", desc: "Chola, Chera, Pandya kingdoms.", duration: "HD Session", videoId: "cm893_ZrD_w", pdfUrl: "#" },
+        { lectureNo: "25", title: "Gupta period", desc: "Chandragupta I, Samudragupta, Chandragupta II.", duration: "HD Session", videoId: "wDBSJnj1JIE", pdfUrl: "#" },
+        { lectureNo: "26", title: "Gupta period 2", desc: "Golden age culture, science, and decline.", duration: "HD Session", videoId: "L4aKfkGULJY", pdfUrl: "#" },
+        { lectureNo: "27", title: "Post gupta period", desc: "Harshavardhana and regional kingdoms.", duration: "HD Session", videoId: "oIHH9Vx47rE", pdfUrl: "#" }
       ],
-
-      // 4. Time and Distance (13 to 18)
-      "ch-cds-time-dist": [
-        { lectureNo: "01", title: "Time And Distance Class 1", desc: "Speed conversions and late-early models.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=26.%20Profit%20And%20Loss%20Class%204&link=bd195741ebe7e24b00dd276a6f23ebac9d4a0d5e10b9770211ca267dd0f091bb1bab43d0d8b408ded173ab34fe0ef01dd33279afeb7902fa5649fe97b5fb3ab26a9a9c6c794c1e9add1b373de1619a86002fc0cff1a7", pdfUrl: "#" },
-        { lectureNo: "02", title: "Time And Distance Class 2", desc: "Constant distance models & ratio methods.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=28.%20Interest%20Class%202&link=b0f1a652616705e0ff2cb41cd593e83242c28390b3f554642f0cf5153a2fe8b7a07051e4e015cca1410fefcc86eff98d0ae91058f3fc55a328ba1d639a3997791ee149b738a407f17fb2111547256f949eee99e13cbb", pdfUrl: "#" },
-        { lectureNo: "03", title: "Time And Distance Class 3", desc: "Relative speed and meeting point calculations.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=30.%20Interest%20Class%204&link=ac651fc568f39b0c825c876febf4458195595fee1f5cda9550013f1fb3a509d61ac48bdd44bd7812016ea1bdbd34330f7c8ed2f9c7713bf35a4f5c85157f0abc32b85b99fd63d6464adc6b47219409ff1020cdd75794", pdfUrl: "#" },
-        { lectureNo: "04", title: "Time And Distance Class 4", desc: "Trains crossing poles, platforms and persons.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=32.%20Number%20System%20Class%202&link=04a5905b88763125866dcd86b1c77322b67e1541a4aa69b4c12ea049c11d876670641b31c498ceb5bf64965a412f62812423e05a65c07c2732372972f0e259ddd1c7a719441b32b2b884e7073cd228c28d89cc57a75a", pdfUrl: "#" },
-        { lectureNo: "05", title: "Time And Distance Class 5", desc: "Boats and streams, upstream & downstream.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=34.%20Number%20System%20Class%204&link=e43354ad57b7edddb3d0caf4de74626fe72723e21da272355f6292763a322ce634a69ddc858e372a14f9f9da751d3a4a14cdbf87f0b675e244504c87a36f15b53a21e7dfabd0e61db8a9a6c5fa393c11591cbc1a433b", pdfUrl: "#" },
-        { lectureNo: "06", title: "Time And Distance Class 6", desc: "Circular tracks and linear races problems.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=36.%20Number%20System%20Class%205%20Part%202&link=cbe3e88ebe4b1241f91f52474521bda0d76bb7dceed48818115b0874fc3d7c819cf600acea49bcc7e1a9f417ad1cd3660383dbcca5b3b972d7446e38fcfc764899397ca55c6f30d31677effee48274654fc5627f1b5a", pdfUrl: "#" }
+      "ch-cds-ota-medieval-history": [
+        { lectureNo: "01", title: "Medieval History Complete", desc: "Delhi Sultanate, Mughal Empire & regional kingdoms overview.", duration: "HD Session", videoId: "HDDF22Z3oIA", pdfUrl: "#" }
       ],
-
-      // 5. Percentage (19 to 22)
-      "ch-cds-percent": [
-        { lectureNo: "01", title: "Percentage Class 1", desc: "Fractions conversion & base values.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=38.%20Number%20System%20Class%207&link=94e466465c019d79df412cc7608bc8f21b20707c111ecd70352c4844a9936d68b52f29a2509396c6e265bd4bea21cce2f457bf3c36b71003922888a340b2dd8c64c22089ab1a459f03d7f829a46c9739568c77199ed6", pdfUrl: "#" },
-        { lectureNo: "02", title: "Percentage Class 2", desc: "Successive changes and multiplier approach.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=40.%20Simplification%20Class%201&link=5f394c99e3258f618e3ea0ededc9572587d37aee7e65eb04ba5ff7b8189019ae6c2198694f0687dd9e6471cf036b38e234255744aebe80f7b30f661490b54fd2766b71e6ea782fcbd4bfb286e7511063ae399fd7d3af", pdfUrl: "#" },
-        { lectureNo: "03", title: "Percentage Class 3", desc: "Price, consumption, and income distributions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=42.%20LCM%20%26%20HCF&link=d796f7fb3244df636b3838fe73a0934ea2e9bb2a27157d2fc6580882d7517dd0382d2dfd41b155e81801177a7911518606b25cfceb0d582b9d4041ca0a8d15f3505760ef30c04fd55f42227237fa471f9c46c3330b90", pdfUrl: "#" },
-        { lectureNo: "04", title: "Percentage Last Class", desc: "Election problems and passing marks.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=44.%20Equation%20Class%2001&link=aad84cee4723b53e719448ff44dc30d3d8047629c2ece38d0803c49907468b1de6d6dffcf23ad2499899aa5967972100e89534c31a70f903bf8d4d7c1955703efaf1c8cbcff28d71901aae3a7b4184d8a4e832b8afe6", pdfUrl: "#" }
+      "ch-cds-ota-modern-history": [
+        { lectureNo: "01", title: "Intro + estado da india", desc: "European penetration into India.", duration: "HD Session", videoId: "_G6PG8kU9vE", pdfUrl: "#" },
+        { lectureNo: "02", title: "Estado da india", desc: "Portuguese in India.", duration: "HD Session", videoId: "RVelfF5M7tc", pdfUrl: "#" },
+        { lectureNo: "03", title: "British + french east company", desc: "English and French corporate expansion.", duration: "HD Session", videoId: "W-0hbD1WcCo", pdfUrl: "#" },
+        { lectureNo: "04", title: "Dutch voc", desc: "Dutch trading activities.", duration: "HD Session", videoId: "8ltpyRNSxTc", pdfUrl: "#" },
+        { lectureNo: "05", title: "Carnatic war", desc: "Anglo-French Carnatic wars.", duration: "HD Session", videoId: "hJ30xGDuhAs", pdfUrl: "#" },
+        { lectureNo: "06", title: "Bengal", desc: "Conquest of Bengal and Plassey.", duration: "HD Session", videoId: "dbJM63i-fDI", pdfUrl: "#" },
+        { lectureNo: "07", title: "Rise of regional states", desc: "Awadh, Hyderabad, Mysore, Punjab.", duration: "HD Session", videoId: "LCHZU_z-mvQ", pdfUrl: "#" },
+        { lectureNo: "08", title: "Anglo mysore war", desc: "Hyder Ali, Tipu Sultan and wars.", duration: "HD Session", videoId: "tWTlZv-jaQo", pdfUrl: "#" },
+        { lectureNo: "09", title: "Anglo maratha", desc: "Maratha confederacy and British.", duration: "HD Session", videoId: "rMksILduaXs", pdfUrl: "#" },
+        { lectureNo: "10", title: "1757-1813", desc: "Mercantilism and consolidation phase.", duration: "HD Session", videoId: "Gx-ST2VteVk", pdfUrl: "#" },
+        { lectureNo: "11", title: "Phase of industrial capitalism", desc: "Free trade imperialism and drain of wealth.", duration: "HD Session", videoId: "2YM43484gEQ", pdfUrl: "#" },
+        { lectureNo: "12", title: "Annexation of Punjab and sindh", desc: "Sikh wars and annexation.", duration: "HD Session", videoId: "fHF3k3RW1Po", pdfUrl: "#" },
+        { lectureNo: "13", title: "Charter act", desc: "Charter acts of 1793 to 1853.", duration: "HD Session", videoId: "IraHOOPelyg", pdfUrl: "#" },
+        { lectureNo: "14", title: "Revolt 1857", desc: "Causes, spread and suppression of 1857 revolt.", duration: "HD Session", videoId: "UfebvYjdSnI", pdfUrl: "#" },
+        { lectureNo: "15", title: "Peasant and tribal revolts", desc: "Santhal, Munda, Indigo revolts.", duration: "HD Session", videoId: "7Yskvm5JYHc", pdfUrl: "#" },
+        { lectureNo: "16", title: "Socio religious reform movement", desc: "Raja Ram Mohan Roy, Arya Samaj, etc.", duration: "HD Session", videoId: "mZcAiSVN5pk", pdfUrl: "#" },
+        { lectureNo: "17", title: "Muslim and sikh reforms", desc: "Aligarh movement, Singh Sabha.", duration: "HD Session", videoId: "W8cexI0yv0w", pdfUrl: "#" },
+        { lectureNo: "18", title: "Association before congress", desc: "Political associations in 19th century.", duration: "HD Session", videoId: "XTvq-AyICco", pdfUrl: "#" },
+        { lectureNo: "19", title: "Formation of congress", desc: "INC establishment in 1885.", duration: "HD Session", videoId: "gmI4_edVQRI", pdfUrl: "#" },
+        { lectureNo: "20", title: "Extremist", desc: "Lal-Bal-Pal and Surat phase.", duration: "HD Session", videoId: "PBtZD2ghuMQ", pdfUrl: "#" },
+        { lectureNo: "21", title: "Surat split", desc: "1907 Congress split.", duration: "HD Session", videoId: "p9jjg2Me0Jo", pdfUrl: "#" },
+        { lectureNo: "22", title: "Lucknow pack", desc: "1916 Lucknow pact and Home Rule.", duration: "HD Session", videoId: "Tj9NWaOuA8c", pdfUrl: "#" },
+        { lectureNo: "23", title: "Rowlatt satyagraha", desc: "Rowlatt act and Jallianwala Bagh.", duration: "HD Session", videoId: "xujBDAsqi_I", pdfUrl: "#" },
+        { lectureNo: "24", title: "Ncm", desc: "Non-Cooperation Movement and Khilafat.", duration: "HD Session", videoId: "u7hyrlquBZo", pdfUrl: "#" },
+        { lectureNo: "25", title: "CDM", desc: "Civil Disobedience Movement and Dandi March.", duration: "HD Session", videoId: "J9e_Yf37hMk", pdfUrl: "#" },
+        { lectureNo: "26", title: "Goi 1935", desc: "Government of India Act 1935.", duration: "HD Session", videoId: "57ajqE0EPec", pdfUrl: "#" },
+        { lectureNo: "27", title: "Freedom with partition", desc: "Cabinet mission, Mountbatten plan.", duration: "HD Session", videoId: "VQRq5uwctQo", pdfUrl: "#" },
+        { lectureNo: "28", title: "Qim + ina", desc: "Quit India Movement and INA trials.", duration: "HD Session", videoId: "--yZntm1pQk", pdfUrl: "#" }
       ],
-
-      // 6. Profit and Loss (23 to 26)
-      "ch-cds-profit-loss": [
-        { lectureNo: "01", title: "Profit And Loss Class 1", desc: "Cost, Selling Price, and profit ratios.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=46.%20Equation%20Class%2003&link=33a87e875ab178b128cf594c367f28537f41c250b1e95abefd95fae6cbacc4f2606302dc12bc6b622997cfc7f070e7682b80a5c12c71a7daf713c396c521b1ef0001b96ba215dd0225e35d8fe7f8aabd965350445f46", pdfUrl: "#" },
-        { lectureNo: "02", title: "Profit And Loss Class 2", desc: "Marked price and successive discounts.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=48.%20Equation%20Class%2005&link=9cfca2e9cf4ccad80ca733161309be4edd14a8105f59571f170356285d8917155c4de1b2e415d0468df4129ed6da0d1995184e387c01e4674fce1e3f05aff384622f57755dde9baec1f976cc61fd629c5e3bd9404d7b", pdfUrl: "#" },
-        { lectureNo: "03", title: "Profit And Loss Class 3", desc: "Dishonest shopkeeper and false weights.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=50.%20Algebra%20Class%202&link=eac77823e502aa8640685b18631da8f9050384fd7e3e709727d4b1f0e116a4196adfd28c2494f932119eea7c8bb83e265214346b323b2285983c7005ce5ff7ac66ec77f9631a5f5468d00ff78a2f3dbafa9f21b1c85c", pdfUrl: "#" },
-        { lectureNo: "04", title: "Profit And Loss Class 4", desc: "Equal selling price and mixed problems.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=52.%20Algebra%20Class%204&link=0da885d579bdf0ec0d0a6544680a48b1980f4fdd88bbab5a9713ba4e5d17151494f5c66e10af169f6fb923df6764bb676138276f424ab05abe1e6a9ef37d20ba20537d081ba3702ca8bd58f39bc8c74974f64640f48d", pdfUrl: "#" }
+      "ch-cds-ota-one-pager": [
+        { lectureNo: "01", title: "CBI Overview", desc: "Central Bureau of Investigation powers & structure.", duration: "HD Session", videoId: "kp_e9zCKkeY", pdfUrl: "#" },
+        { lectureNo: "02", title: "Fertility rate + family survey", desc: "Demographic trends and family health surveys.", duration: "HD Session", videoId: "Iw4NaZKqExI", pdfUrl: "#" },
+        { lectureNo: "03", title: "Protein deficiency", desc: "Nutritional health issues in India.", duration: "HD Session", videoId: "szYMavSGI2s", pdfUrl: "#" },
+        { lectureNo: "04", title: "UNSC", desc: "United Nations Security Council reforms and veto power.", duration: "HD Session", videoId: "_uO0C0hd810", pdfUrl: "#" },
+        { lectureNo: "05", title: "Attorney general + advocate", desc: "Constitutional law officers review.", duration: "HD Session", videoId: "e6z-6Ytw-JM", pdfUrl: "#" }
       ],
-
-      // 7. Interest (SI & CI) (27 to 30)
-      "ch-cds-interest": [
-        { lectureNo: "01", title: "Interest Class 1", desc: "Simple interest fundamental formulas.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=54.%20LCM%20HCF%20Of%20Algebraic%20Factors&link=04bc2a21cdeaf76f40e0f0ffc16ce870a928bf8baf9e2d6c3596c2e937b334acd824c660263f32e1a6ce7fa97d6c10a4e5e875d5fd4bd69a2e5452a1ae83ef333f2c988346aaa30feeb0d6ec4e166ad33a2952b8fafb", pdfUrl: "#" },
-        { lectureNo: "02", title: "Interest Class 2", desc: "Compound interest tree method & multiplier.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=56.%20Logarithm%202&link=fd48f5a86ed1e05ad4da3507440498be5c625ab04ba665bfa497df75ef925f587022878f4ab3f6bfad1281cf91c795e09ca52388b332f4d515872975355418ed996df8333cbaf90b765d92cd9b29e4ad3f50504f2fda", pdfUrl: "#" },
-        { lectureNo: "03", title: "Interest Class 3", desc: "CI vs SI differences for 2 and 3 years.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=58.%20Sets%202&link=db6898b09e940cfe4d84569008debbd0b63f15124ab9299f3932982d798708b7c8314e3d1283472b8c3cdb3bb5ac9f73c40499fb47666645fff5fc99f0f73c0ece2c63a9157c222705f5da557fa57f243dffbbfbd5fc", pdfUrl: "#" },
-        { lectureNo: "04", title: "Interest Class 4", desc: "Installments for simple and compound interest.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=60.%20Geometry%20%2B%202D%20Mensuration%202&link=cabfd93f2550b0bd69870e4109f3499df688221d13ee556f65184b85a284a6509461f911eb07064e8067a26d7f79bbe2aeec990f3fc3ec789458a306532b9252e70b394a938ab8a1253cc7157e0cf119a4eee5d5b26a", pdfUrl: "#" }
+      "ch-cds-ota-gs-master": [
+        { lectureNo: "01", title: "GS Master Class 1", desc: "High-yield conceptual GS integration.", duration: "HD Session", videoId: "DkNdo702VU8", pdfUrl: "#" },
+        { lectureNo: "02", title: "GS Master Class 2", desc: "Core static and dynamic GS mix.", duration: "HD Session", videoId: "3iMxfwvIeAw", pdfUrl: "#" },
+        { lectureNo: "03", title: "GS Master Class 3", desc: "Advanced conceptual analysis.", duration: "HD Session", videoId: "mHpx96v10S0", pdfUrl: "#" },
+        { lectureNo: "04", title: "GS Master Class 4", desc: "Important previous trends and master capsule.", duration: "HD Session", videoId: "NBRUTRr-DBA", pdfUrl: "#" }
       ],
-
-      // 8. Number System (31 to 39)
-      "ch-cds-number-system": [
-        { lectureNo: "01", title: "Number System Class 1", desc: "Classification of numbers & real values.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=62.%20Geometry%20%2B%202D%20Mensuration%204&link=7953222100137661090ea5e4cb9bfe44494fd259a3bcd6ab40fed7a9a55dd8080d011f9358d1ddc60ddd8c21a4f9d86911a70da714644db538eb179f4f2e48c10930ac151aeb9fad44b77b5a5c9a0cd5040fb69bcb38", pdfUrl: "#" },
-        { lectureNo: "02", title: "Number System Class 2", desc: "Divisibility tests and properties.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=64.%20Geometry%20%2B%202D%20Mensuration%206&link=6f6a99ac140807ee9742db1b616e60a119dd89d8c0ba73b0f258672b68c254c59487d847ec9137604fd788a30be2396d7ae75de45b5f8bbf33c54e5d2e9e22d43a652c409e3f645af1a1a32f0ecdb25646173e555a6d", pdfUrl: "#" },
-        { lectureNo: "03", title: "Number System Class 3", desc: "Unit digit and cyclicity rules.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=66.%20Geometry%20%2B%202D%20Mensuration%208&link=409d04756c674f88ee29adf7553c46dec6c7bb1d2adaeb8da843a3ce3373a2c1444b127a48d4b17c4ddc69392c27a0ba9f47cc5f373742f09166ed1bb748b0725b45222f6fec0a68f8e2503d54cb55dd7fe50252eb7b", pdfUrl: "#" },
-        { lectureNo: "04", title: "Number System Class 4", desc: "Trailing zeroes in factorials & expressions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=68.%20Geometry%20%2B%202D%20Mensuration%2010&link=4b97a5ced912562eb28c0f01596032ae2ee5c7c905da1a0390a3873eccce1f9ff0e8c31436b5200974044fc5f442a308e432ed001cf585748ab7bbc4e5d114ad40c4d6d6bc25310d4316894e42f7a45a36df8d4431d3", pdfUrl: "#" },
-        { lectureNo: "05", title: "Number System Class 5 Part 1", desc: "Factors count, sum and even/odd factors.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=71.%20Geometry%20%2B%202D%20Mensuration%2013&link=9be34443b129850f9459201a85a8633ad9f4c3886cc60b76c3ce2bff2e87a09bc83aae5ce50445421929f898c8d1903adf29a32549e3ee0bec7f191066383cd99054f2cd435c1384bd93825bbccf2cd14a9879ec718c", pdfUrl: "#" },
-        { lectureNo: "06", title: "Number System Class 5 Part 2", desc: "Product of factors and prime factorization.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=73.%20Geometry%20%2B%202D%20Mensuration%2015&link=0995f3f0e5f7b201d4186240d90ab10912cba4b4f26d99926165767b8d704d6d32896e1ba9704f21a9f4727236c0f0e9bb93af08a939db14ea6b5b30bd44bea72a5195ff1a615730f8369ad4f394b4948d58e49f23a8", pdfUrl: "#" },
-        { lectureNo: "07", title: "Number System Class 6", desc: "Euler, Fermat & remainder theorems.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=75.%20Mensuration%203D%20Class%201&link=d8063e82972c796f902462370da049084d73e2d1cd253c427f3f0566ff34aa2673cd66d5a9802573928b4ba674970b048e6b77f9863ddf9abee2cb9b2effc6cb15e5daca3f2946c3922de5da0233de5f5609ae939e81", pdfUrl: "#" },
-        { lectureNo: "08", title: "Number System Class 7", desc: "Wilson theorem and binomial remainders.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=77.%20Mensuration%203D%20Class%203&link=3f8dbcf78ccf0e5be480093762a1f864ac51df877d6485dd87f34a45dd725a623426d4dda71c2a189a2f4b3b297e22c9ea49586a7745fc1b9bea68ab0ba5d6dbdd775cba5cb687e08f06a3f5369c16c4a31dc52596ef", pdfUrl: "#" },
-        { lectureNo: "09", title: "Number System Class 8", desc: "Successive division and miscellaneous.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=79.%20Mensuration%203D%20Class%205&link=5b2884900bd6460f5980cdb78d21350fdb99c6de63bfdabb69b0379e7596e60e88fdf0b328968c05ebb2af53ebfe40bf59a864c0fd595f7414bcee9a8f7ac9b1315b70ee15c336d36d385f208f6d4035a46ba15fecc5", pdfUrl: "#" }
+      "ch-cds-ota-eng-vocab": [
+        { lectureNo: "01", title: "Root words class 1", desc: "Etymology and root words foundation.", duration: "HD Session", videoId: "zysRYWURJzE", pdfUrl: "#" },
+        { lectureNo: "02", title: "Root words class 2", desc: "Advanced root words.", duration: "HD Session", videoId: "0vgq8tc", pdfUrl: "#" },
+        { lectureNo: "03", title: "A words", desc: "Vocabulary starting with letter A.", duration: "HD Session", videoId: "JmF8M8PdukU", pdfUrl: "#" },
+        { lectureNo: "04", title: "B words", desc: "Vocabulary starting with letter B.", duration: "HD Session", videoId: "at5HIj1Goxg", pdfUrl: "#" },
+        { lectureNo: "05", title: "C words", desc: "Vocabulary starting with letter C.", duration: "HD Session", videoId: "BqdohxPW9qU", pdfUrl: "#" },
+        { lectureNo: "06", title: "Vocab pyq class 1", desc: "Previous years vocabulary practice.", duration: "HD Session", videoId: "HmLIKMSIL8k", pdfUrl: "#" },
+        { lectureNo: "07", title: "vocab pyq class 2", desc: "Previous years vocabulary practice 2.", duration: "HD Session", videoId: "SJYMdQ8xBmw", pdfUrl: "#" },
+        { lectureNo: "08", title: "vocab pyq class 3", desc: "Previous years vocabulary practice 3.", duration: "HD Session", videoId: "gPmls9nTYAw", pdfUrl: "#" },
+        { lectureNo: "09", title: "D words", desc: "Vocabulary starting with letter D.", duration: "HD Session", videoId: "OqGJkE1f0bw", pdfUrl: "#" },
+        { lectureNo: "10", title: "Vocab pyq complete", desc: "Comprehensive vocab PYQ session.", duration: "HD Session", videoId: "oELTlg0Nffk", pdfUrl: "#" },
+        { lectureNo: "11", title: "E words", desc: "Vocabulary starting with letter E.", duration: "HD Session", videoId: "fkfCseGghfc", pdfUrl: "#" },
+        { lectureNo: "12", title: "F words", desc: "Vocabulary starting with letter F.", duration: "HD Session", videoId: "-8k8e7FLIuE", pdfUrl: "#" },
+        { lectureNo: "13", title: "G words", desc: "Vocabulary starting with letter G.", duration: "HD Session", videoId: "n-zewbJwTc8", pdfUrl: "#" },
+        { lectureNo: "14", title: "H words", desc: "Vocabulary starting with letter H.", duration: "HD Session", videoId: "xuAtBS4t84E", pdfUrl: "#" },
+        { lectureNo: "15", title: "I words", desc: "Vocabulary starting with letter I.", duration: "HD Session", videoId: "0bHyrSlWAXA", pdfUrl: "#" },
+        { lectureNo: "16", title: "Homonyms 1", desc: "Confusing words part 1.", duration: "HD Session", videoId: "KoqMcpBQkDw", pdfUrl: "#" },
+        { lectureNo: "17", title: "Homonyms 2", desc: "Confusing words part 2.", duration: "HD Session", videoId: "P9gBvKLuv8w", pdfUrl: "#" },
+        { lectureNo: "18", title: "Homonyms 3", desc: "Confusing words part 3.", duration: "HD Session", videoId: "1ZOJ4uEsWGo", pdfUrl: "#" },
+        { lectureNo: "19", title: "Homonyms pyq", desc: "Homonyms PYQs.", duration: "HD Session", videoId: "PnfMHu_2rj4", pdfUrl: "#" },
+        { lectureNo: "20", title: "RRB vocab 1 to 5", desc: "Special vocabulary drills.", duration: "HD Session", videoId: "2iRvkigj4a0", pdfUrl: "#" }
       ],
-
-      // 9. Simplification (40 to 41)
-      "ch-cds-simplification": [
-        { lectureNo: "01", title: "Simplification Class 1", desc: "BODMAS order of operations & fractions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=81.%20Mensuration%203D%20Class%207&link=693f9553fcb4e53e269c71d1075c5b627afdaa4950c36c714a08d3e18b74fae07d89153edf23e5b9934c64a1e3fc05cb2340ede1ea8c82995a57c46c0e3101169e0e26844491b2800c5a5313c477ebe4efd2e9a2caa1", pdfUrl: "#" },
-        { lectureNo: "02", title: "Simplification Class 2", desc: "Surds, indices & algebraic forms.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=83.%20Trigonometry%20Class%203&link=f00ff86ba2aeabbb7dcca4590569c27a03ebe1a7ebb7fdf67bde8bd9595a9af91d0780d453ba4b0c2be3585210ed06cd97efa5764abb06dc93f12332edc1052f869061d0228a8b37d5316986a7ed5c73e10e3bcd83d6", pdfUrl: "#" }
+      "ch-cds-ota-eng-grammar": [
+        { lectureNo: "01", title: "Tense class 1", desc: "Tenses basic rules.", duration: "HD Session", videoId: "Ahg5VKFFpyI", pdfUrl: "#" },
+        { lectureNo: "02", title: "Tense complete", desc: "Complete tenses masterclass.", duration: "HD Session", videoId: "3NfR89W1pO4", pdfUrl: "#" },
+        { lectureNo: "03", title: "Parts of speech", desc: "Introduction to parts of speech.", duration: "HD Session", videoId: "wyiCnv3sNGI", pdfUrl: "#" },
+        { lectureNo: "04", title: "Parts of speech class 2", desc: "Advanced usage.", duration: "HD Session", videoId: "Ewk6Fzfp1W4", pdfUrl: "#" },
+        { lectureNo: "05", title: "Parts of speech class 3 part 1", desc: "Detailed breakdown.", duration: "HD Session", videoId: "I4zqC3iIa-M", pdfUrl: "#" },
+        { lectureNo: "06", title: "Parts of speech class 3 part 2", desc: "Exceptions and rules.", duration: "HD Session", videoId: "CIlrrtUBhvs", pdfUrl: "#" },
+        { lectureNo: "07", title: "Parts of speech complete", desc: "Summary and applications.", duration: "HD Session", videoId: "vItsmpv5VAA", pdfUrl: "#" },
+        { lectureNo: "08", title: "Noun class", desc: "Noun types and rules.", duration: "HD Session", videoId: "n7-EjlacaGc", pdfUrl: "#" },
+        { lectureNo: "09", title: "Noun complete", desc: "Advanced noun rules.", duration: "HD Session", videoId: "S2ZQ36os3Gg", pdfUrl: "#" },
+        { lectureNo: "10", title: "Pronoun class 1", desc: "Pronoun rules and antecedent agreement.", duration: "HD Session", videoId: "9VtKRuRpDPg", pdfUrl: "#" },
+        { lectureNo: "11", title: "Pronoun class 2", desc: "Relative and reflexive pronouns.", duration: "HD Session", videoId: "lX_7tr0axGI", pdfUrl: "#" },
+        { lectureNo: "12", title: "Verb 1", desc: "Verb basics and forms.", duration: "HD Session", videoId: "XZ0jZZUcnBI", pdfUrl: "#" },
+        { lectureNo: "13", title: "Verb 2", desc: "Finite and non-finite verbs.", duration: "HD Session", videoId: "nC0LbDiUiT4", pdfUrl: "#" },
+        { lectureNo: "14", title: "S1-S2", desc: "Subject-verb agreement.", duration: "HD Session", videoId: "hLFLjj4wlZE", pdfUrl: "#" },
+        { lectureNo: "15", title: "Verb 3", desc: "Advanced verb patterns.", duration: "HD Session", videoId: "nF_sEU7-sQs", pdfUrl: "#" },
+        { lectureNo: "16", title: "Preposition 1", desc: "Fixed prepositions and usage.", duration: "HD Session", videoId: "LBS8OaUWtSM", pdfUrl: "#" },
+        { lectureNo: "17", title: "Preposition 2", desc: "Prepositions of time and place.", duration: "HD Session", videoId: "L5m4A4lgsRA", pdfUrl: "#" },
+        { lectureNo: "18", title: "Preposition 3", desc: "Advanced preposition rules.", duration: "HD Session", videoId: "hYgNQDfbdAs", pdfUrl: "#" },
+        { lectureNo: "19", title: "Conjunction", desc: "Correlative and coordinating conjunctions.", duration: "HD Session", videoId: "Z30XfIeFQpQ", pdfUrl: "#" },
+        { lectureNo: "20", title: "Voice complete", desc: "Active and Passive voice masterclass.", duration: "HD Session", videoId: "Aagm41PilJ0", pdfUrl: "#" },
+        { lectureNo: "21", title: "Discourse marker", desc: "Transitions and markers.", duration: "HD Session", videoId: "rDXmWbcm0Gw", pdfUrl: "#" },
+        { lectureNo: "22", title: "English practice", desc: "Tense and grammar practice drills.", duration: "HD Session", videoId: "x9eFt-UdLZ4", pdfUrl: "#" }
       ],
-
-      // 10. LCM and HCF (42 to 43 + 54 mapped)
-      "ch-cds-lcm-hcf": [
-        { lectureNo: "01", title: "LCM & HCF", desc: "HCF division rules & LCM properties.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=85.%20Trigonometry%20Class%205&link=14da92833ba55bbcbfc9ce51768eaa57a0033b2022ad12c90e070154992bacfaaff07fb495271523c9b0de2bc9a2999c4a31529c0c0e084d8b94dd49f6ca05ed9c0fb943db1bbb7cedfa07089c4239138dcff60201ff", pdfUrl: "#" },
-        { lectureNo: "02", title: "LCM & HCF Class 02", desc: "Bell tolling and remainder models.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=87.%20Trigonometry%20Class%2007&link=1122d0eb038273e994d570e47ff55f1191a841358e211b31f2a68511de8034f6e6cf8d7edf598a55d42ce7ecdd236a0e6b275c39d59d00d5f9d3b3310f81ce027eef40229fac4475fa21068b5849946a3071ea50bbdf", pdfUrl: "#" },
-        { lectureNo: "03", title: "LCM HCF Of Algebraic Factors", desc: "HCF and LCM of algebraic polynomials.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20108&link=e6ad7086bf6f30817086ad4953239c0070b3c045bbd1838163cd9cc6aed2268363a5d37def6a1dd3780eda434e04f14a5c34df558959e490918af6eb3b306223dc1820f3037387ee1bd82f8ad8445222b320ae781387", pdfUrl: "#" }
+      "ch-cds-ota-economics": [
+        { lectureNo: "01", title: "National income", desc: "GDP, GNP, NNP and calculation methods.", duration: "HD Session", videoId: "_Hh4vWgOHCo", pdfUrl: "#" },
+        { lectureNo: "02", title: "Money", desc: "Money supply and banking system.", duration: "HD Session", videoId: "ZKKs7W00R0o", pdfUrl: "#" },
+        { lectureNo: "03", title: "Monetary policy", desc: "RBI instruments: Repo, CRR, SLR.", duration: "HD Session", videoId: "dAiSGbp-arw", pdfUrl: "#" },
+        { lectureNo: "04", title: "Balance of payment", desc: "Current and capital accounts.", duration: "HD Session", videoId: "j_U0OYRcAUI", pdfUrl: "#" },
+        { lectureNo: "05", title: "Unemployment", desc: "Types of unemployment in India.", duration: "HD Session", videoId: "7nGutWJvVmM", pdfUrl: "#" }
       ],
-
-      // 11. Equations Class (44 to 48)
-      "ch-cds-equations": [
-        { lectureNo: "01", title: "Equation Class 01", desc: "Linear equations and system of equations.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=89.%20Height%20And%20Distance%20Class%202&link=243609960dc52ca6adf77a0c917e630e30db697a2c3a054039b6fecc9b1e1d388da999f01ffcc96c57e6b271bcbe02ac6012b38e15df0ffb78ee5b954dd34c12a30753217cf93a5393be20432be20f2ffe267e7af928", pdfUrl: "#" },
-        { lectureNo: "02", title: "Equation Class 02", desc: "System consistency & infinite solutions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=91.%20Statistics%20Class%202&link=e1835a4ef7c96bb756aac69a3e3f86da7abdd4820ca1864f856baa858178587b6f135e3038cdb2236ff42af88ea6659cc1699eb305e30d5e06d7f67ad2c5a87b8aa55901ead857a982935da1f3cd0cc950ff9794fa02", pdfUrl: "#" },
-        { lectureNo: "03", title: "Equation Class 03", desc: "Quadratic equations: roots and discriminant.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=93.%20Statistics%20Class%204&link=2ac62a05aef3f4b56e3ffac58ffcd99396347923472e312a91882d50fa7e9ad1e0b2f1159d11554d305466511cde7adeb2496aa8728985d98528e983cd3c6e53eec495f1970f356f51eaa3d51b641fd185db72a3121a", pdfUrl: "#" },
-        { lectureNo: "04", title: "Equation Class 04", desc: "Roots transformation & formation.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=42.%20LCM%20%26amp%3B%20HCF&link=9e681b68e94ee5f0534acaa712661d7ad6cc8db787365a43e969c6d8f3a634bd48186741a42bf231423ef370fbadfd2d5cb97b8294d4389150d2bcd2c0fc00ded046e0239892c353b739c0438379790e39283328b697", pdfUrl: "#" },
-        { lectureNo: "05", title: "Equation Class 05", desc: "Advanced examination questions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%2096&link=b4b509babaf5b297ed293419cf4b9efcbe4c847703494986812f1b2a272868dc2eb7f24d004da9e12491587d1fc967c7d8b55b6c3c628050a84db51ccbd790cbfd48bc51cf86c6d4b1c401557c30b5e76cee247399b1", pdfUrl: "#" }
+      "ch-cds-ota-polity": [
+        { lectureNo: "01", title: "Articles 368 + majorities + preamble", desc: "Constitutional amendment and basic structure.", duration: "HD Session", videoId: "WgGJSdVBcXs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Dada ji 1", desc: "Important foundational concepts.", duration: "HD Session", videoId: "TP9xebAtsiQ", pdfUrl: "#" },
+        { lectureNo: "03", title: "President + governor", desc: "Executive heads of centre and state.", duration: "HD Session", videoId: "f45YtWDDqKs", pdfUrl: "#" },
+        { lectureNo: "04", title: "Vice president + pm + cm + com", desc: "Council of ministers and executives.", duration: "HD Session", videoId: "djW7C9aHIKQ", pdfUrl: "#" },
+        { lectureNo: "05", title: "Parliament 1st session", desc: "Legislative procedure overview.", duration: "HD Session", videoId: "2TpGjriICmg", pdfUrl: "#" },
+        { lectureNo: "06", title: "Parliament 2nd session", desc: "Bills and law-making process.", duration: "HD Session", videoId: "vA81Bh8I6rM", pdfUrl: "#" },
+        { lectureNo: "07", title: "Parliament 3rd session", desc: "Budget and financial bills.", duration: "HD Session", videoId: "PAvlZWzEmBk", pdfUrl: "#" },
+        { lectureNo: "08", title: "Parliament 4th session", desc: "Parliamentary privileges and motions.", duration: "HD Session", videoId: "_EiZZhqWNOA", pdfUrl: "#" },
+        { lectureNo: "09", title: "Parliament dissolved", desc: "Lapsing of bills and dissolution rules.", duration: "HD Session", videoId: "8sj4ZssXz-o", pdfUrl: "#" },
+        { lectureNo: "10", title: "State legislature + toss", desc: "Vidhan Sabha and Vidhan Parishad.", duration: "HD Session", videoId: "ziD8dkCjLHA", pdfUrl: "#" },
+        { lectureNo: "11", title: "Federal features", desc: "Unitary vs federal system in India.", duration: "HD Session", videoId: "N9q9WhpF_6s", pdfUrl: "#" },
+        { lectureNo: "12", title: "Centre state relation", desc: "Legislative, administrative & financial relations.", duration: "HD Session", videoId: "zSwhLRufZCo", pdfUrl: "#" },
+        { lectureNo: "13", title: "Finance commission + gst council", desc: "Fiscal federalism bodies.", duration: "HD Session", videoId: "CPbkOoMvtHo", pdfUrl: "#" },
+        { lectureNo: "14", title: "Zonal council + ut + article 371 + traps", desc: "Special provisions and UTs.", duration: "HD Session", videoId: "n2ZlNY9VUrQ", pdfUrl: "#" },
+        { lectureNo: "15", title: "Emergency", desc: "National, President rule & financial emergency.", duration: "HD Session", videoId: "dmdydPdFWHM", pdfUrl: "#" },
+        { lectureNo: "16", title: "Making of Indian constitution", desc: "Constituent assembly debates and framing.", duration: "HD Session", videoId: "QJFLMRyGZnQ", pdfUrl: "#" },
+        { lectureNo: "17", title: "Parliamentary committees", desc: "PAC, Estimates committee, etc.", duration: "HD Session", videoId: "cWQIIIw5QfY", pdfUrl: "#" },
+        { lectureNo: "18", title: "Attorney and advocate general", desc: "Legal advisors of governments.", duration: "HD Session", videoId: "zMX5fPXzhrI", pdfUrl: "#" }
       ],
-
-      // 12. Algebra (49 to 53)
-      "ch-cds-algebra": [
-        { lectureNo: "01", title: "Algebra", desc: "Algebraic expansion and identities.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%2098&link=f7498817fcaf57daf3103398548c1c19bcb24deffb859699c12dfa85d4c4a169231d8a2763acf3351ab748d461bee4993c943fba948a89736772225f855c3725cf76693af6ef13223ea5bde2abe31a4ed980f333dd0b", pdfUrl: "#" },
-        { lectureNo: "02", title: "Algebra Class 2", desc: "x + 1/x models & power rules.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20100&link=82057288f9eba318aef90e3c9f48ff1242515f1e987ff586b7f38bf10fb9f3d2cad1fac50e54c59e613c12c44d9f1315cee3ee75de9c5954bee1d4a7761b9fd85c9407ea01d9b0a45880fdb358687546b9f4bb654e1e", pdfUrl: "#" },
-        { lectureNo: "03", title: "Algebra Class 3", desc: "Higher powers and transformations.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20102&link=9123ded5389b1fe140329eab16be77d20111fe6bd30a6e1270b27aacfd03a88db49c24ca208504db999b2295f298053cd7f16d4600dde01ba359214c978497efd9b0ce85e6b3e3ce9f4a7763fd4dd06870b3466afce9", pdfUrl: "#" },
-        { lectureNo: "04", title: "Algebra Class 4", desc: "Conditional identities and 3abc models.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20104&link=308ca1284b5f2200d8bc9ee509d346f694155bb0cc27cb7bb9eba41b3e08816b332a36869bdafac8bca63e3035ac8c9c12466ff72182d6e7a4d2461f55f5e161d32fca6d22b765fcadb02867dde4d73f481529f2be07", pdfUrl: "#" },
-        { lectureNo: "05", title: "Algebra Class 5", desc: "Polynomial remainder theorem.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20106&link=737ece992a7017063aaad93cb235c79e64f44ffc79284374e84c6f51b4802b46410bb9cebe70bce09d3654db680a3411ef2ea3c3cd55cff44dc7a92f64cbc6fd2a35983ce054a683ca95cd3fdd43efa304d702e29813", pdfUrl: "#" }
+      "ch-cds-ota-physics": [
+        { lectureNo: "01", title: "Physics basics", desc: "Units, dimensions and measurements.", duration: "HD Session", videoId: "K0MeU1bzJ6Q", pdfUrl: "#" },
+        { lectureNo: "02", title: "Force and momentum", desc: "Newton's laws of motion and momentum conservation.", duration: "HD Session", videoId: "sNfHV-oVGj0", pdfUrl: "#" },
+        { lectureNo: "03", title: "Motion traps", desc: "Graphical analysis and tricky motion problems.", duration: "HD Session", videoId: "37p6ZkDjMj8", pdfUrl: "#" }
       ],
-
-      // 13. Logarithm (55 to 56)
-      "ch-cds-logarithm": [
-        { lectureNo: "01", title: "Logarithm", desc: "Definition, base change & rules.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20110&link=65aba10ac7bf3ea52108e371aef1b21973e17127322642b235468666b2f90468a1359119399266e213803932cf4f00fac6b555999a6c86a1b76c1806fc712ae6e85d61b9ae4c548a6aaa0fea36f3d522183e01ff9482", pdfUrl: "#" },
-        { lectureNo: "02", title: "Logarithm 2", desc: "Inequalities and characteristics.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20112&link=68e9e74336623296e84346e7f54e5d52932bdac4e80c72fe1a916de7b0323f297bc871e84559178a837c7fe620e8809a6fb8e64705795a9dcc8e9bd837963f4fbb3de762ebc23a25ffb4ed0df8ea2baa3cc5c0f8aa40", pdfUrl: "#" }
+      "ch-cds-ota-chemistry": [
+        { lectureNo: "01", title: "Chemical reaction", desc: "Types of chemical reactions and balancing equations.", duration: "HD Session", videoId: "YS3J2WRZELs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Acid , base and salt", desc: "pH scale, indicators and properties.", duration: "HD Session", videoId: "YHgoS18T0nc", pdfUrl: "#" },
+        { lectureNo: "03", title: "Metal and non metal", desc: "Reactivity series, ores and metallurgy.", duration: "HD Session", videoId: "NvDycXLBP9c", pdfUrl: "#" },
+        { lectureNo: "04", title: "Mixture", desc: "Separation techniques and solutions.", duration: "HD Session", videoId: "AWzsAKXS50w", pdfUrl: "#" },
+        { lectureNo: "05", title: "Atoms and molecules 1", desc: "Dalton's atomic theory and moles.", duration: "HD Session", videoId: "VBu-b-1uLGk", pdfUrl: "#" },
+        { lectureNo: "06", title: "Atoms and molecules 2", desc: "Molecular mass and stoichiometry.", duration: "HD Session", videoId: "dWB-C3kNDH0", pdfUrl: "#" },
+        { lectureNo: "07", title: "Carbon and compound", desc: "Allotropes and hydrocarbon bonding.", duration: "HD Session", videoId: "AQk0AgZaPnA", pdfUrl: "#" },
+        { lectureNo: "08", title: "Chemical properties of carbon", desc: "Combustion, oxidation and addition reactions.", duration: "HD Session", videoId: "fY0Tk5UNshU", pdfUrl: "#" },
+        { lectureNo: "09", title: "Soap and detergent", desc: "Cleansing action and micelles.", duration: "HD Session", videoId: "H4A800VD9cg", pdfUrl: "#" },
+        { lectureNo: "10", title: "Chemistry high level class", desc: "Advanced conceptual chemistry PYQs.", duration: "HD Session", videoId: "FwXOvPaLfW4", pdfUrl: "#" }
       ],
-
-      // 14. Sets (57 to 58)
-      "ch-cds-sets": [
-        { lectureNo: "01", title: "Sets", desc: "Subsets, power sets and operations.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20114&link=5c2739e4204108237947d038336f0d96182d061258e45b1c7c3bca3b694bb35522bc582a420c0e80f87e3e37efb86ce8bf930ef122b782813631e9cb929c2342eca28ae7e9acd873963cf5757c073a9202d09a0c066e", pdfUrl: "#" },
-        { lectureNo: "02", title: "Sets 2", desc: "Venn diagrams & cardinality.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20116&link=8c1fdf325cd92218e836fb8a76bba77d4f0696047734b65f14f73f827c38919b7b148e313cf8075f4da51566489244ab8aa9d5cd31e55b47b7eb4b1f70305cb84a3d59d12342477317b130aad7c3f998cd31310e8be9", pdfUrl: "#" }
-      ],
-
-      // 15. Geometry + 2D (59 to 73)
-      "ch-cds-geometry": [
-        { lectureNo: "01", title: "Geometry + 2D Mensuration", desc: "Lines, angles and transversals.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20118&link=f06756b827162a30a4d182aaf5156f8053a527399e461613e3e23da504626920f44ee5f4b3c25c294944c3fe387a49bb3c0591c5ddcba80ad20b8e48d45c6470da168ba0f9a56758d365ecd4f57286e11a9381515629", pdfUrl: "#" },
-        { lectureNo: "02", title: "Geometry + 2D Mensuration 2", desc: "Triangles classification & sum rule.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20120&link=127dc06ec9c14bb0bc4776b47dbdc614774938c6cb456bea000ce7a8a480692b0eda20c2812429770895f2f71e727af46d9ec685d321a4c6058eeb2e6b51bd2bde78c3eae62a0796ef7dc54fbc0a889a932cd10d433b", pdfUrl: "#" },
-        { lectureNo: "03", title: "Geometry + 2D Mensuration 3", desc: "Centres of triangles in detail.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20122&link=49167651166dec24792e2bfec63ea5ae09fa3b933bc3eaed9114053e37d8e6560dd36b9125d31808caff5741dc231e0d26a35c1777d1f1dcf9a422223df6dd6057bbda9e354d185819c4d23712449d7064e6f678f0ff", pdfUrl: "#" },
-        { lectureNo: "04", title: "Geometry + 2D Mensuration 4", desc: "Congruence and similarity.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20124&link=216c5574563f0912bc1df39b73775a4884c46b981448bba4faeabb80ffe917d64bf9e034c85ee002d1c032a1d2724466ec3260c4f9e5cf731fc8e0c587199b1297735a8b2f8575068998efc5f5c31a412d76babe3156", pdfUrl: "#" },
-        { lectureNo: "05", title: "Geometry + 2D Mensuration 5", desc: "Right angled triangle properties.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20126&link=d2827231b1b01da9e17e0f8aa85f7319e1334166db56170c4df31c6d11db03fb66afe4e83b2d00187c567c156e270e48f08bf4462f327ba450399f7ee6104ca1c011d24c75118aed09ce526516ab56761b0e06167f27", pdfUrl: "#" },
-        { lectureNo: "06", title: "Geometry + 2D Mensuration 6", desc: "Equilateral & isosceles triangles.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20128&link=6fa212444193a37a90ff01456b1c70babd0397f143b12d0ca947a5f989de71d936cfd9d60187d493b32feb6c6db0712d33af450bcaf49560537a7de008647e5163d19f3e50582ec35c5b02f75a559f6043e4ec362a9e", pdfUrl: "#" },
-        { lectureNo: "07", title: "Geometry + 2D Mensuration 7", desc: "Parallelogram & Rectangle properties.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20130&link=7d34ccf63735677bf82d9968c1116401f239ea43d6f5dbac18d4ee8b07bc0c8bd1310dd065bf949240b4c37ccff0c12a5cf2ebfa8a65ef6311a88e6d6935430eeef1792d988f01e9ffa9076cfe1fabc32e5d93acd188", pdfUrl: "#" },
-        { lectureNo: "08", title: "Geometry + 2D Mensuration 8", desc: "Rhombus, Square and Trapezium.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20132&link=6b74fd53799100bfa14d85da207c01908f34b8788d5bf208923abf79723501d92738db61500c9a15a24a95a778901cf2d9a8a0d30a75d04a8b783078d3dfd014051d8497d88fcd2de04760a00c7f7ede66b189c579a4", pdfUrl: "#" },
-        { lectureNo: "09", title: "Geometry + 2D Mensuration 9", desc: "Polygons: interior & exterior angles.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20134&link=eb10b2ecadcdcef000c98a7a7b7ec45f22de79202fe947464db878fa5cb8e56f40f85338c16b72cd1ab68b4e67a64e856c1e045880c14987d6bd866e46e4538e771c357ef94a7e0ef8111349677d8466c7c81c11f485", pdfUrl: "#" },
-        { lectureNo: "10", title: "Geometry + 2D Mensuration 10", desc: "Circles: chords, tangents, secants.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20136&link=11281ac6fd60bab03e6bce4b0f7d7150f7c2c3d0114b70763bd23ebd60222beaccbd9f18fcad949a6ec58ddb4ed16fc97d815f724f9a5242dd7d234a988661fe4a464285458ffca37179fff5136e1257611777bb1d62", pdfUrl: "#" },
-        { lectureNo: "11", title: "Geometry + 2D Mensuration 11", desc: "Cyclic quadrilaterals & tangents.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20138&link=fa7f6d755d2d1ac50d2aaf0f1c5070a961e1346808ad05e6ac7a4946f7cd46050381d8288c21ce2005b71c1a24de4a60f93ee2ed9a4296edd0c9f62d0b53f632856d5b99d36669626f79f9bf09c9047807b76c90280b", pdfUrl: "#" },
-        { lectureNo: "12", title: "Geometry + 2D Mensuration 13", desc: "Shaded regions and sector area.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20140&link=2d856174c7b66cc93682f2bf66d7965d40467154c415ba4b64ad93924d24a56ad8f698007ddfb402af098bd676bfa8e7f84319ea113c0f4f999c04192dd536f2c6c27b46bf129ba3dd1f8db32c3e82e791adc873feff", pdfUrl: "#" },
-        { lectureNo: "13", title: "Geometry + 2D Mensuration 14", desc: "Transverse common tangents.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20142&link=e9ced24739259bfe1f69b5edab1e301f037dd9f8c799cd35cb8c873cb9d74aad3aae190ee0a6fd58dd7e66a0c53bf3b886c3beeddea61745959d582cfa1f186dc9fb6a8b8232e55e07def1d519e5ba15dd4c5750c540", pdfUrl: "#" },
-        { lectureNo: "14", title: "Geometry + 2D Mensuration 15", desc: "Mixed 2D questions & shortcuts.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20144&link=0f9794e5fff4091af6dd72d43e3505e60d97e7c5532816817cd505cb383b504933bd55a0825753c8394e9b3f38ba2cfba33bac3bf9c23f010f2d787fc2011ee8fa5ee721243276dc0cf93215a8cecb46b4b80558547b", pdfUrl: "#" },
-        { lectureNo: "15", title: "Geometry + 2D Mensuration 16", desc: "Geometry consolidated review.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20146&link=3f329feef97aa794b71fd034c9bb2ff516fef2bdec7d03abd5ad3890436272419a3181616b903cb7ce91b9b82a611e1eca736685b955d1fa74ac8eef1b9243639b2ef83b1218a5ab21f31fc03d0475f7ae794c72db4c", pdfUrl: "#" }
-      ],
-
-      // 16. Mensuration 3D (74 to 80)
-      "ch-cds-mensuration": [
-        { lectureNo: "01", title: "Mensuration 3D Class 1", desc: "Cube and Cuboid surface & volume.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20148&link=5ee693aa2094ed8d39b2151ca4fe10b33652e28278a9a110842669c5a9a905c61ae855a973a88aaa6f1fa5653946e4fd32956a7431a40e49e35b001f6c327e0454b820e5e45609b7accf41c8193b0c7aaa90cd5e10f3", pdfUrl: "#" },
-        { lectureNo: "02", title: "Mensuration 3D Class 2", desc: "Cylinder curved and total surfaces.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20150&link=bdd7d23615ac629ef6e6f0b60211a79aaea898be9b7aebb5fbdb481d6e3a6bc3a913ba3abdf7a8554ebe3609ef9c759d81cbc53fa92037543277689750d4bc2504917caeac5b2b27af9a1ec3f72f3bc3d84829135eda", pdfUrl: "#" },
-        { lectureNo: "03", title: "Mensuration 3D Class 3", desc: "Cone slant height and volume.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20152&link=5a750626f4f6abffafac8971dc5e92efd92a5e76445ebeb3ceb82451c76c1f6b6e30fd48039efaa0e0f4e42cb67cc3d85bd65834a45d54dc83fa323d4719101527ea86d8c3a8b549f04e054ac1410f0adb5b318a8ab8", pdfUrl: "#" },
-        { lectureNo: "04", title: "Mensuration 3D Class 4", desc: "Sphere and Hemisphere formulas.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20154&link=61aa970ba8edc540ce0d255ff35d8f3273e2e88693898ec634dfd7c70c54bcabe863a3e2e11ddfa6faa8690f80d4526f6d65ee67c347898b852b778bc36935f577ced914d3bb8f0d86c2803b218c22758be0a7e5491d", pdfUrl: "#" },
-        { lectureNo: "05", title: "Mensuration 3D Class 5", desc: "Melting and solid conversions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20156&link=ad0b93aba0a634374750b1055c3cc4b6760b37fe57192c4574fd979ed0bf225deee7d65fd288180ec181db635d48fccd4f454dc5c9336f86682f03c1210edc9ca3ed6404857576d11cd407ee6326c92ebd008048fc6c", pdfUrl: "#" },
-        { lectureNo: "06", title: "Mensuration 3D Class 6", desc: "Frustum of cone and shells.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20158&link=19815f2c84af0113faa8c0651719d43e85c671ea746f4a5f7995bd64e58b08c67af8bed1307dcb07a312114d2814c65c909bd5a9a8557ed9273102a372cdae38ead0a4fcaa498e32eb8ba8e485360331836706f5bbac", pdfUrl: "#" },
-        { lectureNo: "07", title: "Mensuration 3D Class 7", desc: "Prism and Pyramid volume structures.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20160&link=fcf46c8f2d8463fd44571494fe8e5001ad40ef76c79c31e0534156fa662ff38651259806b42d689497025f0d6211f7887a7153d2962bf83e0eae72e0fb0a13f8ca4ddc1f437143e72da2c61805e2b12da3c6478567ec", pdfUrl: "#" }
-      ],
-
-      // 17. Trigonometry (81 to 86)
-      "ch-cds-trigonometry": [
-        { lectureNo: "01", title: "Trigonometry Class 02", desc: "Ratios, standard angles & identities.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20162&link=760cf59d47a0d24ea5311d0e8fecdad239a7238091f9120848549789d58e536e4d3636f7bb35033a334b2e9d95c4bc6ae44bc4128d774d326d48f83f6734ab27af505fdfc8dd0043d34a10ed59140d98b8e1fa5909ce", pdfUrl: "#" },
-        { lectureNo: "02", title: "Trigonometry Class 3", desc: "Fundamental squared identities.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20164&link=43c3c3b96f8865cdf12336eb641987fc0b54cfc886dfce1c445eb73d2aae9f6dc3bd4f5d463415b3de4bbc8b78b6da7c864704345ac8ea23efbeb420be7b6f4dbbc62810f9c0e1557aa102f0a8fcff7f3aca49e2f895", pdfUrl: "#" },
-        { lectureNo: "03", title: "Trigonometry Class 4", desc: "Quadrant rules and complementary angles.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20166&link=7b0968ed0819a2bfe1a8a9d94bdfb6edf23444b010c9922b4ff41bdc90144659dc9f95d1bf5d8b4523375f5845f558e33cdf65e591f7032771c9ca434b0cc22bb759ea1dd07ae084621bd2965a5a2c58f16a6e881a99", pdfUrl: "#" },
-        { lectureNo: "04", title: "Trigonometry Class 5", desc: "Maximum and minimum values.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20168&link=304ad0367ae29ad05685db91ef6fc6208bb37bdaefb9ba2c8350867eabda7f8dd51b0623d1661de25375a573a7171f4536b93bd757c244b209ea37c1d4f2d759f6d9ec6206b04a4e4d15d95fadb90f5a461be04047bf", pdfUrl: "#" },
-        { lectureNo: "05", title: "Trigonometry Class 06", desc: "Value substitution tricks.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20170&link=40c376ac971d3f7bcc9761f47bd4f80d3415d9d1df322370d889e76d4ed33256a0c80d9fb3b498dcceef8ab7da59ad91698109f58aadef40a64542e7a49e1878d4de33af0565f0691644f6e4a5018c6bdfd39fbf52b2", pdfUrl: "#" },
-        { lectureNo: "06", title: "Trigonometry Class 07", desc: "Advanced previous years questions.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20172&link=4c6f17087db29a15c4844938c26d1a8686a6bcfa442ca97779ece482a6ac36505f3adfdcb6a06e36c8507868388591689c371f10676084ae11d7dd830911fae107be74c904a5a97f37857e50650a6a61340e0427e5a8", pdfUrl: "#" }
-      ],
-
-      // 18. Height and Distance (87 to 88)
-      "ch-cds-height-distance": [
-        { lectureNo: "01", title: "Height And Distance Class 1", desc: "Elevation, depression standard ratios.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20174&link=02928c0a4b427a4afc6d57c2b34a288e575a3dae8a1f9e4b59c3e330fba8e9e5bd7d5464ed1b828cc40f63a7f2e6e3d6175fd2ab4e6309a3390872fb1e9a0b2a23b0dac0453442327f1157e85691f7ed32d9a881eef7", pdfUrl: "#" },
-        { lectureNo: "02", title: "Height And Distance Class 2", desc: "Multi-angle setups and observer movement.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20176&link=52734dc369fd8dcf60c3ff1f4ab362cbe30334afdd44535d713e20ddb5e93f6aa966948c8f3543a82fdc2971b73c5ed95181bbc4ff7c3d2b1af2735d0b04602dcd368b0732c2cc41232a19e1360cc507ef12e4062ced", pdfUrl: "#" }
-      ],
-
-      // 19. Statistics (89 to 93)
-      "ch-cds-statistics": [
-        { lectureNo: "01", title: "Statistics Class 01", desc: "Mean calculation for frequency groups.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20178&link=d628969e94213003f19cfcfc460977c78bb24470e8e997a4dacee7801b01dda911b32c6f1ffb53236798cb8d59926d4b88987687238318f85a09acb01e9207f1bb5f686890c71112a785ed3c83f87d92a7a8ac87f06f", pdfUrl: "#" },
-        { lectureNo: "02", title: "Statistics Class 2", desc: "Median determination and ogives.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20180&link=ab18ca39d63fff64a39e4bcfac3aa275b1008bb974162f7bf6f3b66cf14f321cb01ead8d1d93ea0b784b453aeed85453db94059bb49c0c48c4b5e35d1617db91d61b674311bdc59809009fb887614e7f6e29052ddab2", pdfUrl: "#" },
-        { lectureNo: "03", title: "Statistics Class 3", desc: "Mode and empirical mean-median relationship.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20182&link=436e87509fd3791812fbb1b196eb0f7db18c80756affe5301ab16b39cda8f86b3cc2da4db761ec7f01500c550b21f8308ee21e6ef1f00992aec0567fb35384eed8e84a20004bfde7c0aaf8ae42f73a49cdca212309ca", pdfUrl: "#" },
-        { lectureNo: "04", title: "Statistics Class 4", desc: "Variance and standard deviation.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20184&link=0acaf33e4d82a76bda69fec4f836dc2fb83008f5a838e4d3bfa7fd452077922939a50b3ad641d2eb3cd10f3bd9784c0f9618d7823bec075b1fdd50df9c69836603693b23cde830c15ebe17074b39b95b36c2016fe821", pdfUrl: "#" },
-        { lectureNo: "05", title: "Ratio Last Class & Average Class 1 (Consolidation)", desc: "Statistics frequency graph consolidation.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=Lecture%20186&link=684bd6992b6ebc2d5b6d793cf5212c90f842012d74fd5a61f571887f0fee176f89a4e6c1d0eb32f93c9697fa8a24007d28ac56219e9870c8b6d7b2eac4cb9c06bfb7db15953b392c4d0e939ff7d64cafc462ad87c3bc", pdfUrl: "#" }
+      "ch-cds-ota-biology": [
+        { lectureNo: "01", title: "Cells basic", desc: "Cell organelles and structure.", duration: "HD Session", videoId: "6CDo2HBJkcw", pdfUrl: "#" },
+        { lectureNo: "02", title: "Cells final class", desc: "Cell division: mitosis and meiosis.", duration: "HD Session", videoId: "BOoADpLh-08", pdfUrl: "#" },
+        { lectureNo: "03", title: "Tissue", desc: "Plant and animal tissues.", duration: "HD Session", videoId: "B-CA0_RXihM", pdfUrl: "#" },
+        { lectureNo: "04", title: "Disease", desc: "Communicable and non-communicable diseases.", duration: "HD Session", videoId: "qJKl-O0cLhc", pdfUrl: "#" },
+        { lectureNo: "05", title: "Digestion", desc: "Human digestive system and enzymes.", duration: "HD Session", videoId: "MUwOfAL2Kwc", pdfUrl: "#" },
+        { lectureNo: "06", title: "Excretion", desc: "Excretory system and nephron function.", duration: "HD Session", videoId: "8mw-VI6Slnk", pdfUrl: "#" },
+        { lectureNo: "07", title: "Heart + Blood + Respiration", desc: "Circulatory and respiratory systems.", duration: "HD Session", videoId: "mtpyYt2-D2o", pdfUrl: "#" },
+        { lectureNo: "08", title: "Reproduction", desc: "Asexual and sexual reproduction.", duration: "HD Session", videoId: "e2jXTVbikZY", pdfUrl: "#" },
+        { lectureNo: "09", title: "Reproduction 2", desc: "Human reproductive system.", duration: "HD Session", videoId: "9hebmAWbVsE", pdfUrl: "#" },
+        { lectureNo: "10", title: "Ecological classification of plants", desc: "Hydrophytes, xerophytes, halophytes.", duration: "HD Session", videoId: "f2P5wwljrAE", pdfUrl: "#" },
+        { lectureNo: "11", title: "Hormones", desc: "Endocrine glands and human hormones.", duration: "HD Session", videoId: "9UOAkXW_wfU", pdfUrl: "#" },
+        { lectureNo: "12", title: "Diversity", desc: "Biological classification overview.", duration: "HD Session", videoId: "bSBU_cOF8XQ", pdfUrl: "#" },
+        { lectureNo: "13", title: "Kingdoms", desc: "Five-kingdom classification system.", duration: "HD Session", videoId: "bv2WO9Gzl68", pdfUrl: "#" }
       ]
     };
 
@@ -299,31 +326,23 @@
       let chapterId = urlParams.get('chapterId') || '';
       const mode = urlParams.get('mode') || 'live';
 
-      // 19 चैप्टर्स और अन्य स्क्वाड्रन के लिए फॉलबैक ID डिटेक्शन
       if (!chapterId || !lectureDatabase[chapterId]) {
         const cleanName = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (cleanName.includes('ratio')) chapterId = 'ch-cds-ratio';
-        else if (cleanName.includes('average')) chapterId = 'ch-cds-average';
-        else if (cleanName.includes('timework') || cleanName.includes('work')) chapterId = 'ch-cds-time-work';
-        else if (cleanName.includes('timedist') || (cleanName.includes('distance') && !cleanName.includes('height'))) chapterId = 'ch-cds-time-dist';
-        else if (cleanName.includes('percent')) chapterId = 'ch-cds-percent';
-        else if (cleanName.includes('profit') || cleanName.includes('loss')) chapterId = 'ch-cds-profit-loss';
-        else if (cleanName.includes('interest')) chapterId = 'ch-cds-interest';
-        else if (cleanName.includes('number')) chapterId = 'ch-cds-number-system';
-        else if (cleanName.includes('simplif')) chapterId = 'ch-cds-simplification';
-        else if (cleanName.includes('lcm') || cleanName.includes('hcf')) chapterId = 'ch-cds-lcm-hcf';
-        else if (cleanName.includes('equation')) chapterId = 'ch-cds-equations';
-        else if (cleanName.includes('algebra')) chapterId = 'ch-cds-algebra';
-        else if (cleanName.includes('logarithm') || cleanName.includes('log')) chapterId = 'ch-cds-logarithm';
-        else if (cleanName.includes('set')) chapterId = 'ch-cds-sets';
-        else if (cleanName.includes('geometr') || cleanName.includes('2d')) chapterId = 'ch-cds-geometry';
-        else if (cleanName.includes('mensurat') || cleanName.includes('3d')) chapterId = 'ch-cds-mensuration';
-        else if (cleanName.includes('trigono')) chapterId = 'ch-cds-trigonometry';
-        else if (cleanName.includes('height')) chapterId = (currentBatch === 'afcat') ? 'ch-afcat-math-03' : 'ch-cds-height-distance';
-        else if (cleanName.includes('statist') || cleanName.includes('stats')) chapterId = (currentBatch === 'afcat') ? 'ch-afcat-math-02' : 'ch-cds-statistics';
-        else if (cleanName.includes('probab')) chapterId = 'ch-afcat-math-01';
-        else if (cleanName.includes('coding') || cleanName.includes('decode')) chapterId = 'ch-afcat-reasoning-02';
-        else if (cleanName.includes('intro') || cleanName.includes('anurag')) chapterId = 'ch-afcat-reasoning-01';
+        if (cleanName.includes('physicalgeography')) chapterId = 'ch-cds-ota-physical-geography';
+        else if (cleanName.includes('indiangeography')) chapterId = 'ch-cds-ota-indian-geography';
+        else if (cleanName.includes('ancienthistory')) chapterId = 'ch-cds-ota-ancient-history';
+        else if (cleanName.includes('medievalhistory')) chapterId = 'ch-cds-ota-medieval-history';
+        else if (cleanName.includes('modernhistory')) chapterId = 'ch-cds-ota-modern-history';
+        else if (cleanName.includes('onepager')) chapterId = 'ch-cds-ota-one-pager';
+        else if (cleanName.includes('gsmaster')) chapterId = 'ch-cds-ota-gs-master';
+        else if (cleanName.includes('vocabulary') || cleanName.includes('vocab')) chapterId = 'ch-cds-ota-eng-vocab';
+        else if (cleanName.includes('grammar')) chapterId = 'ch-cds-ota-eng-grammar';
+        else if (cleanName.includes('economics')) chapterId = 'ch-cds-ota-economics';
+        else if (cleanName.includes('polity')) chapterId = 'ch-cds-ota-polity';
+        else if (cleanName.includes('physics')) chapterId = 'ch-cds-ota-physics';
+        else if (cleanName.includes('chemistry')) chapterId = 'ch-cds-ota-chemistry';
+        else if (cleanName.includes('biology')) chapterId = 'ch-cds-ota-biology';
+        else if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
         else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) chapterId = 'ch-capf-internal-security';
       }
 
@@ -331,10 +350,8 @@
       document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • ${currentSubject.toUpperCase()}`;
       document.getElementById('chapterHeading').innerText = chapterName;
 
-      // मूल स्टैटिक लेक्चर्स लोड होंगे
       const staticLectures = lectureDatabase[chapterId] ? [...lectureDatabase[chapterId]] : [];
 
-      // केवल उसी बैच का लाइव डेटा Firestore से आएगा
       const q = query(
         collection(db, "tactical_curriculum"),
         where("squadron", "==", currentBatch.toLowerCase().trim()),
@@ -442,7 +459,6 @@
       });
     }
 
-    // ओरिजिनल सुरक्षित प्ले राउटर
     window.playLectureVideo = function(videoId, title) {
       if (!videoId || videoId === "#" || videoId === "") {
         alert("It will be uploaded very soon.");
