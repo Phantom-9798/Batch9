@@ -30,7 +30,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Master CDS OTA Subjects with Thematic Images (Live & Recorded)
+    // Master CDS OTA Subjects (Live & Recorded)
     const cdsOtaFullSubjects = [
       {
         name: "Physical Geography",
@@ -102,10 +102,10 @@
         desc: "Optics, Motion, Electricity, Magnetism, Sound & Thermodynamic Laws.",
         image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=80"
       },
-       {
+      {
         name: "English Breakfast",
-        desc: "English sheet.",
-        image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=80"
+        desc: "Daily High-Yield Targeted English Practice Sheets & Vocabulary Dose.",
+        image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
       },
       {
         name: "One Pager",
@@ -114,24 +114,24 @@
       },
       {
         name: "Operation Surprise",
-        desc: "Revision.",
-        image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
+        desc: "Tactical Rapid-Fire Revision & High-Yield Surprise Drills.",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
       }
     ];
 
-    // Standard Batches Map
+    // Master Curriculum Data for all squadrons
     const curriculumData = {
       "cds-math": {
         title: "CDS Mathematics Specialist",
         subjects: [
           { 
             name: "Lectures", 
-            desc: "Comprehensive Theory & Core Concepts",
+            desc: "Comprehensive Theory, Core Concepts & Conceptual Proofs.",
             image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
           },
           { 
             name: "Mock", 
-            desc: "Timed Tactical Test Papers & Solutions",
+            desc: "Timed Tactical Test Papers, Sectional Drills & Video Solutions.",
             image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80"
           }
         ]
@@ -190,99 +190,99 @@
         subjects: [
           { 
             name: "Math", 
-            desc: "Quantitative Aptitude & Problem Solving",
+            desc: "Quantitative Aptitude & Problem Solving Drills.",
             image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
           },
           { 
             name: "English", 
-            desc: "Grammar, Précis, Essay & Analytical Reports",
+            desc: "Grammar, Précis, Essay & Analytical Reports.",
             image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
           },
           { 
             name: "Mentor Session", 
-            desc: "Strategic Mentorship Classes & Tactical Roadmaps",
+            desc: "Strategic Mentorship Classes & Tactical Roadmaps.",
             image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
           },
           { 
             name: "Environment", 
-            desc: "Environment",
-            image: "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80"
+            desc: "Ecology, Biodiversity, Climate Protocols & Conventions.",
+            image: "https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80"
           },
           { 
             name: "Internal Security", 
-            desc: "Internal Security",
+            desc: "Border Management, Cyber Warfare, Insurgency & Law.",
             image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80"
           },
           {
-        name: "Modern History",
-        desc: "Freedom Struggle, British Era, National Movement & Constitutional Evolution.",
-        image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Medieval History",
-        desc: "Delhi Sultanate, Mughal Administration, Architecture & Regional Dynasties.",
-        image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Ancient History",
-        desc: "Indus Valley Civilization, Vedic Period, Mauryan & Gupta Empires.",
-        image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80"
-      },
+            name: "Modern History",
+            desc: "Freedom Struggle, British Era & Constitutional Evolution.",
+            image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Medieval History",
+            desc: "Delhi Sultanate, Mughal Administration & Architecture.",
+            image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Ancient History",
+            desc: "Indus Valley, Vedic Age, Mauryan & Gupta Periods.",
+            image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80"
+          },
           { 
             name: "English Grammar", 
             desc: "Core Rules, Syntax, Sentence Corrections & Error Detection.",
             image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
           },
-           { 
+          { 
             name: "Reasoning", 
             desc: "Verbal, Non-Verbal & Spatial Tactical Reasoning Drills.",
             image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
           },
-           { 
+          { 
             name: "Science and Tech", 
-            desc: "Science Tech.",
-            image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
+            desc: "Space Research, Defense Tech, Nanotech & Computing.",
+            image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
           },
-           {
-        name: "Economics",
-        desc: "Macroeconomics, Indian Economy, Monetary Policy, Fiscal Budgets & Banking.",
-        image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "International Relations",
-        desc: "IR.",
-        image: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Polity",
-        desc: "Indian Constitution, Preamble, Fundamental Rights, Parliament & Judiciary.",
-        image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Biology",
-        desc: "Cell Biology, Human Physiology, Nutrition, Diseases & Ecological Cycles.",
-        image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Chemistry",
-        desc: "Chemical Equations, Elements, Compounds, Bonding & Applied Science.",
-        image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        name: "Physics",
-        desc: "Optics, Motion, Electricity, Magnetism, Sound & Thermodynamic Laws.",
-        image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=80"
-      },
           {
-        name: "Governance",
-        desc: "Governance.",
-        image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80"
-      },
-           {
-        name: "Answer Writing",
-        desc: "Paper 2.",
-        image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80"
-      }
+            name: "Economics",
+            desc: "Macroeconomics, Monetary Policy, Fiscal Budgets & Banking.",
+            image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "International Relations",
+            desc: "Bilateral Treaties, Global Summits & Geopolitics.",
+            image: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Polity",
+            desc: "Indian Constitution, Rights, Parliament & Judicial Framework.",
+            image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Biology",
+            desc: "Cell Physiology, Nutrition, Diseases & Human Anatomy.",
+            image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Chemistry",
+            desc: "Chemical Reactions, Compounds, Metallurgy & Periodic Trends.",
+            image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Physics",
+            desc: "Mechanics, Electricity, Optics & Modern Physical Laws.",
+            image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Governance",
+            desc: "Public Policy, Welfare Schemes & Administrative Accountability.",
+            image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80"
+          },
+          {
+            name: "Answer Writing",
+            desc: "Paper 2 Strategy, Essay Architectures & Report Formats.",
+            image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80"
+          }
         ]
       }
     };
@@ -333,7 +333,7 @@
     function renderBatchCurriculum(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
       currentBatchParam = urlParams.get('batch') || 'cds-kilo';
-      currentModeParam = urlParams.get('mode') || 'live';
+      currentModeParam = (urlParams.get('mode') === 'recorded') ? 'recorded' : 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
       if (!isCombo && !allowedBatches.includes(currentBatchParam)) {
@@ -343,7 +343,8 @@
       }
 
       const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-kilo"];
-      const modeLabel = currentModeParam === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
+      const isRecorded = currentModeParam === 'recorded';
+      const modeLabel = isRecorded ? 'RECORDED VAULT' : 'LIVE SQUADRON';
 
       document.getElementById('batchHeading').innerText = `${currentCurriculum.title} (${modeLabel})`;
       document.getElementById('batchBadge').innerText = `${currentBatchParam.toUpperCase()} • ${modeLabel}`;
@@ -381,7 +382,7 @@
             </div>
             
             <div class="absolute top-2.5 right-2.5">
-              <span class="w-2.5 h-2.5 rounded-full ${currentModeParam === 'recorded' ? 'bg-amber-400' : 'bg-emerald-400'} inline-block shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
+              <span class="w-2.5 h-2.5 rounded-full ${isRecorded ? 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]' : 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]'} inline-block"></span>
             </div>
           </div>
 
@@ -396,8 +397,8 @@
               </p>
             </div>
             <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              <span class="text-[10px] font-mono text-amber-400">
-                ${currentModeParam === 'recorded' ? 'RECORDED ARCHIVE' : 'STATUS: READY'}
+              <span class="text-[10px] font-mono ${isRecorded ? 'text-amber-400' : 'text-emerald-400'}">
+                ${isRecorded ? 'RECORDED VAULT' : '🔴 LIVE READY'}
               </span>
               <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
             </div>
@@ -511,10 +512,8 @@
       </div>
     </div>
 
-    <!-- SUBJECT TABS GRID (WITH VISUAL TOP IMAGES) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="subjectsContainer">
-      <!-- Subjects dynamically rendered with top image via JavaScript -->
-    </div>
+    <!-- SUBJECT TABS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="subjectsContainer"></div>
 
   </main>
 
