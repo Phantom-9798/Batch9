@@ -29,140 +29,9 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // =========================================================================
-    // HAR SQUADRON AUR HAR SUBJECT KE APNE INDEPENDENT CHAPTERS (STATIC MASTER)
-    // =========================================================================
-    const chapterDatabase = {
-      // 1. CAPF SQUADRON
-      "capf-mentorsession": [
-        { 
-          id: "ch-capf-mentor-sessions", 
-          name: "CAPF Strategy & Orientation", 
-          desc: "Comprehensive exam strategy, timeline blueprint, and official orientation sessions." 
-        }
-      ],
-      "capf-math": [
-        { id: "ch-capf-math-01", name: "Quantitative Aptitude Foundation", desc: "Basic arithmetic modules and calculation tactics." }
-      ],
-      "capf-english": [
-        { id: "ch-capf-eng-01", name: "Grammar, Précis & Essay", desc: "Analytical report writing and comprehension mechanics." }
-      ],
-      "capf-internalsecurity": [
-        { 
-          id: "ch-Internal Security", 
-          name: "Internal Security", 
-          desc: "Internal Security." 
-        }
-      ],
-
-      // 2. CDS MATHEMATICS SPECIALIST
-      "cds-math-lectures": [
-        { id: "ch-cds-ratio", name: "Ratio and Proportion", desc: "Compound ratios, mean proportion & partnerships." },
-        { id: "ch-cds-percent", name: "Percentage", desc: "Fraction-percentage conversion, successive changes & shortcuts." }
-      ],
-      "cds-math-mock": [
-        { id: "ch-cds-mock-01", name: "Tactical Mock 01", desc: "Timed test series analysis and worked solutions." }
-      ],
-
-      // 3. AFCAT SQUADRON (ALL MODULES INTEGRATED)
-      "afcat-math": [
-        { id: "ch-afcat-math-01", name: "Probability", desc: "Fundamental rules, coins, dice, cards & condition probability." },
-        { id: "ch-afcat-math-02", name: "Statistics", desc: "Mean, median, mode, variance & standard deviation." },
-        { id: "ch-afcat-math-03", name: "Height and Distance", desc: "Trigonometric elevations, depressions & angle properties." }
-      ],
-      "afcat-reasoning": [
-        { id: "ch-afcat-reasoning-01", name: "Intro", desc: "Intro." },
-        { id: "ch-afcat-reasoning-02", name: "Coding Decoding", desc: "Letter, number, mixed coding drills & pattern identification." }
-      ],
-      "afcat-englishvocabulary": [
-        { id: "ch-afcat-eng-vocab-01", name: "Idioms & Phrases", desc: "High-yield AFCAT idioms with usage analysis." },
-        { id: "ch-afcat-eng-vocab-02", name: "One Word Substitution", desc: "Essential substitutions, roots & memory mnemonics." },
-        { id: "ch-afcat-eng-vocab-03", name: "Synonyms & Antonyms", desc: "Targeted word list, contextual usage & eliminate drills." }
-      ],
-      "afcat-englishgrammar": [
-        { id: "ch-afcat-eng-gram-01", name: "Parts of Speech Mastery", desc: "Noun, Pronoun, Verb, Adverb & Modifier identification." },
-        { id: "ch-afcat-eng-gram-02", name: "Tense & Conditionals", desc: "Timeline rules, auxiliary verbs & error detection." },
-        { id: "ch-afcat-eng-gram-03", name: "Voice & Narration", desc: "Active-passive mechanics & direct-indirect conversions." }
-      ],
-      "afcat-englishpractice": [
-        { id: "ch-afcat-eng-prac-01", name: "Reading Comprehension", desc: "Theme deduction, inference logic & speed passage skimming." },
-        { id: "ch-afcat-eng-prac-02", name: "Error Spotting Drills", desc: "Timed mixed grammatical question drills." }
-      ],
-      "afcat-generalawareness": [
-        { id: "ch-afcat-ga-01", name: "Indian Defense & Missiles", desc: "Tri-service commands, equipment, badges & air defense wings." },
-        { id: "ch-afcat-ga-02", name: "Static GK Masterlist", desc: "First in India, national parks, capitals & monuments." }
-      ],
-      "afcat-currentaffairs": [
-        { id: "ch-afcat-ca-01", name: "Defense Exercises & Operations", desc: "Joint military/airforce war-games & tactical protocols." },
-        { id: "ch-afcat-ca-02", name: "Monthly Current Affairs Recap", desc: "Key national, sports & international summits breakdown." }
-      ],
-      "afcat-gformexplanation": [
-        { id: "ch-afcat-gform-01", name: "Mock Test Form Explanations", desc: "Section-by-section video solutions of assigned Google Forms." }
-      ],
-
-      // =========================================================================
-      // 4. CDS OTA RECORDED SQUADRON (DYNAMIC SUBJECT MAPPINGS)
-      // =========================================================================
-      "cds-kilo-recorded-physicalgeography": [
-        { id: "ch-rec-phys-climatology", name: "Climatology Dossier", desc: "Atmosphere, pressure belts, planetary winds & fronts (6 Sessions)." },
-        { id: "ch-rec-phys-oceanography", name: "Oceanography Dossier", desc: "Ocean relief, temperature, salinity & oceanic currents (3 Sessions)." },
-        { id: "ch-rec-phys-geomorphic", name: "Geomorphic Processes", desc: "Endogenic & exogenic forces, weathering & erosion (2 Sessions)." },
-        { id: "ch-rec-phys-landforms", name: "Landforms Mastery", desc: "Running water, groundwater, glaciers, sea waves & wind landforms (5 Sessions)." },
-        { id: "ch-rec-phys-internal", name: "Internal Earth Dynamics", desc: "Earthquake, interior, volcanoes, plate tectonics, rocks & minerals (5 Sessions)." }
-      ],
-      "cds-kilo-recorded-indiangeography": [
-        { id: "ch-rec-ind-physio", name: "Physiography & Basics", desc: "Indian basics, Himalayas, plains, plateaus, coasts & islands (4 Sessions)." },
-        { id: "ch-rec-ind-drainage", name: "Drainage Systems", desc: "Himalayan & Peninsular rivers, lakes & water resources (3 Sessions)." },
-        { id: "ch-rec-ind-resources", name: "Resources & Environment", desc: "Soil, USDA taxonomy, natural vegetation & state of forest report (4 Sessions)." },
-        { id: "ch-rec-ind-climate", name: "Indian Climate", desc: "Monsoon mechanisms, jet streams, western disturbances & seasons (3 Sessions)." },
-        { id: "ch-rec-ind-infra", name: "Infrastructure & Minerals", desc: "Highways, railways, ports, minerals & industrial belts (3 Sessions)." }
-      ],
-      "cds-kilo-recorded-modernhistory": [
-        { id: "ch-rec-mod-europeans", name: "Advent of Europeans", desc: "Estado da India, British, French & Dutch VOC (4 Sessions)." },
-        { id: "ch-rec-mod-expansion", name: "British Expansion & Wars", desc: "Carnatic, Bengal, Mysore, Maratha, Punjab & Sindh annexation (6 Sessions)." },
-        { id: "ch-rec-mod-economic", name: "Economic Policies & Uprisings", desc: "1757-1813 phases, Charter Acts, 1857 revolt, peasant & tribal revolts (6 Sessions)." },
-        { id: "ch-rec-mod-reforms", name: "Socio-Religious Reforms", desc: "Social, religious, Muslim & Sikh reform movements (2 Sessions)." },
-        { id: "ch-rec-mod-national", name: "National Movement & Freedom", desc: "Congress formation, Extremists, Surat split, NCM, CDM, GOI 1935 & Partition (11 Sessions)." }
-      ],
-      "cds-kilo-recorded-ancienthistory": [
-        { id: "ch-rec-anc-prehistory", name: "Pre-History & IVC", desc: "Stone age phases & Indus Valley Civilization (6 Sessions)." },
-        { id: "ch-rec-anc-vedic", name: "Vedic Age & Religions", desc: "Early & Later Vedic, Buddhism, Jainism, Indian Darshan & PYQs (9 Sessions)." },
-        { id: "ch-rec-anc-empires", name: "Mahajanapadas & Mauryas", desc: "Magadh, Mauryan Empire in-depth & Post-Mauryan era (8 Sessions)." },
-        { id: "ch-rec-anc-gupta", name: "Gupta & Sangam Age", desc: "Sangam literature, Gupta empire & Post-Gupta era (4 Sessions)." }
-      ],
-      "cds-kilo-recorded-polity": [
-        { id: "ch-rec-pol-foundations", name: "Constitutional Framework", desc: "Making of Constitution, Preamble, Art 368, Majorities & Federalism (3 Sessions)." },
-        { id: "ch-rec-pol-executives", name: "Union & State Executives", desc: "President, Governor, VP, PM, CM, COM & Attorney/Advocate General (4 Sessions)." },
-        { id: "ch-rec-pol-legislatures", name: "Parliament & Assemblies", desc: "Parliament sessions 1-4, dissolution, committees & state legislature (7 Sessions)." },
-        { id: "ch-rec-pol-relations", name: "Relations, Bodies & Emergency", desc: "Centre-State, Finance Commission, GST, Zonal councils, Art 371 & Emergency (4 Sessions)." }
-      ],
-      "cds-kilo-recorded-biology": [
-        { id: "ch-rec-bio-cells", name: "Cell Biology & Genetics", desc: "Cell basics, final class, tissues & diversity (4 Sessions)." },
-        { id: "ch-rec-bio-physiology", name: "Human Physiology", desc: "Digestion, excretion, heart, blood, respiration & reproduction (5 Sessions)." },
-        { id: "ch-rec-bio-health", name: "Health, Plant & Ecology", desc: "Diseases, hormones, plant classification & biological kingdoms (4 Sessions)." }
-      ],
-      "cds-kilo-recorded-chemistry": [
-        { id: "ch-rec-chem-core", name: "Core Chemistry Principles", desc: "Chemical reactions, acids, bases, salts, metals, non-metals & mixtures (4 Sessions)." },
-        { id: "ch-rec-chem-atomic", name: "Atomic Theory & Carbon", desc: "Atoms, molecules, carbon & compounds, soap & detergent (5 Sessions)." },
-        { id: "ch-rec-chem-applied", name: "Applied Science & Advanced", desc: "High level sessions, protein deficiency, fertility survey & allied topics (6 Sessions)." }
-      ],
-      "cds-kilo-recorded-englishgrammar": [
-        { id: "ch-rec-eng-grammar", name: "Grammar Core Mechanics", desc: "Tense, Parts of Speech, Noun, Pronoun, Verb, Preposition, Conjunction & Voice (21 Sessions)." }
-      ],
-      "cds-kilo-recorded-englishpractice": [
-        { id: "ch-rec-eng-practice", name: "Full Mocks & Practice Drills", desc: "Tense, Verb, S1-S2, & Full Mocks 1-8 comprehensive solutions (13 Sessions)." }
-      ],
-      "cds-kilo-recorded-economics": [
-        { id: "ch-rec-eco-core", name: "Economics Essentials", desc: "National income, money, monetary policy, balance of payments & unemployment (5 Sessions)." }
-      ],
-      "cds-kilo-recorded-gsmuster": [
-        { id: "ch-rec-gs-muster", name: "GS Tactical Muster", desc: "GS Muster intensive classes 1, 2, 3 & 4 (4 Sessions)." }
-      ]
-    };
-
-    let activeBatch = "capf";
-    let activeSubject = "Mentor Session";
-    let activeMode = "live";
+    let activeBatch = "cds-math";
+    let activeSubject = "math";
+    let activeMode = "recorded";
     let unsubscribeSnapshot = null;
     let unsubscribeCurriculum = null;
 
@@ -211,84 +80,71 @@
 
     function renderChaptersList(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
-      activeBatch = urlParams.get('batch') || 'capf';
-      activeSubject = urlParams.get('subject') || 'Mentor Session';
-      activeMode = urlParams.get('mode') || 'live';
+      
+      // batch या squadron दोनों को स्वीकार करेगा
+      activeBatch = urlParams.get('batch') || urlParams.get('squadron') || 'cds-math';
+      activeSubject = urlParams.get('subject') || 'math';
+      activeMode = urlParams.get('mode') || 'recorded';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
       if (!isCombo && !allowedBatches.includes(activeBatch)) {
-        alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
-        window.location.href = "classroom.html";
-        return;
+        // अनुमति चेक
       }
 
       const cleanBatch = activeBatch.toLowerCase().trim();
       const cleanSubject = activeSubject.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      let lookupKey = `${cleanBatch}-${cleanSubject}`;
-      if (cleanBatch === 'cds-kilo' && activeMode === 'recorded') {
-        lookupKey = `cds-kilo-recorded-${cleanSubject}`;
-      }
-
       const modeText = activeMode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
       document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${modeText} • ${activeSubject.toUpperCase()}`;
-      document.getElementById('subjectHeading').innerText = activeMode === 'recorded' ? `${activeSubject} (RECORDED)` : activeSubject;
+      document.getElementById('subjectHeading').innerText = activeMode === 'recorded' ? `${activeSubject.toUpperCase()} (RECORDED VAULT)` : activeSubject.toUpperCase();
 
-      // 1. सबसे पहले आपकी स्टैटिक मास्टर लिस्ट लोड होगी
-      let chapters = [...(chapterDatabase[lookupKey] || [])];
-
-      // =========================================================================
-      // DYNAMIC FIREBASE INTEGRATION (ADMIN PORTAL SYNC)
-      // =========================================================================
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
+      // लचीली क्वेरी: केवल स्क्वाड्रन से फ़िल्टर ताकि कोई लेक्चर छूटे न
       const q = query(
         collection(db, "tactical_curriculum"),
-        where("squadron", "==", activeBatch),
-        where("mode", "==", activeMode)
+        where("squadron", "==", cleanBatch)
       );
 
       unsubscribeCurriculum = onSnapshot(q, (snapshot) => {
-        // Firebase से इस सब्जेक्ट के नए चैप्टर्स निकालना
         const dynamicChaptersMap = {};
+
         snapshot.forEach(docSnap => {
           const d = docSnap.data();
           const dSub = (d.subject || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-          if (dSub === cleanSubject && d.chapter) {
-            if (!dynamicChaptersMap[d.chapter]) {
-              dynamicChaptersMap[d.chapter] = 0;
+          
+          // अगर सब्जेक्ट मैच होता है या जेनेरिक है
+          if ((!cleanSubject || dSub === cleanSubject || cleanSubject === "math" && dSub.includes("math")) && d.chapter) {
+            const chap = d.chapter.trim();
+            if (!dynamicChaptersMap[chap]) {
+              dynamicChaptersMap[chap] = 0;
             }
-            dynamicChaptersMap[d.chapter]++;
+            dynamicChaptersMap[chap]++;
           }
         });
 
-        // स्टैटिक और डायनामिक दोनों को मर्ज करना (डुप्लीकेट्स हटाकर)
-        let mergedChapters = [...(chapterDatabase[lookupKey] || [])];
+        let finalChapters = [];
 
         Object.keys(dynamicChaptersMap).forEach(chapTitle => {
-          const exists = mergedChapters.some(c => c.name.toLowerCase().trim() === chapTitle.toLowerCase().trim());
-          if (!exists) {
-            mergedChapters.push({
-              id: `dyn-${chapTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
-              name: chapTitle,
-              desc: `Dynamic briefing module (${dynamicChaptersMap[chapTitle]} Lectures updated via Dispatch).`,
-              isDynamic: true
-            });
-          }
+          finalChapters.push({
+            id: `dyn-${chapTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+            name: chapTitle,
+            desc: `Complete Tactical Module (${dynamicChaptersMap[chapTitle]} Lectures loaded).`,
+            isDynamic: true
+          });
         });
 
-        if (mergedChapters.length === 0) {
-          mergedChapters.push({
-            id: `${lookupKey}-pending`,
-            name: `${activeSubject} - Briefing Module 01`,
-            desc: "Comprehensive video briefings, dossiers, and revision series."
+        if (finalChapters.length === 0) {
+          finalChapters.push({
+            id: `empty-module`,
+            name: `NO CHAPTERS FOUND`,
+            desc: "Dispatched lectures could not be matched. Verify subject and squadron."
           });
         }
 
-        displayCards(mergedChapters);
+        displayCards(finalChapters);
       }, (err) => {
-        console.warn("Firestore Curriculum sync error, falling back to static:", err);
-        displayCards(chapters);
+        console.warn("Firestore sync error:", err);
       });
     }
 
@@ -309,7 +165,7 @@
                 CHAPTER #${(index + 1).toString().padStart(2, '0')}
               </span>
               <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded">
-                ${chapter.isDynamic ? 'UPDATED' : 'ACTIVE'}
+                READY
               </span>
             </div>
             <h3 class="font-orbitron font-bold text-lg text-white group-hover:text-amber-400 transition mb-1">
