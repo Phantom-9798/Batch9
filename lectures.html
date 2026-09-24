@@ -63,7 +63,7 @@
     const db = getFirestore(app);
 
     // =========================================================================
-    // ISOLATED LECTURE DATABASE (CDS OTA RECORDED VAULT WITH MAPPED YOUTUBE LINKS)
+    // ISOLATED LECTURE DATABASE (CDS KILO RECORDED VAULT WITH MAPPED YOUTUBE LINKS)
     // =========================================================================
     const lectureDatabase = {
       // ----------------- 1. CAPF SESSIONS -----------------
@@ -82,147 +82,205 @@
         { lectureNo: "01", title: "Idioms & Phrases Class 01", desc: "High-yield AFCAT idioms with contextual usage analysis.", duration: "HD Session", videoId: "", pdfUrl: "#" }
       ],
 
-      // ----------------- 3. CDS OTA MAPPED SUBJECTS (YOUTUBE VIDEOS) -----------------
-      "ch-cds-ota-physical-geography": [
+      // ----------------- 3. CDS KILO RECORDED MAPPED SUBJECTS (YOUTUBE VIDEOS) -----------------
+      "ch-rec-phys-climatology": [
         { lectureNo: "01", title: "Climatology 1", desc: "Climatology foundational concepts.", duration: "HD Session", videoId: "DYU_F-zG-1M", pdfUrl: "#" },
         { lectureNo: "02", title: "Climatology 2", desc: "Advanced atmospheric pressure & wind systems.", duration: "HD Session", videoId: "ovDBDoofNTE", pdfUrl: "#" },
         { lectureNo: "03", title: "Climatology 3", desc: "Atmospheric moisture and precipitation.", duration: "HD Session", videoId: "nWBKZiykPRY", pdfUrl: "#" },
         { lectureNo: "04", title: "Climatology 4", desc: "Air masses and climate classification.", duration: "HD Session", videoId: "bWEGFZ4o8tM", pdfUrl: "#" },
         { lectureNo: "05", title: "Climatology 5", desc: "Cyclones and global climatic belts.", duration: "HD Session", videoId: "CjOZ1CjP648", pdfUrl: "#" },
-        { lectureNo: "06", title: "Climatology Fronts", desc: "Fronts and weather disturbances.", duration: "HD Session", videoId: "ZQ44FeA5YlE", pdfUrl: "#" },
-        { lectureNo: "07", title: "Oceanography 1", desc: "Relief of ocean floor and salinity.", duration: "HD Session", videoId: "nripPA4jsao", pdfUrl: "#" },
-        { lectureNo: "08", title: "Oceanography 2", desc: "Ocean currents and tides.", duration: "HD Session", videoId: "-EM9nqDpwJs", pdfUrl: "#" },
-        { lectureNo: "09", title: "Oceanography 3", desc: "Marine resources and coral reefs.", duration: "HD Session", videoId: "8I_HDgr6_qY", pdfUrl: "#" },
-        { lectureNo: "10", title: "Geomorphic processes 1", desc: "Endogenic and exogenic forces.", duration: "HD Session", videoId: "HS8NliKfdOs", pdfUrl: "#" },
-        { lectureNo: "11", title: "Geomorphic processes 2", desc: "Weathering and mass movement.", duration: "HD Session", videoId: "LyKiD_NRqOw", pdfUrl: "#" },
-        { lectureNo: "12", title: "Landform by running water", desc: "Fluvial landforms and drainage cycles.", duration: "HD Session", videoId: "MQyDKjS8q8o", pdfUrl: "#" },
-        { lectureNo: "13", title: "Landform by ground water", desc: "Karst topography and underground features.", duration: "HD Session", videoId: "2ZDC-OIPwes", pdfUrl: "#" },
-        { lectureNo: "14", title: "Landform by glaciers", desc: "Glacial depositional and erosional landforms.", duration: "HD Session", videoId: "QgCl-ABdgAc", pdfUrl: "#" },
-        { lectureNo: "15", title: "Landform by sea wave", desc: "Coastal landforms and marine erosion.", duration: "HD Session", videoId: "DQ69YtPQzuM", pdfUrl: "#" },
-        { lectureNo: "16", title: "Landform by wind", desc: "Aeolian landforms in arid regions.", duration: "HD Session", videoId: "h8wJYqexP6I", pdfUrl: "#" },
-        { lectureNo: "17", title: "Earthquake", desc: "Seismic waves and epicenter analysis.", duration: "HD Session", videoId: "je3oICjBHSg", pdfUrl: "#" },
-        { lectureNo: "18", title: "Earth's interior", desc: "Crust, mantle, core and discontinuities.", duration: "HD Session", videoId: "17TTLgwEv88", pdfUrl: "#" },
-        { lectureNo: "19", title: "Volcanoes", desc: "Volcanic landforms and eruption types.", duration: "HD Session", videoId: "BMG9Q7jwDeI", pdfUrl: "#" },
-        { lectureNo: "20", title: "Plate tectonics", desc: "Continental drift and plate boundaries.", duration: "HD Session", videoId: "UfgnLF6c5sQ", pdfUrl: "#" },
-        { lectureNo: "21", title: "Rocks and minerals", desc: "Igneous, sedimentary, and metamorphic rocks.", duration: "HD Session", videoId: "CgAf2p6dDVI", pdfUrl: "#" }
+        { lectureNo: "06", title: "Climatology fronts", desc: "Fronts and weather disturbances.", duration: "HD Session", videoId: "ZQ44FeA5YlE", pdfUrl: "#" }
       ],
-      "ch-cds-ota-indian-geography": [
+      "ch-rec-phys-oceanography": [
+        { lectureNo: "01", title: "Oceanography 1", desc: "Relief of ocean floor and salinity.", duration: "HD Session", videoId: "nripPA4jsao", pdfUrl: "#" },
+        { lectureNo: "02", title: "Oceanography 2", desc: "Ocean currents and tides.", duration: "HD Session", videoId: "-EM9nqDpwJs", pdfUrl: "#" },
+        { lectureNo: "03", title: "Oceanography 3", desc: "Marine resources and coral reefs.", duration: "HD Session", videoId: "8I_HDgr6_qY", pdfUrl: "#" }
+      ],
+      "ch-rec-phys-geomorphic": [
+        { lectureNo: "01", title: "Geomorphic processes 1", desc: "Endogenic and exogenic forces.", duration: "HD Session", videoId: "HS8NliKfdOs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Geomorphic processes 2", desc: "Weathering and mass movement.", duration: "HD Session", videoId: "LyKiD_NRqOw", pdfUrl: "#" }
+      ],
+      "ch-rec-phys-landforms": [
+        { lectureNo: "01", title: "Landform by running water", desc: "Fluvial landforms and drainage cycles.", duration: "HD Session", videoId: "MQyDKjS8q8o", pdfUrl: "#" },
+        { lectureNo: "02", title: "Landform by ground water", desc: "Karst topography and underground features.", duration: "HD Session", videoId: "2ZDC-OIPwes", pdfUrl: "#" },
+        { lectureNo: "03", title: "Landform by glaciers", desc: "Glacial depositional and erosional landforms.", duration: "HD Session", videoId: "QgCl-ABdgAc", pdfUrl: "#" },
+        { lectureNo: "04", title: "Landform by sea wave", desc: "Coastal landforms and marine erosion.", duration: "HD Session", videoId: "DQ69YtPQzuM", pdfUrl: "#" },
+        { lectureNo: "05", title: "Landform by wind", desc: "Aeolian landforms in arid regions.", duration: "HD Session", videoId: "h8wJYqexP6I", pdfUrl: "#" }
+      ],
+      "ch-rec-phys-internal": [
+        { lectureNo: "01", title: "Earthquake", desc: "Seismic waves and epicenter analysis.", duration: "HD Session", videoId: "je3oICjBHSg", pdfUrl: "#" },
+        { lectureNo: "02", title: "Earth's interior", desc: "Crust, mantle, core and discontinuities.", duration: "HD Session", videoId: "17TTLgwEv88", pdfUrl: "#" },
+        { lectureNo: "03", title: "Volcanoes", desc: "Volcanic landforms and eruption types.", duration: "HD Session", videoId: "BMG9Q7jwDeI", pdfUrl: "#" },
+        { lectureNo: "04", title: "Plate tectonics", desc: "Continental drift and plate boundaries.", duration: "HD Session", videoId: "UfgnLF6c5sQ", pdfUrl: "#" },
+        { lectureNo: "05", title: "Rocks and minerals", desc: "Igneous, sedimentary, and metamorphic rocks.", duration: "HD Session", videoId: "CgAf2p6dDVI", pdfUrl: "#" }
+      ],
+      "ch-rec-ind-physio": [
         { lectureNo: "01", title: "Indian geography basic", desc: "Location, extent and neighboring countries.", duration: "HD Session", videoId: "KReGkP9nVDE", pdfUrl: "#" },
         { lectureNo: "02", title: "Himalayas + plain", desc: "Himalayan ranges and Northern plains.", duration: "HD Session", videoId: "K-45zpv-_Vo", pdfUrl: "#" },
         { lectureNo: "03", title: "Peninsular plateau", desc: "Central highlands and Deccan plateau.", duration: "HD Session", videoId: "5z_8E-L5vM0", pdfUrl: "#" },
-        { lectureNo: "04", title: "Coastal area + island", desc: "Western/Eastern coasts and island groups.", duration: "HD Session", videoId: "y4J7EDOM0Po", pdfUrl: "#" },
-        { lectureNo: "05", title: "Rivers", desc: "Major river systems and drainage patterns.", duration: "HD Session", videoId: "BtKIVMPrJgU", pdfUrl: "#" },
-        { lectureNo: "06", title: "All rivers", desc: "Comprehensive drainage mapping.", duration: "HD Session", videoId: "35mxgl2PaUw", pdfUrl: "#" },
-        { lectureNo: "07", title: "Soil", desc: "Major soil types in India.", duration: "HD Session", videoId: "JDDyZ3atF14", pdfUrl: "#" },
-        { lectureNo: "08", title: "Vegetation", desc: "Natural vegetation and forest types.", duration: "HD Session", videoId: "xR1SKCkVMbU", pdfUrl: "#" },
-        { lectureNo: "09", title: "Lakes", desc: "Freshwater and saline lakes across India.", duration: "HD Session", videoId: "HrDPL5C6D1M", pdfUrl: "#" },
-        { lectureNo: "10", title: "Indian ports", desc: "Major and minor seaports.", duration: "HD Session", videoId: "itAnYglQYS4", pdfUrl: "#" },
-        { lectureNo: "11", title: "Indian highway + railway", desc: "Transport corridors and networks.", duration: "HD Session", videoId: "JzUcY7JTWpI", pdfUrl: "#" },
-        { lectureNo: "12", title: "Industries + minerals", desc: "Mineral belts and industrial hubs.", duration: "HD Session", videoId: "TTsccUrqDTI", pdfUrl: "#" },
-        { lectureNo: "13", title: "USDA SOIL TAXONOMY", desc: "Scientific classification of soils.", duration: "HD Session", videoId: "VNr6d_VdHDc", pdfUrl: "#" },
-        { lectureNo: "14", title: "India state of forest report", desc: "ISFR key data and statistics.", duration: "HD Session", videoId: "_mgqQS4CWwE", pdfUrl: "#" },
-        { lectureNo: "15", title: "Indian climate", desc: "Monsoon mechanism and seasons.", duration: "HD Session", videoId: "QGqaWdb9wT8", pdfUrl: "#" },
-        { lectureNo: "16", title: "Indian climate khatam", desc: "Monsoon retreat and climatic regions.", duration: "HD Session", videoId: "_NKLSGwLpaU", pdfUrl: "#" },
-        { lectureNo: "17", title: "Jet stream + western disturbance", desc: "Upper air circulation and winter rains.", duration: "HD Session", videoId: "AlnKrCXbIIo", pdfUrl: "#" }
+        { lectureNo: "04", title: "Coastal area + island", desc: "Western/Eastern coasts and island groups.", duration: "HD Session", videoId: "y4J7EDOM0Po", pdfUrl: "#" }
       ],
-      "ch-cds-ota-ancient-history": [
+      "ch-rec-ind-drainage": [
+        { lectureNo: "01", title: "Rivers", desc: "Major river systems and drainage patterns.", duration: "HD Session", videoId: "BtKIVMPrJgU", pdfUrl: "#" },
+        { lectureNo: "02", title: "All rivers", desc: "Comprehensive drainage mapping.", duration: "HD Session", videoId: "35mxgl2PaUw", pdfUrl: "#" },
+        { lectureNo: "03", title: "Lakes", desc: "Freshwater and saline lakes across India.", duration: "HD Session", videoId: "HrDPL5C6D1M", pdfUrl: "#" }
+      ],
+      "ch-rec-ind-resources": [
+        { lectureNo: "01", title: "Soil", desc: "Major soil types in India.", duration: "HD Session", videoId: "JDDyZ3atF14", pdfUrl: "#" },
+        { lectureNo: "02", title: "Vegetation", desc: "Natural vegetation and forest types.", duration: "HD Session", videoId: "xR1SKCkVMbU", pdfUrl: "#" },
+        { lectureNo: "03", title: "USDA SOIL TAXONOMY", desc: "Scientific classification of soils.", duration: "HD Session", videoId: "VNr6d_VdHDc", pdfUrl: "#" },
+        { lectureNo: "04", title: "India state of forest report", desc: "ISFR key data and statistics.", duration: "HD Session", videoId: "_mgqQS4CWwE", pdfUrl: "#" }
+      ],
+      "ch-rec-ind-climate": [
+        { lectureNo: "01", title: "Indian climate", desc: "Monsoon mechanism and seasons.", duration: "HD Session", videoId: "QGqaWdb9wT8", pdfUrl: "#" },
+        { lectureNo: "02", title: "Indian climate khatam", desc: "Monsoon retreat and climatic regions.", duration: "HD Session", videoId: "_NKLSGwLpaU", pdfUrl: "#" },
+        { lectureNo: "03", title: "Jet stream + western disturbance", desc: "Upper air circulation and winter rains.", duration: "HD Session", videoId: "AlnKrCXbIIo", pdfUrl: "#" }
+      ],
+      "ch-rec-ind-infra": [
+        { lectureNo: "01", title: "Indian ports", desc: "Major and minor seaports.", duration: "HD Session", videoId: "itAnYglQYS4", pdfUrl: "#" },
+        { lectureNo: "02", title: "Indian highway + railway", desc: "Transport corridors and networks.", duration: "HD Session", videoId: "JzUcY7JTWpI", pdfUrl: "#" },
+        { lectureNo: "03", title: "Industries + minerals", desc: "Mineral belts and industrial hubs.", duration: "HD Session", videoId: "TTsccUrqDTI", pdfUrl: "#" }
+      ],
+      "ch-rec-mod-europeans": [
+        { lectureNo: "01", title: "Intro + estado da india", desc: "European penetration into India.", duration: "HD Session", videoId: "_G6PG8kU9vE", pdfUrl: "#" },
+        { lectureNo: "02", title: "Estado da india", desc: "Portuguese in India.", duration: "HD Session", videoId: "RVelfF5M7tc", pdfUrl: "#" },
+        { lectureNo: "03", title: "British + french east company", desc: "English and French corporate expansion.", duration: "HD Session", videoId: "W-0hbD1WcCo", pdfUrl: "#" },
+        { lectureNo: "04", title: "Dutch voc", desc: "Dutch trading activities.", duration: "HD Session", videoId: "8ltpyRNSxTc", pdfUrl: "#" }
+      ],
+      "ch-rec-mod-expansion": [
+        { lectureNo: "01", title: "Carnatic war", desc: "Anglo-French Carnatic wars.", duration: "HD Session", videoId: "hJ30xGDuhAs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Bengal", desc: "Conquest of Bengal and Plassey.", duration: "HD Session", videoId: "dbJM63i-fDI", pdfUrl: "#" },
+        { lectureNo: "03", title: "Rise of regional states", desc: "Awadh, Hyderabad, Mysore, Punjab.", duration: "HD Session", videoId: "LCHZU_z-mvQ", pdfUrl: "#" },
+        { lectureNo: "04", title: "Anglo mysore war", desc: "Hyder Ali, Tipu Sultan and wars.", duration: "HD Session", videoId: "tWTlZv-jaQo", pdfUrl: "#" },
+        { lectureNo: "05", title: "Anglo maratha", desc: "Maratha confederacy and British.", duration: "HD Session", videoId: "rMksILduaXs", pdfUrl: "#" },
+        { lectureNo: "06", title: "Annexation of Punjab and sindh", desc: "Sikh wars and annexation.", duration: "HD Session", videoId: "fHF3k3RW1Po", pdfUrl: "#" }
+      ],
+      "ch-rec-mod-economic": [
+        { lectureNo: "01", title: "1757-1813", desc: "Mercantilism and consolidation phase.", duration: "HD Session", videoId: "Gx-ST2VteVk", pdfUrl: "#" },
+        { lectureNo: "02", title: "Phase of industrial capitalism", desc: "Free trade imperialism and drain of wealth.", duration: "HD Session", videoId: "2YM43484gEQ", pdfUrl: "#" },
+        { lectureNo: "03", title: "Charter act", desc: "Charter acts of 1793 to 1853.", duration: "HD Session", videoId: "IraHOOPelyg", pdfUrl: "#" },
+        { lectureNo: "04", title: "Revolt 1857", desc: "Causes, spread and suppression of 1857 revolt.", duration: "HD Session", videoId: "UfebvYjdSnI", pdfUrl: "#" },
+        { lectureNo: "05", title: "Peasant and tribal revolts", desc: "Santhal, Munda, Indigo revolts.", duration: "HD Session", videoId: "7Yskvm5JYHc", pdfUrl: "#" }
+      ],
+      "ch-rec-mod-reforms": [
+        { lectureNo: "01", title: "Socio religious reform movement", desc: "Raja Ram Mohan Roy, Arya Samaj, etc.", duration: "HD Session", videoId: "mZcAiSVN5pk", pdfUrl: "#" },
+        { lectureNo: "02", title: "Muslim and sikh reforms", desc: "Aligarh movement, Singh Sabha.", duration: "HD Session", videoId: "W8cexI0yv0w", pdfUrl: "#" }
+      ],
+      "ch-rec-mod-national": [
+        { lectureNo: "01", title: "Association before congress", desc: "Political associations in 19th century.", duration: "HD Session", videoId: "XTvq-AyICco", pdfUrl: "#" },
+        { lectureNo: "02", title: "Formation of congress", desc: "INC establishment in 1885.", duration: "HD Session", videoId: "gmI4_edVQRI", pdfUrl: "#" },
+        { lectureNo: "03", title: "Extremist", desc: "Lal-Bal-Pal and Surat phase.", duration: "HD Session", videoId: "PBtZD2ghuMQ", pdfUrl: "#" },
+        { lectureNo: "04", title: "Surat split", desc: "1907 Congress split.", duration: "HD Session", videoId: "p9jjg2Me0Jo", pdfUrl: "#" },
+        { lectureNo: "05", title: "Lucknow pack", desc: "1916 Lucknow pact and Home Rule.", duration: "HD Session", videoId: "Tj9NWaOuA8c", pdfUrl: "#" },
+        { lectureNo: "06", title: "Rowlatt satyagraha", desc: "Rowlatt act and Jallianwala Bagh.", duration: "HD Session", videoId: "xujBDAsqi_I", pdfUrl: "#" },
+        { lectureNo: "07", title: "Ncm", desc: "Non-Cooperation Movement and Khilafat.", duration: "HD Session", videoId: "u7hyrlquBZo", pdfUrl: "#" },
+        { lectureNo: "08", title: "CDM", desc: "Civil Disobedience Movement and Dandi March.", duration: "HD Session", videoId: "J9e_Yf37hMk", pdfUrl: "#" },
+        { lectureNo: "09", title: "Goi 1935", desc: "Government of India Act 1935.", duration: "HD Session", videoId: "57ajqE0EPec", pdfUrl: "#" },
+        { lectureNo: "10", title: "Freedom with partition", desc: "Cabinet mission, Mountbatten plan.", duration: "HD Session", videoId: "VQRq5uwctQo", pdfUrl: "#" },
+        { lectureNo: "11", title: "Qim + ina", desc: "Quit India Movement and INA trials.", duration: "HD Session", videoId: "--yZntm1pQk", pdfUrl: "#" }
+      ],
+      "ch-rec-anc-prehistory": [
         { lectureNo: "01", title: "Pre history 1", desc: "Paleolithic, Mesolithic, Neolithic ages.", duration: "HD Session", videoId: "dSazZu4ZPkM", pdfUrl: "#" },
         { lectureNo: "02", title: "Pre history 2", desc: "Chalcolithic cultures and tools.", duration: "HD Session", videoId: "1YxoaTd8U4c", pdfUrl: "#" },
         { lectureNo: "03", title: "Pre history 3", desc: "Transition to civilization.", duration: "HD Session", videoId: "uYHxaHJ8Qw0", pdfUrl: "#" },
         { lectureNo: "04", title: "IVC 1", desc: "Harappan civilization towns and architecture.", duration: "HD Session", videoId: "nN3K2grTlnA", pdfUrl: "#" },
         { lectureNo: "05", title: "IVC 2", desc: "Economy, trade, and society of IVC.", duration: "HD Session", videoId: "daUYVa5K-Fg", pdfUrl: "#" },
-        { lectureNo: "06", title: "IVC 3", desc: "Decline and important sites.", duration: "HD Session", videoId: "f-OyxblhAkg", pdfUrl: "#" },
-        { lectureNo: "07", title: "Vedic age", desc: "Early Vedic society and literature.", duration: "HD Session", videoId: "F0FyX2T-xpE", pdfUrl: "#" },
-        { lectureNo: "08", title: "Vedic age 2", desc: "Later Vedic period changes.", duration: "HD Session", videoId: "Y1XltG3r9cA", pdfUrl: "#" },
-        { lectureNo: "09", title: "Vedic age 3", desc: "Vedic philosophy and rituals.", duration: "HD Session", videoId: "r_-DMSm8578", pdfUrl: "#" },
-        { lectureNo: "10", title: "Vedic age 4", desc: "Polity and economy in Vedic era.", duration: "HD Session", videoId: "IdnOWDw27Ug", pdfUrl: "#" },
-        { lectureNo: "11", title: "Mahajanapadas", desc: "Rise of 16 Mahajanapadas.", duration: "HD Session", videoId: "S7RLjfBGY14", pdfUrl: "#" },
-        { lectureNo: "12", title: "Magadh dynasty", desc: "Haryanka, Shishunaga, Nanda dynasties.", duration: "HD Session", videoId: "HdDF22Z3oIA", pdfUrl: "#" },
-        { lectureNo: "13", title: "Indian darshan", desc: "Six schools of Indian philosophy.", duration: "HD Session", videoId: "dJEt7LSvQ_Y", pdfUrl: "#" },
-        { lectureNo: "14", title: "Buddhism", desc: "Life and teachings of Buddha.", duration: "HD Session", videoId: "XQe8IyW-KSU", pdfUrl: "#" },
-        { lectureNo: "15", title: "Buddhism 2", desc: "Buddhist councils and texts.", duration: "HD Session", videoId: "B1Hc3GpHRmc", pdfUrl: "#" },
-        { lectureNo: "16", title: "Jainism", desc: "Tirthankaras and Mahavira teachings.", duration: "HD Session", videoId: "vaeP5xI47Ds", pdfUrl: "#" },
-        { lectureNo: "17", title: "Vedic age pyq + Jainism", desc: "Previous years questions practice.", duration: "HD Session", videoId: "teispyzxdtY", pdfUrl: "#" },
-        { lectureNo: "18", title: "Mauryan Empire", desc: "Chandragupta Maurya and Bindusara.", duration: "HD Session", videoId: "VbPl2uDeQg8", pdfUrl: "#" },
-        { lectureNo: "19", title: "Mauryan Empire 2", desc: "Ashoka the Great and Dhamma.", duration: "HD Session", videoId: "a7goOIgcFoM", pdfUrl: "#" },
-        { lectureNo: "20", title: "Mauryan Empire 3", desc: "Administration and edicts.", duration: "HD Session", videoId: "MLQQuG4vrR8", pdfUrl: "#" },
-        { lectureNo: "21", title: "Mauryan Empire 4", desc: "Art, architecture and decline.", duration: "HD Session", videoId: "v3JlQyjt7fw", pdfUrl: "#" },
-        { lectureNo: "22", title: "Post Mauryan period", desc: "Shungas, Kanvas, Satavahanas.", duration: "HD Session", videoId: "2-9OBTxt4Tg", pdfUrl: "#" },
-        { lectureNo: "23", title: "Post mauryan period 2", desc: "Indo-Greeks, Shakas, Kushanas.", duration: "HD Session", videoId: "ImGJcuK1SDI", pdfUrl: "#" },
-        { lectureNo: "24", title: "Sangam age", desc: "Chola, Chera, Pandya kingdoms.", duration: "HD Session", videoId: "cm893_ZrD_w", pdfUrl: "#" },
-        { lectureNo: "25", title: "Gupta period", desc: "Chandragupta I, Samudragupta, Chandragupta II.", duration: "HD Session", videoId: "wDBSJnj1JIE", pdfUrl: "#" },
-        { lectureNo: "26", title: "Gupta period 2", desc: "Golden age culture, science, and decline.", duration: "HD Session", videoId: "L4aKfkGULJY", pdfUrl: "#" },
-        { lectureNo: "27", title: "Post gupta period", desc: "Harshavardhana and regional kingdoms.", duration: "HD Session", videoId: "oIHH9Vx47rE", pdfUrl: "#" }
+        { lectureNo: "06", title: "IVC 3", desc: "Decline and important sites.", duration: "HD Session", videoId: "f-OyxblhAkg", pdfUrl: "#" }
       ],
-      "ch-cds-ota-medieval-history": [
-        { lectureNo: "01", title: "Medieval History Complete", desc: "Delhi Sultanate, Mughal Empire & regional kingdoms overview.", duration: "HD Session", videoId: "HDDF22Z3oIA", pdfUrl: "#" }
+      "ch-rec-anc-vedic": [
+        { lectureNo: "01", title: "Vedic age", desc: "Early Vedic society and literature.", duration: "HD Session", videoId: "F0FyX2T-xpE", pdfUrl: "#" },
+        { lectureNo: "02", title: "Vedic age 2", desc: "Later Vedic period changes.", duration: "HD Session", videoId: "Y1XltG3r9cA", pdfUrl: "#" },
+        { lectureNo: "03", title: "Vedic age 3", desc: "Vedic philosophy and rituals.", duration: "HD Session", videoId: "r_-DMSm8578", pdfUrl: "#" },
+        { lectureNo: "04", title: "Vedic age 4", desc: "Polity and economy in Vedic era.", duration: "HD Session", videoId: "IdnOWDw27Ug", pdfUrl: "#" },
+        { lectureNo: "05", title: "Indian darshan", desc: "Six schools of Indian philosophy.", duration: "HD Session", videoId: "dJEt7LSvQ_Y", pdfUrl: "#" },
+        { lectureNo: "06", title: "Buddhism", desc: "Life and teachings of Buddha.", duration: "HD Session", videoId: "XQe8IyW-KSU", pdfUrl: "#" },
+        { lectureNo: "07", title: "Buddhism 2", desc: "Buddhist councils and texts.", duration: "HD Session", videoId: "B1Hc3GpHRmc", pdfUrl: "#" },
+        { lectureNo: "08", title: "Jainism", desc: "Tirthankaras and Mahavira teachings.", duration: "HD Session", videoId: "vaeP5xI47Ds", pdfUrl: "#" },
+        { lectureNo: "09", title: "Vedic age pyq + Jainism", desc: "Previous years questions practice.", duration: "HD Session", videoId: "teispyzxdtY", pdfUrl: "#" }
       ],
-      "ch-cds-ota-modern-history": [
-        { lectureNo: "01", title: "Intro + estado da india", desc: "European penetration into India.", duration: "HD Session", videoId: "_G6PG8kU9vE", pdfUrl: "#" },
-        { lectureNo: "02", title: "Estado da india", desc: "Portuguese in India.", duration: "HD Session", videoId: "RVelfF5M7tc", pdfUrl: "#" },
-        { lectureNo: "03", title: "British + french east company", desc: "English and French corporate expansion.", duration: "HD Session", videoId: "W-0hbD1WcCo", pdfUrl: "#" },
-        { lectureNo: "04", title: "Dutch voc", desc: "Dutch trading activities.", duration: "HD Session", videoId: "8ltpyRNSxTc", pdfUrl: "#" },
-        { lectureNo: "05", title: "Carnatic war", desc: "Anglo-French Carnatic wars.", duration: "HD Session", videoId: "hJ30xGDuhAs", pdfUrl: "#" },
-        { lectureNo: "06", title: "Bengal", desc: "Conquest of Bengal and Plassey.", duration: "HD Session", videoId: "dbJM63i-fDI", pdfUrl: "#" },
-        { lectureNo: "07", title: "Rise of regional states", desc: "Awadh, Hyderabad, Mysore, Punjab.", duration: "HD Session", videoId: "LCHZU_z-mvQ", pdfUrl: "#" },
-        { lectureNo: "08", title: "Anglo mysore war", desc: "Hyder Ali, Tipu Sultan and wars.", duration: "HD Session", videoId: "tWTlZv-jaQo", pdfUrl: "#" },
-        { lectureNo: "09", title: "Anglo maratha", desc: "Maratha confederacy and British.", duration: "HD Session", videoId: "rMksILduaXs", pdfUrl: "#" },
-        { lectureNo: "10", title: "1757-1813", desc: "Mercantilism and consolidation phase.", duration: "HD Session", videoId: "Gx-ST2VteVk", pdfUrl: "#" },
-        { lectureNo: "11", title: "Phase of industrial capitalism", desc: "Free trade imperialism and drain of wealth.", duration: "HD Session", videoId: "2YM43484gEQ", pdfUrl: "#" },
-        { lectureNo: "12", title: "Annexation of Punjab and sindh", desc: "Sikh wars and annexation.", duration: "HD Session", videoId: "fHF3k3RW1Po", pdfUrl: "#" },
-        { lectureNo: "13", title: "Charter act", desc: "Charter acts of 1793 to 1853.", duration: "HD Session", videoId: "IraHOOPelyg", pdfUrl: "#" },
-        { lectureNo: "14", title: "Revolt 1857", desc: "Causes, spread and suppression of 1857 revolt.", duration: "HD Session", videoId: "UfebvYjdSnI", pdfUrl: "#" },
-        { lectureNo: "15", title: "Peasant and tribal revolts", desc: "Santhal, Munda, Indigo revolts.", duration: "HD Session", videoId: "7Yskvm5JYHc", pdfUrl: "#" },
-        { lectureNo: "16", title: "Socio religious reform movement", desc: "Raja Ram Mohan Roy, Arya Samaj, etc.", duration: "HD Session", videoId: "mZcAiSVN5pk", pdfUrl: "#" },
-        { lectureNo: "17", title: "Muslim and sikh reforms", desc: "Aligarh movement, Singh Sabha.", duration: "HD Session", videoId: "W8cexI0yv0w", pdfUrl: "#" },
-        { lectureNo: "18", title: "Association before congress", desc: "Political associations in 19th century.", duration: "HD Session", videoId: "XTvq-AyICco", pdfUrl: "#" },
-        { lectureNo: "19", title: "Formation of congress", desc: "INC establishment in 1885.", duration: "HD Session", videoId: "gmI4_edVQRI", pdfUrl: "#" },
-        { lectureNo: "20", title: "Extremist", desc: "Lal-Bal-Pal and Surat phase.", duration: "HD Session", videoId: "PBtZD2ghuMQ", pdfUrl: "#" },
-        { lectureNo: "21", title: "Surat split", desc: "1907 Congress split.", duration: "HD Session", videoId: "p9jjg2Me0Jo", pdfUrl: "#" },
-        { lectureNo: "22", title: "Lucknow pack", desc: "1916 Lucknow pact and Home Rule.", duration: "HD Session", videoId: "Tj9NWaOuA8c", pdfUrl: "#" },
-        { lectureNo: "23", title: "Rowlatt satyagraha", desc: "Rowlatt act and Jallianwala Bagh.", duration: "HD Session", videoId: "xujBDAsqi_I", pdfUrl: "#" },
-        { lectureNo: "24", title: "Ncm", desc: "Non-Cooperation Movement and Khilafat.", duration: "HD Session", videoId: "u7hyrlquBZo", pdfUrl: "#" },
-        { lectureNo: "25", title: "CDM", desc: "Civil Disobedience Movement and Dandi March.", duration: "HD Session", videoId: "J9e_Yf37hMk", pdfUrl: "#" },
-        { lectureNo: "26", title: "Goi 1935", desc: "Government of India Act 1935.", duration: "HD Session", videoId: "57ajqE0EPec", pdfUrl: "#" },
-        { lectureNo: "27", title: "Freedom with partition", desc: "Cabinet mission, Mountbatten plan.", duration: "HD Session", videoId: "VQRq5uwctQo", pdfUrl: "#" },
-        { lectureNo: "28", title: "Qim + ina", desc: "Quit India Movement and INA trials.", duration: "HD Session", videoId: "--yZntm1pQk", pdfUrl: "#" }
+      "ch-rec-anc-empires": [
+        { lectureNo: "01", title: "Mahajanapadas", desc: "Rise of 16 Mahajanapadas.", duration: "HD Session", videoId: "S7RLjfBGY14", pdfUrl: "#" },
+        { lectureNo: "02", title: "Magadh dynasty", desc: "Haryanka, Shishunaga, Nanda dynasties.", duration: "HD Session", videoId: "HdDF22Z3oIA", pdfUrl: "#" },
+        { lectureNo: "03", title: "Mauryan Empire", desc: "Chandragupta Maurya and Bindusara.", duration: "HD Session", videoId: "VbPl2uDeQg8", pdfUrl: "#" },
+        { lectureNo: "04", title: "Mauryan Empire 2", desc: "Ashoka the Great and Dhamma.", duration: "HD Session", videoId: "a7goOIgcFoM", pdfUrl: "#" },
+        { lectureNo: "05", title: "Mauryan Empire 3", desc: "Administration and edicts.", duration: "HD Session", videoId: "MLQQuG4vrR8", pdfUrl: "#" },
+        { lectureNo: "06", title: "Mauryan Empire 4", desc: "Art, architecture and decline.", duration: "HD Session", videoId: "v3JlQyjt7fw", pdfUrl: "#" },
+        { lectureNo: "07", title: "Post Mauryan period", desc: "Shungas, Kanvas, Satavahanas.", duration: "HD Session", videoId: "2-9OBTxt4Tg", pdfUrl: "#" },
+        { lectureNo: "08", title: "Post mauryan period 2", desc: "Indo-Greeks, Shakas, Kushanas.", duration: "HD Session", videoId: "ImGJcuK1SDI", pdfUrl: "#" }
       ],
-      "ch-cds-ota-one-pager": [
-        { lectureNo: "01", title: "CBI Overview", desc: "Central Bureau of Investigation powers & structure.", duration: "HD Session", videoId: "kp_e9zCKkeY", pdfUrl: "#" },
-        { lectureNo: "02", title: "Fertility rate + family survey", desc: "Demographic trends and family health surveys.", duration: "HD Session", videoId: "Iw4NaZKqExI", pdfUrl: "#" },
-        { lectureNo: "03", title: "Protein deficiency", desc: "Nutritional health issues in India.", duration: "HD Session", videoId: "szYMavSGI2s", pdfUrl: "#" },
-        { lectureNo: "04", title: "UNSC", desc: "United Nations Security Council reforms and veto power.", duration: "HD Session", videoId: "_uO0C0hd810", pdfUrl: "#" },
-        { lectureNo: "05", title: "Attorney general + advocate", desc: "Constitutional law officers review.", duration: "HD Session", videoId: "e6z-6Ytw-JM", pdfUrl: "#" }
+      "ch-rec-anc-gupta": [
+        { lectureNo: "01", title: "Sangam age", desc: "Chola, Chera, Pandya kingdoms.", duration: "HD Session", videoId: "cm893_ZrD_w", pdfUrl: "#" },
+        { lectureNo: "02", title: "Gupta period", desc: "Chandragupta I, Samudragupta, Chandragupta II.", duration: "HD Session", videoId: "wDBSJnj1JIE", pdfUrl: "#" },
+        { lectureNo: "03", title: "Gupta period 2", desc: "Golden age culture, science, and decline.", duration: "HD Session", videoId: "L4aKfkGULJY", pdfUrl: "#" },
+        { lectureNo: "04", title: "Post gupta period", desc: "Harshavardhana and regional kingdoms.", duration: "HD Session", videoId: "oIHH9Vx47rE", pdfUrl: "#" }
       ],
-      "ch-cds-ota-gs-master": [
-        { lectureNo: "01", title: "GS Master Class 1", desc: "High-yield conceptual GS integration.", duration: "HD Session", videoId: "DkNdo702VU8", pdfUrl: "#" },
-        { lectureNo: "02", title: "GS Master Class 2", desc: "Core static and dynamic GS mix.", duration: "HD Session", videoId: "3iMxfwvIeAw", pdfUrl: "#" },
-        { lectureNo: "03", title: "GS Master Class 3", desc: "Advanced conceptual analysis.", duration: "HD Session", videoId: "mHpx96v10S0", pdfUrl: "#" },
-        { lectureNo: "04", title: "GS Master Class 4", desc: "Important previous trends and master capsule.", duration: "HD Session", videoId: "NBRUTRr-DBA", pdfUrl: "#" }
+      "ch-rec-pol-foundations": [
+        { lectureNo: "01", title: "Making of Indian constitution", desc: "Constituent assembly debates and framing.", duration: "HD Session", videoId: "QJFLMRyGZnQ", pdfUrl: "#" },
+        { lectureNo: "02", title: "Articles 368 + majorities + preamble", desc: "Constitutional amendment and basic structure.", duration: "HD Session", videoId: "WgGJSdVBcXs", pdfUrl: "#" },
+        { lectureNo: "03", title: "Federal features", desc: "Unitary vs federal system in India.", duration: "HD Session", videoId: "N9q9WhpF_6s", pdfUrl: "#" }
       ],
-      "ch-cds-ota-eng-vocab": [
-        { lectureNo: "01", title: "Root words class 1", desc: "Etymology and root words foundation.", duration: "HD Session", videoId: "zysRYWURJzE", pdfUrl: "#" },
-        { lectureNo: "02", title: "Root words class 2", desc: "Advanced root words.", duration: "HD Session", videoId: "0vgq8tc", pdfUrl: "#" },
-        { lectureNo: "03", title: "A words", desc: "Vocabulary starting with letter A.", duration: "HD Session", videoId: "JmF8M8PdukU", pdfUrl: "#" },
-        { lectureNo: "04", title: "B words", desc: "Vocabulary starting with letter B.", duration: "HD Session", videoId: "at5HIj1Goxg", pdfUrl: "#" },
-        { lectureNo: "05", title: "C words", desc: "Vocabulary starting with letter C.", duration: "HD Session", videoId: "BqdohxPW9qU", pdfUrl: "#" },
-        { lectureNo: "06", title: "Vocab pyq class 1", desc: "Previous years vocabulary practice.", duration: "HD Session", videoId: "HmLIKMSIL8k", pdfUrl: "#" },
-        { lectureNo: "07", title: "vocab pyq class 2", desc: "Previous years vocabulary practice 2.", duration: "HD Session", videoId: "SJYMdQ8xBmw", pdfUrl: "#" },
-        { lectureNo: "08", title: "vocab pyq class 3", desc: "Previous years vocabulary practice 3.", duration: "HD Session", videoId: "gPmls9nTYAw", pdfUrl: "#" },
-        { lectureNo: "09", title: "D words", desc: "Vocabulary starting with letter D.", duration: "HD Session", videoId: "OqGJkE1f0bw", pdfUrl: "#" },
-        { lectureNo: "10", title: "Vocab pyq complete", desc: "Comprehensive vocab PYQ session.", duration: "HD Session", videoId: "oELTlg0Nffk", pdfUrl: "#" },
-        { lectureNo: "11", title: "E words", desc: "Vocabulary starting with letter E.", duration: "HD Session", videoId: "fkfCseGghfc", pdfUrl: "#" },
-        { lectureNo: "12", title: "F words", desc: "Vocabulary starting with letter F.", duration: "HD Session", videoId: "-8k8e7FLIuE", pdfUrl: "#" },
-        { lectureNo: "13", title: "G words", desc: "Vocabulary starting with letter G.", duration: "HD Session", videoId: "n-zewbJwTc8", pdfUrl: "#" },
-        { lectureNo: "14", title: "H words", desc: "Vocabulary starting with letter H.", duration: "HD Session", videoId: "xuAtBS4t84E", pdfUrl: "#" },
-        { lectureNo: "15", title: "I words", desc: "Vocabulary starting with letter I.", duration: "HD Session", videoId: "0bHyrSlWAXA", pdfUrl: "#" },
-        { lectureNo: "16", title: "Homonyms 1", desc: "Confusing words part 1.", duration: "HD Session", videoId: "KoqMcpBQkDw", pdfUrl: "#" },
-        { lectureNo: "17", title: "Homonyms 2", desc: "Confusing words part 2.", duration: "HD Session", videoId: "P9gBvKLuv8w", pdfUrl: "#" },
-        { lectureNo: "18", title: "Homonyms 3", desc: "Confusing words part 3.", duration: "HD Session", videoId: "1ZOJ4uEsWGo", pdfUrl: "#" },
-        { lectureNo: "19", title: "Homonyms pyq", desc: "Homonyms PYQs.", duration: "HD Session", videoId: "PnfMHu_2rj4", pdfUrl: "#" },
-        { lectureNo: "20", title: "RRB vocab 1 to 5", desc: "Special vocabulary drills.", duration: "HD Session", videoId: "2iRvkigj4a0", pdfUrl: "#" }
+      "ch-rec-pol-executives": [
+        { lectureNo: "01", title: "President + governor", desc: "Executive heads of centre and state.", duration: "HD Session", videoId: "f45YtWDDqKs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Vice president + pm + cm + com", desc: "Council of ministers and executives.", duration: "HD Session", videoId: "djW7C9aHIKQ", pdfUrl: "#" },
+        { lectureNo: "03", title: "Attorney and advocate general", desc: "Legal advisors of governments.", duration: "HD Session", videoId: "zMX5fPXzhrI", pdfUrl: "#" },
+        { lectureNo: "04", title: "Dada ji 1", desc: "Important foundational concepts.", duration: "HD Session", videoId: "TP9xebAtsiQ", pdfUrl: "#" }
       ],
-      "ch-cds-ota-eng-grammar": [
+      "ch-rec-pol-legislatures": [
+        { lectureNo: "01", title: "Parliament ka 1st session", desc: "Legislative procedure overview.", duration: "HD Session", videoId: "2TpGjriICmg", pdfUrl: "#" },
+        { lectureNo: "02", title: "Parliament 2nd session", desc: "Bills and law-making process.", duration: "HD Session", videoId: "vA81Bh8I6rM", pdfUrl: "#" },
+        { lectureNo: "03", title: "Parliament 3rd session", desc: "Budget and financial bills.", duration: "HD Session", videoId: "PAvlZWzEmBk", pdfUrl: "#" },
+        { lectureNo: "04", title: "Parliament 4th session", desc: "Parliamentary privileges and motions.", duration: "HD Session", videoId: "_EiZZhqWNOA", pdfUrl: "#" },
+        { lectureNo: "05", title: "Parliament dissolved", desc: "Lapsing of bills and dissolution rules.", duration: "HD Session", videoId: "8sj4ZssXz-o", pdfUrl: "#" },
+        { lectureNo: "06", title: "State legislature + toss", desc: "Vidhan Sabha and Vidhan Parishad.", duration: "HD Session", videoId: "ziD8dkCjLHA", pdfUrl: "#" },
+        { lectureNo: "07", title: "Parliamentary committees", desc: "PAC, Estimates committee, etc.", duration: "HD Session", videoId: "cWQIIIw5QfY", pdfUrl: "#" }
+      ],
+      "ch-rec-pol-relations": [
+        { lectureNo: "01", title: "Centre state relation", desc: "Legislative, administrative & financial relations.", duration: "HD Session", videoId: "zSwhLRufZCo", pdfUrl: "#" },
+        { lectureNo: "02", title: "Finance commission + gst council", desc: "Fiscal federalism bodies.", duration: "HD Session", videoId: "CPbkOoMvtHo", pdfUrl: "#" },
+        { lectureNo: "03", title: "Zonal council + ut + article 371 + traps", desc: "Special provisions and UTs.", duration: "HD Session", videoId: "n2ZlNY9VUrQ", pdfUrl: "#" },
+        { lectureNo: "04", title: "Emergency", desc: "National, President rule & financial emergency.", duration: "HD Session", videoId: "dmdydPdFWHM", pdfUrl: "#" }
+      ],
+      "ch-rec-bio-cells": [
+        { lectureNo: "01", title: "Cells basic", desc: "Cell organelles and structure.", duration: "HD Session", videoId: "6CDo2HBJkcw", pdfUrl: "#" },
+        { lectureNo: "02", title: "Cells final class", desc: "Cell division: mitosis and meiosis.", duration: "HD Session", videoId: "BOoADpLh-08", pdfUrl: "#" },
+        { lectureNo: "03", title: "Tissue", desc: "Plant and animal tissues.", duration: "HD Session", videoId: "B-CA0_RXihM", pdfUrl: "#" },
+        { lectureNo: "04", title: "Diversity", desc: "Biological classification overview.", duration: "HD Session", videoId: "bSBU_cOF8XQ", pdfUrl: "#" }
+      ],
+      "ch-rec-bio-physiology": [
+        { lectureNo: "01", title: "Digestion", desc: "Human digestive system and enzymes.", duration: "HD Session", videoId: "MUwOfAL2Kwc", pdfUrl: "#" },
+        { lectureNo: "02", title: "Excretion", desc: "Excretory system and nephron function.", duration: "HD Session", videoId: "8mw-VI6Slnk", pdfUrl: "#" },
+        { lectureNo: "03", title: "Heart + Blood + Respiration", desc: "Circulatory and respiratory systems.", duration: "HD Session", videoId: "mtpyYt2-D2o", pdfUrl: "#" },
+        { lectureNo: "04", title: "Reproduction", desc: "Asexual and sexual reproduction.", duration: "HD Session", videoId: "e2jXTVbikZY", pdfUrl: "#" },
+        { lectureNo: "05", title: "Reproduction 2", desc: "Human reproductive system.", duration: "HD Session", videoId: "9hebmAWbVsE", pdfUrl: "#" }
+      ],
+      "ch-rec-bio-health": [
+        { lectureNo: "01", title: "Disease", desc: "Communicable and non-communicable diseases.", duration: "HD Session", videoId: "qJKl-O0cLhc", pdfUrl: "#" },
+        { lectureNo: "02", title: "Hormones", desc: "Endocrine glands and human hormones.", duration: "HD Session", videoId: "9UOAkXW_wfU", pdfUrl: "#" },
+        { lectureNo: "03", title: "Ecological classification of plants", desc: "Hydrophytes, xerophytes, halophytes.", duration: "HD Session", videoId: "f2P5wwljrAE", pdfUrl: "#" },
+        { lectureNo: "04", title: "Kingdoms", desc: "Five-kingdom classification system.", duration: "HD Session", videoId: "bv2WO9Gzl68", pdfUrl: "#" }
+      ],
+      "ch-rec-chem-core": [
+        { lectureNo: "01", title: "Chemical reaction", desc: "Types of chemical reactions and balancing equations.", duration: "HD Session", videoId: "YS3J2WRZELs", pdfUrl: "#" },
+        { lectureNo: "02", title: "Acid , base and salt", desc: "pH scale, indicators and properties.", duration: "HD Session", videoId: "YHgoS18T0nc", pdfUrl: "#" },
+        { lectureNo: "03", title: "Metal and non metal", desc: "Reactivity series, ores and metallurgy.", duration: "HD Session", videoId: "NvDycXLBP9c", pdfUrl: "#" },
+        { lectureNo: "04", title: "Mixture", desc: "Separation techniques and solutions.", duration: "HD Session", videoId: "AWzsAKXS50w", pdfUrl: "#" }
+      ],
+      "ch-rec-chem-atomic": [
+        { lectureNo: "01", title: "Atoms and molecules 1", desc: "Dalton's atomic theory and moles.", duration: "HD Session", videoId: "VBu-b-1uLGk", pdfUrl: "#" },
+        { lectureNo: "02", title: "Atoms and molecules 2", desc: "Molecular mass and stoichiometry.", duration: "HD Session", videoId: "dWB-C3kNDH0", pdfUrl: "#" },
+        { lectureNo: "03", title: "Carbon and compound", desc: "Allotropes and hydrocarbon bonding.", duration: "HD Session", videoId: "AQk0AgZaPnA", pdfUrl: "#" },
+        { lectureNo: "04", title: "Chemical properties of carbon", desc: "Combustion, oxidation and addition reactions.", duration: "HD Session", videoId: "fY0Tk5UNshU", pdfUrl: "#" },
+        { lectureNo: "05", title: "Soap and detergent", desc: "Cleansing action and micelles.", duration: "HD Session", videoId: "H4A800VD9cg", pdfUrl: "#" }
+      ],
+      "ch-rec-chem-applied": [
+        { lectureNo: "01", title: "Chemistry high level class", desc: "Advanced conceptual chemistry PYQs.", duration: "HD Session", videoId: "FwXOvPaLfW4", pdfUrl: "#" },
+        { lectureNo: "02", title: "CBI Overview", desc: "Central Bureau of Investigation powers & structure.", duration: "HD Session", videoId: "kp_e9zCKkeY", pdfUrl: "#" },
+        { lectureNo: "03", title: "Fertility rate + family survey", desc: "Demographic trends and family health surveys.", duration: "HD Session", videoId: "Iw4NaZKqExI", pdfUrl: "#" },
+        { lectureNo: "04", title: "Protein deficiency", desc: "Nutritional health issues in India.", duration: "HD Session", videoId: "szYMavSGI2s", pdfUrl: "#" },
+        { lectureNo: "05", title: "UNSC", desc: "United Nations Security Council reforms and veto power.", duration: "HD Session", videoId: "_uO0C0hd810", pdfUrl: "#" },
+        { lectureNo: "06", title: "Attorney general + advocate", desc: "Constitutional law officers review.", duration: "HD Session", videoId: "e6z-6Ytw-JM", pdfUrl: "#" }
+      ],
+      "ch-rec-eng-grammar": [
         { lectureNo: "01", title: "Tense class 1", desc: "Tenses basic rules.", duration: "HD Session", videoId: "Ahg5VKFFpyI", pdfUrl: "#" },
         { lectureNo: "02", title: "Tense complete", desc: "Complete tenses masterclass.", duration: "HD Session", videoId: "3NfR89W1pO4", pdfUrl: "#" },
         { lectureNo: "03", title: "Parts of speech", desc: "Introduction to parts of speech.", duration: "HD Session", videoId: "wyiCnv3sNGI", pdfUrl: "#" },
@@ -243,67 +301,34 @@
         { lectureNo: "18", title: "Preposition 3", desc: "Advanced preposition rules.", duration: "HD Session", videoId: "hYgNQDfbdAs", pdfUrl: "#" },
         { lectureNo: "19", title: "Conjunction", desc: "Correlative and coordinating conjunctions.", duration: "HD Session", videoId: "Z30XfIeFQpQ", pdfUrl: "#" },
         { lectureNo: "20", title: "Voice complete", desc: "Active and Passive voice masterclass.", duration: "HD Session", videoId: "Aagm41PilJ0", pdfUrl: "#" },
-        { lectureNo: "21", title: "Discourse marker", desc: "Transitions and markers.", duration: "HD Session", videoId: "rDXmWbcm0Gw", pdfUrl: "#" },
-        { lectureNo: "22", title: "English practice", desc: "Tense and grammar practice drills.", duration: "HD Session", videoId: "x9eFt-UdLZ4", pdfUrl: "#" }
+        { lectureNo: "21", title: "Discourse marker", desc: "Transitions and markers.", duration: "HD Session", videoId: "rDXmWbcm0Gw", pdfUrl: "#" }
       ],
-      "ch-cds-ota-economics": [
+      "ch-rec-eng-practice": [
+        { lectureNo: "01", title: "Tense practice", desc: "Tense practice drills.", duration: "HD Session", videoId: "x9eFt-UdLZ4", pdfUrl: "#" },
+        { lectureNo: "02", title: "Full mock 2 explanation part 1", desc: "Mock solutions part 1.", duration: "HD Session", videoId: "HoK6GCs-laE", pdfUrl: "#" },
+        { lectureNo: "03", title: "Full mock 3 explanation", desc: "Mock solutions part 2.", duration: "HD Session", videoId: "fDOKGzNAyyE", pdfUrl: "#" },
+        { lectureNo: "04", title: "FULL MOCK 02 EXPLANATION PART 2", desc: "Mock solutions part 3.", duration: "HD Session", videoId: "FzTkeqpwyzc", pdfUrl: "#" },
+        { lectureNo: "05", title: "Full mock 1 explanation", desc: "Mock solutions part 4.", duration: "HD Session", videoId: "_sT0oEyeVuM", pdfUrl: "#" },
+        { lectureNo: "06", title: "Full mock 7 English explanation", desc: "English mock explanation.", duration: "HD Session", videoId: "OTuL8PtNdSg", pdfUrl: "#" },
+        { lectureNo: "07", title: "Full mock 6", desc: "Full mock explanation.", duration: "HD Session", videoId: "CGBG27MV20s", pdfUrl: "#" },
+        { lectureNo: "08", title: "Fm 7 English explanation part 1", desc: "Mock analysis.", duration: "HD Session", videoId: "kHaozdrUGlE", pdfUrl: "#" },
+        { lectureNo: "09", title: "Verb practice", desc: "Verb practice session.", duration: "HD Session", videoId: "LJe0b8TnrXU", pdfUrl: "#" },
+        { lectureNo: "10", title: "Fm english 5 explanation", desc: "Mock english analysis.", duration: "HD Session", videoId: "M4PTMj4RG3Y", pdfUrl: "#" },
+        { lectureNo: "11", title: "Fm 8 explanation", desc: "Full mock 8 analysis.", duration: "HD Session", videoId: "u8bR8GHISm8", pdfUrl: "#" },
+        { lectureNo: "12", title: "S1-S2 practice", desc: "Subject-verb practice drills.", duration: "HD Session", videoId: "xCC_31dyKGU", pdfUrl: "#" }
+      ],
+      "ch-rec-eco-core": [
         { lectureNo: "01", title: "National income", desc: "GDP, GNP, NNP and calculation methods.", duration: "HD Session", videoId: "_Hh4vWgOHCo", pdfUrl: "#" },
         { lectureNo: "02", title: "Money", desc: "Money supply and banking system.", duration: "HD Session", videoId: "ZKKs7W00R0o", pdfUrl: "#" },
         { lectureNo: "03", title: "Monetary policy", desc: "RBI instruments: Repo, CRR, SLR.", duration: "HD Session", videoId: "dAiSGbp-arw", pdfUrl: "#" },
         { lectureNo: "04", title: "Balance of payment", desc: "Current and capital accounts.", duration: "HD Session", videoId: "j_U0OYRcAUI", pdfUrl: "#" },
         { lectureNo: "05", title: "Unemployment", desc: "Types of unemployment in India.", duration: "HD Session", videoId: "7nGutWJvVmM", pdfUrl: "#" }
       ],
-      "ch-cds-ota-polity": [
-        { lectureNo: "01", title: "Articles 368 + majorities + preamble", desc: "Constitutional amendment and basic structure.", duration: "HD Session", videoId: "WgGJSdVBcXs", pdfUrl: "#" },
-        { lectureNo: "02", title: "Dada ji 1", desc: "Important foundational concepts.", duration: "HD Session", videoId: "TP9xebAtsiQ", pdfUrl: "#" },
-        { lectureNo: "03", title: "President + governor", desc: "Executive heads of centre and state.", duration: "HD Session", videoId: "f45YtWDDqKs", pdfUrl: "#" },
-        { lectureNo: "04", title: "Vice president + pm + cm + com", desc: "Council of ministers and executives.", duration: "HD Session", videoId: "djW7C9aHIKQ", pdfUrl: "#" },
-        { lectureNo: "05", title: "Parliament 1st session", desc: "Legislative procedure overview.", duration: "HD Session", videoId: "2TpGjriICmg", pdfUrl: "#" },
-        { lectureNo: "06", title: "Parliament 2nd session", desc: "Bills and law-making process.", duration: "HD Session", videoId: "vA81Bh8I6rM", pdfUrl: "#" },
-        { lectureNo: "07", title: "Parliament 3rd session", desc: "Budget and financial bills.", duration: "HD Session", videoId: "PAvlZWzEmBk", pdfUrl: "#" },
-        { lectureNo: "08", title: "Parliament 4th session", desc: "Parliamentary privileges and motions.", duration: "HD Session", videoId: "_EiZZhqWNOA", pdfUrl: "#" },
-        { lectureNo: "09", title: "Parliament dissolved", desc: "Lapsing of bills and dissolution rules.", duration: "HD Session", videoId: "8sj4ZssXz-o", pdfUrl: "#" },
-        { lectureNo: "10", title: "State legislature + toss", desc: "Vidhan Sabha and Vidhan Parishad.", duration: "HD Session", videoId: "ziD8dkCjLHA", pdfUrl: "#" },
-        { lectureNo: "11", title: "Federal features", desc: "Unitary vs federal system in India.", duration: "HD Session", videoId: "N9q9WhpF_6s", pdfUrl: "#" },
-        { lectureNo: "12", title: "Centre state relation", desc: "Legislative, administrative & financial relations.", duration: "HD Session", videoId: "zSwhLRufZCo", pdfUrl: "#" },
-        { lectureNo: "13", title: "Finance commission + gst council", desc: "Fiscal federalism bodies.", duration: "HD Session", videoId: "CPbkOoMvtHo", pdfUrl: "#" },
-        { lectureNo: "14", title: "Zonal council + ut + article 371 + traps", desc: "Special provisions and UTs.", duration: "HD Session", videoId: "n2ZlNY9VUrQ", pdfUrl: "#" },
-        { lectureNo: "15", title: "Emergency", desc: "National, President rule & financial emergency.", duration: "HD Session", videoId: "dmdydPdFWHM", pdfUrl: "#" },
-        { lectureNo: "16", title: "Making of Indian constitution", desc: "Constituent assembly debates and framing.", duration: "HD Session", videoId: "QJFLMRyGZnQ", pdfUrl: "#" },
-        { lectureNo: "17", title: "Parliamentary committees", desc: "PAC, Estimates committee, etc.", duration: "HD Session", videoId: "cWQIIIw5QfY", pdfUrl: "#" },
-        { lectureNo: "18", title: "Attorney and advocate general", desc: "Legal advisors of governments.", duration: "HD Session", videoId: "zMX5fPXzhrI", pdfUrl: "#" }
-      ],
-      "ch-cds-ota-physics": [
-        { lectureNo: "01", title: "Physics basics", desc: "Units, dimensions and measurements.", duration: "HD Session", videoId: "K0MeU1bzJ6Q", pdfUrl: "#" },
-        { lectureNo: "02", title: "Force and momentum", desc: "Newton's laws of motion and momentum conservation.", duration: "HD Session", videoId: "sNfHV-oVGj0", pdfUrl: "#" },
-        { lectureNo: "03", title: "Motion traps", desc: "Graphical analysis and tricky motion problems.", duration: "HD Session", videoId: "37p6ZkDjMj8", pdfUrl: "#" }
-      ],
-      "ch-cds-ota-chemistry": [
-        { lectureNo: "01", title: "Chemical reaction", desc: "Types of chemical reactions and balancing equations.", duration: "HD Session", videoId: "YS3J2WRZELs", pdfUrl: "#" },
-        { lectureNo: "02", title: "Acid , base and salt", desc: "pH scale, indicators and properties.", duration: "HD Session", videoId: "YHgoS18T0nc", pdfUrl: "#" },
-        { lectureNo: "03", title: "Metal and non metal", desc: "Reactivity series, ores and metallurgy.", duration: "HD Session", videoId: "NvDycXLBP9c", pdfUrl: "#" },
-        { lectureNo: "04", title: "Mixture", desc: "Separation techniques and solutions.", duration: "HD Session", videoId: "AWzsAKXS50w", pdfUrl: "#" },
-        { lectureNo: "05", title: "Atoms and molecules 1", desc: "Dalton's atomic theory and moles.", duration: "HD Session", videoId: "VBu-b-1uLGk", pdfUrl: "#" },
-        { lectureNo: "06", title: "Atoms and molecules 2", desc: "Molecular mass and stoichiometry.", duration: "HD Session", videoId: "dWB-C3kNDH0", pdfUrl: "#" },
-        { lectureNo: "07", title: "Carbon and compound", desc: "Allotropes and hydrocarbon bonding.", duration: "HD Session", videoId: "AQk0AgZaPnA", pdfUrl: "#" },
-        { lectureNo: "08", title: "Chemical properties of carbon", desc: "Combustion, oxidation and addition reactions.", duration: "HD Session", videoId: "fY0Tk5UNshU", pdfUrl: "#" },
-        { lectureNo: "09", title: "Soap and detergent", desc: "Cleansing action and micelles.", duration: "HD Session", videoId: "H4A800VD9cg", pdfUrl: "#" },
-        { lectureNo: "10", title: "Chemistry high level class", desc: "Advanced conceptual chemistry PYQs.", duration: "HD Session", videoId: "FwXOvPaLfW4", pdfUrl: "#" }
-      ],
-      "ch-cds-ota-biology": [
-        { lectureNo: "01", title: "Cells basic", desc: "Cell organelles and structure.", duration: "HD Session", videoId: "6CDo2HBJkcw", pdfUrl: "#" },
-        { lectureNo: "02", title: "Cells final class", desc: "Cell division: mitosis and meiosis.", duration: "HD Session", videoId: "BOoADpLh-08", pdfUrl: "#" },
-        { lectureNo: "03", title: "Tissue", desc: "Plant and animal tissues.", duration: "HD Session", videoId: "B-CA0_RXihM", pdfUrl: "#" },
-        { lectureNo: "04", title: "Disease", desc: "Communicable and non-communicable diseases.", duration: "HD Session", videoId: "qJKl-O0cLhc", pdfUrl: "#" },
-        { lectureNo: "05", title: "Digestion", desc: "Human digestive system and enzymes.", duration: "HD Session", videoId: "MUwOfAL2Kwc", pdfUrl: "#" },
-        { lectureNo: "06", title: "Excretion", desc: "Excretory system and nephron function.", duration: "HD Session", videoId: "8mw-VI6Slnk", pdfUrl: "#" },
-        { lectureNo: "07", title: "Heart + Blood + Respiration", desc: "Circulatory and respiratory systems.", duration: "HD Session", videoId: "mtpyYt2-D2o", pdfUrl: "#" },
-        { lectureNo: "08", title: "Reproduction", desc: "Asexual and sexual reproduction.", duration: "HD Session", videoId: "e2jXTVbikZY", pdfUrl: "#" },
-        { lectureNo: "09", title: "Reproduction 2", desc: "Human reproductive system.", duration: "HD Session", videoId: "9hebmAWbVsE", pdfUrl: "#" },
-        { lectureNo: "10", title: "Ecological classification of plants", desc: "Hydrophytes, xerophytes, halophytes.", duration: "HD Session", videoId: "f2P5wwljrAE", pdfUrl: "#" },
-        { lectureNo: "11", title: "Hormones", desc: "Endocrine glands and human hormones.", duration: "HD Session", videoId: "9UOAkXW_wfU", pdfUrl: "#" },
-        { lectureNo: "12", title: "Diversity", desc: "Biological classification overview.", duration: "HD Session", videoId: "bSBU_cOF8XQ", pdfUrl: "#" },
-        { lectureNo: "13", title: "Kingdoms", desc: "Five-kingdom classification system.", duration: "HD Session", videoId: "bv2WO9Gzl68", pdfUrl: "#" }
+      "ch-rec-gs-muster": [
+        { lectureNo: "01", title: "GS muster class 1", desc: "Intensive GS practice class 1.", duration: "HD Session", videoId: "DkNdo702VU8", pdfUrl: "#" },
+        { lectureNo: "02", title: "GS muster class 2", desc: "Intensive GS practice class 2.", duration: "HD Session", videoId: "3iMxfwvIeAw", pdfUrl: "#" },
+        { lectureNo: "03", title: "GS muster class 3", desc: "Intensive GS practice class 3.", duration: "HD Session", videoId: "mHpx96v10S0", pdfUrl: "#" },
+        { lectureNo: "04", title: "GS muster class 4", desc: "Intensive GS practice class 4.", duration: "HD Session", videoId: "NBRUTRr-DBA", pdfUrl: "#" }
       ]
     };
 
@@ -328,20 +353,39 @@
 
       if (!chapterId || !lectureDatabase[chapterId]) {
         const cleanName = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (cleanName.includes('physicalgeography')) chapterId = 'ch-cds-ota-physical-geography';
-        else if (cleanName.includes('indiangeography')) chapterId = 'ch-cds-ota-indian-geography';
-        else if (cleanName.includes('ancienthistory')) chapterId = 'ch-cds-ota-ancient-history';
-        else if (cleanName.includes('medievalhistory')) chapterId = 'ch-cds-ota-medieval-history';
-        else if (cleanName.includes('modernhistory')) chapterId = 'ch-cds-ota-modern-history';
-        else if (cleanName.includes('onepager')) chapterId = 'ch-cds-ota-one-pager';
-        else if (cleanName.includes('gsmaster')) chapterId = 'ch-cds-ota-gs-master';
-        else if (cleanName.includes('vocabulary') || cleanName.includes('vocab')) chapterId = 'ch-cds-ota-eng-vocab';
-        else if (cleanName.includes('grammar')) chapterId = 'ch-cds-ota-eng-grammar';
-        else if (cleanName.includes('economics')) chapterId = 'ch-cds-ota-economics';
-        else if (cleanName.includes('polity')) chapterId = 'ch-cds-ota-polity';
-        else if (cleanName.includes('physics')) chapterId = 'ch-cds-ota-physics';
-        else if (cleanName.includes('chemistry')) chapterId = 'ch-cds-ota-chemistry';
-        else if (cleanName.includes('biology')) chapterId = 'ch-cds-ota-biology';
+        if (cleanName.includes('climatology')) chapterId = 'ch-rec-phys-climatology';
+        else if (cleanName.includes('oceanography')) chapterId = 'ch-rec-phys-oceanography';
+        else if (cleanName.includes('geomorphic')) chapterId = 'ch-rec-phys-geomorphic';
+        else if (cleanName.includes('landforms')) chapterId = 'ch-rec-phys-landforms';
+        else if (cleanName.includes('earth') || cleanName.includes('internal') || cleanName.includes('volcano') || cleanName.includes('plate') || cleanName.includes('earthquake')) chapterId = 'ch-rec-phys-internal';
+        else if (cleanName.includes('physiography') || cleanName.includes('himalayas') || cleanName.includes('peninsular') || cleanName.includes('coastal')) chapterId = 'ch-rec-ind-physio';
+        else if (cleanName.includes('drainage') || cleanName.includes('rivers') || cleanName.includes('lakes')) chapterId = 'ch-rec-ind-drainage';
+        else if (cleanName.includes('resources') || cleanName.includes('soil') || cleanName.includes('vegetation') || cleanName.includes('forest')) chapterId = 'ch-rec-ind-resources';
+        else if (cleanName.includes('climate')) chapterId = 'ch-rec-ind-climate';
+        else if (cleanName.includes('infrastructure') || cleanName.includes('ports') || cleanName.includes('highway') || cleanName.includes('industries')) chapterId = 'ch-rec-ind-infra';
+        else if (cleanName.includes('advent') || cleanName.includes('europeans')) chapterId = 'ch-rec-mod-europeans';
+        else if (cleanName.includes('expansion') || cleanName.includes('wars') || cleanName.includes('carnatic') || cleanName.includes('bengal') || cleanName.includes('mysore') || cleanName.includes('maratha') || cleanName.includes('punjab')) chapterId = 'ch-rec-mod-expansion';
+        else if (cleanName.includes('economic') || cleanName.includes('uprisings') || cleanName.includes('1757') || cleanName.includes('capitalism') || cleanName.includes('charter') || cleanName.includes('revolt') || cleanName.includes('peasant')) chapterId = 'ch-rec-mod-economic';
+        else if (cleanName.includes('reforms')) chapterId = 'ch-rec-mod-reforms';
+        else if (cleanName.includes('national') || cleanName.includes('congress') || cleanName.includes('extremist') || cleanName.includes('surat') || cleanName.includes('lucknow') || cleanName.includes('rowlatt') || cleanName.includes('ncm') || cleanName.includes('cdm') || cleanName.includes('goi') || cleanName.includes('freedom') || cleanName.includes('qim')) chapterId = 'ch-rec-mod-national';
+        else if (cleanName.includes('prehistory') || cleanName.includes('ivc')) chapterId = 'ch-rec-anc-prehistory';
+        else if (cleanName.includes('vedic') || cleanName.includes('religions') || cleanName.includes('buddhism') || cleanName.includes('jainism')) chapterId = 'ch-rec-anc-vedic';
+        else if (cleanName.includes('mahajanapadas') || cleanName.includes('mauryas')) chapterId = 'ch-rec-anc-empires';
+        else if (cleanName.includes('gupta') || cleanName.includes('sangam')) chapterId = 'ch-rec-anc-gupta';
+        else if (cleanName.includes('constitutional') || cleanName.includes('framework')) chapterId = 'ch-rec-pol-foundations';
+        else if (cleanName.includes('union') || cleanName.includes('state') || cleanName.includes('executives')) chapterId = 'ch-rec-pol-executives';
+        else if (cleanName.includes('parliament') || cleanName.includes('assemblies')) chapterId = 'ch-rec-pol-legislatures';
+        else if (cleanName.includes('relations') || cleanName.includes('bodies') || cleanName.includes('emergency')) chapterId = 'ch-rec-pol-relations';
+        else if (cleanName.includes('cell') || cleanName.includes('genetics') || cleanName.includes('tissues')) chapterId = 'ch-rec-bio-cells';
+        else if (cleanName.includes('physiology')) chapterId = 'ch-rec-bio-physiology';
+        else if (cleanName.includes('health') || cleanName.includes('plant') || cleanName.includes('ecology')) chapterId = 'ch-rec-bio-health';
+        else if (cleanName.includes('core') || cleanName.includes('principles')) chapterId = 'ch-rec-chem-core';
+        else if (cleanName.includes('atomic') || cleanName.includes('carbon')) chapterId = 'ch-rec-chem-atomic';
+        else if (cleanName.includes('applied') || cleanName.includes('science')) chapterId = 'ch-rec-chem-applied';
+        else if (cleanName.includes('grammar') || cleanName.includes('mechanics')) chapterId = 'ch-rec-eng-grammar';
+        else if (cleanName.includes('mocks') || cleanName.includes('practice')) chapterId = 'ch-rec-eng-practice';
+        else if (cleanName.includes('economics') || cleanName.includes('essentials')) chapterId = 'ch-rec-eco-core';
+        else if (cleanName.includes('muster') || cleanName.includes('tactical')) chapterId = 'ch-rec-gs-muster';
         else if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
         else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) chapterId = 'ch-capf-internal-security';
       }
@@ -428,6 +472,15 @@
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition group shadow-lg";
 
+        // यदि वीडियो ID पूरी YouTube URL है तो उसका ID एक्सट्रैक्ट करें या सीधे इस्तेमाल करें
+        let embedSrc = lec.videoId;
+        if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
+          const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          if (match && match[1]) {
+            embedSrc = match[1];
+          }
+        }
+
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-3">
@@ -447,7 +500,7 @@
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-            <button onclick="window.playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
+            <button onclick="window.playLectureVideo('${embedSrc}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
               WATCH LECTURE
             </button>
             <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
