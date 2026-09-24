@@ -61,10 +61,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    // =========================================================================
-    // ISOLATED LECTURE DATABASE (CAPF, AFCAT & CDS OTA ALL MODULES RESTORED)
-    // =========================================================================
     const lectureDatabase = {
       // ----------------- 1. CAPF SESSIONS -----------------
       "ch-capf-mentor-sessions": [
@@ -142,7 +138,7 @@
         { lectureNo: "04", title: "Landform by sea wave", desc: "Coastal landforms and marine erosion.", duration: "HD Session", videoId: "DQ69YtPQzuM", pdfUrl: "#" },
         { lectureNo: "05", title: "Landform by wind", desc: "Aeolian landforms in arid regions.", duration: "HD Session", videoId: "h8wJYqexP6I", pdfUrl: "#" }
       ],
-      "ch-rec-phys-internal": [
+      "ch-rec-phys-Internal Earth Dynamics": [
         { lectureNo: "01", title: "Earthquake", desc: "Seismic waves and epicenter analysis.", duration: "HD Session", videoId: "je3oICjBHSg", pdfUrl: "#" },
         { lectureNo: "02", title: "Earth's interior", desc: "Crust, mantle, core and discontinuities.", duration: "HD Session", videoId: "17TTLgwEv88", pdfUrl: "#" },
         { lectureNo: "03", title: "Volcanoes", desc: "Volcanic landforms and eruption types.", duration: "HD Session", videoId: "BMG9Q7jwDeI", pdfUrl: "#" },
