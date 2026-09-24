@@ -245,7 +245,7 @@
       transition: width 0.15s linear;
     }
 
-    /* ANTI-PIRACY FLOATING WATERMARK STYLES */
+    /* ANTI-PIRACY FLOATING WATERMARK STYLES (OPACITY REDUCED FOR FOCUS) */
     .phantom-watermark-layer {
       position: absolute;
       top: 30%;
@@ -256,9 +256,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      opacity: 0.32;
+      opacity: 0.08; /* अत्यंत हल्का किया गया ताकि पढ़ाई में रुकावट न हो */
       transform: rotate(-22deg);
-      transition: top 2.5s ease, left 2.5s ease;
+      transition: top 3s ease, left 3s ease;
     }
   </style>
 </head>
@@ -290,10 +290,10 @@
         
         <!-- ================= TACTICAL ANTI-PIRACY HUD OVERLAY ================= -->
         <div id="securityWatermark" class="phantom-watermark-layer">
-          <span class="font-mono text-xs font-black text-red-500 tracking-widest uppercase">
+          <span class="font-mono text-[11px] font-bold text-neutral-400 tracking-widest uppercase">
             SECURE ACCESS: <span id="traceUid">TP-2026-CADET</span>
           </span>
-          <span class="text-[10px] font-mono text-emerald-400/90 tracking-tighter" id="wmTimestamp">
+          <span class="text-[9px] font-mono text-neutral-500 tracking-tighter" id="wmTimestamp">
             ENCRYPTED SESSION ACTIVE
           </span>
         </div>
@@ -351,7 +351,6 @@
       let finalVideo = urlVideo || storedVideo;
       const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
 
-      // यूआरएल डिकोड सुरक्षित तरीके से करें
       if (finalVideo) {
         try {
           finalVideo = decodeURIComponent(finalVideo);
@@ -370,7 +369,7 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // =========================================================================
-      // CASE 1: NEXIELD (Clean Top Title Mask + Permanent Top HUD)
+      // CASE 1: NEXIELD
       // =========================================================================
       if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
         isNexield = true;
@@ -493,7 +492,6 @@
       }
     });
 
-    // YouTube Bottom Controls Auto-hide
     function showControls() {
       const ytBar = document.getElementById("ytCustomBar");
       if (ytBar) ytBar.classList.remove("hud-hidden");
@@ -511,10 +509,8 @@
       }, 3000);
     }
 
-    // SPEED CONTROLLER
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
-
       if (isNexield) {
         const iframe = document.getElementById("nexieldIframe");
         if (iframe && iframe.contentWindow) {
@@ -528,7 +524,6 @@
       }
     }
 
-    // FULLSCREEN & EXIT CONTROLLER (PERMANENT TOP BUTTON)
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
@@ -553,7 +548,6 @@
       }
     });
 
-    // Skip & Tap Logic (YouTube)
     let leftTimer = null, rightTimer = null;
     let leftClicks = 0, rightClicks = 0;
 
@@ -647,16 +641,13 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Disable Inspect Shortcuts
     document.addEventListener("keydown", (e) => {
       if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
         e.preventDefault();
       }
     });
 
-    // =========================================================================
-    // DYNAMIC ANTI-RECORDING JITTER & WATERMARK MOTION ENGINE
-    // =========================================================================
+    // WATERMARK POSITION JITTER ENGINE
     (() => {
       const wm = document.getElementById('securityWatermark');
       const timeStampEl = document.getElementById('wmTimestamp');
