@@ -1,6 +1,40 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <script>
+(() => {
+  // 1. Right Click Disable
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+      (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
+
+  // 3. DevTools Freezing Trap
+  setInterval(() => {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > 100) {
+      document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+    }
+  }, 1000);
+
+  // 4. Console Auto Clear
+  setInterval(() => {
+    console.clear();
+  }, 1500);
+})();
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Tactical Chapter Directory</title>
@@ -29,6 +63,7 @@
     const db = getFirestore(app);
 
     const chapterDatabase = {
+      // 1. CAPF SQUADRON
       "capf-mentorsession": [
         { id: "ch-capf-mentor-sessions", name: "CAPF Strategy & Orientation", desc: "Comprehensive exam strategy, timeline blueprint, and official orientation sessions." }
       ],
@@ -41,6 +76,8 @@
       "capf-internalsecurity": [
         { id: "ch-Internal Security", name: "Internal Security", desc: "Internal Security." }
       ],
+
+      // 2. CDS MATHEMATICS SPECIALIST
       "cds-math-lectures": [
         { id: "ch-cds-ratio", name: "Ratio and Proportion", desc: "Compound ratios, mean proportion & partnerships." },
         { id: "ch-cds-percent", name: "Percentage", desc: "Fraction-percentage conversion, successive changes & shortcuts." }
@@ -48,6 +85,8 @@
       "cds-math-mock": [
         { id: "ch-cds-mock-01", name: "Tactical Mock 01", desc: "Timed test series analysis and worked solutions." }
       ],
+
+      // 3. AFCAT SQUADRON
       "afcat-math": [
         { id: "ch-afcat-math-01", name: "Probability", desc: "Fundamental rules, coins, dice, cards & condition probability." },
         { id: "ch-afcat-math-02", name: "Statistics", desc: "Mean, median, mode, variance & standard deviation." },
@@ -82,6 +121,8 @@
       "afcat-gformexplanation": [
         { id: "ch-afcat-gform-01", name: "Mock Test Form Explanations", desc: "Section-by-section video solutions of assigned Google Forms." }
       ],
+
+      // 4. CDS OTA RECORDED SQUADRON
       "cds-kilo-recorded-physicalgeography": [
         { id: "ch-rec-phys-climatology", name: "Climatology Dossier", desc: "Atmosphere, pressure belts, planetary winds & fronts (6 Sessions)." },
         { id: "ch-rec-phys-oceanography", name: "Oceanography Dossier", desc: "Ocean relief, temperature, salinity & oceanic currents (3 Sessions)." },
@@ -152,43 +193,10 @@
         window.location.href = "index.html";
         return;
       }
-
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
-        if (!docSnap.exists()) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          signOut(auth).then(() => window.location.href = "index.html");
-          return;
-        }
-
-        const data = docSnap.data();
-        const localToken = localStorage.getItem("phantom_session_token");
-
-        if (data.status !== "active") {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          alert("Notice: Cadet account is currently not active or pending verification.");
-          signOut(auth).then(() => window.location.href = "index.html");
-          return;
-        }
-
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          if (unsubscribeCurriculum) unsubscribeCurriculum();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          signOut(auth).then(() => {
-            localStorage.removeItem("phantom_session_token");
-            localStorage.removeItem("phantom_uid");
-            window.location.href = "index.html";
-          });
-          return;
-        }
-
-        renderChaptersList(data.allowedBatches || []);
-      });
+      renderChaptersList();
     });
 
-    function renderChaptersList(allowedBatches) {
+    function renderChaptersList() {
       const urlParams = new URLSearchParams(window.location.search);
       activeBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
       activeSubject = urlParams.get('subject') || 'Mentor Session';
@@ -206,15 +214,16 @@
       document.getElementById('badgeIndicator').innerText = `${activeBatch.toUpperCase()} • ${modeText} • ${activeSubject.toUpperCase()}`;
       document.getElementById('subjectHeading').innerText = activeMode === 'recorded' ? `${activeSubject} (RECORDED)` : activeSubject;
 
-      // आपकी पुरानी मूल स्टैटिक लिस्ट लोड होगी
+      // आपकी मूल स्टैटिक लिस्ट ही लोड होगी
       let chapters = [...(chapterDatabase[lookupKey] || [])];
 
       if (unsubscribeCurriculum) unsubscribeCurriculum();
 
-      // केवल उसी बैच के लिए Firestore से डायनामिक डेटा लोड होगा जो अभी खोला गया है
+      // केवल उसी स्क्वाड्रन और मोड का डेटा आएगा, कोई मिक्सिंग नहीं होगी
       const q = query(
         collection(db, "tactical_curriculum"),
-        where("squadron", "==", cleanBatch)
+        where("squadron", "==", cleanBatch),
+        where("mode", "==", activeMode)
       );
 
       unsubscribeCurriculum = onSnapshot(q, (snapshot) => {
@@ -222,15 +231,9 @@
 
         snapshot.forEach(docSnap => {
           const d = docSnap.data();
-          const dMode = (d.mode || "recorded").toLowerCase();
           const dSub = (d.subject || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
-          // सिर्फ सही मोड और सही सब्जेक्ट मैच होने पर ही जोड़ेगा (AFCAT में CDS Math नहीं घुसेगा)
-          const isTargetSubject = (cleanSubject === "lectures" && cleanBatch === "cds-math") || 
-                                  (dSub === cleanSubject) || 
-                                  (cleanSubject.includes("math") && dSub.includes("math"));
-
-          if (dMode === activeMode && isTargetSubject && d.chapter) {
+          if (dSub === cleanSubject && d.chapter) {
             const chap = d.chapter.trim();
             if (!dynamicChaptersMap[chap]) {
               dynamicChaptersMap[chap] = 0;
@@ -247,7 +250,7 @@
             mergedChapters.push({
               id: `dyn-${chapTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
               name: chapTitle,
-              desc: `Dynamic briefing module (${dynamicChaptersMap[chapTitle]} Lectures loaded).`,
+              desc: `Dynamic briefing module (${dynamicChaptersMap[chapTitle]} Lectures).`,
               isDynamic: true
             });
           }
@@ -316,11 +319,9 @@
     };
 
     window.terminateCadetSession = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      if (unsubscribeCurriculum) unsubscribeCurriculum();
       signOut(auth).then(() => {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
+        localStorage.clear();
+        sessionStorage.clear();
         window.location.href = "index.html";
       });
     };
