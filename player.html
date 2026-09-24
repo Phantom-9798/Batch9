@@ -1,6 +1,40 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <script>
+(() => {
+  // 1. Right Click Block
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // 2. F12, DevTools shortcuts, Save & Print Block
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+      (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
+
+  // 3. Ultra-Fast Console Trap (Freezes browser debugger instantly)
+  setInterval(() => {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > 100) {
+      document.body.innerHTML = '<div style="background:#000;color:#ef4444;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:bold;font-size:20px;text-align:center;">[SECURITY BREACH DETECTED]<br>TERMINAL LOCKED - DEVTOOLS PROHIBITED</div>';
+    }
+  }, 800);
+
+  // 4. Memory Scrub
+  setInterval(() => {
+    console.clear();
+  }, 1200);
+})();
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Tactical Video Console</title>
@@ -210,6 +244,22 @@
       border-radius: 3px;
       transition: width 0.15s linear;
     }
+
+    /* ANTI-PIRACY FLOATING WATERMARK STYLES */
+    .phantom-watermark-layer {
+      position: absolute;
+      top: 30%;
+      left: 25%;
+      z-index: 55;
+      pointer-events: none;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.32;
+      transform: rotate(-22deg);
+      transition: top 2.5s ease, left 2.5s ease;
+    }
   </style>
 </head>
 
@@ -238,6 +288,16 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
+        <!-- ================= TACTICAL ANTI-PIRACY HUD OVERLAY ================= -->
+        <div id="securityWatermark" class="phantom-watermark-layer">
+          <span class="font-mono text-xs font-black text-red-500 tracking-widest uppercase">
+            SECURE ACCESS: <span id="traceUid">TP-2026-CADET</span>
+          </span>
+          <span class="text-[10px] font-mono text-emerald-400/90 tracking-tighter" id="wmTimestamp">
+            ENCRYPTED SESSION ACTIVE
+          </span>
+        </div>
+
         <!-- PERMANENT TOP-RIGHT HUD (SPEED + FULLSCREEN FIXED) -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
           <div class="flex items-center gap-1.5">
@@ -312,7 +372,7 @@
           <div class="nexield-box">
             <div class="nexield-top-mask"></div>
             <iframe 
-              id="nexieldIframe"
+              id="nexieldIframe" 
               src="${finalVideo}" 
               class="nexield-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
@@ -586,6 +646,32 @@
         e.preventDefault();
       }
     });
+
+    // =========================================================================
+    // DYNAMIC ANTI-RECORDING JITTER & WATERMARK MOTION ENGINE
+    // =========================================================================
+    (() => {
+      const wm = document.getElementById('securityWatermark');
+      const timeStampEl = document.getElementById('wmTimestamp');
+      
+      // Auto-update live military session time on watermark
+      setInterval(() => {
+        const now = new Date();
+        if (timeStampEl) {
+          timeStampEl.innerText = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
+        }
+      }, 1000);
+
+      // Random jitter movement inside video screen (even in fullscreen)
+      setInterval(() => {
+        if (wm) {
+          const top = Math.floor(Math.random() * 65) + 10;
+          const left = Math.floor(Math.random() * 55) + 10;
+          wm.style.top = top + '%';
+          wm.style.left = left + '%';
+        }
+      }, 3000);
+    })();
   </script>
 </body>
 </html>
