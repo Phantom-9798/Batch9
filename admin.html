@@ -57,8 +57,8 @@
     <p class="font-orbitron text-[10px] text-neutral-400 tracking-widest uppercase mb-5">
       LEVEL-4 PHANTOM CLEARANCE REQUIRED
     </p>
-    <input id="adminPass" type="password" placeholder="Hima Phantom 74" class="w-full bg-black border border-neutral-700 focus:border-emerald-500 text-center text-emerald-400 font-mono tracking-widest py-3 rounded-xl outline-none mb-4">
-    <button onclick="unlockTerminal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-bold py-2.5 rounded-xl transition text-xs tracking-wider">
+    <input id="adminPass" type="password" placeholder="Enter Clearance Key" class="w-full bg-black border border-neutral-700 focus:border-emerald-500 text-center text-emerald-400 font-mono tracking-widest py-3 rounded-xl outline-none mb-4">
+    <button onclick="unlockTerminal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-bold py-2.5 rounded-xl transition text-xs tracking-wider cursor-pointer">
       VERIFY IDENTITY
     </button>
   </div>
@@ -81,10 +81,10 @@
 
       <!-- Tab Switcher -->
       <div class="flex border-b border-neutral-800 mb-6 gap-2">
-        <button id="singleTabBtn" onclick="switchMode('single')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition">
+        <button id="singleTabBtn" onclick="switchMode('single')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer">
           [1] SINGLE DAILY LECTURE
         </button>
-        <button id="bulkTabBtn" onclick="switchMode('bulk')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition">
+        <button id="bulkTabBtn" onclick="switchMode('bulk')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [2] BULK TSV ARCHIVE UPLOAD
         </button>
       </div>
@@ -203,11 +203,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // GATE PASSCODE (इसे अपनी इच्छानुसार बदल सकते हैं)
-    const TERMINAL_KEY = "PHANTOM786";
+    // GATE PASSCODE (Updated to your chosen key)
+    const TERMINAL_KEY = "Hima Phantom 74";
 
     window.unlockTerminal = () => {
-      const entered = document.getElementById("adminPass").value;
+      const entered = document.getElementById("adminPass").value.trim();
       if (entered === TERMINAL_KEY) {
         document.getElementById("authGate").classList.add("hidden");
         document.getElementById("adminConsole").classList.remove("hidden");
@@ -215,6 +215,13 @@
         alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
       }
     };
+
+    // Enter Key दबाने पर सीधा अनलॉक
+    document.getElementById("adminPass").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        window.unlockTerminal();
+      }
+    });
 
     window.switchMode = (mode) => {
       const singleSec = document.getElementById("singleSection");
@@ -225,13 +232,13 @@
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
         bulkSec.classList.add("hidden");
-        sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition";
-        bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition";
+        sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer";
+        bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       } else {
         singleSec.classList.add("hidden");
         bulkSec.classList.remove("hidden");
-        bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-amber-400 text-amber-400 transition";
-        sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition";
+        bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-amber-400 text-amber-400 transition cursor-pointer";
+        sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       }
     };
 
@@ -332,7 +339,6 @@
           else if (lower.includes("mensuration")) chapterName = "Mensuration";
           else if (lower.includes("trigonometry")) chapterName = "Trigonometry";
           else {
-            // अगर कोई मैच न हो तो पहले दो शब्द चैप्टर बन जाएँगे
             const words = fullTitle.replace(/^[0-9.]+\s*/, '').split(' ');
             chapterName = words.slice(0, 2).join(' ') || "Core Concepts";
           }
