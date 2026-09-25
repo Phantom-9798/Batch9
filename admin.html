@@ -238,21 +238,40 @@
         </button>
       </div>
 
-      <!-- ================= MODE 5: TELEGRAM BROADCAST (PERMANENT FIXED) ================= -->
+      <!-- ================= MODE 5: TELEGRAM BROADCAST (MULTI-SELECT & PROMPT) ================= -->
       <div id="telegramSection" class="hidden space-y-4">
         <div class="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 mb-4">
           <h3 class="font-orbitron text-sm font-bold text-blue-400 mb-1">📡 TACTICAL TELEGRAM BROADCAST</h3>
-          <p class="text-xs text-neutral-400">Select squadron & dispatch professional alerts directly via bot without any chat ID hassles.</p>
+          <p class="text-xs text-neutral-400">Select multiple batches to send custom or lecture alerts instantly via bot.</p>
+        </div>
+
+        <div>
+          <label class="text-xs text-neutral-400 font-mono mb-2 block">SELECT TARGET BATCHES (एक या एकाधिक सेलेक्ट करें)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-black border border-neutral-700 p-3 rounded-lg">
+            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
+              <input type="checkbox" name="tgBatch" value="AFCAT Batch" class="accent-emerald-500"> AFCAT Batch
+            </label>
+            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
+              <input type="checkbox" name="tgBatch" value="CDS Math Batch" class="accent-emerald-500"> CDS Math
+            </label>
+            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
+              <input type="checkbox" name="tgBatch" value="CDS OTA Batch" class="accent-emerald-500"> CDS OTA
+            </label>
+            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
+              <input type="checkbox" name="tgBatch" value="CAPF Batch" class="accent-emerald-500"> CAPF Batch
+            </label>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-xs text-neutral-400 font-mono mb-1 block">SELECT TARGET SQUADRON</label>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">DISPLAY SQUADRON LABEL</label>
             <select id="tgSquadron" class="w-full bg-black border border-neutral-700 text-emerald-400 p-2.5 rounded-lg text-sm outline-none">
-              <option value="afcat">AFCAT Squadron</option>
-              <option value="cds-math">CDS Mathematics Specialist</option>
-              <option value="cds-kilo">CDS OTA Squadron</option>
-              <option value="capf">CAPF Squadron</option>
+              <option value="GENERAL OPERATIONS">General Announcement / All Batches</option>
+              <option value="AFCAT SQUADRON">AFCAT Squadron</option>
+              <option value="CDS MATHEMATICS SPECIALIST">CDS Mathematics Specialist</option>
+              <option value="CDS OTA SQUADRON">CDS OTA Squadron</option>
+              <option value="CAPF SQUADRON">CAPF Squadron</option>
             </select>
           </div>
           <div>
@@ -266,16 +285,16 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">MODULE / SUBJECT</label>
-          <input id="tgSubject" type="text" placeholder="e.g. Physical Geography, Mathematics" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
+          <input id="tgSubject" type="text" placeholder="e.g. Physical Geography, Mathematics, General Notice" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">LECTURE TITLE</label>
-          <input id="tgTitle" type="text" placeholder="e.g. Geomorphology Class 01" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">LECTURE TITLE / MESSAGE HEADER</label>
+          <input id="tgTitle" type="text" placeholder="e.g. Geomorphology Class 01 / Important Update" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">ACCESS LINK / URL</label>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">ACCESS LINK / URL (Optional for general messages)</label>
           <input id="tgUrl" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500 font-mono">
         </div>
 
@@ -313,14 +332,8 @@
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
-    // TELEGRAM BOT & PERMANENT CHAT ID MAPPING (آپ یہاں اپنی ضرورت کے مطابق چیٹ آئی ڈی بعد میں ڈال سکتے ہیں)
+    // UPDATED SECURE BOT TOKEN
     const TG_BOT_TOKEN = "8564039198:AAHnJz2-UQ1X5yiBNC8nBDW2C6bGkCYPfPY";
-    const TG_CHAT_IDS = {
-      "afcat": "-100XXXXXXXXXX",     // AFCAT Group Chat ID
-      "cds-math": "-100XXXXXXXXXX",  // CDS Math Group Chat ID
-      "cds-kilo": "-100XXXXXXXXXX",  // CDS OTA Group Chat ID
-      "capf": "-100XXXXXXXXXX"       // CAPF Group Chat ID
-    };
 
     window.unlockTerminal = () => {
       const entered = document.getElementById("adminPass").value.trim();
@@ -602,23 +615,35 @@
       }
     };
 
-    // 5. Telegram Broadcast Logic (No Chat ID Prompt Required)
+    // 5. Telegram Broadcast Logic (Multi-Select Batches & Prompt Chat ID)
     window.sendTelegramBroadcast = async () => {
-      const squadron = document.getElementById("tgSquadron").value;
+      const selectedBatches = Array.from(document.querySelectorAll('input[name="tgBatch"]:checked')).map(el => el.value);
+      
+      if (selectedBatches.length === 0) {
+        alert("Please select at least one Target Batch checkbox!");
+        return;
+      }
+
+      const squadronLabel = document.getElementById("tgSquadron").value;
       const mode = document.getElementById("tgMode").value;
       const subject = document.getElementById("tgSubject").value.trim();
       const title = document.getElementById("tgTitle").value.trim();
       const url = document.getElementById("tgUrl").value.trim();
 
-      if (!subject || !title || !url) {
-        alert("Please fill Subject, Title, and URL fields!");
+      if (!subject || !title) {
+        alert("Module / Subject and Lecture Title / Message Header are mandatory!");
         return;
       }
 
-      const targetChatId = TG_CHAT_IDS[squadron];
-      if (!targetChatId || targetChatId.includes("X")) {
-        alert("⚠️ Please update the correct numeric Chat ID for this squadron inside the script first!");
-        return;
+      // Prompt for each selected batch's Chat ID at runtime
+      const chatIds = {};
+      for (let batch of selectedBatches) {
+        let cid = prompt(`Enter numeric Chat ID for [ ${batch} ] (e.g. -100xxxxxxxxxx):`);
+        if (!cid || !cid.trim()) {
+          alert("Broadcast cancelled: Chat ID missing for " + batch);
+          return;
+        }
+        chatIds[batch] = cid.trim();
       }
 
       const btn = document.getElementById("tgSubmitBtn");
@@ -626,33 +651,47 @@
       btn.disabled = true;
 
       // Professional Military Style Message Template
-      const messageText = `🚨 **TACTICAL DISPATCH ALERT** 🚨\n\n` +
-                          `🎯 **Squadron:** ${squadron.toUpperCase()}\n` +
-                          `⚙️ **Mode:** ${mode.toUpperCase()}\n` +
-                          `📚 **Module:** ${subject}\n` +
-                          `📖 **Lecture:** ${title}\n\n` +
-                          `⚡ *Status: Live in Vault*\n` +
-                          `────────────────────────\n` +
-                          `*© TEAM PHANTOM MILITARY OPERATIONS*`;
+      let messageText = `🚨 **TACTICAL DISPATCH ALERT** 🚨\n\n` +
+                        `🎯 **Operations:** ${squadronLabel}\n` +
+                        `⚙️ **Mode:** ${mode.toUpperCase()}\n` +
+                        `📚 **Module:** ${subject}\n` +
+                        `📖 **Details:** ${title}\n`;
+      
+      if (url) {
+        messageText += `\n🔗 **Access Link:**\n${url}\n`;
+      }
+
+      messageText += `\n⚡ *Status: Live in Vault*\n` +
+                     `────────────────────────\n` +
+                     `*© TEAM PHANTOM MILITARY OPERATIONS*`;
+
+      let successCount = 0;
 
       try {
-        const response = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: targetChatId,
-            text: messageText,
-            parse_mode: 'Markdown'
-          })
-        });
+        for (let batch of selectedBatches) {
+          const chatId = chatIds[batch];
+          const response = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: messageText,
+              parse_mode: 'Markdown'
+            })
+          });
 
-        const data = await response.json();
-        if (data.ok) {
-          showStatus(`[TELEGRAM SUCCESS] Broadcast transmitted successfully via Bot!`, true);
+          const data = await response.json();
+          if (data.ok) {
+            successCount++;
+          }
+        }
+
+        if (successCount > 0) {
+          showStatus(`[TELEGRAM SUCCESS] Broadcast successfully sent to ${successCount} batch(es)!`, true);
           document.getElementById("tgTitle").value = "";
           document.getElementById("tgUrl").value = "";
         } else {
-          showStatus(`[TELEGRAM ERROR] ${data.description}`, false);
+          showStatus(`[TELEGRAM ERROR] Failed to transmit message. Check Chat IDs.`, false);
         }
       } catch (e) {
         showStatus(`[NETWORK FAILURE] ${e.message}`, false);
