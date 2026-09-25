@@ -385,7 +385,6 @@
       if (!chapterId || !lectureDatabase[chapterId]) {
         const cleanName = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-        // Yeh saare CDS Recorded/OTA ke checks hain, isliye inhein sirf 'cds-kilo' ke liye chalayein:
         if (currentBatch === 'cds-kilo') {
           if (cleanName.includes('climatology')) chapterId = 'ch-rec-phys-climatology';
           else if (cleanName.includes('oceanography')) chapterId = 'ch-rec-phys-oceanography';
@@ -422,7 +421,6 @@
           else if (cleanName.includes('muster') || cleanName.includes('tactical')) chapterId = 'ch-rec-gs-muster';
         }
 
-        // CAPF aur AFCAT ke apne independent checks:
         if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
         else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) chapterId = 'ch-capf-internal-security';
       }
@@ -432,6 +430,7 @@
 
       const staticLectures = lectureDatabase[chapterId] ? [...lectureDatabase[chapterId]] : [];
 
+      // 🔥 FIX: CDS Math ke liye query ko aur behtar banaya gaya hai
       const q = query(
         collection(db, "tactical_curriculum"),
         where("squadron", "==", currentBatch.toLowerCase().trim()),
@@ -447,10 +446,27 @@
           const d = docSnap.data();
           const dChap = (d.chapter || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
-          if (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap))) {
+          // 🔥 FIX: Math ke liye agar subject "Lectures" hai aur chapter match ho raha hai toh fetch karega
+          const matchesChapter = (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap)));
+          const isMathsMatch = (currentBatch === 'cds-math' && d.subject === 'Lectures' && matchesChapter);
+          const isGeneralMatch = (currentBatch !== 'cds-math' && matchesChapter);
+
+          if (isMathsMatch || isGeneralMatch || currentBatch === 'cds-math') { 
+            // CDS Math ke saare uploaded lectures ko allow karne ke liye flexible check
             const vUrl = (d.url || d.videoUrl || "").trim();
             const cleanTitle = (d.title || "").trim().toLowerCase();
             const uniqueKey = vUrl || cleanTitle;
+
+            // Agar chapter name match ho raha hai ya phir math ka chapter title me keyword match hai
+            if (currentBatch === 'cds-math') {
+               // Math ke titles jaise "45. Equation Class 02" ko "Equations Class" ke sath match karna
+               const chapterKeyword = targetChap.replace(/(class|chapter|\d)/g, '').trim();
+               const titleKeyword = cleanTitle.replace(/(class|chapter|\d)/g, '').trim();
+               
+               if (!dChap.includes(chapterKeyword) && !titleKeyword.includes(chapterKeyword) && !cleanTitle.includes(targetChap)) {
+                 return; // Agar match nahi hua toh skip karo
+               }
+            }
 
             if (!seenVideos.has(uniqueKey)) {
               seenVideos.add(uniqueKey);
