@@ -332,15 +332,15 @@
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
-    // UPDATED SECURE BOT TOKEN
-    const TG_BOT_TOKEN = "8564039198:AAHnJz2-UQ1X5yiBNC8nBDW2C6bGkCYPfPY";
+    // UPDATED FRESH NEW BOT TOKEN
+    const TG_BOT_TOKEN = "8470610898:AAG3Bon22IfatvOqFW7upLkigbtKO7s223w";
 
-    // PERMANENT CHAT ID MAPPING 
+    // PERMANENT CORRECTED CHAT ID MAPPING
     const TG_CHAT_IDS = {
-      "afcat": "-100390742554",     // AFCAT Group ID[cite: 5]
-      "cds-math": "-1004290849239",  // CDS Math Group ID[cite: 4]
-      "cds-kilo": "-1004390121368",  // CDS OTA Group ID[cite: 6]
-      "capf": "-1003926640064"       // CAPF Group ID[cite: 5]
+      "afcat": "-1003907422554",     // AFCAT Group ID
+      "cds-math": "-1004290849239",  // CDS Math Group ID
+      "cds-kilo": "-1004390121368",  // CDS OTA Group ID
+      "capf": "-1003926640064"       // CAPF Group ID
     };
 
     window.unlockTerminal = () => {
@@ -623,7 +623,7 @@
       }
     };
 
-    // 5. Telegram Broadcast Logic (Permanent Multi-Select Dispatch)
+    // 5. Telegram Broadcast Logic
     window.sendTelegramBroadcast = async () => {
       const selectedBatches = Array.from(document.querySelectorAll('input[name="tgBatch"]:checked')).map(el => el.value);
       
@@ -647,7 +647,6 @@
       btn.innerText = "BROADCASTING...";
       btn.disabled = true;
 
-      // Professional Military Style Message Template
       let messageText = `🚨 **TACTICAL DISPATCH ALERT** 🚨\n\n` +
                         `🎯 **Operations:** ${squadronLabel}\n` +
                         `⚙️ **Mode:** ${mode.toUpperCase()}\n` +
