@@ -90,6 +90,9 @@
         <button id="extractorTabBtn" onclick="switchMode('extractor')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [3] NEXIELD EXTRACTOR
         </button>
+        <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
+          [4] PURGE / DATA MANAGER
+        </button>
       </div>
 
       <!-- ================= MODE 1: SINGLE LECTURE ================= -->
@@ -197,6 +200,41 @@
         </div>
       </div>
 
+      <!-- ================= MODE 4: PURGE / DATA MANAGER (NEW) ================= -->
+      <div id="managerSection" class="hidden space-y-4">
+        <div class="p-4 rounded-xl bg-red-950/20 border border-red-500/30 mb-4">
+          <h3 class="font-orbitron text-sm font-bold text-red-400 mb-1">⚠️ TACTICAL PURGE PROTOCOL</h3>
+          <p class="text-xs text-neutral-400">Select the exact Squadron, Mode, and Subject below to wipe out old/broken lectures from Firestore before uploading fresh TSV data.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">TARGET SQUADRON</label>
+            <select id="purgeSquadron" class="w-full bg-black border border-neutral-700 text-emerald-400 p-2.5 rounded-lg text-sm outline-none">
+              <option value="cds-kilo">CDS OTA Squadron</option>
+              <option value="cds-math">CDS Mathematics Specialist</option>
+              <option value="afcat">AFCAT Squadron</option>
+              <option value="capf">CAPF Squadron</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">MODULE / SUBJECT NAME</label>
+            <input id="purgeSubject" type="text" placeholder="e.g. Lectures, Physical Geography" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-red-500">
+          </div>
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">STREAM MODE</label>
+            <select id="purgeMode" class="w-full bg-black border border-neutral-700 text-amber-400 p-2.5 rounded-lg text-sm outline-none">
+              <option value="recorded">Recorded Vault</option>
+              <option value="live">Live Squadron</option>
+            </select>
+          </div>
+        </div>
+
+        <button onclick="executePurge()" id="purgeSubmitBtn" class="w-full bg-red-600 hover:bg-red-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
+          WIPE SELECTED SUBJECT DATA FROM FIRESTORE
+        </button>
+      </div>
+
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -209,7 +247,7 @@
   <!-- ================= FIREBASE LOGIC ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -246,19 +284,23 @@
       const singleSec = document.getElementById("singleSection");
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
+      const managerSec = document.getElementById("managerSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
+      const mBtn = document.getElementById("managerTabBtn");
 
       // Reset all buttons and sections
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
+      managerSec.classList.add("hidden");
       
       sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
@@ -269,6 +311,9 @@
       } else if (mode === 'extractor') {
         extractorSec.classList.remove("hidden");
         eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-purple-400 text-purple-400 transition cursor-pointer";
+      } else if (mode === 'manager') {
+        managerSec.classList.remove("hidden");
+        mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-red-400 text-red-400 transition cursor-pointer";
       }
     };
 
@@ -440,6 +485,57 @@
       } else {
         outputEl.value = tsvResult;
         showStatus(`[EXTRACTED] Successfully converted ${count - 1} links to TSV!`, true);
+      }
+    };
+
+    // 4. Purge / Data Manager Logic (Squadron + Mode + Subject Wise Deletion)
+    window.executePurge = async () => {
+      const squadron = document.getElementById("purgeSquadron").value;
+      const subject = document.getElementById("purgeSubject").value.trim();
+      const mode = document.getElementById("purgeMode").value;
+
+      if (!subject) {
+        alert("Please enter the exact Module / Subject name to purge!");
+        return;
+      }
+
+      if (!confirm(`WARNING: Are you sure you want to delete all lectures under Squadron: ${squadron}, Mode: ${mode}, Subject: ${subject}?`)) {
+        return;
+      }
+
+      const btn = document.getElementById("purgeSubmitBtn");
+      btn.innerText = "WIPING DATA...";
+      btn.disabled = true;
+
+      try {
+        const q = query(
+          collection(db, "tactical_curriculum"),
+          where("squadron", "==", squadron),
+          where("mode", "==", mode),
+          where("subject", "==", subject)
+        );
+
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          showStatus("[INFO] No matching documents found to purge for this subject/mode.", false);
+          btn.innerText = "WIPE SELECTED SUBJECT DATA FROM FIRESTORE";
+          btn.disabled = false;
+          return;
+        }
+
+        const deletePromises = [];
+        querySnapshot.forEach((docSnap) => {
+          deletePromises.push(deleteDoc(docSnap.ref));
+        });
+
+        await Promise.all(deletePromises);
+        showStatus(`[PURGE SUCCESS] Successfully deleted ${deletePromises.length} old lectures for ${subject} (${mode}).`, true);
+      } catch (e) {
+        showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
+      } finally {
+        btn.innerText = "WIPE SELECTED SUBJECT DATA FROM FIRESTORE";
+        btn.disabled = false;
       }
     };
   </script>
