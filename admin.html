@@ -80,12 +80,15 @@
       </div>
 
       <!-- Tab Switcher -->
-      <div class="flex border-b border-neutral-800 mb-6 gap-2">
+      <div class="flex border-b border-neutral-800 mb-6 gap-2 flex-wrap">
         <button id="singleTabBtn" onclick="switchMode('single')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer">
-          [1] SINGLE DAILY LECTURE
+          [1] SINGLE LECTURE
         </button>
         <button id="bulkTabBtn" onclick="switchMode('bulk')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [2] BULK TSV ARCHIVE UPLOAD
+          [2] BULK TSV UPLOAD
+        </button>
+        <button id="extractorTabBtn" onclick="switchMode('extractor')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
+          [3] NEXIELD EXTRACTOR
         </button>
       </div>
 
@@ -177,6 +180,23 @@
         </button>
       </div>
 
+      <!-- ================= MODE 3: NEXIELD HTML LINK EXTRACTOR ================= -->
+      <div id="extractorSection" class="hidden space-y-4">
+        <div>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE NEXIELD HTML CODE</label>
+          <textarea id="extractorHtmlInput" rows="6" placeholder="Nexield page ka pura HTML yahan paste karein..." class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+        </div>
+
+        <button onclick="extractToTsv()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
+          EXTRACT TO TSV FORMAT
+        </button>
+
+        <div>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">EXTRACTED TSV (Copy and paste into Bulk Upload section above)</label>
+          <textarea id="extractorOutput" rows="6" placeholder="Generated TSV output yahan aayega..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+        </div>
+      </div>
+
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -203,7 +223,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // GATE PASSCODE (Updated to your chosen key)
+    // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
     window.unlockTerminal = () => {
@@ -216,7 +236,6 @@
       }
     };
 
-    // Enter Key दबाने पर सीधा अनलॉक
     document.getElementById("adminPass").addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         window.unlockTerminal();
@@ -226,19 +245,30 @@
     window.switchMode = (mode) => {
       const singleSec = document.getElementById("singleSection");
       const bulkSec = document.getElementById("bulkSection");
+      const extractorSec = document.getElementById("extractorSection");
+      
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
+      const eBtn = document.getElementById("extractorTabBtn");
+
+      // Reset all buttons and sections
+      singleSec.classList.add("hidden");
+      bulkSec.classList.add("hidden");
+      extractorSec.classList.add("hidden");
+      
+      sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
-        bulkSec.classList.add("hidden");
         sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer";
-        bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
-      } else {
-        singleSec.classList.add("hidden");
+      } else if (mode === 'bulk') {
         bulkSec.classList.remove("hidden");
         bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-amber-400 text-amber-400 transition cursor-pointer";
-        sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      } else if (mode === 'extractor') {
+        extractorSec.classList.remove("hidden");
+        eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-purple-400 text-purple-400 transition cursor-pointer";
       }
     };
 
@@ -358,7 +388,6 @@
           count++;
           batchCount++;
 
-          // Firestore बैच लिमिट (अधिकतम 500)
           if (batchCount === 450) {
             await batch.commit();
             batch = writeBatch(db);
@@ -377,6 +406,40 @@
       } finally {
         btn.innerText = "EXECUTE BULK BATCH DISPATCH";
         btn.disabled = false;
+      }
+    };
+
+    // 3. Nexield HTML Link Extractor Logic
+    window.extractToTsv = () => {
+      const html = document.getElementById('extractorHtmlInput').value;
+      const outputEl = document.getElementById('extractorOutput');
+      
+      if (!html.trim()) {
+        alert("Please paste the HTML code first!");
+        return;
+      }
+
+      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
+      
+      let match;
+      let tsvResult = "";
+      let count = 1;
+
+      while ((match = regex.exec(html)) !== null) {
+        const title = match[1];
+        const token = match[2];
+        
+        const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+        
+        tsvResult += `${count}\t${title}\t${fullUrl}\n`;
+        count++;
+      }
+
+      if (count === 1) {
+        outputEl.value = "❌ No matching playLesson links found in this HTML!";
+      } else {
+        outputEl.value = tsvResult;
+        showStatus(`[EXTRACTED] Successfully converted ${count - 1} links to TSV!`, true);
       }
     };
   </script>
