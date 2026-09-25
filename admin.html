@@ -93,9 +93,6 @@
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [4] PURGE / DATA MANAGER
         </button>
-        <button id="telegramTabBtn" onclick="switchMode('telegram')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [5] TELEGRAM BROADCAST
-        </button>
       </div>
 
       <!-- ================= MODE 1: SINGLE LECTURE ================= -->
@@ -238,71 +235,6 @@
         </button>
       </div>
 
-      <!-- ================= MODE 5: TELEGRAM BROADCAST (PERMANENT MULTI-SELECT) ================= -->
-      <div id="telegramSection" class="hidden space-y-4">
-        <div class="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 mb-4">
-          <h3 class="font-orbitron text-sm font-bold text-blue-400 mb-1">📡 TACTICAL TELEGRAM BROADCAST</h3>
-          <p class="text-xs text-neutral-400">Select multiple batches to send custom or lecture alerts instantly via bot.</p>
-        </div>
-
-        <div>
-          <label class="text-xs text-neutral-400 font-mono mb-2 block">SELECT TARGET BATCHES (एक या एकाधिक सेलेक्ट करें)</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-black border border-neutral-700 p-3 rounded-lg">
-            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
-              <input type="checkbox" name="tgBatch" value="afcat" class="accent-emerald-500"> AFCAT Batch
-            </label>
-            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
-              <input type="checkbox" name="tgBatch" value="cds-math" class="accent-emerald-500"> CDS Math
-            </label>
-            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
-              <input type="checkbox" name="tgBatch" value="cds-kilo" class="accent-emerald-500"> CDS OTA
-            </label>
-            <label class="flex items-center gap-2 text-xs text-emerald-400 cursor-pointer">
-              <input type="checkbox" name="tgBatch" value="capf" class="accent-emerald-500"> CAPF Batch
-            </label>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="text-xs text-neutral-400 font-mono mb-1 block">DISPLAY SQUADRON LABEL</label>
-            <select id="tgSquadron" class="w-full bg-black border border-neutral-700 text-emerald-400 p-2.5 rounded-lg text-sm outline-none">
-              <option value="GENERAL OPERATIONS">General Announcement / All Batches</option>
-              <option value="AFCAT SQUADRON">AFCAT Squadron</option>
-              <option value="CDS MATHEMATICS SPECIALIST">CDS Mathematics Specialist</option>
-              <option value="CDS OTA SQUADRON">CDS OTA Squadron</option>
-              <option value="CAPF SQUADRON">CAPF Squadron</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs text-neutral-400 font-mono mb-1 block">STREAM MODE</label>
-            <select id="tgMode" class="w-full bg-black border border-neutral-700 text-amber-400 p-2.5 rounded-lg text-sm outline-none">
-              <option value="recorded">Recorded Vault</option>
-              <option value="live">Live Squadron</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">MODULE / SUBJECT</label>
-          <input id="tgSubject" type="text" placeholder="e.g. Physical Geography, Mathematics, General Notice" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
-        </div>
-
-        <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">LECTURE TITLE / MESSAGE HEADER</label>
-          <input id="tgTitle" type="text" placeholder="e.g. Geomorphology Class 01 / Important Update" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500">
-        </div>
-
-        <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">ACCESS LINK / URL (Optional for general messages)</label>
-          <input id="tgUrl" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-blue-500 font-mono">
-        </div>
-
-        <button onclick="sendTelegramBroadcast()" id="tgSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          TRANSMIT BROADCAST VIA BOT
-        </button>
-      </div>
-
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -312,7 +244,7 @@
     TEAM PHANTOM MILITARY DISPATCH GATEWAY &bull; CONFIDENTIAL
   </footer>
 
-  <!-- ================= FIREBASE & TELEGRAM LOGIC ================= -->
+  <!-- ================= FIREBASE LOGIC ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -331,17 +263,6 @@
 
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
-
-    // UPDATED FRESH NEW BOT TOKEN
-    const TG_BOT_TOKEN = "8470610898:AAG3Bon22IfatvOqFW7upLkigbtKO7s223w";
-
-    // PERMANENT CORRECTED CHAT ID MAPPING
-    const TG_CHAT_IDS = {
-      "afcat": "-1003907422554",     // AFCAT Group ID
-      "cds-math": "-1004290849239",  // CDS Math Group ID
-      "cds-kilo": "-1004390121368",  // CDS OTA Group ID
-      "capf": "-1003926640064"       // CAPF Group ID
-    };
 
     window.unlockTerminal = () => {
       const entered = document.getElementById("adminPass").value.trim();
@@ -364,25 +285,21 @@
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
       const managerSec = document.getElementById("managerSection");
-      const telegramSec = document.getElementById("telegramSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
       const mBtn = document.getElementById("managerTabBtn");
-      const tBtn = document.getElementById("telegramTabBtn");
 
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
       managerSec.classList.add("hidden");
-      telegramSec.classList.add("hidden");
       
       sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
-      tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
@@ -396,9 +313,6 @@
       } else if (mode === 'manager') {
         managerSec.classList.remove("hidden");
         mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-red-400 text-red-400 transition cursor-pointer";
-      } else if (mode === 'telegram') {
-        telegramSec.classList.remove("hidden");
-        tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-blue-400 text-blue-400 transition cursor-pointer";
       }
     };
 
@@ -619,76 +533,6 @@
         showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
       } finally {
         btn.innerText = "WIPE SELECTED SUBJECT DATA FROM FIRESTORE";
-        btn.disabled = false;
-      }
-    };
-
-    // 5. Telegram Broadcast Logic
-    window.sendTelegramBroadcast = async () => {
-      const selectedBatches = Array.from(document.querySelectorAll('input[name="tgBatch"]:checked')).map(el => el.value);
-      
-      if (selectedBatches.length === 0) {
-        alert("Please select at least one Target Batch checkbox!");
-        return;
-      }
-
-      const squadronLabel = document.getElementById("tgSquadron").value;
-      const mode = document.getElementById("tgMode").value;
-      const subject = document.getElementById("tgSubject").value.trim();
-      const title = document.getElementById("tgTitle").value.trim();
-      const url = document.getElementById("tgUrl").value.trim();
-
-      if (!subject || !title) {
-        alert("Module / Subject and Lecture Title / Message Header are mandatory!");
-        return;
-      }
-
-      const btn = document.getElementById("tgSubmitBtn");
-      btn.innerText = "BROADCASTING...";
-      btn.disabled = true;
-
-      let messageText = `🚨 **TACTICAL DISPATCH ALERT** 🚨\n\n` +
-                        `🎯 **Operations:** ${squadronLabel}\n` +
-                        `⚙️ **Mode:** ${mode.toUpperCase()}\n` +
-                        `📚 **Module:** ${subject}\n` +
-                        `📖 **Details:** ${title}\n`;
-      
-      if (url) {
-        messageText += `\n🔗 **Access Link:**\n${text}\n`;
-      }
-
-      messageText += `\n⚡ *Status: Live in Vault*\n` +
-                     `────────────────────────\n` +
-                     `*© TEAM PHANTOM MILITARY OPERATIONS*`;
-
-      let successCount = 0;
-
-      try {
-        for (let batchKey of selectedBatches) {
-          const chatId = TG_CHAT_IDS[batchKey];
-          if (!chatId) continue;
-
-     const targetUrl = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${chatId}&parse_mode=Markdown&text=${encodeURIComponent(messageText)}`;
-          const apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-          const response = await fetch(apiUrl);
-          const data = await response.json();
-          if (data.ok) {
-            successCount++;
-          }
-        }
-
-        if (successCount > 0) {
-          showStatus(`[TELEGRAM SUCCESS] Broadcast successfully transmitted to ${successCount} batch(es)!`, true);
-          document.getElementById("tgTitle").value = "";
-          document.getElementById("tgUrl").value = "";
-        } else {
-          showStatus(`[TELEGRAM ERROR] Failed to transmit message. Check network or bot permissions.`, false);
-        }
-      } catch (e) {
-        showStatus(`[NETWORK FAILURE] ${e.message}`, false);
-      } finally {
-        btn.innerText = "TRANSMIT BROADCAST VIA BOT";
         btn.disabled = false;
       }
     };
