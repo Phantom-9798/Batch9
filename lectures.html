@@ -1,1338 +1,685 @@
 <!DOCTYPE html>
-
 <html lang="en" class="dark">
-
 <head>
-
   <script>
-
 (() => {
-
   // 1. Right Click Disable
-
   document.addEventListener('contextmenu', e => e.preventDefault());
 
-
-
   // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
-
   document.addEventListener('keydown', e => {
-
     if (
-
       e.key === 'F12' ||
-
       (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-
       (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-
     ) {
-
       e.preventDefault();
-
       e.stopPropagation();
-
       return false;
-
     }
-
   });
 
-
-
   // 3. DevTools Freezing Trap
-
   setInterval(() => {
-
     const start = performance.now();
-
     debugger;
-
     const end = performance.now();
-
     if (end - start > 100) {
-
       document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-
     }
-
   }, 1000);
 
-
-
   // 4. Console Auto Clear
-
   setInterval(() => {
-
     console.clear();
-
   }, 1500);
-
 })();
-
 </script>
-
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>TEAM PHANTOM | Tactical Lecture Console</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
-
   
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-
-
   <script type="module">
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
     import { getFirestore, doc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-
-
     const firebaseConfig = {
-
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-
       authDomain: "team-phantom-enrollment.firebaseapp.com",
-
       projectId: "team-phantom-enrollment",
-
       storageBucket: "team-phantom-enrollment.firebasestorage.app",
-
       messagingSenderId: "658049687096",
-
       appId: "1:658049687096:web:8464788a43126a6bced0cd"
-
     };
-
-
 
     const app = initializeApp(firebaseConfig);
-
     const auth = getAuth(app);
-
     const db = getFirestore(app);
-
     const lectureDatabase = {
-
       // ----------------- 1. CAPF SESSIONS -----------------
-
       "ch-capf-mentor-sessions": [
-
         { lectureNo: "01", title: "Mentor Session 01 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis, official syllabus deep-dive.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.Mentorship%20Session%20-%2031%20August&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b582b8802523afdc925bd656cb06fd238640ef6e0779ada32986e6c5fdc91439d8c7e9754c9132fd4775b3e414f575b354dc94a3d0707a7659b3792a632147753a463edd2f946207a5eca660a87a2ba7a23571c408257449deab7ebbbf4af47161ca21bfcdee7828209f8a9708bac6a8095382a709a00fbfe7d34603ab8a9e6114c46eb00cf1e2d70ccf7d5ec2eeb1df93a", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Mentor Session 02 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis, official syllabus deep-dive.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=2.%20Mentorship%20Session%20-%201%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5829d3a3ed47820f41134038482549c8c35f263b801d8c885d4b728873d8abb735a0c9f6c26bfc0bbb6a663a14964ecc9245ae66fd68fa66db3b8c06047946e4838346fcfd6d07a57c682f2f9717a5a17a8094a068581a83dbe6eee47925b6f1112f9d6bb2cbc109e3c732d866b5039adde7a28fc27ccbd81df3af1f60fdead57afdcc57df14bc323e637aad46964022c7", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Mentor Session 03 : Strategic Roadmap & Timeline", desc: "Complete phase-wise preparation strategy.", duration: "45 Mins", videoId: "https://vimpd.nexield.in/?title=3.%20Mentorship%20Session%20-%205%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58116937e3a5a359762b50034e70e0e69dd362fcee53253b26861fee1d38050eb5eb442e95e0bc4822a0fa5f548b3955a38acd81233bac970a8cb32ab153af692778f790f9ffa929ac45fd01d06694fb4f9164816073e09bcccf788da77b59d7997e0ee890ca43cd97c883042ec4ec4b4d8cf13603b6af558156609c33bd42f397dbccc2d991eef031c57d572c9e712fc9", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Mentor Session 04 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=4.%20Mentorship%20Session%20-%209%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b580ab33dd747b4faee1e478c76400bd8d71c1f0f14c6a89e802ef87c485e27a28cb60d69c366dd0d303533c9645771ff763c9d561655990964d02c4df7c7f634227360f585e18b18a67a348f1a6fa91768944f6cd1bd44a07585ce4e4c873e7953311f707c5dc48bc5b66c6406540a858686f562a84db51aa74c92d0309a5e773d6a3cbdec8d5ccb756d321e26beb6cec1", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Mentor Session 05 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "https://vimpd.nexield.in/?title=5.%20Mentorship%20Session%20-%2016%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58d9885baf0232bbd6324c38ba2159087aa460ba9b9fc0d089a0e46c35739f8770b42f895ebea384cea9dfe6c68030e63bce3025ee926db26fa66a5860b39c5e3245e5327a8556d1e7d3d70e195b237a08c170d42c84b44d3db4bcb6401f4cfeb534348d7891d5b9b84a0d8860cf7f7003a78f6cae454904445917b74d2f409bb560b22e6ff29a93e99112850862cd62d0", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Mentor Session 06 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "https://vimpd.nexield.in/?title=6.%20Mentorship%20Session%20-%2019%20September&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b580a9c2c680e9710d2e20a8e39a76e65841dfb1fd2153c2571279fb3a4b32c5c1eab3b216c640e5da30853da8ef6b0a32c1d0bac7ec2cd521cf12d6cbfd32a104916adca57d91dcbff0b862e594a049ce6e81694c66cdb2e52f61b61cd998dfd01e0e29ab067b2b1498dc30ef5a586dc0ae806ca9c5db0d44cbd8ea89b883383d35e9013e60b19b0569524d975b29f515d", pdfUrl: "#" }
-
       ],
-
       "ch-capf-math-01": [
-
         { lectureNo: "01", title: "Quantitative Aptitude Foundation", desc: "Basic arithmetic modules and calculation tactics.", duration: "HD Session", videoId: "", pdfUrl: "#" }
-
       ],
-
       "ch-capf-eng-01": [
-
         { lectureNo: "01", title: "Grammar, Précis & Essay", desc: "Analytical report writing and comprehension mechanics.", duration: "HD Session", videoId: "", pdfUrl: "#" }
-
       ],
-
       "ch-capf-internal-security": [
-
         { lectureNo: "01", title: "Internal security challenges in 21st century", desc: "Border management, insurgency & modern security threats.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=1.%20Internal%20security%20challenges%20in%2021st%20century&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58c741afb1f6167378494dd5a7478ed277f58fbe0b0476166a102d9a79d2fc66f6ca139a8310ed93a1fb08e5ddb034351500d3c600a928602af4cd3e1cda0489f63fa94ea40d8b98b5b7b48973e35e9708c63b96c5297861f9a90925d2f4b925b4df44ecdfadd5dd16cc4461df18ea65d53437c72f67dfd4a43cd385b9ad0d943132250937777383d69dd0626b8e38daec", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Kashmir Militancy", desc: "Evolution, proxy war dynamics, security grid & modern scenario.", duration: "50 Mins", videoId: "https://vimpd.nexield.in/?title=2.%20Kashmir%20Militancy&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5809f02fa66023484a867999115205e5cae40c5fdea2ffd4b5a28b5d7c68d2f14277f3b6bf5a422c675f9e6d5e10bf2a30002296b2069b776fb5031533cf4bcc65b58ac6abb78b3fe882f14f8ff8c889f6d6689ad948b262ff78936396e331dd001a81bd01d62a5e0301406ed82affee2dcb9bd4101fd7a49b3cc4d673079f989dd7d2653f449641da5bbb679f53ddf21a", pdfUrl: "#" }
-
       ],
-
       "ch-mentor-sessions": [
-
         { lectureNo: "03", title: "Mentor Session 03 : Strategic Roadmap & Timeline", desc: "Complete phase-wise preparation strategy.", duration: "45 Mins", videoId: "pC6cxRQu3P4", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Mentor Session 04 : Paper Pattern & Booklist Analysis", desc: "High-yield topics analysis.", duration: "50 Mins", videoId: "MbwFTOEkx4c", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Mentor Session 05 : CAPF Tactical Execution", desc: "Official orientation and paper blueprint.", duration: "58 Mins", videoId: "vxh_UIChO7M", pdfUrl: "#" }
-
       ],
-
-
 
       // ----------------- 2. AFCAT SESSIONS -----------------
-
       "ch-afcat-eng-vocab-01": [
-
         { lectureNo: "01", title: "Idioms & Phrases Class 01", desc: "High-yield AFCAT idioms with contextual usage analysis.", duration: "HD Session", videoId: "", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-eng-vocab-02": [
-
         { lectureNo: "01", title: "One Word Substitution", desc: "Essential substitutions, roots & memory mnemonics.", duration: "HD Session", videoId: "", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-eng-vocab-03": [
-
         { lectureNo: "01", title: "Synonyms & Antonyms", desc: "Targeted word list, contextual usage & eliminate drills.", duration: "HD Session", videoId: "", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-math-01": [
-
         { lectureNo: "01", title: "Probability", desc: "Fundamental rules, coins, dice, cards & condition probability.", duration: "72 Mins", videoId: "https://vimpd.nexield.in/?title=1.%20Probability%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b587b81b1094738d239ab7d2635a5a079dcb7c0be8b7872b1cb5a55d9f4fad20c1feed32be33f9d3f5e72fcf7d7aea7fb5cc9e883b33175b723040ec27dae21ba6462cd5a9d66827b05a97d508ac495efe73dba9655aa2302783728acbfb53db96935b293be1bcb71e254c6f245691ad67ab3b1e26bd208c55791c677049e6e1841ba9f861501ed24261f333a7ed3c3efd3", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-math-02": [
-
         { lectureNo: "01", title: "Statistics", desc: "Mean, median, mode, variance & standard deviation.", duration: "73 Mins", videoId: "https://vimpd.nexield.in/?title=4.%20Statistics%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b588e7052779214d6a4dff9ee9a050e997647079046e72c64ffd9114caa473a55f58cbe0fa5f7c3907add06610ca83172a36d51bfb24b9e50fabc8e8c9a296951e6c2004ea5b6ef82b3b05d332696dd670fec49e83472fabd2cd2eee8aea595ff4df3ea22937fd07b304e3205bb870e941f9fada7c4b99182053a906ceda5698725e9332ba5f766c27ceeac278abb651ce7", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-math-03": [
-
         { lectureNo: "01", title: "Height and Distance", desc: "Trigonometric elevations, depressions & angle properties.", duration: "59 Mins", videoId: "https://vimpd.nexield.in/?title=7.%20Height%20And%20Distance%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b5880ab66a790f7b505b4670a400a359e28dd03351b07130b6fdd7d9c8ce5bd91abb6c9f98c0504c7a88bd65cf335f46b5289f111b4b4034ea922cdea95e558a11b5a3e4c8cfeb248dec4fc4df78c451303c0a0e507d08823692259a5d4a1be26a43c652f971f24bbce6e6033a036fba5d17d186c785292108ef7a65fc62b681a0efd3260372bd613e232d2b17c72603fd6", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-reasoning-01": [
-
         { lectureNo: "01", title: "Intro", desc: "Intro.", duration: "Intro Class", videoId: "https://vimpd.nexield.in/?title=1.%20Anurag%20Bhaiya%20-%20Intro%20Class&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58609e0eef1b54bb9d69eb6a3f6f8f74cb2015c4bdb58a6ce5cd3abfb1d66bd2b104253736b72d9bea535242dbb080752d55e64002a6a21dd8995565aa87c170dba5f9c7035dd84b317fc9211b0d441dde45f18edcd9b29a198ad5c084cba7091598c5c66cf63e47438a7e9eac84a47fe74e2f9d1ab72afc6fdfce075c2821b39c46f077077f2adbf78f421fb66a3f7702", pdfUrl: "#" }
-
       ],
-
       "ch-afcat-reasoning-02": [
-
         { lectureNo: "01", title: "Coding Decoding", desc: "Letter, number, mixed coding drills & pattern identification.", duration: "HD Session", videoId: "https://vimpd.nexield.in/?title=2.%20Coding%20Decoding%20Class%201&link=21b2c8ca805fc6961a1c13f994bec9cd9089926cf3d78cf9ddb0dcc6e8381b58fc09e9d2b749955b98baabec0eee36d7cf9f4b647f37734e282fea2f1a4b1edc32e89e508a504d0ed342a157b277688640ab22efe983f465c3c0dbceed53098a8fda069be7b6796358a6017f5500546bf16546fd501abd4b52ca01fe9c6a19748323b8c19de496cdad002c0bd0a63d6e8932215eac3ccb58abd0c32dfa52b13f237c79bdf8691d41f2d6062a3bbf8e36", pdfUrl: "#" }
-
       ],
-
-
 
       // ----------------- 3. CDS KILO RECORDED MAPPED SUBJECTS (YOUTUBE VIDEOS) -----------------
-
       "ch-rec-phys-climatology": [
-
         { lectureNo: "01", title: "Climatology 1", desc: "Climatology foundational concepts.", duration: "HD Session", videoId: "DYU_F-zG-1M", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Climatology 2", desc: "Advanced atmospheric pressure & wind systems.", duration: "HD Session", videoId: "ovDBDoofNTE", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Climatology 3", desc: "Atmospheric moisture and precipitation.", duration: "HD Session", videoId: "nWBKZiykPRY", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Climatology 4", desc: "Air masses and climate classification.", duration: "HD Session", videoId: "bWEGFZ4o8tM", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Climatology 5", desc: "Cyclones and global climatic belts.", duration: "HD Session", videoId: "CjOZ1CjP648", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Climatology fronts", desc: "Fronts and weather disturbances.", duration: "HD Session", videoId: "ZQ44FeA5YlE", pdfUrl: "#" }
-
       ],
-
       "ch-rec-phys-oceanography": [
-
         { lectureNo: "01", title: "Oceanography 1", desc: "Relief of ocean floor and salinity.", duration: "HD Session", videoId: "nripPA4jsao", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Oceanography 2", desc: "Ocean currents and tides.", duration: "HD Session", videoId: "-EM9nqDpwJs", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Oceanography 3", desc: "Marine resources and coral reefs.", duration: "HD Session", videoId: "8I_HDgr6_qY", pdfUrl: "#" }
-
       ],
-
       "ch-rec-phys-geomorphic": [
-
         { lectureNo: "01", title: "Geomorphic processes 1", desc: "Endogenic and exogenic forces.", duration: "HD Session", videoId: "HS8NliKfdOs", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Geomorphic processes 2", desc: "Weathering and mass movement.", duration: "HD Session", videoId: "LyKiD_NRqOw", pdfUrl: "#" }
-
       ],
-
       "ch-rec-phys-landforms": [
-
         { lectureNo: "01", title: "Landform by running water", desc: "Fluvial landforms and drainage cycles.", duration: "HD Session", videoId: "MQyDKjS8q8o", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Landform by ground water", desc: "Karst topography and underground features.", duration: "HD Session", videoId: "2ZDC-OIPwes", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Landform by glaciers", desc: "Glacial depositional and erosional landforms.", duration: "HD Session", videoId: "QgCl-ABdgAc", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Landform by sea wave", desc: "Coastal landforms and marine erosion.", duration: "HD Session", videoId: "DQ69YtPQzuM", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Landform by wind", desc: "Aeolian landforms in arid regions.", duration: "HD Session", videoId: "h8wJYqexP6I", pdfUrl: "#" }
-
       ],
-
       "ch-rec-phys-Internal Earth Dynamics": [
-
         { lectureNo: "01", title: "Earthquake", desc: "Seismic waves and epicenter analysis.", duration: "HD Session", videoId: "je3oICjBHSg", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Earth's interior", desc: "Crust, mantle, core and discontinuities.", duration: "HD Session", videoId: "17TTLgwEv88", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Volcanoes", desc: "Volcanic landforms and eruption types.", duration: "HD Session", videoId: "BMG9Q7jwDeI", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Plate tectonics", desc: "Continental drift and plate boundaries.", duration: "HD Session", videoId: "UfgnLF6c5sQ", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Rocks and minerals", desc: "Igneous, sedimentary, and metamorphic rocks.", duration: "HD Session", videoId: "CgAf2p6dDVI", pdfUrl: "#" }
-
       ],
-
       "ch-rec-ind-physio": [
-
         { lectureNo: "01", title: "Indian geography basic", desc: "Location, extent and neighboring countries.", duration: "HD Session", videoId: "KReGkP9nVDE", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Himalayas + plain", desc: "Himalayan ranges and Northern plains.", duration: "HD Session", videoId: "K-45zpv-_Vo", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Peninsular plateau", desc: "Central highlands and Deccan plateau.", duration: "HD Session", videoId: "5z_8E-L5vM0", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Coastal area + island", desc: "Western/Eastern coasts and island groups.", duration: "HD Session", videoId: "y4J7EDOM0Po", pdfUrl: "#" }
-
       ],
-
       "ch-rec-ind-drainage": [
-
         { lectureNo: "01", title: "Rivers", desc: "Major river systems and drainage patterns.", duration: "HD Session", videoId: "BtKIVMPrJgU", pdfUrl: "#" },
-
         { lectureNo: "02", title: "All rivers", desc: "Comprehensive drainage mapping.", duration: "HD Session", videoId: "35mxgl2PaUw", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Lakes", desc: "Freshwater and saline lakes across India.", duration: "HD Session", videoId: "HrDPL5C6D1M", pdfUrl: "#" }
-
       ],
-
       "ch-rec-ind-resources": [
-
         { lectureNo: "01", title: "Soil", desc: "Major soil types in India.", duration: "HD Session", videoId: "JDDyZ3atF14", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Vegetation", desc: "Natural vegetation and forest types.", duration: "HD Session", videoId: "xR1SKCkVMbU", pdfUrl: "#" },
-
         { lectureNo: "03", title: "USDA SOIL TAXONOMY", desc: "Scientific classification of soils.", duration: "HD Session", videoId: "VNr6d_VdHDc", pdfUrl: "#" },
-
         { lectureNo: "04", title: "India state of forest report", desc: "ISFR key data and statistics.", duration: "HD Session", videoId: "_mgqQS4CWwE", pdfUrl: "#" }
-
       ],
-
       "ch-rec-ind-climate": [
-
         { lectureNo: "01", title: "Indian climate", desc: "Monsoon mechanism and seasons.", duration: "HD Session", videoId: "QGqaWdb9wT8", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Indian climate khatam", desc: "Monsoon retreat and climatic regions.", duration: "HD Session", videoId: "_NKLSGwLpaU", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Jet stream + western disturbance", desc: "Upper air circulation and winter rains.", duration: "HD Session", videoId: "AlnKrCXbIIo", pdfUrl: "#" }
-
       ],
-
       "ch-rec-ind-infra": [
-
         { lectureNo: "01", title: "Indian ports", desc: "Major and minor seaports.", duration: "HD Session", videoId: "itAnYglQYS4", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Indian highway + railway", desc: "Transport corridors and networks.", duration: "HD Session", videoId: "JzUcY7JTWpI", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Industries + minerals", desc: "Mineral belts and industrial hubs.", duration: "HD Session", videoId: "TTsccUrqDTI", pdfUrl: "#" }
-
       ],
-
       "ch-rec-mod-europeans": [
-
         { lectureNo: "01", title: "Intro + estado da india", desc: "European penetration into India.", duration: "HD Session", videoId: "_G6PG8kU9vE", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Estado da india", desc: "Portuguese in India.", duration: "HD Session", videoId: "RVelfF5M7tc", pdfUrl: "#" },
-
         { lectureNo: "03", title: "British + french east company", desc: "English and French corporate expansion.", duration: "HD Session", videoId: "W-0hbD1WcCo", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Dutch voc", desc: "Dutch trading activities.", duration: "HD Session", videoId: "8ltpyRNSxTc", pdfUrl: "#" }
-
       ],
-
       "ch-rec-mod-expansion": [
-
         { lectureNo: "01", title: "Carnatic war", desc: "Anglo-French Carnatic wars.", duration: "HD Session", videoId: "hJ30xGDuhAs", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Bengal", desc: "Conquest of Bengal and Plassey.", duration: "HD Session", videoId: "dbJM63i-fDI", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Rise of regional states", desc: "Awadh, Hyderabad, Mysore, Punjab.", duration: "HD Session", videoId: "LCHZU_z-mvQ", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Anglo mysore war", desc: "Hyder Ali, Tipu Sultan and wars.", duration: "HD Session", videoId: "tWTlZv-jaQo", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Anglo maratha", desc: "Maratha confederacy and British.", duration: "HD Session", videoId: "rMksILduaXs", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Annexation of Punjab and sindh", desc: "Sikh wars and annexation.", duration: "HD Session", videoId: "fHF3k3RW1Po", pdfUrl: "#" }
-
       ],
-
       "ch-rec-mod-economic": [
-
         { lectureNo: "01", title: "1757-1813", desc: "Mercantilism and consolidation phase.", duration: "HD Session", videoId: "Gx-ST2VteVk", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Phase of industrial capitalism", desc: "Free trade imperialism and drain of wealth.", duration: "HD Session", videoId: "2YM43484gEQ", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Charter act", desc: "Charter acts of 1793 to 1853.", duration: "HD Session", videoId: "IraHOOPelyg", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Revolt 1857", desc: "Causes, spread and suppression of 1857 revolt.", duration: "HD Session", videoId: "UfebvYjdSnI", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Peasant and tribal revolts", desc: "Santhal, Munda, Indigo revolts.", duration: "HD Session", videoId: "7Yskvm5JYHc", pdfUrl: "#" }
-
       ],
-
       "ch-rec-mod-reforms": [
-
         { lectureNo: "01", title: "Socio religious reform movement", desc: "Raja Ram Mohan Roy, Arya Samaj, etc.", duration: "HD Session", videoId: "mZcAiSVN5pk", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Muslim and sikh reforms", desc: "Aligarh movement, Singh Sabha.", duration: "HD Session", videoId: "W8cexI0yv0w", pdfUrl: "#" }
-
       ],
-
       "ch-rec-mod-national": [
-
         { lectureNo: "01", title: "Association before congress", desc: "Political associations in 19th century.", duration: "HD Session", videoId: "XTvq-AyICco", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Formation of congress", desc: "INC establishment in 1885.", duration: "HD Session", videoId: "gmI4_edVQRI", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Extremist", desc: "Lal-Bal-Pal and Surat phase.", duration: "HD Session", videoId: "PBtZD2ghuMQ", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Surat split", desc: "1907 Congress split.", duration: "HD Session", videoId: "p9jjg2Me0Jo", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Lucknow pack", desc: "1916 Lucknow pact and Home Rule.", duration: "HD Session", videoId: "Tj9NWaOuA8c", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Rowlatt satyagraha", desc: "Rowlatt act and Jallianwala Bagh.", duration: "HD Session", videoId: "xujBDAsqi_I", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Ncm", desc: "Non-Cooperation Movement and Khilafat.", duration: "HD Session", videoId: "u7hyrlquBZo", pdfUrl: "#" },
-
         { lectureNo: "08", title: "CDM", desc: "Civil Disobedience Movement and Dandi March.", duration: "HD Session", videoId: "J9e_Yf37hMk", pdfUrl: "#" },
-
         { lectureNo: "09", title: "Goi 1935", desc: "Government of India Act 1935.", duration: "HD Session", videoId: "57ajqE0EPec", pdfUrl: "#" },
-
         { lectureNo: "10", title: "Freedom with partition", desc: "Cabinet mission, Mountbatten plan.", duration: "HD Session", videoId: "VQRq5uwctQo", pdfUrl: "#" },
-
         { lectureNo: "11", title: "Qim + ina", desc: "Quit India Movement and INA trials.", duration: "HD Session", videoId: "--yZntm1pQk", pdfUrl: "#" }
-
       ],
-
       "ch-rec-anc-prehistory": [
-
         { lectureNo: "01", title: "Pre history 1", desc: "Paleolithic, Mesolithic, Neolithic ages.", duration: "HD Session", videoId: "dSazZu4ZPkM", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Pre history 2", desc: "Chalcolithic cultures and tools.", duration: "HD Session", videoId: "1YxoaTd8U4c", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Pre history 3", desc: "Transition to civilization.", duration: "HD Session", videoId: "uYHxaHJ8Qw0", pdfUrl: "#" },
-
         { lectureNo: "04", title: "IVC 1", desc: "Harappan civilization towns and architecture.", duration: "HD Session", videoId: "nN3K2grTlnA", pdfUrl: "#" },
-
         { lectureNo: "05", title: "IVC 2", desc: "Economy, trade, and society of IVC.", duration: "HD Session", videoId: "daUYVa5K-Fg", pdfUrl: "#" },
-
         { lectureNo: "06", title: "IVC 3", desc: "Decline and important sites.", duration: "HD Session", videoId: "f-OyxblhAkg", pdfUrl: "#" }
-
       ],
-
       "ch-rec-anc-vedic": [
-
         { lectureNo: "01", title: "Vedic age", desc: "Early Vedic society and literature.", duration: "HD Session", videoId: "F0FyX2T-xpE", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Vedic age 2", desc: "Later Vedic period changes.", duration: "HD Session", videoId: "Y1XltG3r9cA", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Vedic age 3", desc: "Vedic philosophy and rituals.", duration: "HD Session", videoId: "r_-DMSm8578", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Vedic age 4", desc: "Polity and economy in Vedic era.", duration: "HD Session", videoId: "IdnOWDw27Ug", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Indian darshan", desc: "Six schools of Indian philosophy.", duration: "HD Session", videoId: "dJEt7LSvQ_Y", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Buddhism", desc: "Life and teachings of Buddha.", duration: "HD Session", videoId: "XQe8IyW-KSU", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Buddhism 2", desc: "Buddhist councils and texts.", duration: "HD Session", videoId: "B1Hc3GpHRmc", pdfUrl: "#" },
-
         { lectureNo: "08", title: "Jainism", desc: "Tirthankaras and Mahavira teachings.", duration: "HD Session", videoId: "vaeP5xI47Ds", pdfUrl: "#" },
-
         { lectureNo: "09", title: "Vedic age pyq + Jainism", desc: "Previous years questions practice.", duration: "HD Session", videoId: "teispyzxdtY", pdfUrl: "#" }
-
       ],
-
       "ch-rec-anc-empires": [
-
         { lectureNo: "01", title: "Mahajanapadas", desc: "Rise of 16 Mahajanapadas.", duration: "HD Session", videoId: "S7RLjfBGY14", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Magadh dynasty", desc: "Haryanka, Shishunaga, Nanda dynasties.", duration: "HD Session", videoId: "HdDF22Z3oIA", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Mauryan Empire", desc: "Chandragupta Maurya and Bindusara.", duration: "HD Session", videoId: "VbPl2uDeQg8", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Mauryan Empire 2", desc: "Ashoka the Great and Dhamma.", duration: "HD Session", videoId: "a7goOIgcFoM", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Mauryan Empire 3", desc: "Administration and edicts.", duration: "HD Session", videoId: "MLQQuG4vrR8", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Mauryan Empire 4", desc: "Art, architecture and decline.", duration: "HD Session", videoId: "v3JlQyjt7fw", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Post Mauryan period", desc: "Shungas, Kanvas, Satavahanas.", duration: "HD Session", videoId: "2-9OBTxt4Tg", pdfUrl: "#" },
-
         { lectureNo: "08", title: "Post mauryan period 2", desc: "Indo-Greeks, Shakas, Kushanas.", duration: "HD Session", videoId: "ImGJcuK1SDI", pdfUrl: "#" }
-
       ],
-
       "ch-rec-anc-gupta": [
-
         { lectureNo: "01", title: "Sangam age", desc: "Chola, Chera, Pandya kingdoms.", duration: "HD Session", videoId: "cm893_ZrD_w", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Gupta period", desc: "Chandragupta I, Samudragupta, Chandragupta II.", duration: "HD Session", videoId: "wDBSJnj1JIE", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Gupta period 2", desc: "Golden age culture, science, and decline.", duration: "HD Session", videoId: "L4aKfkGULJY", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Post gupta period", desc: "Harshavardhana and regional kingdoms.", duration: "HD Session", videoId: "oIHH9Vx47rE", pdfUrl: "#" }
-
       ],
-
       "ch-rec-pol-foundations": [
-
         { lectureNo: "01", title: "Making of Indian constitution", desc: "Constituent assembly debates and framing.", duration: "HD Session", videoId: "QJFLMRyGZnQ", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Articles 368 + majorities + preamble", desc: "Constitutional amendment and basic structure.", duration: "HD Session", videoId: "WgGJSdVBcXs", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Federal features", desc: "Unitary vs federal system in India.", duration: "HD Session", videoId: "N9q9WhpF_6s", pdfUrl: "#" }
-
       ],
-
       "ch-rec-pol-executives": [
-
         { lectureNo: "01", title: "President + governor", desc: "Executive heads of centre and state.", duration: "HD Session", videoId: "f45YtWDDqKs", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Vice president + pm + cm + com", desc: "Council of ministers and executives.", duration: "HD Session", videoId: "djW7C9aHIKQ", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Attorney and advocate general", desc: "Legal advisors of governments.", duration: "HD Session", videoId: "zMX5fPXzhrI", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Dada ji 1", desc: "Important foundational concepts.", duration: "HD Session", videoId: "TP9xebAtsiQ", pdfUrl: "#" }
-
       ],
-
       "ch-rec-pol-legislatures": [
-
         { lectureNo: "01", title: "Parliament ka 1st session", desc: "Legislative procedure overview.", duration: "HD Session", videoId: "2TpGjriICmg", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Parliament 2nd session", desc: "Bills and law-making process.", duration: "HD Session", videoId: "vA81Bh8I6rM", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Parliament 3rd session", desc: "Budget and financial bills.", duration: "HD Session", videoId: "PAvlZWzEmBk", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Parliament 4th session", desc: "Parliamentary privileges and motions.", duration: "HD Session", videoId: "_EiZZhqWNOA", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Parliament dissolved", desc: "Lapsing of bills and dissolution rules.", duration: "HD Session", videoId: "8sj4ZssXz-o", pdfUrl: "#" },
-
         { lectureNo: "06", title: "State legislature + toss", desc: "Vidhan Sabha and Vidhan Parishad.", duration: "HD Session", videoId: "ziD8dkCjLHA", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Parliamentary committees", desc: "PAC, Estimates committee, etc.", duration: "HD Session", videoId: "cWQIIIw5QfY", pdfUrl: "#" }
-
       ],
-
       "ch-rec-pol-relations": [
-
         { lectureNo: "01", title: "Centre state relation", desc: "Legislative, administrative & financial relations.", duration: "HD Session", videoId: "zSwhLRufZCo", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Finance commission + gst council", desc: "Fiscal federalism bodies.", duration: "HD Session", videoId: "CPbkOoMvtHo", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Zonal council + ut + article 371 + traps", desc: "Special provisions and UTs.", duration: "HD Session", videoId: "n2ZlNY9VUrQ", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Emergency", desc: "National, President rule & financial emergency.", duration: "HD Session", videoId: "dmdydPdFWHM", pdfUrl: "#" }
-
       ],
-
       "ch-rec-bio-cells": [
-
         { lectureNo: "01", title: "Cells basic", desc: "Cell organelles and structure.", duration: "HD Session", videoId: "6CDo2HBJkcw", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Cells final class", desc: "Cell division: mitosis and meiosis.", duration: "HD Session", videoId: "BOoADpLh-08", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Tissue", desc: "Plant and animal tissues.", duration: "HD Session", videoId: "B-CA0_RXihM", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Diversity", desc: "Biological classification overview.", duration: "HD Session", videoId: "bSBU_cOF8XQ", pdfUrl: "#" }
-
       ],
-
       "ch-rec-bio-physiology": [
-
         { lectureNo: "01", title: "Digestion", desc: "Human digestive system and enzymes.", duration: "HD Session", videoId: "MUwOfAL2Kwc", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Excretion", desc: "Excretory system and nephron function.", duration: "HD Session", videoId: "8mw-VI6Slnk", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Heart + Blood + Respiration", desc: "Circulatory and respiratory systems.", duration: "HD Session", videoId: "mtpyYt2-D2o", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Reproduction", desc: "Asexual and sexual reproduction.", duration: "HD Session", videoId: "e2jXTVbikZY", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Reproduction 2", desc: "Human reproductive system.", duration: "HD Session", videoId: "9hebmAWbVsE", pdfUrl: "#" }
-
       ],
-
       "ch-rec-bio-health": [
-
         { lectureNo: "01", title: "Disease", desc: "Communicable and non-communicable diseases.", duration: "HD Session", videoId: "qJKl-O0cLhc", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Hormones", desc: "Endocrine glands and human hormones.", duration: "HD Session", videoId: "9UOAkXW_wfU", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Ecological classification of plants", desc: "Hydrophytes, xerophytes, halophytes.", duration: "HD Session", videoId: "f2P5wwljrAE", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Kingdoms", desc: "Five-kingdom classification system.", duration: "HD Session", videoId: "bv2WO9Gzl68", pdfUrl: "#" }
-
       ],
-
       "ch-rec-chem-core": [
-
         { lectureNo: "01", title: "Chemical reaction", desc: "Types of chemical reactions and balancing equations.", duration: "HD Session", videoId: "YS3J2WRZELs", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Acid , base and salt", desc: "pH scale, indicators and properties.", duration: "HD Session", videoId: "YHgoS18T0nc", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Metal and non metal", desc: "Reactivity series, ores and metallurgy.", duration: "HD Session", videoId: "NvDycXLBP9c", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Mixture", desc: "Separation techniques and solutions.", duration: "HD Session", videoId: "AWzsAKXS50w", pdfUrl: "#" }
-
       ],
-
       "ch-rec-chem-atomic": [
-
         { lectureNo: "01", title: "Atoms and molecules 1", desc: "Dalton's atomic theory and moles.", duration: "HD Session", videoId: "VBu-b-1uLGk", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Atoms and molecules 2", desc: "Molecular mass and stoichiometry.", duration: "HD Session", videoId: "dWB-C3kNDH0", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Carbon and compound", desc: "Allotropes and hydrocarbon bonding.", duration: "HD Session", videoId: "AQk0AgZaPnA", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Chemical properties of carbon", desc: "Combustion, oxidation and addition reactions.", duration: "HD Session", videoId: "fY0Tk5UNshU", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Soap and detergent", desc: "Cleansing action and micelles.", duration: "HD Session", videoId: "H4A800VD9cg", pdfUrl: "#" }
-
       ],
-
       "ch-rec-chem-applied": [
-
         { lectureNo: "01", title: "Chemistry high level class", desc: "Advanced conceptual chemistry PYQs.", duration: "HD Session", videoId: "FwXOvPaLfW4", pdfUrl: "#" },
-
         { lectureNo: "02", title: "CBI Overview", desc: "Central Bureau of Investigation powers & structure.", duration: "HD Session", videoId: "kp_e9zCKkeY", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Fertility rate + family survey", desc: "Demographic trends and family health surveys.", duration: "HD Session", videoId: "Iw4NaZKqExI", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Protein deficiency", desc: "Nutritional health issues in India.", duration: "HD Session", videoId: "szYMavSGI2s", pdfUrl: "#" },
-
         { lectureNo: "05", title: "UNSC", desc: "United Nations Security Council reforms and veto power.", duration: "HD Session", videoId: "_uO0C0hd810", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Attorney general + advocate", desc: "Constitutional law officers review.", duration: "HD Session", videoId: "e6z-6Ytw-JM", pdfUrl: "#" }
-
       ],
-
       "ch-rec-eng-grammar": [
-
         { lectureNo: "01", title: "Tense class 1", desc: "Tenses basic rules.", duration: "HD Session", videoId: "Ahg5VKFFpyI", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Tense complete", desc: "Complete tenses masterclass.", duration: "HD Session", videoId: "3NfR89W1pO4", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Parts of speech", desc: "Introduction to parts of speech.", duration: "HD Session", videoId: "wyiCnv3sNGI", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Parts of speech class 2", desc: "Advanced usage.", duration: "HD Session", videoId: "Ewk6Fzfp1W4", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Parts of speech class 3 part 1", desc: "Detailed breakdown.", duration: "HD Session", videoId: "I4zqC3iIa-M", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Parts of speech class 3 part 2", desc: "Exceptions and rules.", duration: "HD Session", videoId: "CIlrrtUBhvs", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Parts of speech complete", desc: "Summary and applications.", duration: "HD Session", videoId: "vItsmpv5VAA", pdfUrl: "#" },
-
         { lectureNo: "08", title: "Noun class", desc: "Noun types and rules.", duration: "HD Session", videoId: "n7-EjlacaGc", pdfUrl: "#" },
-
         { lectureNo: "09", title: "Noun complete", desc: "Advanced noun rules.", duration: "HD Session", videoId: "S2ZQ36os3Gg", pdfUrl: "#" },
-
         { lectureNo: "10", title: "Pronoun class 1", desc: "Pronoun rules and antecedent agreement.", duration: "HD Session", videoId: "9VtKRuRpDPg", pdfUrl: "#" },
-
         { lectureNo: "11", title: "Pronoun class 2", desc: "Relative and reflexive pronouns.", duration: "HD Session", videoId: "lX_7tr0axGI", pdfUrl: "#" },
-
         { lectureNo: "12", title: "Verb 1", desc: "Verb basics and forms.", duration: "HD Session", videoId: "XZ0jZZUcnBI", pdfUrl: "#" },
-
         { lectureNo: "13", title: "Verb 2", desc: "Finite and non-finite verbs.", duration: "HD Session", videoId: "nC0LbDiUiT4", pdfUrl: "#" },
-
         { lectureNo: "14", title: "S1-S2", desc: "Subject-verb agreement.", duration: "HD Session", videoId: "hLFLjj4wlZE", pdfUrl: "#" },
-
         { lectureNo: "15", title: "Verb 3", desc: "Advanced verb patterns.", duration: "HD Session", videoId: "nF_sEU7-sQs", pdfUrl: "#" },
-
         { lectureNo: "16", title: "Preposition 1", desc: "Fixed prepositions and usage.", duration: "HD Session", videoId: "LBS8OaUWtSM", pdfUrl: "#" },
-
         { lectureNo: "17", title: "Preposition 2", desc: "Prepositions of time and place.", duration: "HD Session", videoId: "L5m4A4lgsRA", pdfUrl: "#" },
-
         { lectureNo: "18", title: "Preposition 3", desc: "Advanced preposition rules.", duration: "HD Session", videoId: "hYgNQDfbdAs", pdfUrl: "#" },
-
         { lectureNo: "19", title: "Conjunction", desc: "Correlative and coordinating conjunctions.", duration: "HD Session", videoId: "Z30XfIeFQpQ", pdfUrl: "#" },
-
         { lectureNo: "20", title: "Voice complete", desc: "Active and Passive voice masterclass.", duration: "HD Session", videoId: "Aagm41PilJ0", pdfUrl: "#" },
-
         { lectureNo: "21", title: "Discourse marker", desc: "Transitions and markers.", duration: "HD Session", videoId: "rDXmWbcm0Gw", pdfUrl: "#" }
-
       ],
-
       "ch-rec-eng-practice": [
-
         { lectureNo: "01", title: "Tense practice", desc: "Tense practice drills.", duration: "HD Session", videoId: "x9eFt-UdLZ4", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Full mock 2 explanation part 1", desc: "Mock solutions part 1.", duration: "HD Session", videoId: "HoK6GCs-laE", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Full mock 3 explanation", desc: "Mock solutions part 2.", duration: "HD Session", videoId: "fDOKGzNAyyE", pdfUrl: "#" },
-
         { lectureNo: "04", title: "FULL MOCK 02 EXPLANATION PART 2", desc: "Mock solutions part 3.", duration: "HD Session", videoId: "FzTkeqpwyzc", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Full mock 1 explanation", desc: "Mock solutions part 4.", duration: "HD Session", videoId: "_sT0oEyeVuM", pdfUrl: "#" },
-
         { lectureNo: "06", title: "Full mock 7 English explanation", desc: "English mock explanation.", duration: "HD Session", videoId: "OTuL8PtNdSg", pdfUrl: "#" },
-
         { lectureNo: "07", title: "Full mock 6", desc: "Full mock explanation.", duration: "HD Session", videoId: "CGBG27MV20s", pdfUrl: "#" },
-
         { lectureNo: "08", title: "Fm 7 English explanation part 1", desc: "Mock analysis.", duration: "HD Session", videoId: "kHaozdrUGlE", pdfUrl: "#" },
-
         { lectureNo: "09", title: "Verb practice", desc: "Verb practice session.", duration: "HD Session", videoId: "LJe0b8TnrXU", pdfUrl: "#" },
-
         { lectureNo: "10", title: "Fm english 5 explanation", desc: "Mock english analysis.", duration: "HD Session", videoId: "M4PTMj4RG3Y", pdfUrl: "#" },
-
         { lectureNo: "11", title: "Fm 8 explanation", desc: "Full mock 8 analysis.", duration: "HD Session", videoId: "u8bR8GHISm8", pdfUrl: "#" },
-
         { lectureNo: "12", title: "S1-S2 practice", desc: "Subject-verb practice drills.", duration: "HD Session", videoId: "xCC_31dyKGU", pdfUrl: "#" }
-
       ],
-
       "ch-rec-eco-core": [
-
         { lectureNo: "01", title: "National income", desc: "GDP, GNP, NNP and calculation methods.", duration: "HD Session", videoId: "_Hh4vWgOHCo", pdfUrl: "#" },
-
         { lectureNo: "02", title: "Money", desc: "Money supply and banking system.", duration: "HD Session", videoId: "ZKKs7W00R0o", pdfUrl: "#" },
-
         { lectureNo: "03", title: "Monetary policy", desc: "RBI instruments: Repo, CRR, SLR.", duration: "HD Session", videoId: "dAiSGbp-arw", pdfUrl: "#" },
-
         { lectureNo: "04", title: "Balance of payment", desc: "Current and capital accounts.", duration: "HD Session", videoId: "j_U0OYRcAUI", pdfUrl: "#" },
-
         { lectureNo: "05", title: "Unemployment", desc: "Types of unemployment in India.", duration: "HD Session", videoId: "7nGutWJvVmM", pdfUrl: "#" }
-
       ],
-
       "ch-rec-gs-muster": [
-
         { lectureNo: "01", title: "GS muster class 1", desc: "Intensive GS practice class 1.", duration: "HD Session", videoId: "DkNdo702VU8", pdfUrl: "#" },
-
         { lectureNo: "02", title: "GS muster class 2", desc: "Intensive GS practice class 2.", duration: "HD Session", videoId: "3iMxfwvIeAw", pdfUrl: "#" },
-
         { lectureNo: "03", title: "GS muster class 3", desc: "Intensive GS practice class 3.", duration: "HD Session", videoId: "mHpx96v10S0", pdfUrl: "#" },
-
         { lectureNo: "04", title: "GS muster class 4", desc: "Intensive GS practice class 4.", duration: "HD Session", videoId: "NBRUTRr-DBA", pdfUrl: "#" }
-
       ]
-
     };
 
-
-
     let currentBatch = "capf";
-
     let currentSubject = "Mentor Session";
 
-
-
     onAuthStateChanged(auth, (user) => {
-
       if (!user) {
-
         window.location.href = "index.html";
-
         return;
-
       }
-
       renderLecturesList();
-
     });
 
-
-
     function renderLecturesList() {
-
       const urlParams = new URLSearchParams(window.location.search);
-
       currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
-
       currentSubject = urlParams.get('subject') || 'Mentor Session';
-
       const chapterName = urlParams.get('chapter') || 'Briefing Dossier';
-
       let chapterId = urlParams.get('chapterId') || '';
-
       const mode = urlParams.get('mode') || 'live';
 
-
-
       if (!chapterId || !lectureDatabase[chapterId]) {
-
         const cleanName = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-
-
-        // Yeh saare CDS Recorded/OTA ke checks hain, isliye inhein sirf 'cds-kilo' ke liye chalayein:
-
         if (currentBatch === 'cds-kilo') {
-
           if (cleanName.includes('climatology')) chapterId = 'ch-rec-phys-climatology';
-
           else if (cleanName.includes('oceanography')) chapterId = 'ch-rec-phys-oceanography';
-
           else if (cleanName.includes('geomorphic')) chapterId = 'ch-rec-phys-geomorphic';
-
           else if (cleanName.includes('landforms')) chapterId = 'ch-rec-phys-landforms';
-
           else if (cleanName.includes('earth') || cleanName.includes('internal') || cleanName.includes('volcano') || cleanName.includes('plate') || cleanName.includes('earthquake')) chapterId = 'ch-rec-phys-internal';
-
           else if (cleanName.includes('physiography') || cleanName.includes('himalayas') || cleanName.includes('peninsular') || cleanName.includes('coastal')) chapterId = 'ch-rec-ind-physio';
-
           else if (cleanName.includes('drainage') || cleanName.includes('rivers') || cleanName.includes('lakes')) chapterId = 'ch-rec-ind-drainage';
-
           else if (cleanName.includes('resources') || cleanName.includes('soil') || cleanName.includes('vegetation') || cleanName.includes('forest')) chapterId = 'ch-rec-ind-resources';
-
           else if (cleanName.includes('climate')) chapterId = 'ch-rec-ind-climate';
-
           else if (cleanName.includes('infrastructure') || cleanName.includes('ports') || cleanName.includes('highway') || cleanName.includes('industries')) chapterId = 'ch-rec-ind-infra';
-
           else if (cleanName.includes('advent') || cleanName.includes('europeans')) chapterId = 'ch-rec-mod-europeans';
-
           else if (cleanName.includes('expansion') || cleanName.includes('wars') || cleanName.includes('carnatic') || cleanName.includes('bengal') || cleanName.includes('mysore') || cleanName.includes('maratha') || cleanName.includes('punjab')) chapterId = 'ch-rec-mod-expansion';
-
           else if (cleanName.includes('economic') || cleanName.includes('uprisings') || cleanName.includes('1757') || cleanName.includes('capitalism') || cleanName.includes('charter') || cleanName.includes('revolt') || cleanName.includes('peasant')) chapterId = 'ch-rec-mod-economic';
-
           else if (cleanName.includes('reforms')) chapterId = 'ch-rec-mod-reforms';
-
           else if (cleanName.includes('national') || cleanName.includes('congress') || cleanName.includes('extremist') || cleanName.includes('surat') || cleanName.includes('lucknow') || cleanName.includes('rowlatt') || cleanName.includes('ncm') || cleanName.includes('cdm') || cleanName.includes('goi') || cleanName.includes('freedom') || cleanName.includes('qim')) chapterId = 'ch-rec-mod-national';
-
           else if (cleanName.includes('prehistory') || cleanName.includes('ivc')) chapterId = 'ch-rec-anc-prehistory';
-
           else if (cleanName.includes('vedic') || cleanName.includes('religions') || cleanName.includes('buddhism') || cleanName.includes('jainism')) chapterId = 'ch-rec-anc-vedic';
-
           else if (cleanName.includes('mahajanapadas') || cleanName.includes('mauryas')) chapterId = 'ch-rec-anc-empires';
-
           else if (cleanName.includes('gupta') || cleanName.includes('sangam')) chapterId = 'ch-rec-anc-gupta';
-
           else if (cleanName.includes('constitutional') || cleanName.includes('framework')) chapterId = 'ch-rec-pol-foundations';
-
           else if (cleanName.includes('union') || cleanName.includes('state') || cleanName.includes('executives')) chapterId = 'ch-rec-pol-executives';
-
           else if (cleanName.includes('parliament') || cleanName.includes('assemblies')) chapterId = 'ch-rec-pol-legislatures';
-
           else if (cleanName.includes('relations') || cleanName.includes('bodies') || cleanName.includes('emergency')) chapterId = 'ch-rec-pol-relations';
-
           else if (cleanName.includes('cell') || cleanName.includes('genetics') || cleanName.includes('tissues')) chapterId = 'ch-rec-bio-cells';
-
           else if (cleanName.includes('physiology')) chapterId = 'ch-rec-bio-physiology';
-
           else if (cleanName.includes('health') || cleanName.includes('plant') || cleanName.includes('ecology')) chapterId = 'ch-rec-bio-health';
-
           else if (cleanName.includes('core') || cleanName.includes('principles')) chapterId = 'ch-rec-chem-core';
-
           else if (cleanName.includes('atomic') || cleanName.includes('carbon')) chapterId = 'ch-rec-chem-atomic';
-
           else if (cleanName.includes('applied') || cleanName.includes('science')) chapterId = 'ch-rec-chem-applied';
-
           else if (cleanName.includes('grammar') || cleanName.includes('mechanics')) chapterId = 'ch-rec-eng-grammar';
-
           else if (cleanName.includes('mocks') || cleanName.includes('practice')) chapterId = 'ch-rec-eng-practice';
-
           else if (cleanName.includes('economics') || cleanName.includes('essentials')) chapterId = 'ch-rec-eco-core';
-
           else if (cleanName.includes('muster') || cleanName.includes('tactical')) chapterId = 'ch-rec-gs-muster';
-
         }
 
-
-
-        // CAPF aur AFCAT ke apne independent checks:
-
         if (cleanName.includes('idiom') || cleanName.includes('phrase')) chapterId = 'ch-afcat-eng-vocab-01';
-
         else if (cleanName.includes('security') || cleanName.includes('internal') || cleanName.includes('kashmir')) chapterId = 'ch-capf-internal-security';
-
       }
-
       const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-
       document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge} • ${currentSubject.toUpperCase()}`;
-
       document.getElementById('chapterHeading').innerText = chapterName;
-
-
 
       const staticLectures = lectureDatabase[chapterId] ? [...lectureDatabase[chapterId]] : [];
 
-
-
+      // 🔥 FIX: CDS Math ke liye query ko aur behtar banaya gaya hai
       const q = query(
-
         collection(db, "tactical_curriculum"),
-
         where("squadron", "==", currentBatch.toLowerCase().trim()),
-
         where("mode", "==", mode)
-
       );
 
-
-
       onSnapshot(q, (snapshot) => {
-
         const dynamicLectures = [];
-
         const seenVideos = new Set();
-
         const targetChap = chapterName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-
-
         snapshot.forEach(docSnap => {
-
           const d = docSnap.data();
-
           const dChap = (d.chapter || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
+          // 🔥 FIX: Math ke liye agar subject "Lectures" hai aur chapter match ho raha hai toh fetch karega
+          const matchesChapter = (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap)));
+          const isMathsMatch = (currentBatch === 'cds-math' && d.subject === 'Lectures' && matchesChapter);
+          const isGeneralMatch = (currentBatch !== 'cds-math' && matchesChapter);
 
-
-          if (dChap && (dChap === targetChap || dChap.includes(targetChap) || targetChap.includes(dChap))) {
-
+          if (isMathsMatch || isGeneralMatch || currentBatch === 'cds-math') { 
+            // CDS Math ke saare uploaded lectures ko allow karne ke liye flexible check
             const vUrl = (d.url || d.videoUrl || "").trim();
-
             const cleanTitle = (d.title || "").trim().toLowerCase();
-
             const uniqueKey = vUrl || cleanTitle;
 
-
-
-            if (!seenVideos.has(uniqueKey)) {
-
-              seenVideos.add(uniqueKey);
-
-              dynamicLectures.push({
-
-                lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
-
-                title: d.title,
-
-                desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
-
-                duration: d.duration || "HD Session",
-
-                videoId: vUrl,
-
-                pdfUrl: d.pdfUrl || "#",
-
-                order: Number(d.order) || 999
-
-              });
-
+            // Agar chapter name match ho raha hai ya phir math ka chapter title me keyword match hai
+            if (currentBatch === 'cds-math') {
+               // Math ke titles jaise "45. Equation Class 02" ko "Equations Class" ke sath match karna
+               const chapterKeyword = targetChap.replace(/(class|chapter|\d)/g, '').trim();
+               const titleKeyword = cleanTitle.replace(/(class|chapter|\d)/g, '').trim();
+               
+               if (!dChap.includes(chapterKeyword) && !titleKeyword.includes(chapterKeyword) && !cleanTitle.includes(targetChap)) {
+                 return; // Agar match nahi hua toh skip karo
+               }
             }
 
+            if (!seenVideos.has(uniqueKey)) {
+              seenVideos.add(uniqueKey);
+              dynamicLectures.push({
+                lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
+                title: d.title,
+                desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
+                duration: d.duration || "HD Session",
+                videoId: vUrl,
+                pdfUrl: d.pdfUrl || "#",
+                order: Number(d.order) || 999
+              });
+            }
           }
-
         });
-
-
 
         dynamicLectures.sort((a, b) => a.order - b.order);
 
-
-
         const combined = [...staticLectures];
-
         dynamicLectures.forEach(dyn => {
-
           const exists = combined.some(st => (st.title && st.title.toLowerCase() === dyn.title.toLowerCase()) || (st.videoId && st.videoId === dyn.videoId));
-
           if (!exists) combined.push(dyn);
-
         });
 
-
-
         displayLectures(combined, chapterName, mode);
-
       }, (err) => {
-
         console.warn("Curriculum sync fallback:", err);
-
         displayLectures(staticLectures, chapterName, mode);
-
       });
-
     }
-
-
 
     function displayLectures(lectures, chapterName, mode) {
-
       const container = document.getElementById('lecturesContainer');
-
       container.innerHTML = "";
-
       document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
 
-
-
       if (lectures.length === 0) {
-
         container.innerHTML = `
-
           <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-500/30">
-
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-4 text-2xl">
-
               ⏳
-
             </div>
-
             <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2 uppercase">
-
               IT WILL BE UPLOADED VERY SOON
-
             </h3>
-
             <p class="text-xs text-neutral-400 font-body max-w-md mx-auto">
-
               ${mode === 'recorded' ? 'Recorded syllabus dossiers for this module are currently under synchronization.' : `Live lectures for "${chapterName}" are scheduled.`}
-
             </p>
-
           </div>
-
         `;
-
         return;
-
       }
-
-
 
       lectures.forEach((lec) => {
-
         const card = document.createElement('div');
-
         card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition group shadow-lg";
 
-
-
         let embedSrc = lec.videoId;
-
         if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
-
           const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-
           if (match && match[1]) {
-
             embedSrc = match[1];
-
           }
-
         }
 
-
-
         card.innerHTML = `
-
           <div>
-
             <div class="flex items-center justify-between mb-3">
-
               <span class="px-2.5 py-0.5 rounded bg-black/80 border border-neutral-700 text-amber-400 font-mono text-xs font-bold">
-
                 SESSION #${lec.lectureNo}
-
               </span>
-
               <span class="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-
                 ⏱ ${lec.duration}
-
               </span>
-
             </div>
-
             <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1.5">
-
               ${lec.title}
-
             </h3>
-
             <p class="text-xs text-neutral-400 font-body leading-relaxed mb-4">
-
               ${lec.desc}
-
             </p>
-
           </div>
-
-
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-
             <button onclick="window.playLectureVideo('${embedSrc}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
-
               WATCH LECTURE
-
             </button>
-
             <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
-
               NOTES (PDF)
-
             </button>
-
           </div>
-
         `;
-
         container.appendChild(card);
-
       });
-
     }
-
-
 
     window.playLectureVideo = function(videoId, title) {
-
       if (!videoId || videoId === "#" || videoId === "") {
-
         alert("It will be uploaded very soon.");
-
         return;
-
       }
-
       const cleanTitle = title || "TACTICAL SESSION";
-
       sessionStorage.setItem("phantom_current_video", videoId);
-
       sessionStorage.setItem("phantom_current_title", cleanTitle);
-
       window.location.href = "player.html";
-
     };
-
-
 
     window.openClassNotes = function(url) {
-
       if (!url || url === "#" || url === "") {
-
         alert("Notes dossier: It will be uploaded very soon.");
-
         return;
-
       }
-
       window.open(url, "_blank");
-
     };
-
-
 
     window.navigateBackToChapters = function() {
-
       window.history.back();
-
     };
-
-
 
     window.terminateCadetSession = function() {
-
       signOut(auth).then(() => {
-
         localStorage.clear();
-
         sessionStorage.clear();
-
         window.location.href = "index.html";
-
       });
-
     };
-
   </script>
 
-
-
   <style>
-
     body { font-family: 'Rajdhani', sans-serif; background-color: #04070b; }
-
     .font-stencil { font-family: 'Black Ops One', cursive; }
-
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
-
     .font-body { font-family: 'Inter', sans-serif; }
 
-
-
     .tactical-bg {
-
       background: 
-
         radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
-
         radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
-
         radial-gradient(circle at 85% 60%, rgba(234, 179, 8, 0.14) 0%, transparent 50%),
-
         linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%),
-
         url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=2000&q=80');
-
       background-size: cover; background-position: center; background-attachment: fixed;
-
     }
-
-
 
     .hud-grid {
-
       background-image: 
-
         linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
-
         linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
-
       background-size: 32px 32px;
-
     }
-
-
 
     .armor-panel {
-
       background: rgba(10, 15, 22, 0.92);
-
       border: 1px solid rgba(245, 158, 11, 0.25);
-
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
-
     }
-
   </style>
-
 </head>
 
-
-
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
-
   <header class="w-full pt-6 pb-4 px-4 border-b border-neutral-800/80 bg-black/60 backdrop-blur-md sticky top-0 z-50">
-
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-
       <div class="flex items-center gap-4">
-
         <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center">
-
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
-
         </div>
-
         <div>
-
           <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-yellow-300">
-
             TEAM PHANTOM
-
           </h1>
-
           <p class="font-orbitron text-[10px] sm:text-xs text-neutral-400 tracking-widest uppercase">
-
             TACTICAL LECTURE CONSOLE
-
           </p>
-
         </div>
-
       </div>
-
-
 
       <div class="flex items-center gap-3">
-
         <button onclick="window.navigateBackToChapters()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
-
           &larr; BACK TO CHAPTERS
-
         </button>
-
         <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
-
           LOGOUT
-
         </button>
-
       </div>
-
     </div>
-
   </header>
 
-
-
   <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-
     <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-
       <div>
-
         <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
-
           BRIEFING ARCHIVE
-
         </div>
-
         <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="chapterHeading">
-
           LOADING CHAPTER...
-
         </h2>
-
         <p class="text-xs text-neutral-400 font-body mt-1">
-
           Access high-definition tactical classes, concept walkthroughs, and official dossier notes below.
-
         </p>
-
       </div>
-
       <div class="flex items-center gap-2 bg-black/60 border border-emerald-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
-
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-
         <span id="lectureCountBadge">STREAM READY</span>
-
       </div>
-
     </div>
 
-
-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lecturesContainer"></div>
-
   </main>
 
-
-
   <footer class="w-full bg-black/95 border-t border-neutral-900 py-3.5 px-4 text-center">
-
     <p class="text-[11px] font-body text-neutral-500 tracking-wider">
-
       &copy; 2026 TEAM PHANTOM. MILITARY PRECISION PROTOCOL.
-
     </p>
-
   </footer>
-
 </body>
-
-</html> 
-
+</html>
