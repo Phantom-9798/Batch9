@@ -204,10 +204,10 @@
       <div id="managerSection" class="hidden space-y-4">
         <div class="p-4 rounded-xl bg-red-950/20 border border-red-500/30 mb-4">
           <h3 class="font-orbitron text-sm font-bold text-red-400 mb-1">⚠️ TACTICAL PURGE PROTOCOL</h3>
-          <p class="text-xs text-neutral-400">Select the exact Squadron, Mode, and Subject below to wipe out old/broken lectures from Firestore before uploading fresh TSV data.</p>
+          <p class="text-xs text-neutral-400">Select the exact Squadron, Mode, Subject, and optional Chapter below to wipe out specific lectures from Firestore.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div>
             <label class="text-xs text-neutral-400 font-mono mb-1 block">TARGET SQUADRON</label>
             <select id="purgeSquadron" class="w-full bg-black border border-neutral-700 text-emerald-400 p-2.5 rounded-lg text-sm outline-none">
@@ -219,7 +219,11 @@
           </div>
           <div>
             <label class="text-xs text-neutral-400 font-mono mb-1 block">MODULE / SUBJECT NAME</label>
-            <input id="purgeSubject" type="text" placeholder="e.g. Lectures, Physical Geography" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-red-500">
+            <input id="purgeSubject" type="text" placeholder="e.g. Mathematics" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-red-500">
+          </div>
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">CHAPTER NAME (Optional)</label>
+            <input id="purgeChapter" type="text" placeholder="e.g. Ratio & Proportion" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-red-500">
           </div>
           <div>
             <label class="text-xs text-neutral-400 font-mono mb-1 block">STREAM MODE</label>
@@ -231,7 +235,7 @@
         </div>
 
         <button onclick="executePurge()" id="purgeSubmitBtn" class="w-full bg-red-600 hover:bg-red-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          WIPE SELECTED SUBJECT DATA FROM FIRESTORE
+          WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE
         </button>
       </div>
 
@@ -486,18 +490,25 @@
       }
     };
 
-    // 4. Purge / Data Manager Logic
+    // 4. Purge / Data Manager Logic (Updated with Optional Chapter)
     window.executePurge = async () => {
       const squadron = document.getElementById("purgeSquadron").value;
       const subject = document.getElementById("purgeSubject").value.trim();
+      const chapter = document.getElementById("purgeChapter").value.trim();
       const mode = document.getElementById("purgeMode").value;
 
       if (!subject) {
-        alert("Please enter the exact Module / Subject name to purge!");
+        alert("Please enter the Module / Subject name!");
         return;
       }
 
-      if (!confirm(`WARNING: Are you sure you want to delete all lectures under Squadron: ${squadron}, Mode: ${mode}, Subject: ${subject}?`)) {
+      let confirmMsg = `WARNING: Are you sure you want to delete lectures under Squadron: ${squadron}, Mode: ${mode}, Subject: ${subject}`;
+      if (chapter) {
+        confirmMsg += `, Chapter: ${chapter}`;
+      }
+      confirmMsg += `?`;
+
+      if (!confirm(confirmMsg)) {
         return;
       }
 
@@ -506,18 +517,31 @@
       btn.disabled = true;
 
       try {
-        const q = query(
-          collection(db, "tactical_curriculum"),
-          where("squadron", "==", squadron),
-          where("mode", "==", mode),
-          where("subject", "==", subject)
-        );
+        let q;
+        const colRef = collection(db, "tactical_curriculum");
+        
+        if (chapter) {
+          q = query(
+            colRef,
+            where("squadron", "==", squadron),
+            where("mode", "==", mode),
+            where("subject", "==", subject),
+            where("chapter", "==", chapter)
+          );
+        } else {
+          q = query(
+            colRef,
+            where("squadron", "==", squadron),
+            where("mode", "==", mode),
+            where("subject", "==", subject)
+          );
+        }
 
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-          showStatus("[INFO] No matching documents found to purge for this subject/mode.", false);
-          btn.innerText = "WIPE SELECTED SUBJECT DATA FROM FIRESTORE";
+          showStatus("[INFO] No matching documents found to purge.", false);
+          btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
           btn.disabled = false;
           return;
         }
@@ -528,11 +552,12 @@
         });
 
         await Promise.all(deletePromises);
-        showStatus(`[PURGE SUCCESS] Successfully deleted ${deletePromises.length} old lectures for ${subject} (${mode}).`, true);
+        showStatus(`[PURGE SUCCESS] Successfully deleted ${deletePromises.length} lectures!`, true);
+        document.getElementById("purgeChapter").value = "";
       } catch (e) {
         showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
       } finally {
-        btn.innerText = "WIPE SELECTED SUBJECT DATA FROM FIRESTORE";
+        btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
         btn.disabled = false;
       }
     };
