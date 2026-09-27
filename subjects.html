@@ -372,6 +372,8 @@
       activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group shadow-lg";
+        
+        // CHANGED HERE: Direct navigation to lectures.html instead of chapters.html
         card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
 
         card.innerHTML = `
@@ -418,8 +420,9 @@
       });
     }
 
+    // UPDATED FUNCTION: Direct redirect to lectures.html
     function openSubjectModule(batch, subjectName, mode) {
-      window.location.href = `chapters.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
+      window.location.href = `lectures.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
     }
 
     window.terminateCadetSession = function() {
