@@ -115,7 +115,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-xs text-neutral-400 font-mono mb-1 block">CHAPTER NAME (स्क्वायर कार्ड बॉक्स)</label>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">CHAPTER NAME (Optional)</label>
             <input id="chapterInput" type="text" placeholder="e.g. Geomorphology, Ratio & Proportion" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500">
           </div>
           <div class="grid grid-cols-3 gap-2">
@@ -328,18 +328,18 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // 1. Single Lecture Dispatch
+    // 1. Single Lecture Dispatch (Chapter is now optional)
     window.dispatchSingleLecture = async () => {
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
-      const chapter = document.getElementById("chapterInput").value.trim();
+      const chapter = document.getElementById("chapterInput").value.trim() || "General";
       const order = parseInt(document.getElementById("orderInput").value) || 1;
       const mode = document.getElementById("modeSelect").value;
       const title = document.getElementById("titleInput").value.trim();
       const url = document.getElementById("urlInput").value.trim();
 
-      if (!subject || !chapter || !title || !url) {
-        showStatus("[ERROR] Module, Chapter, Title, and URL are mandatory.", false);
+      if (!subject || !title || !url) {
+        showStatus("[ERROR] Module, Title, and URL are mandatory.", false);
         return;
       }
 
@@ -359,7 +359,7 @@
           createdAt: serverTimestamp()
         });
 
-        showStatus(`[CONFIRMED] Lecture "${title}" successfully stored under ${chapter}.`, true);
+        showStatus(`[CONFIRMED] Lecture "${title}" successfully stored.`, true);
         document.getElementById("titleInput").value = "";
         document.getElementById("urlInput").value = "";
         document.getElementById("orderInput").value = order + 1;
@@ -490,7 +490,7 @@
       }
     };
 
-    // 4. Purge / Data Manager Logic (Updated with Optional Chapter)
+    // 4. Purge / Data Manager Logic
     window.executePurge = async () => {
       const squadron = document.getElementById("purgeSquadron").value;
       const subject = document.getElementById("purgeSubject").value.trim();
