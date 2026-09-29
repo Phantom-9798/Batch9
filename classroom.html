@@ -86,8 +86,8 @@
         applyBatchAccess("afcat", hasAfcat);
         applyBatchAccess("capf", hasCapf);
 
-        // Render Multi-Link Secure Telegram Notification Bar based on allowed batches
-        renderTelegramNotification(allowed, isCombo);
+        // Render Smart Multi-Group Persistent Telegram Notification Bar
+        renderTelegramNotification(allowed, isCombo, user.uid);
       });
     });
 
@@ -122,54 +122,71 @@
       }
     }
 
-    // Dynamic Multi-Link Secure Telegram Notification Logic
-    function renderTelegramNotification(allowed, isCombo) {
+    // Smart Multi-Group Individual Tracking Notification Logic
+    window.renderTelegramNotification = function(allowed, isCombo, userId) {
       const container = document.getElementById("telegramNotificationContainer");
       if (!container) return;
 
-      // Check if user already dismissed the notification via localStorage
-      if (localStorage.getItem("phantom_tg_dismissed") === "true") {
-        container.innerHTML = "";
-        return;
-      }
+      // Master link directory with unique internal IDs
+      const allLinks = [
+        { id: "afcat", name: "AFCAT SQUADRON GROUP", url: "https://t.squadron.link/afcat" }, // Obfuscated routing or direct
+        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON", url: "https://t.me/+vzk5GPt9mwwwMTc1" },
+        { id: "cds-kilo", name: "CDS OTA SQUADRON", url: "https://t.me/+fbkHtdwcNF04OTll" },
+        { id: "capf", name: "CAPF SQUADRON", url: "https://t.me/+JmGvA3F25WY1YjA9" }
+      ];
 
-      // Master link directory
-      const allLinks = {
-        "afcat": { name: "AFCAT SQUADRON GROUP", url: "https://t.me/+Bz5FQ-ti5j9mNzll" },
-        "cds-math": { name: "CDS MATHEMATICS SQUADRON", url: "https://t.me/+vzk5GPt9mwwwMTc1" },
-        "cds-kilo": { name: "CDS OTA SQUADRON", url: "https://t.me/+fbkHtdwcNF04OTll" },
-        "capf": { name: "CAPF SQUADRON", url: "https://t.me/+JmGvA3F25WY1YjA9" }
-      };
+      // Re-map AFCAT actual URL cleanly
+      allLinks[0].url = "https://t.me/+Bz5FQ-ti5j9mNzll";
 
-      // Collect links that match user's unlocked batches
-      let userLinks = [];
+      // Filter groups based on cadet's authorized batches
+      let userGroups = [];
       if (isCombo) {
-        userLinks = Object.values(allLinks);
+        userGroups = allLinks;
       } else {
-        for (let key of allowed) {
-          if (allLinks[key]) {
-            userLinks.push(allLinks[key]);
-          }
-        }
+        userGroups = allLinks.filter(g => allowed.includes(g.id));
       }
 
-      if (userLinks.length === 0) {
+      if (userGroups.length === 0) {
         container.innerHTML = "";
         return;
       }
 
-      // Build buttons HTML dynamically for each unlocked group
-      let buttonsHtml = "";
-      userLinks.forEach((item) => {
-        buttonsHtml += `
-          <div class="p-3 rounded-xl bg-black/95 border border-amber-500/30 flex items-center justify-between gap-3">
-            <span class="text-xs font-mono text-amber-300 font-semibold">${item.name}</span>
-            <a href="${item.url}" target="_blank" onclick="dismissNotification()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0">
-              JOIN GROUP &rarr;
-            </a>
-          </div>
-        `;
+      // Load joined status storage per user from localStorage
+      let joinedStorageKey = "phantom_joined_groups_" + userId;
+      let joinedGroups = JSON.parse(localStorage.getItem(joinedStorageKey) || "[]");
+
+      // Check if user has already joined ALL authorized groups
+      const allJoined = userGroups.every(g => joinedGroups.includes(g.id));
+      if (allJoined) {
+        container.innerHTML = "";
+        return;
+      }
+
+      // Build items HTML dynamically reflecting individual status
+      let groupsHtml = "";
+      userGroups.forEach((group) => {
+        const isAlreadyJoined = joinedGroups.includes(group.id);
+        
+        if (isAlreadyJoined) {
+          groupsHtml += `
+            <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
+              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Joined)</span>
+              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-400 font-orbitron text-[10px] uppercase font-bold">VERIFIED</span>
+            </div>
+          `;
+        } else {
+          groupsHtml += `
+            <div class="p-3 rounded-xl bg-black/95 border border-amber-500/30 flex items-center justify-between gap-3">
+              <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
+              <a href="${group.url}" target="_blank" onclick="markGroupJoined('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer">
+                JOIN GROUP &rarr;
+              </a>
+            </div>
+          `;
+        }
       });
+
+      const remainingCount = userGroups.filter(g => !joinedGroups.includes(g.id)).length;
 
       container.innerHTML = `
         <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
@@ -179,20 +196,20 @@
                 ⚡
               </div>
               <div>
-                <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">TACTICAL TELEGRAM DISPATCH NOTICE</h4>
-                <p class="text-xs text-neutral-300 font-body mt-0.5">You have active authorized squadron access. Click below to view and join your official telegram groups.</p>
+                <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
+                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span> to join. Complete joining all authorized servers to clear notice.</p>
               </div>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
               <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
-                CLICK TO VIEW GROUPS (${userLinks.length})
+                VIEW PENDING GROUPS (${remainingCount})
               </button>
             </div>
           </div>
-          <!-- Expandable Secure Join Options Box containing all matching buttons -->
+          <!-- Expandable Secure Join Options Box containing individual group status -->
           <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-500/40 space-y-3 max-w-xl mx-auto">
-            <p class="text-[11px] text-neutral-300 font-mono text-center">SELECT AUTHORIZED SQUADRON SERVER:</p>
-            ${buttonsHtml}
+            <p class="text-[11px] text-neutral-300 font-mono text-center">JOIN ALL AUTHORIZED SQUADRON CHANNELS BELOW:</p>
+            ${groupsHtml}
           </div>
         </div>
       `;
@@ -205,12 +222,14 @@
       }
     }
 
-    window.dismissNotification = function() {
-      localStorage.setItem("phantom_tg_dismissed", "true");
-      setTimeout(() => {
-        const container = document.getElementById("telegramNotificationContainer");
-        if (container) container.innerHTML = "";
-      }, 1000);
+    window.markGroupJoined = function(groupId, userId) {
+      let storageKey = "phantom_joined_groups_" + userId;
+      let joinedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      
+      if (!joinedGroups.includes(groupId)) {
+        joinedGroups.push(groupId);
+        localStorage.setItem(storageKey, JSON.stringify(joinedGroups));
+      }
     }
 
     // Redirect to batch-mode.html to choose between Live and Recorded
