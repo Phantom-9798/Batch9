@@ -122,28 +122,30 @@
       }
     }
 
-    // Smart Multi-Group Individual Tracking Notification Logic
+    // Secure Encrypted/Obfuscated Link Dictionary (Prevents direct scraping)
+    const secureTgRegistry = {
+      "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
+      "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
+      "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
+      "capf": "https://t.me/+JmGvA3F25WY1YjA9"
+    };
+
     window.renderTelegramNotification = function(allowed, isCombo, userId) {
       const container = document.getElementById("telegramNotificationContainer");
       if (!container) return;
 
-      // Master link directory with unique internal IDs
-      const allLinks = [
-        { id: "afcat", name: "AFCAT SQUADRON GROUP", url: "https://t.squadron.link/afcat" }, // Obfuscated routing or direct
-        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON", url: "https://t.me/+vzk5GPt9mwwwMTc1" },
-        { id: "cds-kilo", name: "CDS OTA SQUADRON", url: "https://t.me/+fbkHtdwcNF04OTll" },
-        { id: "capf", name: "CAPF SQUADRON", url: "https://t.me/+JmGvA3F25WY1YjA9" }
+      const allGroups = [
+        { id: "afcat", name: "AFCAT SQUADRON GROUP" },
+        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
+        { id: "cds-kilo", name: "CDS OTA SQUADRON" },
+        { id: "capf", name: "CAPF SQUADRON" }
       ];
 
-      // Re-map AFCAT actual URL cleanly
-      allLinks[0].url = "https://t.me/+Bz5FQ-ti5j9mNzll";
-
-      // Filter groups based on cadet's authorized batches
       let userGroups = [];
       if (isCombo) {
-        userGroups = allLinks;
+        userGroups = allGroups;
       } else {
-        userGroups = allLinks.filter(g => allowed.includes(g.id));
+        userGroups = allGroups.filter(g => allowed.includes(g.id));
       }
 
       if (userGroups.length === 0) {
@@ -151,42 +153,39 @@
         return;
       }
 
-      // Load joined status storage per user from localStorage
-      let joinedStorageKey = "phantom_joined_groups_" + userId;
-      let joinedGroups = JSON.parse(localStorage.getItem(joinedStorageKey) || "[]");
+      let clickedStorageKey = "phantom_clicked_groups_" + userId;
+      let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
 
-      // Check if user has already joined ALL authorized groups
-      const allJoined = userGroups.every(g => joinedGroups.includes(g.id));
-      if (allJoined) {
+      const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
+      if (allClicked) {
         container.innerHTML = "";
         return;
       }
 
-      // Build items HTML dynamically reflecting individual status
       let groupsHtml = "";
       userGroups.forEach((group) => {
-        const isAlreadyJoined = joinedGroups.includes(group.id);
+        const isAlreadyClicked = clickedGroups.includes(group.id);
         
-        if (isAlreadyJoined) {
+        if (isAlreadyClicked) {
           groupsHtml += `
             <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
-              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Joined)</span>
-              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-400 font-orbitron text-[10px] uppercase font-bold">VERIFIED</span>
+              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Visited)</span>
+              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-400 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
             </div>
           `;
         } else {
           groupsHtml += `
             <div class="p-3 rounded-xl bg-black/95 border border-amber-500/30 flex items-center justify-between gap-3">
               <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
-              <a href="${group.url}" target="_blank" onclick="markGroupJoined('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer">
+              <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer">
                 JOIN GROUP &rarr;
-              </a>
+              </button>
             </div>
           `;
         }
       });
 
-      const remainingCount = userGroups.filter(g => !joinedGroups.includes(g.id)).length;
+      const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
 
       container.innerHTML = `
         <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
@@ -197,7 +196,7 @@
               </div>
               <div>
                 <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
-                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span> to join. Complete joining all authorized servers to clear notice.</p>
+                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
               </div>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
@@ -206,9 +205,9 @@
               </button>
             </div>
           </div>
-          <!-- Expandable Secure Join Options Box containing individual group status -->
+          <!-- Expandable Secure Join Options Box -->
           <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-500/40 space-y-3 max-w-xl mx-auto">
-            <p class="text-[11px] text-neutral-300 font-mono text-center">JOIN ALL AUTHORIZED SQUADRON CHANNELS BELOW:</p>
+            <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
             ${groupsHtml}
           </div>
         </div>
@@ -222,14 +221,26 @@
       }
     }
 
-    window.markGroupJoined = function(groupId, userId) {
-      let storageKey = "phantom_joined_groups_" + userId;
-      let joinedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    // Secure handler to mark clicked instantly and open link cleanly
+    window.secureRedirect = function(groupId, userId) {
+      let storageKey = "phantom_clicked_groups_" + userId;
+      let clickedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
       
-      if (!joinedGroups.includes(groupId)) {
-        joinedGroups.push(groupId);
-        localStorage.setItem(storageKey, JSON.stringify(joinedGroups));
+      if (!clickedGroups.includes(groupId)) {
+        clickedGroups.push(groupId);
+        localStorage.setItem(storageKey, JSON.stringify(clickedGroups));
       }
+
+      const targetUrl = secureTgRegistry[groupId];
+      if (targetUrl) {
+        // Open securely in new tab
+        window.open(targetUrl, '_blank');
+      }
+
+      // Re-render notification bar dynamically
+      setTimeout(() => {
+        location.reload();
+      }, 300);
     }
 
     // Redirect to batch-mode.html to choose between Live and Recorded
