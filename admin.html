@@ -139,8 +139,19 @@
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL</label>
-          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL (Duration Auto-Fetch Active)</label>
+          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">LECTURE DESCRIPTION (Manual Entry)</label>
+            <textarea id="descriptionInput" rows="3" placeholder="Lecture ke baare mein yahan manual description likhein..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500"></textarea>
+          </div>
+          <div>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO DURATION (Auto-Fetched / Editable)</label>
+            <input id="durationInput" type="text" placeholder="Auto-detected or custom..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500">
+          </div>
         </div>
 
         <button onclick="dispatchSingleLecture()" id="singleSubmitBtn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
@@ -179,7 +190,7 @@
         </div>
 
         <button onclick="dispatchBulkTsv()" id="bulkSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          EXECUTE BULK BATCH DISPATCH
+          EXECUTE BULK BATCH DISPATCH (AUTO DURATION & DESCRIPTION)
         </button>
       </div>
 
@@ -328,7 +339,66 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // 1. Single Lecture Dispatch (Chapter is now optional)
+    // Helper: Helper function to get video duration via a hidden video element (Free client-side)
+    function getDurationFromUrl(url) {
+      return new Promise((resolve) => {
+        if (!url) {
+          resolve("HD Session");
+          return;
+        }
+        const tempVideo = document.createElement('video');
+        tempVideo.src = url;
+        tempVideo.preload = 'metadata';
+        
+        let resolved = false;
+        const timer = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve("HD Session");
+          }
+        }, 4000); // 4 second timeout fallback
+
+        tempVideo.onloadedmetadata = function() {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timer);
+            window.URL.revokeObjectURL(tempVideo.src);
+            const totalSeconds = Math.round(tempVideo.duration);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            let formatted = "";
+            if (minutes > 0) formatted += `${minutes} Mins `;
+            if (seconds > 0 && minutes < 5) formatted += `${seconds} Secs`;
+            resolve(formatted.trim() || `${totalSeconds} Secs`);
+          }
+        };
+
+        tempVideo.onerror = function() {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timer);
+            resolve("HD Session");
+          }
+        };
+      });
+    }
+
+    // Single Lecture Auto-Duration Fetch on URL change
+    window.fetchVideoDuration = async function(videoUrl, durationInputId) {
+      if (!videoUrl) return;
+      const durationInput = document.getElementById(durationInputId);
+      durationInput.value = "Detecting duration...";
+      const detected = await getDurationFromUrl(videoUrl);
+      durationInput.value = detected;
+    };
+
+    // Helper to generate a smart tactical description from chapter / title
+    function generateSmartDescription(subject, title) {
+      return `Comprehensive tactical briefing and high-yield concept masterclass covering ${title} under the ${subject} operational module. Recommended for structured defense exam preparation.`;
+    }
+
+    // 1. Single Lecture Dispatch with Manual Description and Auto Duration
     window.dispatchSingleLecture = async () => {
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
@@ -337,6 +407,8 @@
       const mode = document.getElementById("modeSelect").value;
       const title = document.getElementById("titleInput").value.trim();
       const url = document.getElementById("urlInput").value.trim();
+      const description = document.getElementById("descriptionInput").value.trim();
+      const duration = document.getElementById("durationInput").value.trim() || "HD Session";
 
       if (!subject || !title || !url) {
         showStatus("[ERROR] Module, Title, and URL are mandatory.", false);
@@ -355,6 +427,8 @@
           order: order,
           mode: mode,
           title: title,
+          description: description,
+          duration: duration,
           url: url,
           createdAt: serverTimestamp()
         });
@@ -362,6 +436,8 @@
         showStatus(`[CONFIRMED] Lecture "${title}" successfully stored.`, true);
         document.getElementById("titleInput").value = "";
         document.getElementById("urlInput").value = "";
+        document.getElementById("descriptionInput").value = "";
+        document.getElementById("durationInput").value = "";
         document.getElementById("orderInput").value = order + 1;
       } catch (e) {
         showStatus(`[FAILURE] Firestore Error: ${e.message}`, false);
@@ -371,7 +447,7 @@
       }
     };
 
-    // 2. Bulk TSV Dispatch
+    // 2. Bulk TSV Dispatch with Auto Duration and Auto Description
     window.dispatchBulkTsv = async () => {
       const squadron = document.getElementById("bulkSquadron").value;
       const subject = document.getElementById("bulkSubject").value.trim();
@@ -385,7 +461,7 @@
 
       const lines = tsv.split('\n');
       const btn = document.getElementById("bulkSubmitBtn");
-      btn.innerText = "BATCH PROCESSING...";
+      btn.innerText = "PROCESSING BULK & FETCHING DURATIONS...";
       btn.disabled = true;
 
       try {
@@ -403,6 +479,10 @@
           const sNo = parseInt(parts[0].trim()) || (i + 1);
           const fullTitle = parts[1].trim();
           const url = parts[2].trim();
+
+          // Auto-detect duration for each bulk item securely
+          const autoDuration = await getDurationFromUrl(url);
+          const autoDescription = generateSmartDescription(subject, fullTitle);
 
           let chapterName = "General Module";
           const lower = fullTitle.toLowerCase();
@@ -428,6 +508,8 @@
             order: sNo,
             mode: mode,
             title: fullTitle,
+            description: autoDescription,
+            duration: autoDuration,
             url: url,
             createdAt: serverTimestamp()
           });
@@ -435,7 +517,7 @@
           count++;
           batchCount++;
 
-          if (batchCount === 450) {
+          if (batchCount === 400) {
             await batch.commit();
             batch = writeBatch(db);
             batchCount = 0;
@@ -446,12 +528,12 @@
           await batch.commit();
         }
 
-        showStatus(`[BATCH SUCCESS] ${count} Lectures pushed into Firestore successfully!`, true);
+        showStatus(`[BULK SUCCESS] ${count} Lectures dispatched with auto-fetched durations and descriptions!`, true);
         document.getElementById("bulkTsvData").value = "";
       } catch (e) {
-        showStatus(`[BATCH FAILURE] Error: ${e.message}`, false);
+        showStatus(`[BULK FAILURE] Error: ${e.message}`, false);
       } finally {
-        btn.innerText = "EXECUTE BULK BATCH DISPATCH";
+        btn.innerText = "EXECUTE BULK BATCH DISPATCH (AUTO DURATION & DESCRIPTION)";
         btn.disabled = false;
       }
     };
@@ -537,7 +619,7 @@
           );
         }
 
-        const querySnapshot = await getDocs(q);
+        const querySnapshot =@ getDocs(q);
         
         if (querySnapshot.empty) {
           showStatus("[INFO] No matching documents found to purge.", false);
