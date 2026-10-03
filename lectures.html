@@ -62,10 +62,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    const lectureDatabase = {
-      // Static fallback database agar zaroorat pade
-    };
-
     let currentBatch = "capf";
     let currentSubject = "Mentor Session";
 
@@ -89,7 +85,7 @@
 
       const staticLectures = [];
 
-      // 🔥 DIRECT SUBJECT QUERY (Chapter layer completely bypassed)
+      // 🔥 DIRECT SUBJECT QUERY
       const q = query(
         collection(db, "tactical_curriculum"),
         where("squadron", "==", currentBatch.toLowerCase().trim()),
@@ -112,8 +108,8 @@
             dynamicLectures.push({
               lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
               title: d.title,
-              desc: d.desc || "Tactical lecture briefing uploaded via Dispatch Console.",
-              duration: d.duration || "HD Session",
+              desc: d.description || d.desc || "", // Purely dynamic from Firestore
+              duration: d.duration || "", // Purely dynamic duration
               videoId: vUrl,
               pdfUrl: d.pdfUrl || "#",
               order: Number(d.order) || 999
@@ -170,22 +166,23 @@
           }
         }
 
+        // Only display description block if description exists
+        const descHtml = lec.desc ? `<p class="text-xs text-neutral-400 font-body leading-relaxed mb-4">${lec.desc}</p>` : '';
+        // Only display duration if it exists
+        const durationHtml = lec.duration ? `<span class="text-[11px] font-mono text-neutral-400 flex items-center gap-1">⏱ ${lec.duration}</span>` : '';
+
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="px-2.5 py-0.5 rounded bg-black/80 border border-neutral-700 text-amber-400 font-mono text-xs font-bold">
                 SESSION #${lec.lectureNo}
               </span>
-              <span class="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-                ⏱ ${lec.duration}
-              </span>
+              ${durationHtml}
             </div>
             <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1.5">
               ${lec.title}
             </h3>
-            <p class="text-xs text-neutral-400 font-body leading-relaxed mb-4">
-              ${lec.desc}
-            </p>
+            ${descHtml}
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
