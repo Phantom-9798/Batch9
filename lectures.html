@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <style>
+ 
+<style>
   /* 1. Corner Live Time Tracker Widget */
   #phantomStudyTimerWidget {
     position: fixed;
@@ -32,7 +33,7 @@
     100% { transform: scale(0.95); opacity: 0.8; }
   }
 
-  /* 2. Floating Focus Status Dock (Bottom Center - Display Only, Fully Automated) */
+  /* 2. Floating Focus Status Dock (Bottom Center) */
   #phantomFocusDock {
     position: fixed;
     bottom: 20px;
@@ -55,12 +56,24 @@
     letter-spacing: 1px;
   }
 
-  /* Automatic Zen Mode (Hides non-essential items completely) */
+  /* Smart Zen Mode: Hides distractions but PROTECTS Back/Navigation buttons completely */
   body.zen-mode header, 
   body.zen-mode footer, 
   body.zen-mode .non-essential-ui {
     display: none !important;
   }
+  
+  /* Exception: Keep all back buttons, navigation, headers with back options fully visible */
+  body.zen-mode a[href*="back"],
+  body.zen-mode button[onclick*="back"],
+  body.zen-mode .back-btn,
+  body.zen-mode .navigation,
+  body.zen-mode nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   body.zen-mode main {
     max-width: 1100px !important;
     margin: 0 auto;
@@ -74,7 +87,7 @@
   <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
 </div>
 
-<!-- Bottom Floating Status Dock (Shows Auto-Running Features) -->
+<!-- Bottom Floating Status Dock -->
 <div id="phantomFocusDock">
   <span>🛡️ ZEN MODE: ACTIVE</span>
   <span>|</span>
