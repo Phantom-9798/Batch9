@@ -339,7 +339,7 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Helper: Helper function to get video duration via a hidden video element (Free client-side)
+    // Helper: Get video duration via a hidden video element (Free client-side)
     function getDurationFromUrl(url) {
       return new Promise((resolve) => {
         if (!url) {
@@ -393,7 +393,7 @@
       durationInput.value = detected;
     };
 
-    // Helper to generate a smart tactical description from chapter / title
+    // Helper to generate a smart tactical description from chapter / title for Bulk
     function generateSmartDescription(subject, title) {
       return `Comprehensive tactical briefing and high-yield concept masterclass covering ${title} under the ${subject} operational module. Recommended for structured defense exam preparation.`;
     }
@@ -480,7 +480,6 @@
           const fullTitle = parts[1].trim();
           const url = parts[2].trim();
 
-          // Auto-detect duration for each bulk item securely
           const autoDuration = await getDurationFromUrl(url);
           const autoDescription = generateSmartDescription(subject, fullTitle);
 
@@ -619,7 +618,7 @@
           );
         }
 
-        const querySnapshot =@ getDocs(q);
+        const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
           showStatus("[INFO] No matching documents found to purge.", false);
