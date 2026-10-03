@@ -32,7 +32,7 @@
     100% { transform: scale(0.95); opacity: 0.8; }
   }
 
-  /* 2. Floating Focus Command Dock (Bottom Center) */
+  /* 2. Floating Focus Status Dock (Bottom Center - Display Only, Fully Automated) */
   #phantomFocusDock {
     position: fixed;
     bottom: 20px;
@@ -42,81 +42,58 @@
     background: rgba(10, 15, 22, 0.96);
     border: 1px solid rgba(245, 158, 11, 0.4);
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 9999px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     font-family: 'Orbitron', sans-serif;
     backdrop-filter: blur(10px);
-  }
-  .focus-dock-btn {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-size: 11px;
     color: #f59e0b;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 10px;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-  }
-  .focus-dock-btn:hover {
-    background: #f59e0b;
-    color: #000;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    letter-spacing: 1px;
   }
 
-  /* Zen Focus Mode Class */
+  /* Automatic Zen Mode (Hides non-essential items completely) */
   body.zen-mode header, 
   body.zen-mode footer, 
   body.zen-mode .non-essential-ui {
     display: none !important;
   }
   body.zen-mode main {
-    max-width: 1000px !important;
+    max-width: 1100px !important;
     margin: 0 auto;
   }
 </style>
 
-<!-- Top Corner Live Time Tracker (Auto-running) -->
+<!-- Top Corner Live Time Tracker (Auto-running continuously) -->
 <div id="phantomStudyTimerWidget">
   <div class="pulse-dot"></div>
   <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
   <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
 </div>
 
-<!-- Bottom Floating Focus Command Dock -->
+<!-- Bottom Floating Status Dock (Shows Auto-Running Features) -->
 <div id="phantomFocusDock">
-  <button class="focus-dock-btn" onclick="toggleZenMode()">🛡️ Zen Mode</button>
-  <button class="focus-dock-btn" onclick="openPomodoroModal()">⏳ Pomodoro</button>
-  <button class="focus-dock-btn" onclick="toggleAmbientAudio()">🎵 Audio: <span id="audioStatus">OFF</span></button>
-  <button class="focus-dock-btn" onclick="showDailyBriefing()">📜 Mission Brief</button>
+  <span>🛡️ ZEN MODE: ACTIVE</span>
+  <span>|</span>
+  <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
+  <span>|</span>
+  <span>🎵 AUDIO: ON</span>
 </div>
 
-<!-- Pomodoro Modal -->
-<div id="pomodoroModal" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
-  <div style="background:#0a0f16; border:1px solid rgba(245,158,11,0.5); padding:24px; border-radius:16px; text-align:center; max-width:320px; width:90%; font-family:'Orbitron',sans-serif;">
-    <h3 style="color:#f59e0b; font-size:14px; margin-bottom:8px; font-weight:bold;">TACTICAL POMODORO TIMER</h3>
-    <p style="font-size:10px; color:#a3a3a3; margin-bottom:16px;">25 Mins Intensive Study / 5 Mins Break</p>
-    <div id="pomoDisplay" style="font-size:32px; font-weight:900; color:#fff; margin-bottom:20px;">25:00</div>
-    <div style="display:flex; gap:8px; justify-content:center;">
-      <button onclick="startPomodoro()" style="background:#f59e0b; color:#000; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">START</button>
-      <button onclick="resetPomodoro()" style="background:#262626; color:#fff; border:1px solid #404040; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">RESET</button>
-      <button onclick="closePomodoroModal()" style="background:#991b1b; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">CLOSE</button>
-    </div>
-  </div>
-</div>
-
-<!-- Hidden Audio Element for Ambient White Noise -->
-<audio id="ambientAudio" loop>
+<!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
+<audio id="ambientAudio" autoplay loop>
   <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
 </audio>
 
 <script>
-  // 1. Fully Automatic Live Study Time Tracker (Runs instantly on login/entry)
+  // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
   (function() {
+    // Automatically engage Zen Mode on entry
+    document.body.classList.add("zen-mode");
+
     const todayStr = new Date().toDateString();
     const lastDate = localStorage.getItem("phantom_study_date");
     
@@ -126,115 +103,71 @@
     }
 
     let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+    let sessionSeconds = 0; // Infinite counting session timer
 
+    // Continuous infinite tracking as long as cadet is on website
     setInterval(() => {
       totalSeconds++;
+      sessionSeconds++;
       localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
 
+      // Update Top Corner Daily Total Timer
       const hrs = Math.floor(totalSeconds / 3600);
       const mins = Math.floor((totalSeconds % 3600) / 60);
       const secs = totalSeconds % 60;
-
       const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
       const displayEl = document.getElementById("phantomTimerDisplay");
       if (displayEl) {
         displayEl.innerText = displayStr;
       }
+
+      // Update Bottom Floating Dock Session Timer (Counts up infinitely without stopping)
+      const pHrs = Math.floor(sessionSeconds / 3600);
+      const pMins = Math.floor((sessionSeconds % 3600) / 60);
+      const pSecs = sessionSeconds % 60;
+      const pDisplayStr = pHrs > 0 
+        ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
+        : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+      
+      const autoPomoEl = document.getElementById("autoPomoDisplay");
+      if (autoPomoEl) {
+        autoPomoEl.innerText = pDisplayStr;
+      }
     }, 1000);
   })();
 
-  // 2. Automatic Daily Mission Briefing on First Entry of the Day
+  // 2. Automatic Daily Mission Briefing on Entry (No clicks required)
   window.addEventListener('DOMContentLoaded', () => {
     const lastBriefDate = localStorage.getItem("phantom_brief_date");
     const todayStr = new Date().toDateString();
 
     if (lastBriefDate !== todayStr) {
       localStorage.setItem("phantom_brief_date", todayStr);
-      // Auto trigger briefing popup after 1 second of page load
       setTimeout(() => {
-        showDailyBriefing();
-      }, 1000);
+        const quotes = [
+          "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
+          "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
+          "\"Discipline is choosing between what you want now and what you want most.\""
+        ];
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
+      }, 800);
     }
   });
 
-  // Zen Mode Toggle
-  window.toggleZenMode = function() {
-    document.body.classList.toggle("zen-mode");
-    const isZen = document.body.classList.contains("zen-mode");
-    alert(isZen ? "🛡️ ZEN FOCUS MODE ENGAGED: Distractions hidden." : "ZEN MODE DISABLED.");
-  };
-
-  // Pomodoro Timer Logic
-  let pomoInterval = null;
-  let pomoSeconds = 25 * 60;
-  let isPomoRunning = false;
-
-  window.openPomodoroModal = function() {
-    document.getElementById("pomodoroModal").style.display = "flex";
-  };
-
-  window.closePomodoroModal = function() {
-    document.getElementById("pomodoroModal").style.display = "none";
-  };
-
-  window.startPomodoro = function() {
-    if (isPomoRunning) return;
-    isPomoRunning = true;
-    pomoInterval = setInterval(() => {
-      if (pomoSeconds > 0) {
-        pomoSeconds--;
-        updatePomoDisplay();
-      } else {
-        clearInterval(pomoInterval);
-        isPomoRunning = false;
-        alert("🚨 MISSION OBJECTIVE REACHED! Take a 5-minute tactical break, Cadet.");
-        pomoSeconds = 5 * 60;
-        updatePomoDisplay();
-      }
-    }, 1000);
-  };
-
-  window.resetPomodoro = function() {
-    clearInterval(pomoInterval);
-    isPomoRunning = false;
-    pomoSeconds = 25 * 60;
-    updatePomoDisplay();
-  };
-
-  function updatePomoDisplay() {
-    const mins = Math.floor(pomoSeconds / 60);
-    const secs = pomoSeconds % 60;
-    document.getElementById("pomoDisplay").innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  // Ambient Focus Audio Toggle
-  let isAudioPlaying = false;
-  window.toggleAmbientAudio = function() {
+  // 3. Auto-play Ambient Audio safely on load/interaction
+  window.addEventListener('load', () => {
     const audio = document.getElementById("ambientAudio");
-    const status = document.getElementById("audioStatus");
-    if (!isAudioPlaying) {
-      audio.play().catch(() => {});
-      isAudioPlaying = true;
-      status.innerText = "ON";
-      status.style.color = "#22c55e";
-    } else {
-      audio.pause();
-      isAudioPlaying = false;
-      status.innerText = "OFF";
-      status.style.color = "#f59e0b";
+    if (audio) {
+      audio.volume = 0.4;
+      audio.play().catch(() => {
+        // Fallback to play on first user interaction if browser blocks autoplay
+        document.addEventListener('click', () => {
+          audio.play().catch(() => {});
+        }, { once: true });
+      });
     }
-  };
-
-  // Daily Mission Briefing Dialog
-  window.showDailyBriefing = function() {
-    const quotes = [
-      "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-      "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-      "\"Discipline is choosing between what you want now and what you want most.\""
-    ];
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    alert("📜 TEAM PHANTOM DAILY MISSION BRIEFING:\n\n" + randomQuote);
-  };
+  });
 </script>
   <script>
   (() => {
