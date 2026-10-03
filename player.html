@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
- 
 <style>
   /* 1. Corner Live Time Tracker Widget */
   #phantomStudyTimerWidget {
@@ -55,29 +54,6 @@
     font-weight: bold;
     letter-spacing: 1px;
   }
-
-  /* Smart Zen Mode: Hides distractions but PROTECTS Back/Navigation buttons completely */
-  body.zen-mode header, 
-  body.zen-mode footer, 
-  body.zen-mode .non-essential-ui {
-    display: none !important;
-  }
-  
-  /* Exception: Keep all back buttons, navigation, headers with back options fully visible */
-  body.zen-mode a[href*="back"],
-  body.zen-mode button[onclick*="back"],
-  body.zen-mode .back-btn,
-  body.zen-mode .navigation,
-  body.zen-mode nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  body.zen-mode main {
-    max-width: 1100px !important;
-    margin: 0 auto;
-  }
 </style>
 
 <!-- Top Corner Live Time Tracker (Auto-running continuously) -->
@@ -89,7 +65,7 @@
 
 <!-- Bottom Floating Status Dock -->
 <div id="phantomFocusDock">
-  <span>🛡️ ZEN MODE: ACTIVE</span>
+  <span>🛡️ MISSION MODE: ACTIVE</span>
   <span>|</span>
   <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
   <span>|</span>
@@ -104,9 +80,6 @@
 <script>
   // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
   (function() {
-    // Automatically engage Zen Mode on entry
-    document.body.classList.add("zen-mode");
-
     const todayStr = new Date().toDateString();
     const lastDate = localStorage.getItem("phantom_study_date");
     
