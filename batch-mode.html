@@ -1,6 +1,241 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+<style>
+  /* 1. Corner Live Time Tracker Widget */
+  #phantomStudyTimerWidget {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    z-index: 99999;
+    background: rgba(4, 7, 13, 0.95);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(8px);
+  }
+  #phantomStudyTimerWidget .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #f59e0b;
+    border-radius: 50%;
+    animation: phantomPulse 1.5s infinite;
+  }
+  @keyframes phantomPulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #f59e0b; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+  }
+
+  /* 2. Floating Focus Command Dock (Bottom Center) */
+  #phantomFocusDock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99998;
+    background: rgba(10, 15, 22, 0.96);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+    padding: 8px 16px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Orbitron', sans-serif;
+    backdrop-filter: blur(10px);
+  }
+  .focus-dock-btn {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+  }
+  .focus-dock-btn:hover {
+    background: #f59e0b;
+    color: #000;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  }
+
+  /* Zen Focus Mode Class */
+  body.zen-mode header, 
+  body.zen-mode footer, 
+  body.zen-mode .non-essential-ui {
+    display: none !important;
+  }
+  body.zen-mode main {
+    max-width: 1000px !important;
+    margin: 0 auto;
+  }
+</style>
+
+<!-- Top Corner Live Time Tracker (Auto-running) -->
+<div id="phantomStudyTimerWidget">
+  <div class="pulse-dot"></div>
+  <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
+  <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
+</div>
+
+<!-- Bottom Floating Focus Command Dock -->
+<div id="phantomFocusDock">
+  <button class="focus-dock-btn" onclick="toggleZenMode()">🛡️ Zen Mode</button>
+  <button class="focus-dock-btn" onclick="openPomodoroModal()">⏳ Pomodoro</button>
+  <button class="focus-dock-btn" onclick="toggleAmbientAudio()">🎵 Audio: <span id="audioStatus">OFF</span></button>
+  <button class="focus-dock-btn" onclick="showDailyBriefing()">📜 Mission Brief</button>
+</div>
+
+<!-- Pomodoro Modal -->
+<div id="pomodoroModal" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+  <div style="background:#0a0f16; border:1px solid rgba(245,158,11,0.5); padding:24px; border-radius:16px; text-align:center; max-width:320px; width:90%; font-family:'Orbitron',sans-serif;">
+    <h3 style="color:#f59e0b; font-size:14px; margin-bottom:8px; font-weight:bold;">TACTICAL POMODORO TIMER</h3>
+    <p style="font-size:10px; color:#a3a3a3; margin-bottom:16px;">25 Mins Intensive Study / 5 Mins Break</p>
+    <div id="pomoDisplay" style="font-size:32px; font-weight:900; color:#fff; margin-bottom:20px;">25:00</div>
+    <div style="display:flex; gap:8px; justify-content:center;">
+      <button onclick="startPomodoro()" style="background:#f59e0b; color:#000; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">START</button>
+      <button onclick="resetPomodoro()" style="background:#262626; color:#fff; border:1px solid #404040; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">RESET</button>
+      <button onclick="closePomodoroModal()" style="background:#991b1b; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:11px; cursor:pointer;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Audio Element for Ambient White Noise -->
+<audio id="ambientAudio" loop>
+  <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
+</audio>
+
+<script>
+  // 1. Fully Automatic Live Study Time Tracker (Runs instantly on login/entry)
+  (function() {
+    const todayStr = new Date().toDateString();
+    const lastDate = localStorage.getItem("phantom_study_date");
+    
+    if (lastDate !== todayStr) {
+      localStorage.setItem("phantom_study_date", todayStr);
+      localStorage.setItem("phantom_daily_seconds", "0");
+    }
+
+    let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+
+    setInterval(() => {
+      totalSeconds++;
+      localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+
+      const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+      const displayEl = document.getElementById("phantomTimerDisplay");
+      if (displayEl) {
+        displayEl.innerText = displayStr;
+      }
+    }, 1000);
+  })();
+
+  // 2. Automatic Daily Mission Briefing on First Entry of the Day
+  window.addEventListener('DOMContentLoaded', () => {
+    const lastBriefDate = localStorage.getItem("phantom_brief_date");
+    const todayStr = new Date().toDateString();
+
+    if (lastBriefDate !== todayStr) {
+      localStorage.setItem("phantom_brief_date", todayStr);
+      // Auto trigger briefing popup after 1 second of page load
+      setTimeout(() => {
+        showDailyBriefing();
+      }, 1000);
+    }
+  });
+
+  // Zen Mode Toggle
+  window.toggleZenMode = function() {
+    document.body.classList.toggle("zen-mode");
+    const isZen = document.body.classList.contains("zen-mode");
+    alert(isZen ? "🛡️ ZEN FOCUS MODE ENGAGED: Distractions hidden." : "ZEN MODE DISABLED.");
+  };
+
+  // Pomodoro Timer Logic
+  let pomoInterval = null;
+  let pomoSeconds = 25 * 60;
+  let isPomoRunning = false;
+
+  window.openPomodoroModal = function() {
+    document.getElementById("pomodoroModal").style.display = "flex";
+  };
+
+  window.closePomodoroModal = function() {
+    document.getElementById("pomodoroModal").style.display = "none";
+  };
+
+  window.startPomodoro = function() {
+    if (isPomoRunning) return;
+    isPomoRunning = true;
+    pomoInterval = setInterval(() => {
+      if (pomoSeconds > 0) {
+        pomoSeconds--;
+        updatePomoDisplay();
+      } else {
+        clearInterval(pomoInterval);
+        isPomoRunning = false;
+        alert("🚨 MISSION OBJECTIVE REACHED! Take a 5-minute tactical break, Cadet.");
+        pomoSeconds = 5 * 60;
+        updatePomoDisplay();
+      }
+    }, 1000);
+  };
+
+  window.resetPomodoro = function() {
+    clearInterval(pomoInterval);
+    isPomoRunning = false;
+    pomoSeconds = 25 * 60;
+    updatePomoDisplay();
+  };
+
+  function updatePomoDisplay() {
+    const mins = Math.floor(pomoSeconds / 60);
+    const secs = pomoSeconds % 60;
+    document.getElementById("pomoDisplay").innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // Ambient Focus Audio Toggle
+  let isAudioPlaying = false;
+  window.toggleAmbientAudio = function() {
+    const audio = document.getElementById("ambientAudio");
+    const status = document.getElementById("audioStatus");
+    if (!isAudioPlaying) {
+      audio.play().catch(() => {});
+      isAudioPlaying = true;
+      status.innerText = "ON";
+      status.style.color = "#22c55e";
+    } else {
+      audio.pause();
+      isAudioPlaying = false;
+      status.innerText = "OFF";
+      status.style.color = "#f59e0b";
+    }
+  };
+
+  // Daily Mission Briefing Dialog
+  window.showDailyBriefing = function() {
+    const quotes = [
+      "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
+      "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
+      "\"Discipline is choosing between what you want now and what you want most.\""
+    ];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    alert("📜 TEAM PHANTOM DAILY MISSION BRIEFING:\n\n" + randomQuote);
+  };
+</script>
   <script>
   (() => {
     // 1. Right Click Disable
