@@ -262,7 +262,6 @@
             dynamicLectures.push({
               lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
               title: d.title,
-              desc: d.description || d.desc || "", // Purely dynamic from Firestore
               duration: d.duration || "", // Purely dynamic duration
               videoId: vUrl,
               pdfUrl: d.pdfUrl || "#",
@@ -320,8 +319,6 @@
           }
         }
 
-        // Only display description block if description exists
-        const descHtml = lec.desc ? `<p class="text-xs text-neutral-400 font-body leading-relaxed mb-4">${lec.desc}</p>` : '';
         // Only display duration if it exists
         const durationHtml = lec.duration ? `<span class="text-[11px] font-mono text-neutral-400 flex items-center gap-1">⏱ ${lec.duration}</span>` : '';
 
@@ -333,10 +330,9 @@
               </span>
               ${durationHtml}
             </div>
-            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1.5">
+            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-3">
               ${lec.title}
-            </h3>
-            ${descHtml}
+          </h3>
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
