@@ -312,6 +312,25 @@
       pointer-events: none;
     }
 
+    /* ZOOM & DIRECT LINK CONTAINER (FIX FOR SCREEN FITTING) */
+    .zoom-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .zoom-frame {
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+      object-fit: contain;
+    }
+
     /* YOUTUBE ENGINE */
     .yt-custom-container {
       position: relative;
@@ -399,7 +418,7 @@
       transition: width 0.15s linear;
     }
 
-    /* ANTI-PIRACY FLOATING WATERMARK STYLES (OPACITY REDUCED FOR FOCUS) */
+    /* ANTI-PIRACY FLOATING WATERMARK STYLES */
     .phantom-watermark-layer {
       position: absolute;
       top: 30%;
@@ -410,7 +429,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      opacity: 0.08; /* अत्यंत हल्का किया गया ताकि पढ़ाई में रुकावट न हो */
+      opacity: 0.08;
       transform: rotate(-22deg);
       transition: top 3s ease, left 3s ease;
     }
@@ -525,7 +544,7 @@
       // =========================================================================
       // CASE 1: NEXIELD
       // =========================================================================
-      if (finalVideo.startsWith("http://") || finalVideo.startsWith("https://")) {
+      if (finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.endsWith(".mp4")) {
         isNexield = true;
 
         playerRoot.innerHTML = `
@@ -540,8 +559,19 @@
           </div>
         `;
       } 
+     // =========================================================================
+     // CASE 2: ZOOM / DIRECT VIDEO LINK (Auto-fit Screen Fix)
+     // =========================================================================
+     else if (finalVideo.includes("zoom") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com")) {
+       isNexield = false;
+       playerRoot.innerHTML = `
+         <div class="zoom-box">
+           <iframe src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+         </div>
+       `;
+     }
       // =========================================================================
-      // CASE 2: YOUTUBE ENGINE
+      // CASE 3: YOUTUBE ENGINE
       // =========================================================================
       else {
         isNexield = false;
