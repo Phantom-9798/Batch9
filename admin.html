@@ -88,7 +88,7 @@
           [2] BULK TSV UPLOAD
         </button>
         <button id="extractorTabBtn" onclick="switchMode('extractor')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [3] SMART LINK EXTRACTOR (ZOOM/NEXIELD)
+          [3] NEXIELD EXTRACTOR
         </button>
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [4] PURGE / DATA MANAGER
@@ -139,8 +139,8 @@
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO STREAM URL / ZOOM LINK / TOKEN (Auto-Detect Active)</label>
-          <input id="urlInput" type="text" placeholder="Paste Zoom URL, mp4 or Nexield link..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL</label>
+          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -186,30 +186,27 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE TSV DATA (S.No [TAB] Title [TAB] URL)</label>
-          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://...&#10;2	2. Zoom Class	https://zoom.us/..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://vimpd.nexield.in/...&#10;2	2. Ratio Class 2	https://vimpd.nexield.in/..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="dispatchBulkTsv()" id="bulkSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          EXECUTE BULK BATCH DISPATCH (AUTO DETECT ZOOM/NEXIELD)
+          EXECUTE BULK BATCH DISPATCH
         </button>
       </div>
 
-      <!-- ================= MODE 3: SMART LINK EXTRACTOR (ZOOM/NEXIELD) ================= -->
+      <!-- ================= MODE 3: NEXIELD HTML LINK EXTRACTOR (ORIGINAL & SIMPLE) ================= -->
       <div id="extractorSection" class="hidden space-y-4">
-        <div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl">
-          <p class="text-xs text-purple-300 font-mono">💡 <strong>Smart Extractor Active:</strong> Yeh extractor HTML code ko scan karke automatically pehchan lega ki kaun sa link Zoom ka hai aur kaun sa Nexield/Vimeo ka, aur uske hisab se sahi format generate karega!</p>
-        </div>
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE LECTURES PAGE HTML CODE</label>
-          <textarea id="extractorHtmlInput" rows="6" placeholder="Pura HTML code yahan paste karein..." class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE NEXIELD HTML CODE</label>
+          <textarea id="extractorHtmlInput" rows="6" placeholder="Nexield page ka pura HTML yahan paste karein..." class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="extractToTsv()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          SMART EXTRACT TO TSV FORMAT
+          EXTRACT TO TSV FORMAT
         </button>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">EXTRACTED TSV (Zoom & Nexield Auto-Identified)</label>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">EXTRACTED TSV (Copy and paste into Bulk Upload section above)</label>
           <textarea id="extractorOutput" rows="6" placeholder="Generated TSV output yahan aayega..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
       </div>
@@ -344,8 +341,8 @@
 
     function getDurationFromUrl(url) {
       return new Promise((resolve) => {
-        if (!url || url.includes("zoom")) {
-          resolve("Live / Zoom Session");
+        if (!url) {
+          resolve("HD Session");
           return;
         }
         const tempVideo = document.createElement('video');
@@ -477,7 +474,7 @@
 
           const sNo = parseInt(parts[0].trim()) || (i + 1);
           const fullTitle = parts[1].trim();
-          let url = parts[2].trim();
+          const url = parts[2].trim();
 
           const autoDuration = await getDurationFromUrl(url);
           const autoDescription = generateSmartDescription(subject, fullTitle);
@@ -527,7 +524,7 @@
       }
     };
 
-    // 3. SMART LINK EXTRACTOR LOGIC (Universal Zoom / Nexield / Vimeo Auto-Detection)
+    // 3. Original & Simple Nexield HTML Link Extractor Logic
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
@@ -537,44 +534,17 @@
         return;
       }
 
-      // Regex to capture playLesson calls: playLesson('Title', 'token', 'type')
-      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?\s*\)/g;
+      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
       
       let match;
       let tsvResult = "";
       let count = 1;
-      let zoomCount = 0;
-      let nexieldCount = 0;
 
       while ((match = regex.exec(html)) !== null) {
         const title = match[1];
         const token = match[2];
-        const linkType = (match[3] || '').toLowerCase();
         
-        let fullUrl = "";
-        const lowerToken = token.toLowerCase();
-
-        // Check if it's Zoom or if linkType explicitly specifies zoom
-        if (lowerToken.includes("zoom") || linkType === 'zoom' || (token.startsWith("http") && token.includes("zoom"))) {
-          if (token.startsWith("http")) {
-            fullUrl = token;
-          } else {
-            fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-          }
-          zoomCount++;
-        } else if (linkType === 'vimeo' || lowerToken.includes("vimeo")) {
-          fullUrl = `https://vimp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-          nexieldCount++;
-        } else {
-          // If type is not explicitly vimeo or token indicates zoom stream, route safely
-          if (linkType === 'zoom' || lowerToken.includes('zoom')) {
-            fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-            zoomCount++;
-          } else {
-            fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-            nexieldCount++;
-          }
-        }
+        const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
         
         tsvResult += `${count}\t${title}\t${fullUrl}\n`;
         count++;
@@ -584,7 +554,7 @@
         outputEl.value = "❌ No matching playLesson links found in this HTML!";
       } else {
         outputEl.value = tsvResult;
-        showStatus(`[SMART EXTRACTED] Converted ${count - 1} links! (Zoom/Live: ${zoomCount}, Nexield/Vimeo: ${nexieldCount})`, true);
+        showStatus(`[EXTRACTED] Successfully converted ${count - 1} links to TSV!`, true);
       }
     };
 
