@@ -242,9 +242,12 @@
     }
 
     #phantomConsoleScreen:fullscreen,
-    #phantomConsoleScreen:-webkit-full-screen {
+    #phantomConsoleScreen:-webkit-full-screen,
+    #phantomConsoleScreen:-ms-fullscreen {
       width: 100vw !important;
       height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
       border-radius: 0 !important;
     }
 
@@ -312,7 +315,7 @@
       pointer-events: none;
     }
 
-    /* ZOOM & DIRECT LINK CONTAINER (FIX FOR SCREEN FITTING) */
+    /* ZOOM & DIRECT LINK CONTAINER (FULLSCREEN STRETCH FIX) */
     .zoom-box {
       position: relative;
       width: 100%;
@@ -328,7 +331,7 @@
       width: 100% !important;
       height: 100% !important;
       border: none;
-      object-fit: contain;
+      object-fit: fill; /* Forces the video/stream to stretch and fill the screen completely on fullscreen */
     }
 
     /* YOUTUBE ENGINE */
@@ -559,17 +562,17 @@
           </div>
         `;
       } 
-     // =========================================================================
-     // CASE 2: ZOOM / DIRECT VIDEO LINK (Auto-fit Screen Fix)
-     // =========================================================================
-     else if (finalVideo.includes("zoom") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com")) {
-       isNexield = false;
-       playerRoot.innerHTML = `
-         <div class="zoom-box">
-           <iframe src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-         </div>
-       `;
-     }
+      // =========================================================================
+      // CASE 2: ZOOM / DIRECT VIDEO LINK (Auto-fit Screen Fix)
+      // =========================================================================
+      else if (finalVideo.includes("zoom") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com")) {
+        isNexield = false;
+        playerRoot.innerHTML = `
+          <div class="zoom-box">
+            <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+          </div>
+        `;
+      }
       // =========================================================================
       // CASE 3: YOUTUBE ENGINE
       // =========================================================================
@@ -708,24 +711,35 @@
       }
     }
 
+    // ENHANCED TACTICAL FULLSCREEN (FORCES FULL VIEWPORT & STRETCH)
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
 
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (target.requestFullscreen) target.requestFullscreen();
-        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (target.requestFullscreen) {
+          target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        } else if (target.msRequestFullscreen) {
+          target.msRequestFullscreen();
+        }
         if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
       } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
         if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
       }
     }
 
     document.addEventListener("fullscreenchange", () => {
       const fsBtn = document.getElementById("permanentFsBtn");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
       } else {
         if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
