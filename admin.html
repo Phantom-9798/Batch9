@@ -88,7 +88,7 @@
           [2] BULK TSV UPLOAD
         </button>
         <button id="extractorTabBtn" onclick="switchMode('extractor')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [3] NEXIELD EXTRACTOR
+          [3] SMART LINK EXTRACTOR (ZOOM/NEXIELD)
         </button>
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [4] PURGE / DATA MANAGER
@@ -139,17 +139,17 @@
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL (Duration Auto-Fetch Active)</label>
-          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO STREAM URL / ZOOM LINK / TOKEN (Auto-Detect Active)</label>
+          <input id="urlInput" type="text" placeholder="Paste Zoom URL, mp4 or Nexield link..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="text-xs text-neutral-400 font-mono mb-1 block">LECTURE DESCRIPTION (Manual Entry)</label>
-            <textarea id="descriptionInput" rows="3" placeholder="Lecture ke baare mein yahan manual description likhein..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500"></textarea>
+            <textarea id="descriptionInput" rows="3" placeholder="Lecture description..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500"></textarea>
           </div>
           <div>
-            <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO DURATION (Auto-Fetched / Editable)</label>
+            <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO DURATION</label>
             <input id="durationInput" type="text" placeholder="Auto-detected or custom..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500">
           </div>
         </div>
@@ -186,27 +186,30 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE TSV DATA (S.No [TAB] Title [TAB] URL)</label>
-          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://vimpd.nexield.in/...&#10;2	2. Ratio Class 2	https://vimpd.nexield.in/..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://...&#10;2	2. Zoom Class	https://zoom.us/..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="dispatchBulkTsv()" id="bulkSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          EXECUTE BULK BATCH DISPATCH (AUTO DURATION & DESCRIPTION)
+          EXECUTE BULK BATCH DISPATCH (AUTO DETECT ZOOM/NEXIELD)
         </button>
       </div>
 
-      <!-- ================= MODE 3: NEXIELD HTML LINK EXTRACTOR ================= -->
+      <!-- ================= MODE 3: SMART LINK EXTRACTOR (ZOOM/NEXIELD) ================= -->
       <div id="extractorSection" class="hidden space-y-4">
+        <div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl">
+          <p class="text-xs text-purple-300 font-mono">💡 <strong>Smart Extractor Active:</strong> Yeh extractor HTML code ko scan karke automáticamente pehchan lega ki kaun sa link Zoom ka hai aur kaun sa Nexield/Vimeo ka, aur uske hisab se sahi format generate karega!</p>
+        </div>
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE NEXIELD HTML CODE</label>
-          <textarea id="extractorHtmlInput" rows="6" placeholder="Nexield page ka pura HTML yahan paste karein..." class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE LECTURES PAGE HTML CODE</label>
+          <textarea id="extractorHtmlInput" rows="6" placeholder="Pura HTML code yahan paste karein..." class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="extractToTsv()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
-          EXTRACT TO TSV FORMAT
+          SMART EXTRACT TO TSV FORMAT
         </button>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">EXTRACTED TSV (Copy and paste into Bulk Upload section above)</label>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">EXTRACTED TSV (Zoom & Nexield Auto-Identified)</label>
           <textarea id="extractorOutput" rows="6" placeholder="Generated TSV output yahan aayega..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
       </div>
@@ -339,11 +342,10 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Helper: Get video duration via a hidden video element (Free client-side)
     function getDurationFromUrl(url) {
       return new Promise((resolve) => {
-        if (!url) {
-          resolve("HD Session");
+        if (!url || url.includes("zoom")) {
+          resolve("Live / Zoom Session");
           return;
         }
         const tempVideo = document.createElement('video');
@@ -356,7 +358,7 @@
             resolved = true;
             resolve("HD Session");
           }
-        }, 4000); // 4 second timeout fallback
+        }, 4000);
 
         tempVideo.onloadedmetadata = function() {
           if (!resolved) {
@@ -366,7 +368,6 @@
             const totalSeconds = Math.round(tempVideo.duration);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            
             let formatted = "";
             if (minutes > 0) formatted += `${minutes} Mins `;
             if (seconds > 0 && minutes < 5) formatted += `${seconds} Secs`;
@@ -384,7 +385,6 @@
       });
     }
 
-    // Single Lecture Auto-Duration Fetch on URL change
     window.fetchVideoDuration = async function(videoUrl, durationInputId) {
       if (!videoUrl) return;
       const durationInput = document.getElementById(durationInputId);
@@ -393,12 +393,11 @@
       durationInput.value = detected;
     };
 
-    // Helper to generate a smart tactical description from chapter / title for Bulk
     function generateSmartDescription(subject, title) {
       return `Comprehensive tactical briefing and high-yield concept masterclass covering ${title} under the ${subject} operational module. Recommended for structured defense exam preparation.`;
     }
 
-    // 1. Single Lecture Dispatch with Manual Description and Auto Duration
+    // 1. Single Lecture Dispatch
     window.dispatchSingleLecture = async () => {
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
@@ -447,7 +446,7 @@
       }
     };
 
-    // 2. Bulk TSV Dispatch with Auto Duration and Auto Description
+    // 2. Bulk TSV Dispatch with Smart Zoom / Nexield handling
     window.dispatchBulkTsv = async () => {
       const squadron = document.getElementById("bulkSquadron").value;
       const subject = document.getElementById("bulkSubject").value.trim();
@@ -461,7 +460,7 @@
 
       const lines = tsv.split('\n');
       const btn = document.getElementById("bulkSubmitBtn");
-      btn.innerText = "PROCESSING BULK & FETCHING DURATIONS...";
+      btn.innerText = "PROCESSING BULK...";
       btn.disabled = true;
 
       try {
@@ -478,26 +477,17 @@
 
           const sNo = parseInt(parts[0].trim()) || (i + 1);
           const fullTitle = parts[1].trim();
-          const url = parts[2].trim();
+          let url = parts[2].trim();
 
           const autoDuration = await getDurationFromUrl(url);
           const autoDescription = generateSmartDescription(subject, fullTitle);
 
-          let chapterName = "General Module";
+          let chapterName = "Core Concepts";
           const lower = fullTitle.toLowerCase();
           if (lower.includes("ratio")) chapterName = "Ratio & Proportion";
           else if (lower.includes("percentage")) chapterName = "Percentage";
-          else if (lower.includes("time and work")) chapterName = "Time & Work";
-          else if (lower.includes("speed") || lower.includes("distance")) chapterName = "Speed, Time & Distance";
-          else if (lower.includes("profit")) chapterName = "Profit & Loss";
-          else if (lower.includes("average")) chapterName = "Average";
-          else if (lower.includes("geometry")) chapterName = "Geometry";
-          else if (lower.includes("mensuration")) chapterName = "Mensuration";
-          else if (lower.includes("trigonometry")) chapterName = "Trigonometry";
-          else {
-            const words = fullTitle.replace(/^[0-9.]+\s*/, '').split(' ');
-            chapterName = words.slice(0, 2).join(' ') || "Core Concepts";
-          }
+          else if (lower.includes("vocab")) chapterName = "Vocabulary";
+          else if (lower.includes("idiom")) chapterName = "Idioms & Phrases";
 
           const docRef = doc(collection(db, "tactical_curriculum"));
           batch.set(docRef, {
@@ -527,17 +517,17 @@
           await batch.commit();
         }
 
-        showStatus(`[BULK SUCCESS] ${count} Lectures dispatched with auto-fetched durations and descriptions!`, true);
+        showStatus(`[BULK SUCCESS] ${count} Lectures dispatched successfully!`, true);
         document.getElementById("bulkTsvData").value = "";
       } catch (e) {
         showStatus(`[BULK FAILURE] Error: ${e.message}`, false);
       } finally {
-        btn.innerText = "EXECUTE BULK BATCH DISPATCH (AUTO DURATION & DESCRIPTION)";
+        btn.innerText = "EXECUTE BULK BATCH DISPATCH (AUTO DETECT ZOOM/NEXIELD)";
         btn.disabled = false;
       }
     };
 
-    // 3. Nexield HTML Link Extractor Logic
+    // 3. Smart Link Extractor Logic (Auto-Identifies Zoom vs Nexield/Vimeo)
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
@@ -547,17 +537,34 @@
         return;
       }
 
-      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
+      // Regex to capture playLesson calls: playLesson('Title', 'token', 'type')
+      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?\s*\)/g;
       
       let match;
       let tsvResult = "";
       let count = 1;
+      let zoomCount = 0;
+      let nexieldCount = 0;
 
       while ((match = regex.exec(html)) !== null) {
         const title = match[1];
         const token = match[2];
+        const linkType = match[3] || 'zoom';
         
-        const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+        let fullUrl = "";
+        
+        // Auto-detect if link or token contains Zoom or is direct zoom url
+        if (token.includes("zoom") || token.startsWith("http") && token.includes("zoom")) {
+          fullUrl = token; // Direct Zoom URL
+          zoomCount++;
+        } else if (linkType === 'vimeo') {
+          fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+          nexieldCount++;
+        } else {
+          // Default to zoomp or standard nexield proxy
+          fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+          zoomCount++;
+        }
         
         tsvResult += `${count}\t${title}\t${fullUrl}\n`;
         count++;
@@ -567,7 +574,7 @@
         outputEl.value = "❌ No matching playLesson links found in this HTML!";
       } else {
         outputEl.value = tsvResult;
-        showStatus(`[EXTRACTED] Successfully converted ${count - 1} links to TSV!`, true);
+        showStatus(`[SMART EXTRACTED] Converted ${count - 1} links! (Zoom/Streams: ${zoomCount}, Other/Vimeo: ${nexieldCount})`, true);
       }
     };
 
