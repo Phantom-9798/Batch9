@@ -197,7 +197,7 @@
       <!-- ================= MODE 3: SMART LINK EXTRACTOR (ZOOM/NEXIELD) ================= -->
       <div id="extractorSection" class="hidden space-y-4">
         <div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl">
-          <p class="text-xs text-purple-300 font-mono">💡 <strong>Smart Extractor Active:</strong> Yeh extractor HTML code ko scan karke automáticamente pehchan lega ki kaun sa link Zoom ka hai aur kaun sa Nexield/Vimeo ka, aur uske hisab se sahi format generate karega!</p>
+          <p class="text-xs text-purple-300 font-mono">💡 <strong>Smart Extractor Active:</strong> Yeh extractor HTML code ko scan karke automatically pehchan lega ki kaun sa link Zoom ka hai aur kaun sa Nexield/Vimeo ka, aur uske hisab se sahi format generate karega!</p>
         </div>
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE LECTURES PAGE HTML CODE</label>
@@ -446,7 +446,7 @@
       }
     };
 
-    // 2. Bulk TSV Dispatch with Smart Zoom / Nexield handling
+    // 2. Bulk TSV Dispatch
     window.dispatchBulkTsv = async () => {
       const squadron = document.getElementById("bulkSquadron").value;
       const subject = document.getElementById("bulkSubject").value.trim();
@@ -522,12 +522,12 @@
       } catch (e) {
         showStatus(`[BULK FAILURE] Error: ${e.message}`, false);
       } finally {
-        btn.innerText = "EXECUTE BULK BATCH DISPATCH (AUTO DETECT ZOOM/NEXIELD)";
+        btn.innerText = "EXECUTE BULK BATCH DISPATCH";
         btn.disabled = false;
       }
     };
 
-    // 3. Smart Link Extractor Logic (Auto-Identifies Zoom vs Nexield/Vimeo)
+    // 3. SMART LINK EXTRACTOR LOGIC (Universal Zoom / Nexield / Vimeo Auto-Detection)
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
@@ -549,21 +549,31 @@
       while ((match = regex.exec(html)) !== null) {
         const title = match[1];
         const token = match[2];
-        const linkType = match[3] || 'zoom';
+        const linkType = (match[3] || '').toLowerCase();
         
         let fullUrl = "";
-        
-        // Auto-detect if link or token contains Zoom or is direct zoom url
-        if (token.includes("zoom") || token.startsWith("http") && token.includes("zoom")) {
-          fullUrl = token; // Direct Zoom URL
+        const lowerToken = token.toLowerCase();
+
+        // Check if it's Zoom or if linkType explicitly specifies zoom
+        if (lowerToken.includes("zoom") || linkType === 'zoom' || (token.startsWith("http") && token.includes("zoom"))) {
+          if (token.startsWith("http")) {
+            fullUrl = token;
+          } else {
+            fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+          }
           zoomCount++;
-        } else if (linkType === 'vimeo') {
-          fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+        } else if (linkType === 'vimeo' || lowerToken.includes("vimeo")) {
+          fullUrl = `https://vimp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
           nexieldCount++;
         } else {
-          // Default to zoomp or standard nexield proxy
-          fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-          zoomCount++;
+          // If type is not explicitly vimeo or token indicates zoom stream, route safely
+          if (linkType === 'zoom' || lowerToken.includes('zoom')) {
+            fullUrl = `https://zoomp.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+            zoomCount++;
+          } else {
+            fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+            nexieldCount++;
+          }
         }
         
         tsvResult += `${count}\t${title}\t${fullUrl}\n`;
@@ -574,7 +584,7 @@
         outputEl.value = "❌ No matching playLesson links found in this HTML!";
       } else {
         outputEl.value = tsvResult;
-        showStatus(`[SMART EXTRACTED] Converted ${count - 1} links! (Zoom/Streams: ${zoomCount}, Other/Vimeo: ${nexieldCount})`, true);
+        showStatus(`[SMART EXTRACTED] Converted ${count - 1} links! (Zoom/Live: ${zoomCount}, Nexield/Vimeo: ${nexieldCount})`, true);
       }
     };
 
