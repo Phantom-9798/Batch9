@@ -241,6 +241,7 @@
       border-radius: 0.75rem;
     }
 
+    /* FULLSCREEN STRETCH FIX FOR ALL ELEMENTS */
     #phantomConsoleScreen:fullscreen,
     #phantomConsoleScreen:-webkit-full-screen,
     #phantomConsoleScreen:-ms-fullscreen {
@@ -249,6 +250,22 @@
       max-width: none !important;
       max-height: none !important;
       border-radius: 0 !important;
+      background: #000 !important;
+    }
+
+    #phantomConsoleScreen:fullscreen .zoom-box,
+    #phantomConsoleScreen:-webkit-full-screen .zoom-box,
+    #phantomConsoleScreen:-ms-fullscreen .zoom-box {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    #phantomConsoleScreen:fullscreen .zoom-frame,
+    #phantomConsoleScreen:-webkit-full-screen .zoom-frame,
+    #phantomConsoleScreen:-ms-fullscreen .zoom-frame {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
     }
 
     /* TOP-RIGHT PERMANENT HUD BAR (SPEED + FULLSCREEN) */
@@ -315,7 +332,7 @@
       pointer-events: none;
     }
 
-    /* ZOOM & DIRECT LINK CONTAINER (FULLSCREEN STRETCH FIX) */
+    /* ZOOM & DIRECT LINK CONTAINER */
     .zoom-box {
       position: relative;
       width: 100%;
@@ -331,7 +348,7 @@
       width: 100% !important;
       height: 100% !important;
       border: none;
-      object-fit: fill; /* Forces the video/stream to stretch and fill the screen completely on fullscreen */
+      object-fit: fill;
     }
 
     /* YOUTUBE ENGINE */
@@ -711,7 +728,7 @@
       }
     }
 
-    // ENHANCED TACTICAL FULLSCREEN (FORCES FULL VIEWPORT & STRETCH)
+    // ENHANCED TACTICAL FULLSCREEN
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
