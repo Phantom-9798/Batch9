@@ -57,6 +57,11 @@
       border: 1px solid rgba(245, 158, 11, 0.4);
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 0, 0, 0.8);
     }
+    /* Disabled button style */
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed !important;
+    }
   </style>
 </head>
 
@@ -101,31 +106,31 @@
       <div class="space-y-4 font-body pt-2 text-center">
         <p id="targetInstruction" class="text-xs font-mono text-neutral-300 uppercase tracking-wider leading-relaxed">Scanning operational window...</p>
 
-        <!-- 1. MORNING SECTION (Send & Confirmation Button mandatory) -->
+        <!-- 1. MORNING SECTION -->
         <div id="morningSection" class="hidden space-y-4">
           <a href="#" onclick="openTelegramMorning(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
             <span>📷</span> Send your today's target
           </a>
 
-          <!-- Confirmation Box (Ye ab hamesha dikhega morning section ke sath taaki bacha click kar sake) -->
+          <!-- Confirmation Box (Initially Disabled until Telegram link is clicked) -->
           <div id="morningConfirmBox" class="p-4 rounded-xl bg-blue-950/70 border border-blue-500 space-y-3">
-            <p class="text-xs text-blue-300 font-mono">Telegram par photo bhejne ke baad niche click karein:</p>
-            <button onclick="submitMorningProof()" class="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+            <p id="morningInstructionText" class="text-xs text-amber-300 font-mono">⚠️ Pehle upar wale button par click karke Telegram par photo bhejiye!</p>
+            <button id="morningSubmitBtn" onclick="submitMorningProof()" disabled class="w-full py-3 rounded-lg bg-emerald-600 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition shadow-md">
               I have sent target proof &rarr; Enter Classroom
             </button>
           </div>
         </div>
 
-        <!-- 2. EVENING SECTION (Active after 4:00 PM ONLY if morning is done) -->
+        <!-- 2. EVENING SECTION (Active after 4:00 PM) -->
         <div id="eveningSection" class="hidden space-y-4">
           <a href="#" onclick="openTelegramEvening(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
             <span>✅</span> Send your target completed photo
           </a>
 
-          <!-- Confirmation Box -->
+          <!-- Confirmation Box (Initially Disabled until Telegram link is clicked) -->
           <div id="eveningConfirmBox" class="p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-3">
-            <p class="text-xs text-emerald-300 font-mono">Telegram par completion photo bhejne ke baad niche click karein:</p>
-            <button onclick="submitEveningProof()" class="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+            <p id="eveningInstructionText" class="text-xs text-amber-300 font-mono">⚠️ Pehle upar wale button par click karke Telegram par completion photo bhejiye!</p>
+            <button id="eveningSubmitBtn" onclick="submitEveningProof()" disabled class="w-full py-3 rounded-lg bg-emerald-600 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition shadow-md">
               I have sent target completed photo &rarr; Enter Classroom
             </button>
           </div>
@@ -170,7 +175,6 @@
 
     let currentCadetName = "Cadet";
 
-    // Helper: Calculate Target Cycle Date (Resets daily at 6:00 AM)
     function getTacticalCycleDate() {
       const now = new Date();
       if (now.getHours() < 6) {
@@ -229,7 +233,6 @@
       const instruction = document.getElementById("targetInstruction");
       const badge = document.getElementById("dispatchStatusBadge");
 
-      // Agar dono targets done hain toh seedha classroom bhejo
       if (currentHour >= 16 && morningDone && eveningDone) {
         window.location.href = "classroom.html";
         return;
@@ -243,28 +246,33 @@
         badge.innerText = "Morning Window";
         if (!morningDone) {
           morningSec.classList.remove("hidden");
-          instruction.innerText = "Send your today's target photo via Telegram, then click 'I have sent target proof' to enter classroom.";
+          instruction.innerText = "Pehle Telegram par target photo bhejiye, tab niche wala button enable hoga.";
         }
       } else {
-        // Shaam 4:00 PM ke baad
         badge.innerText = "Evening Window";
         if (!morningDone) {
           morningSec.classList.remove("hidden");
           instruction.innerText = "ACCESS RESTRICTED: Pehle apna morning target submit karo!";
         } else if (!eveningDone) {
           eveningSec.classList.remove("hidden");
-          instruction.innerText = "Send your target completed photo via Telegram, then click confirmation below.";
+          instruction.innerText = "Pehle Telegram par completion photo bhejiye, tab niche wala button enable hoga.";
         } else {
           window.location.href = "classroom.html";
         }
       }
     }
 
-    // Telegram Open Handlers
+    // 1. Morning Telegram Click -> Enables the submit button
     window.openTelegramMorning = (e) => {
       e.preventDefault();
       const msg = encodeURIComponent(`🎯 *MORNING TARGET SUBMISSION*\nCadet: ${currentCadetName}\nStatus: Sending today's target photo! 🟢`);
       window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      
+      // Enable the confirmation button & update instruction text
+      const btn = document.getElementById("morningSubmitBtn");
+      btn.disabled = false;
+      document.getElementById("morningInstructionText").innerText = "✅ Link opened. Ab aap confirmation button click kar sakte hain!";
+      document.getElementById("morningInstructionText").className = "text-xs text-emerald-400 font-mono";
     };
 
     window.submitMorningProof = async () => {
@@ -284,10 +292,17 @@
       }
     };
 
+    // 2. Evening Telegram Click -> Enables the submit button
     window.openTelegramEvening = (e) => {
       e.preventDefault();
       const msg = encodeURIComponent(`✅ *TARGET COMPLETED PHOTO*\nCadet: ${currentCadetName}\nStatus: Sending evening completion photo! 🟢`);
       window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      
+      // Enable the confirmation button & update instruction text
+      const btn = document.getElementById("eveningSubmitBtn");
+      btn.disabled = false;
+      document.getElementById("eveningInstructionText").innerText = "✅ Link opened. Ab aap confirmation button click kar sakte hain!";
+      document.getElementById("eveningInstructionText").className = "text-xs text-emerald-400 font-mono";
     };
 
     window.submitEveningProof = async () => {
