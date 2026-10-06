@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <script>
+    // ================= TIGHT SECURITY & TAMPER BLOCK =================
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+      setInterval(() => {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100) {
+          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;font-family:monospace;">SECURITY ALERT: TACTICAL TAMPER DETECTED. ACCESS TERMINATED.</h2>';
+        }
+      }, 1000);
+    })();
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM PHANTOM | Daily Target Dispatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Rajdhani', sans-serif; background-color: #05080c; }
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
+    .tactical-bg {
+      background: radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.15) 0%, transparent 55%),
+                  radial-gradient(circle at 15% 45%, rgba(14, 165, 233, 0.12) 0%, transparent 45%),
+                  linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%);
+      background-size: cover; background-position: center; min-height: 100vh;
+    }
+    .hud-grid {
+      background-image: linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .armor-card {
+      background: rgba(10, 15, 20, 0.95);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+
+<body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between p-4 sm:p-6 select-none">
+
+  <header class="max-w-3xl mx-auto w-full text-center mb-6">
+    <h1 class="font-stencil text-3xl sm:text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 drop-shadow-md">
+      TEAM PHANTOM
+    </h1>
+    <h2 class="font-orbitron text-base sm:text-lg tracking-widest text-neutral-300 mt-1 uppercase font-bold">
+      DAILY TARGET DISPATCH TERMINAL
+    </h2>
+    <p class="text-xs font-mono text-neutral-400 mt-1">Strict Discipline &bull; Daily 6:00 AM Reset Protocol</p>
+  </header>
+
+  <main class="max-w-xl mx-auto w-full flex-grow">
+    
+    <!-- UNREGISTERED / NOT AUTHORIZED VIEW -->
+    <div id="unauthorizedView" class="armor-card rounded-2xl p-8 text-center hidden">
+      <div class="text-4xl mb-3">🔒</div>
+      <h3 class="font-orbitron text-lg font-bold text-red-400 mb-2">ACCESS RESTRICTED</h3>
+      <p class="text-xs text-neutral-400 font-body leading-relaxed">
+        Your account is not listed in the authorized target tracking roster. Contact administration.
+      </p>
+    </div>
+
+    <!-- MAIN TARGET CONSOLE -->
+    <div id="authorizedView" class="armor-card rounded-2xl p-6 sm:p-8 hidden space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-4">
+        <div>
+          <span class="text-[10px] font-orbitron text-amber-400 uppercase tracking-widest">Active Cadet</span>
+          <h2 id="cadetDisplayName" class="font-orbitron text-base font-bold text-white">Loading...</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest block">Status</span>
+          <span id="dispatchStatusBadge" class="font-orbitron text-xs text-amber-400 font-bold uppercase">Standby</span>
+        </div>
+      </div>
+
+      <!-- INSTRUCTION DISPLAY -->
+      <div class="space-y-4 font-body pt-2 text-center">
+        <p id="targetInstruction" class="text-xs font-mono text-neutral-300 uppercase tracking-wider leading-relaxed">Scanning operational window...</p>
+
+        <!-- 1. MORNING SECTION -->
+        <div id="morningSection" class="hidden space-y-4">
+          <a href="#" onclick="openTelegramMorning(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+            <span>📷</span> Send your today's target
+          </a>
+
+          <div id="morningConfirmBox" class="hidden p-4 rounded-xl bg-blue-950/70 border border-blue-500 space-y-3">
+            <p class="text-xs text-blue-300 font-mono">Have you dispatched your target proof?</p>
+            <button onclick="submitMorningProof()" class="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+              I have sent target proof &rarr; Enter Classroom
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. EVENING SECTION (Active after 4:00 PM) -->
+        <div id="eveningSection" class="hidden space-y-4">
+          <a href="#" onclick="openTelegramEvening(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+            <span>✅</span> Send your target completed photo
+          </a>
+
+          <div id="eveningConfirmBox" class="hidden p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-3">
+            <p class="text-xs text-emerald-300 font-mono">Have you dispatched your completion photo?</p>
+            <button onclick="submitEveningProof()" class="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+              I have sent target completed photo &rarr; Enter Classroom
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-3xl mx-auto w-full text-center py-4 text-xs font-rajdhani tracking-widest text-neutral-500 border-t border-neutral-900 mt-6">
+    TEAM PHANTOM &bull; DAILY TARGET DISPATCH &bull; &copy; 2026
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const AUTHORIZED_EMAILS = [
+      "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
+      "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
+      "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
+      "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
+      "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
+      "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
+      "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
+      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
+    ];
+
+    let currentCadetName = "Cadet";
+
+    // Helper: Calculate Target Cycle Date (Resets daily at 6:00 AM)
+    function getTacticalCycleDate() {
+      const now = new Date();
+      // Agar subah ke 6 baje se pehle ka waqt hai, toh use pichle din ka cycle mana jayega
+      if (now.getHours() < 6) {
+        now.setDate(now.getDate() - 1);
+      }
+      return now.toDateString();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      try {
+        const userEmail = user.email;
+        if (!AUTHORIZED_EMAILS.includes(userEmail)) { 
+          document.getElementById('unauthorizedView').classList.remove('hidden'); 
+          return; 
+        }
+
+        const cadetRef = doc(db, "daily_target_students", user.uid);
+        let cadetSnap = await getDoc(cadetRef);
+
+        if (!cadetSnap.exists()) {
+          await setDoc(cadetRef, {
+            email: userEmail,
+            name: user.displayName || "Cadet",
+            morningTargetDoneCycle: "",
+            eveningTargetDoneCycle: "",
+            lastSubmissionTimestamp: 0
+          });
+          cadetSnap = await getDoc(cadetRef);
+        }
+
+        const cadetData = cadetSnap.data();
+        currentCadetName = cadetData.name || "Cadet";
+
+        document.getElementById('authorizedView').classList.remove('hidden');
+        document.getElementById('cadetDisplayName').innerText = currentCadetName;
+
+        evaluateTimeAndStatus(cadetData);
+
+      } catch (e) {
+        console.error("Auth Dispatch Error:", e);
+        document.getElementById('unauthorizedView').classList.remove('hidden');
+      }
+    });
+
+    function evaluateTimeAndStatus(cadetData) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentCycleStr = getTacticalCycleDate();
+
+      const morningDone = cadetData.morningTargetDoneCycle === currentCycleStr;
+      const eveningDone = cadetData.eveningTargetDoneCycle === currentCycleStr;
+
+      const morningSec = document.getElementById("morningSection");
+      const eveningSec = document.getElementById("eveningSection");
+      const instruction = document.getElementById("targetInstruction");
+      const badge = document.getElementById("dispatchStatusBadge");
+
+      // Agar subah 6 AM ke baad ka naya din shuru ho gaya hai, aur target done hain toh classroom jane do
+      if (currentHour >= 16 && morningDone && eveningDone) {
+        window.location.href = "classroom.html";
+        return;
+      }
+      if (currentHour >= 6 && currentHour < 16 && morningDone) {
+        window.location.href = "classroom.html";
+        return;
+      }
+
+      if (currentHour >= 6 && currentHour < 16) {
+        badge.innerText = "Morning Window";
+        if (!morningDone) {
+          morningSec.classList.remove("hidden");
+          instruction.innerText = "Send your today's target photo via Telegram to proceed.";
+        }
+      } else {
+        // Shaam 4:00 PM ke baad ya raat/subah 6 baje se pehle
+        badge.innerText = "Evening Window";
+        if (!morningDone) {
+          morningSec.classList.remove("hidden");
+          instruction.innerText = "ACCESS RESTRICTED: Pehle apna morning target submit karo!";
+        } else if (!eveningDone) {
+          eveningSec.classList.remove("hidden");
+          instruction.innerText = "Send your target completed photo via Telegram.";
+        } else {
+          window.location.href = "classroom.html";
+        }
+      }
+    }
+
+    // Telegram Open Handlers
+    window.openTelegramMorning = (e) => {
+      e.preventDefault();
+      const msg = encodeURIComponent(`🎯 *MORNING TARGET SUBMISSION*\nCadet: ${currentCadetName}\nStatus: Sending today's target photo! 🟢`);
+      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      document.getElementById('morningConfirmBox').classList.remove('hidden');
+    };
+
+    window.submitMorningProof = async () => {
+      const user = auth.currentUser;
+      const currentCycleStr = getTacticalCycleDate();
+      if (user) {
+        try {
+          await updateDoc(doc(db, "daily_target_students", user.uid), {
+            morningTargetDoneCycle: currentCycleStr,
+            lastSubmissionTimestamp: Date.now()
+          });
+          alert("Morning Proof Recorded! Entering Classroom...");
+          window.location.href = "classroom.html";
+        } catch (err) {
+          alert("Dispatch error. Please try again.");
+        }
+      }
+    };
+
+    window.openTelegramEvening = (e) => {
+      e.preventDefault();
+      const msg = encodeURIComponent(`✅ *TARGET COMPLETED PHOTO*\nCadet: ${currentCadetName}\nStatus: Sending evening completion photo! 🟢`);
+      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      document.getElementById('eveningConfirmBox').classList.remove('hidden');
+    };
+
+    window.submitEveningProof = async () => {
+      const user = auth.currentUser;
+      const currentCycleStr = getTacticalCycleDate();
+      if (user) {
+        try {
+          await updateDoc(doc(db, "daily_target_students", user.uid), {
+            eveningTargetDoneCycle: currentCycleStr,
+            lastSubmissionTimestamp: Date.now()
+          });
+          alert("Evening Completion Proof Recorded! Entering Classroom...");
+          window.location.href = "classroom.html";
+        } catch (err) {
+          alert("Dispatch error. Please try again.");
+        }
+      }
+    };
+  </script>
+
+</body>
+</html>
