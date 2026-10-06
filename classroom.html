@@ -1,35 +1,33 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-<!-- ================= EVENING TARGET POPUP BANNER (Appears after 4 PM if pending) ================= -->
-<div id="eveningPopupBanner" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
+<!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM ONLY if morning target is done) -->
+<div id="globalEveningPopup" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
   <div class="flex items-center gap-3">
     <span class="text-2xl">⚠️</span>
     <div>
       <h4 class="font-orbitron text-sm font-bold text-amber-400">TACTICAL ALERT: EVENING TARGET PROOF PENDING</h4>
-      <p class="text-xs text-neutral-300">Aapka aaj ka evening/night target completion proof abhi tak submit nahi hua hai. Kripya apna task complete karke proof submit karein.</p>
+      <p class="text-xs text-neutral-300">Shyam ke 4 baj chuke hain aur morning verified hai. Kripya apna evening target proof submit karein.</p>
     </div>
   </div>
   <button onclick="window.location.href='targets.html'" class="whitespace-nowrap px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
-    SUBMIT PROOF NOW &rarr;
+    SUBMIT EVENING PROOF &rarr;
   </button>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const firebaseConfig = {
+  const app = initializeApp({
     apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
     authDomain: "team-phantom-enrollment.firebaseapp.com",
     projectId: "team-phantom-enrollment",
     storageBucket: "team-phantom-enrollment.firebasestorage.app",
     messagingSenderId: "658049687096",
     appId: "1:658049687096:web:8464788a43126a6bced0cd"
-  };
-
-  const app = initializeApp(firebaseConfig);
+  });
   const auth = getAuth(app);
   const db = getFirestore(app);
 
@@ -45,48 +43,30 @@
   ];
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "index.html";
-      return;
-    }
+    if (user) {
+      try {
+        const userEmail = user.email;
+        if (!AUTHORIZED_TARGET_EMAILS.includes(userEmail)) return;
 
-    try {
-      const userEmail = user.email;
-      const isAllowed = AUTHORIZED_TARGET_EMAILS.includes(userEmail);
+        const snap = await getDoc(doc(db, "cadets", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const today = new Date().toDateString();
+          const currentHour = new Date().getHours();
 
-      if (!isAllowed) {
-        return; // Agar list me nahi hai toh classroom ka default access jo hai rehne do
+          const eveningTimeReached = currentHour >= 16; // 4 PM ke baad
+          const morningDone = data.morningTargetDoneDate === today; // KYA SUBAH KA KIYA HAI?
+          const eveningDone = data.eveningTargetDoneDate === today;
+
+          // STRICT CHECK: 4 baje ke baad, subah ka kiya ho, aur sham ka baki ho, tabhi popup dikhao
+          if (eveningTimeReached && morningDone && !eveningDone) {
+            const popup = document.getElementById("globalEveningPopup");
+            if (popup) popup.classList.remove("hidden");
+          }
+        }
+      } catch (err) {
+        console.error("Global Popup Error:", err);
       }
-
-      const cadetRef = doc(db, "cadets", user.uid);
-      let cadetSnap = await getDoc(cadetRef);
-      const today = new Date().toDateString();
-
-      // Agar database me cadet ka record nahi hai, toh turant naya record banao
-      if (!cadetSnap.exists()) {
-        await setDoc(cadetRef, {
-          email: userEmail,
-          name: user.displayName || "Cadet",
-          streak: 0,
-          morningTargetDoneDate: "", // Khali rakhna zaroori hai taaki target page khule!
-          eveningTargetDoneDate: "",
-          lastSubmissionTimestamp: 0
-        });
-        // Naya record bante hi turant targets.html par bhej do
-        window.location.href = "targets.html";
-        return;
-      }
-
-      const data = cadetSnap.data();
-      const morningDone = data.morningTargetDoneDate === today;
-
-      // STRICT CHECK: Agar subah ka target aaj ki date me done nahi hai, toh classroom mat kholne do, seedha targets.html bhejo!
-      if (!morningDone) {
-        window.location.href = "targets.html";
-      }
-
-    } catch (err) {
-      console.error("Classroom Guard Error:", err);
     }
   });
 </script>
