@@ -428,7 +428,7 @@
       return now.toDateString();
     }
 
-    // Load Target Monitor Data with 3+ days inactive strict check
+    // Load Target Monitor Data with Strict Independent Morning/Evening Check
     window.loadTargetMonitor = async () => {
       const completedBody = document.getElementById("completedTableBody");
       const defaultersBody = document.getElementById("defaultersTableBody");
@@ -458,17 +458,22 @@
             const eveningCycle = data.eveningTargetDoneCycle || "";
             
             const timeSinceLastSubmit = now - lastTimestamp;
-            
-            // STRICT 3+ DAYS CHECK: Sirf tabhi inactive mana jayega jab last submission ko 3 din ya usse zyada ho gaye hon
             const isInactive = lastTimestamp === 0 || timeSinceLastSubmit >= threeDaysMs;
 
-            const isMorningDone = morningCycle === currentCycleStr;
-            const isEveningDone = eveningCycle === currentCycleStr;
+            // INDEPENDENT STATUS CHECK
+            const isMorningDone = (morningCycle === currentCycleStr);
+            const isEveningDone = (eveningCycle === currentCycleStr);
 
-            // SECTION 1: Daily Target Status (Morning & Evening)
+            // SECTION 1: Daily Target Status (Morning & Evening Alag-Alag)
             statusCount++;
-            const morningBadge = isMorningDone ? `<span class="text-emerald-400 font-bold">Done ✅</span>` : `<span class="text-red-400 font-bold">Pending ❌</span>`;
-            const eveningBadge = isEveningDone ? `<span class="text-emerald-400 font-bold">Done ✅</span>` : `<span class="text-red-400 font-bold">Pending ❌</span>`;
+            const morningBadge = isMorningDone 
+              ? `<span class="text-emerald-400 font-bold">Done ✅</span>` 
+              : `<span class="text-red-400 font-bold">Pending ❌</span>`;
+            
+            const eveningBadge = isEveningDone 
+              ? `<span class="text-emerald-400 font-bold">Done ✅</span>` 
+              : `<span class="text-red-400 font-bold">Pending ❌</span>`;
+
             const overallBadge = (isMorningDone && isEveningDone) 
               ? `<span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Completed 🔥</span>`
               : `<span class="px-2 py-0.5 rounded bg-amber-950/80 text-amber-400 border border-amber-500/40 text-[10px] font-bold">Incomplete ⏳</span>`;
@@ -485,7 +490,7 @@
               </tr>
             `;
 
-            // SECTION 2: Inactive Defaulters (Sirf 3+ days continuous gap hone par hi show hoga, submission hote hi hat jayega)
+            // SECTION 2: Inactive Defaulters (3+ Days Pending)
             if (isInactive) {
               defaultersCount++;
               const lastDateStr = lastTimestamp ? new Date(lastTimestamp).toLocaleString() : "Never Submitted";
