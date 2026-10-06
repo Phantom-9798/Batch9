@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
- <!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM only for authorized cadets if pending) -->
+<!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM ONLY if morning target is done) -->
 <div id="globalEveningPopup" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
   <div class="flex items-center gap-3">
     <span class="text-2xl">⚠️</span>
     <div>
       <h4 class="font-orbitron text-sm font-bold text-amber-400">TACTICAL ALERT: EVENING TARGET PROOF PENDING</h4>
-      <p class="text-xs text-neutral-300">Shyam ke 4 baj chuke hain. Kripya apna evening target complete karke proof submit karein.</p>
+      <p class="text-xs text-neutral-300">Shyam ke 4 baj chuke hain aur morning verified hai. Kripya apna evening target proof submit karein.</p>
     </div>
   </div>
   <button onclick="window.location.href='targets.html'" class="whitespace-nowrap px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
-    SUBMIT PROOF NOW &rarr;
+    SUBMIT EVENING PROOF &rarr;
   </button>
 </div>
 
@@ -31,7 +31,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Wahi authorized emails ki list jo hamari main file me hai
   const AUTHORIZED_TARGET_EMAILS = [
     "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
     "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
@@ -47,11 +46,7 @@
     if (user) {
       try {
         const userEmail = user.email;
-        
-        // 1. Pehle check karo ki user authorized list me hai ya nahi
-        if (!AUTHORIZED_TARGET_EMAILS.includes(userEmail)) {
-          return; // Agar list me nahi hai, toh chupचाप wapas chale jao, popup mat dikhao
-        }
+        if (!AUTHORIZED_TARGET_EMAILS.includes(userEmail)) return;
 
         const snap = await getDoc(doc(db, "cadets", user.uid));
         if (snap.exists()) {
@@ -60,10 +55,11 @@
           const currentHour = new Date().getHours();
 
           const eveningTimeReached = currentHour >= 16; // 4 PM ke baad
+          const morningDone = data.morningTargetDoneDate === today; // KYA SUBAH KA KIYA HAI?
           const eveningDone = data.eveningTargetDoneDate === today;
 
-          // 2. Sirf tabhi dikhao jab 4 baj chuke hon AUR evening target pending ho
-          if (eveningTimeReached && !eveningDone) {
+          // STRICT CHECK: 4 baje ke baad, subah ka kiya ho, aur sham ka baki ho, tabhi popup dikhao
+          if (eveningTimeReached && morningDone && !eveningDone) {
             const popup = document.getElementById("globalEveningPopup");
             if (popup) popup.classList.remove("hidden");
           }
