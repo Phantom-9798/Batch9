@@ -115,7 +115,7 @@
           </div>
         </div>
 
-        <!-- 2. EVENING SECTION (Active after 4:00 PM) -->
+        <!-- 2. EVENING SECTION (Active after 4:00 PM ONLY if morning is done) -->
         <div id="eveningSection" class="hidden space-y-4">
           <a href="#" onclick="openTelegramEvening(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
             <span>✅</span> Send your target completed photo
@@ -171,7 +171,6 @@
     // Helper: Calculate Target Cycle Date (Resets daily at 6:00 AM)
     function getTacticalCycleDate() {
       const now = new Date();
-      // Agar subah ke 6 baje se pehle ka waqt hai, toh use pichle din ka cycle mana jayega
       if (now.getHours() < 6) {
         now.setDate(now.getDate() - 1);
       }
@@ -211,7 +210,7 @@
 
       } catch (e) {
         console.error("Auth Dispatch Error:", e);
-        document.getElementById('unauthorizedView').classList.remove('hidden');
+        document.getElementById('unauthorizedView').classList.add('hidden');
       }
     });
 
@@ -228,7 +227,7 @@
       const instruction = document.getElementById("targetInstruction");
       const badge = document.getElementById("dispatchStatusBadge");
 
-      // Agar subah 6 AM ke baad ka naya din shuru ho gaya hai, aur target done hain toh classroom jane do
+      // Agar dono targets done hain toh seedha classroom bhejo
       if (currentHour >= 16 && morningDone && eveningDone) {
         window.location.href = "classroom.html";
         return;
@@ -245,12 +244,14 @@
           instruction.innerText = "Send your today's target photo via Telegram to proceed.";
         }
       } else {
-        // Shaam 4:00 PM ke baad ya raat/subah 6 baje se pehle
+        // Shaam 4:00 PM ke baad
         badge.innerText = "Evening Window";
         if (!morningDone) {
+          // STRICT RULE: Agar subah ka nahi kiya, toh evening show hi nahi hoga, sirf morning block dikhega
           morningSec.classList.remove("hidden");
           instruction.innerText = "ACCESS RESTRICTED: Pehle apna morning target submit karo!";
         } else if (!eveningDone) {
+          // Subah ho chuka hai, tabhi evening section dikhao
           eveningSec.classList.remove("hidden");
           instruction.innerText = "Send your target completed photo via Telegram.";
         } else {
