@@ -98,34 +98,38 @@
         </div>
       </div>
 
-      <!-- ACTION BUTTONS CONTAINER -->
+      <!-- TIME-BASED DYNAMIC ACTION CONTAINER -->
       <div class="space-y-4 font-body pt-2">
-        <p class="text-xs font-mono text-neutral-400 text-center uppercase tracking-wider">Select operational action below:</p>
+        <p id="targetInstruction" class="text-xs font-mono text-neutral-400 text-center uppercase tracking-wider">Scanning operational status...</p>
 
-        <!-- 1. Send Target Photo (Morning) -->
-        <a id="sendTargetBtn" href="#" onclick="prepareTargetTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
-          <span>📷</span> 1. SEND TARGET PHOTO (TELEGRAM)
-        </a>
+        <!-- 1. MORNING TARGET SECTION (Visible before 4 PM) -->
+        <div id="morningSection" class="hidden space-y-3">
+          <a id="sendTargetBtn" href="#" onclick="prepareTargetTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+            <span>📷</span> 1. SEND MORNING TARGET PHOTO
+          </a>
 
-        <!-- Morning Confirmation Box (Appears after clicking Telegram button) -->
-        <div id="morningConfirmBox" class="hidden p-4 rounded-xl bg-blue-950/70 border border-blue-500 space-y-2 text-center">
-          <p class="text-xs text-blue-300 font-mono">Kya aapne Telegram par photo bhej di hai?</p>
-          <button onclick="confirmMorningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
-            YES, I HAVE SENT &rarr; UNLOCK CLASSROOM
-          </button>
+          <!-- Morning Confirmation Box -->
+          <div id="morningConfirmBox" class="hidden p-4 rounded-xl bg-blue-950/70 border border-blue-500 space-y-2 text-center">
+            <p class="text-xs text-blue-300 font-mono">Kya aapne Telegram par morning photo bhej di hai?</p>
+            <button onclick="confirmMorningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+              YES, I HAVE SENT &rarr; UNLOCK CLASSROOM
+            </button>
+          </div>
         </div>
 
-        <!-- 2. Target Completed Proof (Evening) -->
-        <a id="completeTargetBtn" href="#" onclick="prepareCompleteTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
-          <span>✅</span> 2. TARGET COMPLETED PROOF (EVENING)
-        </a>
+        <!-- 2. EVENING TARGET SECTION (Visible only after 4 PM, provided morning is done) -->
+        <div id="eveningSection" class="hidden space-y-3">
+          <a id="completeTargetBtn" href="#" onclick="prepareCompleteTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+            <span>✅</span> 2. TARGET COMPLETED PROOF (EVENING)
+          </a>
 
-        <!-- Evening Confirmation Box (Appears after clicking Evening Telegram button) -->
-        <div id="eveningConfirmBox" class="hidden p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-2 text-center">
-          <p class="text-xs text-emerald-300 font-mono">Kya aapne evening proof bhej diya hai?</p>
-          <button onclick="confirmEveningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
-            CONFIRM & SUBMIT TO ADMIN
-          </button>
+          <!-- Evening Confirmation Box -->
+          <div id="eveningConfirmBox" class="hidden p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-2 text-center">
+            <p class="text-xs text-emerald-300 font-mono">Kya aapne evening proof bhej diya hai?</p>
+            <button onclick="confirmEveningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+              CONFIRM & SUBMIT EVENING PROOF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -183,7 +187,6 @@
           return; 
         }
 
-        // Agar naya user hai toh database me default entry bana do
         if (!cadetSnap.exists()) {
           await setDoc(cadetRef, {
             email: userEmail,
@@ -202,19 +205,58 @@
         document.getElementById('authorizedView').classList.remove('hidden');
         document.getElementById('cadetDisplayName').innerText = currentCadetName;
         document.getElementById('streakCount').innerText = `🔥 ${cadetData.streak || 0} Days`;
+
+        // Yahan time aur submission check karke button switch hoga
+        setupTimeBasedTracker(cadetData);
+
       } catch (e) {
         console.error("Auth error:", e);
+        document.getElementById('unauthorizedView').classList.add('hidden');
         document.getElementById('unauthorizedView').classList.remove('hidden');
       }
     });
 
-    // 1. Morning Target: Telegram खोलेगा, फिर यूजर खुद कन्फर्म करेगा
+    // TIME-BASED SWITCH LOGIC
+    function setupTimeBasedTracker(cadetData) {
+      const currentHour = new Date().getHours();
+      const todayStr = new Date().toDateString();
+      
+      const morningDone = cadetData.morningTargetDoneDate === todayStr;
+      const eveningDone = cadetData.eveningTargetDoneDate === todayStr;
+
+      const morningSec = document.getElementById("morningSection");
+      const eveningSec = document.getElementById("eveningSection");
+      const instruction = document.getElementById("targetInstruction");
+
+      if (currentHour < 16) {
+        // Subah 4 baje se pehle
+        if (!morningDone) {
+          morningSec.classList.remove("hidden");
+          instruction.innerText = "Morning Session: Submit morning target photo to proceed.";
+        } else {
+          instruction.innerText = "Morning target already submitted! Evening proof will unlock after 4:00 PM.";
+        }
+      } else {
+        // Sham ke 4 baje ke baad
+        if (!morningDone) {
+          // Agar kisi ne subah ka nahi kiya aur direct sham ko aa raha hai
+          morningSec.classList.remove("hidden");
+          instruction.innerText = "ACCESS DENIED: Pehle apna morning target submit karo, tabhi evening target khulega!";
+        } else if (!eveningDone) {
+          // Subah ho chuka hai, ab sirf evening button dikhao
+          eveningSec.classList.remove("hidden");
+          instruction.innerText = "Evening Session: Morning verified. Submit your evening completion proof.";
+        } else {
+          instruction.innerText = "Dono targets aaj ke liye successfully complete ho chuke hain! You are cleared.";
+        }
+      }
+    }
+
+    // 1. Morning Target
     window.prepareTargetTelegram = (e) => {
       e.preventDefault();
       const msg = encodeURIComponent(`🎯 *MORNING TARGET SUBMISSION*\nCadet: ${currentCadetName}\nStatus: Target photo ready for submission! 🟢`);
       window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
-      
-      // Confirmation box dikhao taaki bina photo bheje koi aage na badh sake
       document.getElementById('morningConfirmBox').classList.remove('hidden');
     };
 
@@ -244,7 +286,6 @@
       e.preventDefault();
       const msg = encodeURIComponent(`✅ *TARGET COMPLETED* ☑️\nCadet: ${currentCadetName}\nStatus: All assigned tasks finished successfully! 🟢 [CHECKED]`);
       window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
-      
       document.getElementById('eveningConfirmBox').classList.remove('hidden');
     };
 
