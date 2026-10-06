@@ -1,6 +1,59 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM across pages if pending) -->
+<div id="globalEveningPopup" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">⚠️</span>
+    <div>
+      <h4 class="font-orbitron text-sm font-bold text-amber-400">TACTICAL ALERT: EVENING TARGET PROOF PENDING</h4>
+      <p class="text-xs text-neutral-300">Shyam ke 4 baj chuke hain. Kripya apna evening target complete karke proof submit karein.</p>
+    </div>
+  </div>
+  <button onclick="window.location.href='targets.html'" class="whitespace-nowrap px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
+    SUBMIT PROOF NOW &rarr;
+  </button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+    authDomain: "team-phantom-enrollment.firebaseapp.com",
+    projectId: "team-phantom-enrollment",
+    storageBucket: "team-phantom-enrollment.firebasestorage.app",
+    messagingSenderId: "658049687096",
+    appId: "1:658049687096:web:8464788a43126a6bced0cd"
+  });
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const snap = await getDoc(doc(db, "cadets", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const today = new Date().toDateString();
+          const currentHour = new Date().getHours();
+
+          const eveningTimeReached = currentHour >= 16; // 4 PM ke baad
+          const eveningDone = data.eveningTargetDoneDate === today;
+
+          if (eveningTimeReached && !eveningDone) {
+            const popup = document.getElementById("globalEveningPopup");
+            if (popup) popup.classList.remove("hidden");
+          }
+        }
+      } catch (err) {
+        console.error("Global Popup Error:", err);
+      }
+    }
+  });
+</script>
 <style>
   /* 1. Corner Live Time Tracker Widget */
   #phantomStudyTimerWidget {
