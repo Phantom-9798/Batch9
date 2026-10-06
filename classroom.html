@@ -1,7 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
- <script type="module">
+<!-- ================= EVENING TARGET POPUP BANNER (Appears after 4 PM if pending) ================= -->
+<div id="eveningPopupBanner" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">⚠️</span>
+    <div>
+      <h4 class="font-orbitron text-sm font-bold text-amber-400">TACTICAL ALERT: EVENING TARGET PROOF PENDING</h4>
+      <p class="text-xs text-neutral-300">Aapka aaj ka evening/night target completion proof abhi tak submit nahi hua hai. Kripya apna task complete karke proof submit karein.</p>
+    </div>
+  </div>
+  <button onclick="window.location.href='targets.html'" class="whitespace-nowrap px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
+    SUBMIT PROOF NOW &rarr;
+  </button>
+</div>
+
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -19,7 +33,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Teri saari authorized emails ki list yahan classroom guard mein bhi daal di hai
   const AUTHORIZED_TARGET_EMAILS = [
     "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
     "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
@@ -41,25 +54,27 @@
           const today = new Date().toDateString();
           const currentHour = new Date().getHours(); // 24-hour format
 
-          // Agar user is authorized target list mein hai
-          if (AUTHORIZED_TARGET_EMAILS.includes(email) || data.targetAccess === true) {
+          if (AUTHORIZED_EMAILS.includes(email) || data.targetAccess === true) {
             
-            // 1. Check Morning Target
+            // 1. Subah ka target check: Agar subah ka nahi hua, toh seedha targets.html par kheench kar le jao (Strict Mode)
             const morningDone = data.morningTargetDoneDate === today;
-            
-            // 2. Check Evening Completion (Agar sham ke 4 ya uske baad ho gaye hain)
+            if (!morningDone) {
+              window.location.href = "targets.html";
+              return;
+            }
+
+            // 2. Sham ke 4 baje ke baad ka popup check (Hour >= 16 matlab 4 PM ke baad)
             const eveningTimeReached = currentHour >= 16;
             const eveningDone = data.eveningTargetDoneDate === today;
 
-            // Agar subah ka nahi hua, YA (sham ke 4 baj gaye hain aur raat ka proof nahi bheja)
-            if (!morningDone || (eveningTimeReached && !eveningDone)) {
-              // Turant targets.html par redirect karo!
-              window.location.href = "targets.html";
+            if (eveningTimeReached && !eveningDone) {
+              // Class room access nahi rokenge, bas upar chamakta hua popup dikha denge!
+              document.getElementById("eveningPopupBanner").classList.remove("hidden");
             }
           }
         }
       } catch (err) {
-        console.error("Classroom Guard Error:", err);
+        console.error("Popup Guard Error:", err);
       }
     }
   });
