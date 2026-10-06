@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM across pages if pending) -->
+  <!-- GLOBAL EVENING TARGET POPUP BANNER (Appears after 4 PM only for authorized cadets if pending) -->
 <div id="globalEveningPopup" class="hidden max-w-4xl mx-auto my-4 p-4 rounded-xl bg-amber-950/90 border-2 border-amber-500 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-pulse">
   <div class="flex items-center gap-3">
     <span class="text-2xl">⚠️</span>
@@ -31,9 +31,28 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Wahi authorized emails ki list jo hamari main file me hai
+  const AUTHORIZED_TARGET_EMAILS = [
+    "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
+    "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
+    "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
+    "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
+    "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
+    "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
+    "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
+    "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
+  ];
+
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
+        const userEmail = user.email;
+        
+        // 1. Pehle check karo ki user authorized list me hai ya nahi
+        if (!AUTHORIZED_TARGET_EMAILS.includes(userEmail)) {
+          return; // Agar list me nahi hai, toh chupचाप wapas chale jao, popup mat dikhao
+        }
+
         const snap = await getDoc(doc(db, "cadets", user.uid));
         if (snap.exists()) {
           const data = snap.data();
@@ -43,6 +62,7 @@
           const eveningTimeReached = currentHour >= 16; // 4 PM ke baad
           const eveningDone = data.eveningTargetDoneDate === today;
 
+          // 2. Sirf tabhi dikhao jab 4 baj chuke hon AUR evening target pending ho
           if (eveningTimeReached && !eveningDone) {
             const popup = document.getElementById("globalEveningPopup");
             if (popup) popup.classList.remove("hidden");
