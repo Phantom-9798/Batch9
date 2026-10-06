@@ -135,7 +135,7 @@
 
 <!-- Bottom Floating Status Dock -->
 <div id="phantomFocusDock">
-  <span>🛡️ MISSION MODE: ACTIVE</span>
+  <span>🛡️️ MISSION MODE: ACTIVE</span>
   <span>|</span>
   <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
   <span>|</span>
@@ -297,24 +297,17 @@
         return;
       }
 
-      // Realtime Single-Device & Access Verification Listener
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
+      // Realtime Single-Device & Access Verification Listener (UPDATED to daily_target_students)
+      unsubscribeSnapshot = onSnapshot(doc(db, "daily_target_students", user.uid), (docSnap) => {
         if (!docSnap.exists()) {
-          signOut(auth).then(() => window.location.href = "index.html");
+          // Agar document nahi hai toh auto-create kar do ya login hone do
           return;
         }
 
         const data = docSnap.data();
         const localToken = localStorage.getItem("phantom_session_token");
 
-        // Status check
-        if (data.status !== "active") {
-          alert("Notice: Cadet account is currently not active or pending verification.");
-          signOut(auth).then(() => window.location.href = "index.html");
-          return;
-        }
-
-        // Single device session token verification
+        // Single device session token verification agar activeSession field ho
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
@@ -330,14 +323,11 @@
         document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
         document.getElementById('cadetEmailDisplay').innerText = data.email || user.email;
 
-        // Apply dynamic batch permissions
-        const allowed = data.allowedBatches || [];
-        const isCombo = allowed.includes("combo") || allowed.includes("all");
-
-        const hasMath = isCombo || allowed.includes("cds-math");
-        const hasKilo = isCombo || allowed.includes("cds-kilo");
-        const hasAfcat = isCombo || allowed.includes("afcat");
-        const hasCapf = isCombo || allowed.includes("capf");
+        // Sabhi authorized cadets ko saare batches ka access denge ya fir default unlocked
+        const hasMath = true;
+        const hasKilo = true;
+        const hasAfcat = true;
+        const hasCapf = true;
 
         applyBatchAccess("cds-math", hasMath);
         applyBatchAccess("cds-kilo", hasKilo);
@@ -345,7 +335,8 @@
         applyBatchAccess("capf", hasCapf);
 
         // Render Smart Multi-Group Persistent Telegram Notification Bar
-        renderTelegramNotification(allowed, isCombo, user.uid);
+        const allowed = ["cds-math", "cds-kilo", "afcat", "capf"];
+        renderTelegramNotification(allowed, true, user.uid);
       });
     });
 
@@ -399,17 +390,7 @@
         { id: "capf", name: "CAPF SQUADRON" }
       ];
 
-      let userGroups = [];
-      if (isCombo) {
-        userGroups = allGroups;
-      } else {
-        userGroups = allGroups.filter(g => allowed.includes(g.id));
-      }
-
-      if (userGroups.length === 0) {
-        container.innerHTML = "";
-        return;
-      }
+      let userGroups = allGroups;
 
       let clickedStorageKey = "phantom_clicked_groups_" + userId;
       let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
@@ -491,17 +472,14 @@
 
       const targetUrl = secureTgRegistry[groupId];
       if (targetUrl) {
-        // Open securely in new tab
         window.open(targetUrl, '_blank');
       }
 
-      // Re-render notification bar dynamically
       setTimeout(() => {
         location.reload();
       }, 300);
     }
 
-    // Redirect to batch-mode.html to choose between Live and Recorded
     function openBatchLectures(batchId) {
       window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
     }
@@ -609,13 +587,12 @@
       </div>
     </div>
 
-    <!-- BATCH CARDS GRID (SPLIT HALF-HALF DESIGN) -->
+    <!-- BATCH CARDS GRID -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-      <!-- 1. CDS MATHEMATICS (IMA DEHRADUN) -->
+      <!-- 1. CDS MATHEMATICS -->
       <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
         <div>
-          <!-- TOP HALF: IMA CHETWODE BUILDING IMAGE -->
           <div class="relative w-full h-48 overflow-hidden bg-black">
             <img 
               src="math-ima.jpeg" 
@@ -624,23 +601,18 @@
               onerror="this.src='https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80';"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            
             <div class="absolute top-3 left-3">
               <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">
                 COURSE #01
               </span>
             </div>
-            
             <div class="absolute top-3 right-3" id="badge-cds-math"></div>
-            
             <div class="absolute bottom-2 left-3">
               <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
                 IMA &bull; INA &bull; AFA
               </span>
             </div>
           </div>
-
-          <!-- BOTTOM HALF: DETAILS -->
           <div class="p-4">
             <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">
               CDS MATHEMATICS
@@ -653,16 +625,14 @@
             </p>
           </div>
         </div>
-
         <div class="p-4 pt-0">
           <button id="btn-cds-math" class="w-full"></button>
         </div>
       </div>
 
-      <!-- 2. CDS OTA SQUADRON (OTA CHENNAI) -->
+      <!-- 2. CDS OTA -->
       <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
         <div>
-          <!-- TOP HALF: OTA CHENNAI MAIN GATE & FLAG IMAGE -->
           <div class="relative w-full h-48 overflow-hidden bg-black">
             <img 
               src="ota-chennai.jpeg" 
@@ -671,23 +641,18 @@
               onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80';"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            
             <div class="absolute top-3 left-3">
               <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">
                 COURSE #02
               </span>
             </div>
-            
             <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
-
             <div class="absolute bottom-2 left-3">
               <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
                 OTA CHENNAI
               </span>
             </div>
           </div>
-
-          <!-- BOTTOM HALF: DETAILS -->
           <div class="p-4">
             <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">
               CDS OTA
@@ -700,16 +665,14 @@
             </p>
           </div>
         </div>
-
         <div class="p-4 pt-0">
           <button id="btn-cds-kilo" class="w-full"></button>
         </div>
       </div>
 
-      <!-- 3. AFCAT (AIR FORCE ACADEMY DUNDIGAL) -->
+      <!-- 3. AFCAT -->
       <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
         <div>
-          <!-- TOP HALF: AIR FORCE ACADEMY FLIGHT DRILL IMAGE -->
           <div class="relative w-full h-48 overflow-hidden bg-black">
             <img 
               src="afcat-afa.jpeg" 
@@ -718,23 +681,18 @@
               onerror="this.src='https://images.unsplash.com/photo-1519074069444-1ba4ea16e6f5?auto=format&fit=crop&w=800&q=80';"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            
             <div class="absolute top-3 left-3">
               <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">
                 COURSE #03
               </span>
             </div>
-            
             <div class="absolute top-3 right-3" id="badge-afcat"></div>
-
             <div class="absolute bottom-2 left-3">
               <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">
                 AFA DUNDIGAL
               </span>
             </div>
           </div>
-
-          <!-- BOTTOM HALF: DETAILS -->
           <div class="p-4">
             <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">
               AFCAT
@@ -747,16 +705,14 @@
             </p>
           </div>
         </div>
-
         <div class="p-4 pt-0">
           <button id="btn-afcat" class="w-full"></button>
         </div>
       </div>
 
-      <!-- 4. CAPF (CENTRAL ARMED POLICE FORCES) -->
+      <!-- 4. CAPF -->
       <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
         <div>
-          <!-- TOP HALF: CAPF FORCES INSIGNIA IMAGE -->
           <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
             <img 
               src="capf-forces.jpeg" 
@@ -765,23 +721,18 @@
               onerror="this.src='https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80';"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
-            
             <div class="absolute top-3 left-3">
               <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">
                 COURSE #04
               </span>
             </div>
-            
             <div class="absolute top-3 right-3" id="badge-capf"></div>
-
             <div class="absolute bottom-2 left-3">
               <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">
                 CRPF &bull; BSF &bull; CISF &bull; ITBP &bull; SSB
               </span>
             </div>
           </div>
-
-          <!-- BOTTOM HALF: DETAILS -->
           <div class="p-4">
             <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">
               CAPF
@@ -794,7 +745,6 @@
             </p>
           </div>
         </div>
-
         <div class="p-4 pt-0">
           <button id="btn-capf" class="w-full"></button>
         </div>
