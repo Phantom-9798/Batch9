@@ -351,7 +351,7 @@
       "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
       "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
       "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
-      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "hkr9835@gmail.com"
+      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
     ];
 
     window.unlockTerminal = () => {
@@ -422,16 +422,16 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Daily Target Monitor Logic (Strict Separate Morning & Evening Validation)
+    // Daily Target Monitor Logic (Connected to daily_target_students collection)
     window.loadTargetMonitor = async () => {
       const completedBody = document.getElementById("completedTableBody");
       const defaultersBody = document.getElementById("defaultersTableBody");
 
-      completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
-      defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
+      completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning daily targets...</td></tr>`;
+      defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning defaulters...</td></tr>`;
 
       try {
-        const snapshot = await getDocs(collection(db, "cadets"));
+        const snapshot = await getDocs(collection(db, "daily_target_students"));
         
         let completedHtml = "";
         let defaultersHtml = "";
@@ -456,7 +456,7 @@
             const isMorningDoneToday = morningDate === todayStr;
             const isEveningDoneToday = eveningDate === todayStr;
 
-            // STRICT CONDITION: Jab tak DONO (Morning aur Evening) aaj ke din done nahi honge, tab tak completed section me nahi aayega
+            // STRICT CONDITION: Dono done hone chahiye tabhi completed section me aayega
             if (isMorningDoneToday && isEveningDoneToday && !isInactive) {
               completedCount++;
               completedHtml += `
@@ -500,7 +500,7 @@
         });
 
         completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No cadets have completed BOTH morning and evening targets for today yet.</td></tr>` : completedHtml;
-        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Super 100/Daily Target cadets are active.</td></tr>` : defaultersHtml;
+        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Daily Target cadets are active.</td></tr>` : defaultersHtml;
 
       } catch (e) {
         completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
@@ -510,7 +510,7 @@
 
     window.keepCadet = async (cadetId, email) => {
       try {
-        await updateDoc(doc(db, "cadets", cadetId), {
+        await updateDoc(doc(db, "daily_target_students", cadetId), {
           lastSubmissionTimestamp: Date.now(),
           lastTargetDate: new Date().toDateString()
         });
@@ -524,7 +524,7 @@
     window.removeCadet = async (cadetId, email) => {
       if (!confirm(`WARNING: Are you sure you want to completely purge cadet ${email} and revoke all access?`)) return;
       try {
-        await deleteDoc(doc(db, "cadets", cadetId));
+        await deleteDoc(doc(db, "daily_target_students", cadetId));
         alert(`[PURGED] Cadet ${email} has been removed and access revoked.`);
         loadTargetMonitor();
       } catch (e) {
