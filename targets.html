@@ -127,7 +127,7 @@
           <div id="eveningConfirmBox" class="hidden p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-2 text-center">
             <p class="text-xs text-emerald-300 font-mono">Kya aapne evening proof bhej diya hai?</p>
             <button onclick="confirmEveningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
-              CONFIRM & SUBMIT EVENING PROOF
+              I HAVE SUBMITTED THE PROOF &rarr; COMPLETE
             </button>
           </div>
         </div>
@@ -176,7 +176,7 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
       try {
-        const cadetRef = doc(db, "cadets", user.uid);
+        const cadetRef = doc(db, "daily_target_students", user.uid);
         let cadetSnap = await getDoc(cadetRef);
         
         const userEmail = user.email;
@@ -206,17 +206,15 @@
         document.getElementById('cadetDisplayName').innerText = currentCadetName;
         document.getElementById('streakCount').innerText = `🔥 ${cadetData.streak || 0} Days`;
 
-        // Yahan time aur submission check karke button switch hoga
         setupTimeBasedTracker(cadetData);
 
       } catch (e) {
         console.error("Auth error:", e);
-        document.getElementById('unauthorizedView').classList.add('hidden');
         document.getElementById('unauthorizedView').classList.remove('hidden');
       }
     });
 
-    // TIME-BASED SWITCH LOGIC
+    // TIME-BASED STRICT SWITCH LOGIC
     function setupTimeBasedTracker(cadetData) {
       const currentHour = new Date().getHours();
       const todayStr = new Date().toDateString();
@@ -229,7 +227,7 @@
       const instruction = document.getElementById("targetInstruction");
 
       if (currentHour < 16) {
-        // Subah 4 baje se pehle
+        // Subah 4 baje se pehle sirf morning target
         if (!morningDone) {
           morningSec.classList.remove("hidden");
           instruction.innerText = "Morning Session: Submit morning target photo to proceed.";
@@ -239,11 +237,10 @@
       } else {
         // Sham ke 4 baje ke baad
         if (!morningDone) {
-          // Agar kisi ne subah ka nahi kiya aur direct sham ko aa raha hai
           morningSec.classList.remove("hidden");
           instruction.innerText = "ACCESS DENIED: Pehle apna morning target submit karo, tabhi evening target khulega!";
         } else if (!eveningDone) {
-          // Subah ho chuka hai, ab sirf evening button dikhao
+          // Subah ho chuka hai, ab sirf evening proof ka section dikhao
           eveningSec.classList.remove("hidden");
           instruction.innerText = "Evening Session: Morning verified. Submit your evening completion proof.";
         } else {
@@ -266,7 +263,7 @@
 
       if (user) {
         try {
-          const cadetRef = doc(db, "cadets", user.uid);
+          const cadetRef = doc(db, "daily_target_students", user.uid);
           await updateDoc(cadetRef, {
             morningTargetDoneDate: todayStr,
             lastTargetDate: todayStr,
@@ -295,7 +292,7 @@
 
       if (user) {
         try {
-          const cadetRef = doc(db, "cadets", user.uid);
+          const cadetRef = doc(db, "daily_target_students", user.uid);
           await updateDoc(cadetRef, {
             eveningTargetDoneDate: todayStr,
             lastSubmissionTimestamp: Date.now()
