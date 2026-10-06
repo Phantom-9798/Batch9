@@ -143,7 +143,7 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL</label>
-          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." onchange="fetchVideoDuration(this.value, 'durationInput')" class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -253,35 +253,36 @@
         </button>
       </div>
 
-      <!-- ================= MODE 5: DAILY TARGET MONITOR (TWO SECTIONS) ================= -->
+      <!-- ================= MODE 5: DAILY TARGET MONITOR (UPDATED SECTIONS) ================= -->
       <div id="targetsSection" class="hidden space-y-6">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-orbitron text-sm font-bold text-amber-400">⚡ DAILY TARGET TRACKER MONITOR</h3>
-            <p class="text-xs text-neutral-400">Live overview of cadets who have completed targets vs inactive defaulters.</p>
+            <p class="text-xs text-neutral-400">Live overview of evening completions and morning submissions.</p>
           </div>
           <button onclick="loadTargetMonitor()" class="bg-amber-600 hover:bg-amber-500 text-black font-orbitron font-bold px-4 py-2 rounded-xl transition text-xs tracking-wider cursor-pointer">
             REFRESH MONITOR
           </button>
         </div>
 
-        <!-- SECTION 1: TARGET COMPLETED CADETS -->
+        <!-- SECTION 1: EVENING TARGET COMPLETED SECTION -->
         <div class="space-y-3">
           <h4 class="font-orbitron text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-            <span>✅</span> Target Completed Section (Active Today)
+            <span>✅</span> Target Completed Section (Evening / Active Today)
           </h4>
           <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-black/60">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-neutral-800 text-[11px] font-orbitron text-neutral-400">
                   <th class="p-3">Cadet Name / Email</th>
-                  <th class="p-3">Last Target / Submission Date</th>
+                  <th class="p-3">Evening Proof Date</th>
+                  <th class="p-3">Target Submission (Morning)</th>
                   <th class="p-3">Status</th>
                 </tr>
               </thead>
               <tbody id="completedTableBody" class="text-xs font-mono">
                 <tr>
-                  <td colspan="3" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
+                  <td colspan="4" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
                 </tr>
               </tbody>
             </table>
@@ -421,12 +422,12 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Daily Target Monitor Logic (Separated into Completed & Defaulters)
+    // Daily Target Monitor Logic (Updated with Evening Completion & Morning Submission)
     window.loadTargetMonitor = async () => {
       const completedBody = document.getElementById("completedTableBody");
       const defaultersBody = document.getElementById("defaultersTableBody");
 
-      completedBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
+      completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
       defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
 
       try {
@@ -447,12 +448,13 @@
 
           if (AUTHORIZED_EMAILS.includes(email) || data.targetAccess === true) {
             const lastTimestamp = data.lastSubmissionTimestamp || 0;
-            const lastDate = data.lastTargetDate || "";
+            const eveningDate = data.eveningTargetDoneDate || "";
+            const morningDate = data.morningTargetDoneDate || "";
             const diff = now - lastTimestamp;
             const isInactive = diff > threeDaysMs || lastTimestamp === 0;
-            const isTodayDone = lastDate === todayStr;
+            const isEveningDoneToday = eveningDate === todayStr;
 
-            if (isTodayDone && !isInactive) {
+            if (isEveningDoneToday && !isInactive) {
               completedCount++;
               completedHtml += `
                 <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
@@ -460,7 +462,8 @@
                     <div class="font-bold text-white">${data.name || "Cadet"}</div>
                     <div class="text-[11px] text-neutral-400">${email}</div>
                   </td>
-                  <td class="p-3 text-emerald-400">${lastDate}</td>
+                  <td class="p-3 text-emerald-400">${eveningDate} (Evening Done)</td>
+                  <td class="p-3 text-cyan-400">${morningDate ? morningDate + ' (Morning Done)' : 'Pending'}</td>
                   <td class="p-3">
                     <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Completed ✅</span>
                   </td>
@@ -474,7 +477,7 @@
                     <div class="font-bold text-white">${data.name || "Cadet"}</div>
                     <div class="text-[11px] text-neutral-400">${email}</div>
                   </td>
-                  <td class="p-3 text-neutral-400">${lastDate || "Never Submitted"}</td>
+                  <td class="p-3 text-neutral-400">${data.lastTargetDate || "Never Submitted"}</td>
                   <td class="p-3">
                     <span class="px-2 py-0.5 rounded bg-red-950/80 text-red-400 border border-red-500/40 text-[10px] font-bold">3+ Days Inactive ⚠️</span>
                   </td>
@@ -492,11 +495,11 @@
           }
         });
 
-        completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="3" class="p-4 text-center text-neutral-500">No target submissions recorded for today yet.</td></tr>` : completedHtml;
+        completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No evening target proofs recorded for today yet.</td></tr>` : completedHtml;
         defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Super 100/Daily Target cadets are active.</td></tr>` : defaultersHtml;
 
       } catch (e) {
-        completedBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
+        completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
         defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
       }
     };
@@ -525,7 +528,7 @@
       }
     };
 
-    // Lecture Dispatch & Purge functions kept intact...
+    // Lecture Dispatch & Purge functions...
     window.dispatchSingleLecture = async () => {
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
