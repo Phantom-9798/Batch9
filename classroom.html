@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <script type="module">
+ <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -19,7 +19,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Teri authorized emails ki list
+  // Teri saari authorized emails ki list yahan classroom guard mein bhi daal di hai
   const AUTHORIZED_TARGET_EMAILS = [
     "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
     "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
@@ -28,7 +28,7 @@
     "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
     "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
     "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
-    "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com"
+    "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com"
   ];
 
   onAuthStateChanged(auth, async (user) => {
@@ -39,17 +39,27 @@
           const data = snap.data();
           const email = data.email || user.email;
           const today = new Date().toDateString();
+          const currentHour = new Date().getHours(); // 24-hour format
 
-          // Agar yeh user target list mein hai, AUR isne aaj ka morning target confirm nahi kiya hai
+          // Agar user is authorized target list mein hai
           if (AUTHORIZED_TARGET_EMAILS.includes(email) || data.targetAccess === true) {
-            if (data.morningTargetDoneDate !== today) {
-              // Turant redirect karo targets.html par!
+            
+            // 1. Check Morning Target
+            const morningDone = data.morningTargetDoneDate === today;
+            
+            // 2. Check Evening Completion (Agar sham ke 4 ya uske baad ho gaye hain)
+            const eveningTimeReached = currentHour >= 16;
+            const eveningDone = data.eveningTargetDoneDate === today;
+
+            // Agar subah ka nahi hua, YA (sham ke 4 baj gaye hain aur raat ka proof nahi bheja)
+            if (!morningDone || (eveningTimeReached && !eveningDone)) {
+              // Turant targets.html par redirect karo!
               window.location.href = "targets.html";
             }
           }
         }
       } catch (err) {
-        console.error("Target Guard Error:", err);
+        console.error("Classroom Guard Error:", err);
       }
     }
   });
