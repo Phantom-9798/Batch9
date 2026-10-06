@@ -265,7 +265,7 @@
           </button>
         </div>
 
-        <!-- SECTION 1: EVENING TARGET COMPLETED SECTION -->
+        <!-- SECTION 1: TARGET COMPLETED SECTION (BOTH MORNING & EVENING REQUIRED) -->
         <div class="space-y-3">
           <h4 class="font-orbitron text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
             <span>✅</span> Target Completed Section (Evening / Active Today)
@@ -422,7 +422,7 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Daily Target Monitor Logic (Updated with Evening Completion & Morning Submission)
+    // Daily Target Monitor Logic (Strict Separate Morning & Evening Validation)
     window.loadTargetMonitor = async () => {
       const completedBody = document.getElementById("completedTableBody");
       const defaultersBody = document.getElementById("defaultersTableBody");
@@ -452,9 +452,12 @@
             const morningDate = data.morningTargetDoneDate || "";
             const diff = now - lastTimestamp;
             const isInactive = diff > threeDaysMs || lastTimestamp === 0;
+
+            const isMorningDoneToday = morningDate === todayStr;
             const isEveningDoneToday = eveningDate === todayStr;
 
-            if (isEveningDoneToday && !isInactive) {
+            // STRICT CONDITION: Jab tak DONO (Morning aur Evening) aaj ke din done nahi honge, tab tak completed section me nahi aayega
+            if (isMorningDoneToday && isEveningDoneToday && !isInactive) {
               completedCount++;
               completedHtml += `
                 <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
@@ -462,14 +465,15 @@
                     <div class="font-bold text-white">${data.name || "Cadet"}</div>
                     <div class="text-[11px] text-neutral-400">${email}</div>
                   </td>
-                  <td class="p-3 text-emerald-400">${eveningDate} (Evening Done)</td>
-                  <td class="p-3 text-cyan-400">${morningDate ? morningDate + ' (Morning Done)' : 'Pending'}</td>
+                  <td class="p-3 text-emerald-400">${eveningDate} (Evening Done ✅)</td>
+                  <td class="p-3 text-cyan-400">${morningDate} (Morning Done ✅)</td>
                   <td class="p-3">
-                    <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Completed ✅</span>
+                    <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Fully Completed 🔥</span>
                   </td>
                 </tr>
               `;
-            } else if (isInactive) {
+            } 
+            else if (isInactive) {
               defaultersCount++;
               defaultersHtml += `
                 <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
@@ -495,7 +499,7 @@
           }
         });
 
-        completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No evening target proofs recorded for today yet.</td></tr>` : completedHtml;
+        completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No cadets have completed BOTH morning and evening targets for today yet.</td></tr>` : completedHtml;
         defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Super 100/Daily Target cadets are active.</td></tr>` : defaultersHtml;
 
       } catch (e) {
