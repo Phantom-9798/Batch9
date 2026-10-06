@@ -1,6 +1,75 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <!-- EVENING POPUP MODAL (Appears after 4 PM daily) -->
+<div id="eveningPopupModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="armor-card rounded-2xl p-6 max-w-md w-full text-center space-y-4 border-2 border-amber-500 animate-pulse">
+    <div class="text-3xl">⚠️</div>
+    <h3 class="font-orbitron text-base font-bold text-amber-400">DAILY TASK COMPLETED</h3>
+    <p class="text-xs text-neutral-300 font-body">Shyam ke 4 baj chuke hain. Kripya apna evening target completed photo submit karne ke liye target terminal par jayein.</p>
+    <button onclick="window.location.href='targets.html'" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
+      OPEN TARGET TERMINAL &rarr;
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+    authDomain: "team-phantom-enrollment.firebaseapp.com",
+    projectId: "team-phantom-enrollment",
+    storageBucket: "team-phantom-enrollment.firebasestorage.app",
+    messagingSenderId: "658049687096",
+    appId: "1:658049687096:web:8464788a43126a6bced0cd"
+  });
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const AUTHORIZED_EMAILS = [
+    "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
+    "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
+    "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
+    "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
+    "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
+    "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
+    "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
+    "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
+  ];
+
+  function getTacticalCycleDate() {
+    const now = new Date();
+    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
+    return now.toDateString();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user && AUTHORIZED_EMAILS.includes(user.email)) {
+      try {
+        const snap = await getDoc(doc(db, "daily_target_students", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const now = new Date();
+          const currentHour = now.getHours();
+          const cycleStr = getTacticalCycleDate();
+
+          const isAfter4PM = currentHour >= 16;
+          const morningDone = data.morningTargetDoneCycle === cycleStr;
+          const eveningDone = data.eveningTargetDoneCycle === cycleStr;
+
+          if (isAfter4PM && morningDone && !eveningDone) {
+            document.getElementById("eveningPopupModal").classList.remove("hidden");
+          }
+        }
+      } catch (e) {
+        console.error("Popup check error:", e);
+      }
+    }
+  });
+</script>
 <style>
   /* 1. Corner Live Time Tracker Widget */
   #phantomStudyTimerWidget {
