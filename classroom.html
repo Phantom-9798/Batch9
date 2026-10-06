@@ -1,6 +1,59 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+    authDomain: "team-phantom-enrollment.firebaseapp.com",
+    projectId: "team-phantom-enrollment",
+    storageBucket: "team-phantom-enrollment.firebasestorage.app",
+    messagingSenderId: "658049687096",
+    appId: "1:658049687096:web:8464788a43126a6bced0cd"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Teri authorized emails ki list
+  const AUTHORIZED_TARGET_EMAILS = [
+    "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
+    "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
+    "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
+    "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
+    "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
+    "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
+    "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
+    "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com"
+  ];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const snap = await getDoc(doc(db, "cadets", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const email = data.email || user.email;
+          const today = new Date().toDateString();
+
+          // Agar yeh user target list mein hai, AUR isne aaj ka morning target confirm nahi kiya hai
+          if (AUTHORIZED_TARGET_EMAILS.includes(email) || data.targetAccess === true) {
+            if (data.morningTargetDoneDate !== today) {
+              // Turant redirect karo targets.html par!
+              window.location.href = "targets.html";
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Target Guard Error:", err);
+      }
+    }
+  });
+</script>
 <style>
   /* 1. Corner Live Time Tracker Widget */
   #phantomStudyTimerWidget {
