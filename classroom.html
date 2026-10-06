@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <!-- EVENING POPUP MODAL (Appears after 4 PM daily) -->
-<div id="eveningPopupModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-  <div class="armor-card rounded-2xl p-6 max-w-md w-full text-center space-y-4 border-2 border-amber-500 animate-pulse">
-    <div class="text-3xl">⚠️</div>
-    <h3 class="font-orbitron text-base font-bold text-amber-400">DAILY TASK COMPLETED</h3>
-    <p class="text-xs text-neutral-300 font-body">Shyam ke 4 baj chuke hain. Kripya apna evening target completed photo submit karne ke liye target terminal par jayein.</p>
-    <button onclick="window.location.href='targets.html'" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
-      OPEN TARGET TERMINAL &rarr;
+<!-- EVENING MANDATORY STICKY POPUP MODAL (Appears after 4 PM daily, cannot be closed until completed) -->
+<div id="eveningPopupModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+  <div class="armor-card rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.4)]">
+    <div class="text-4xl animate-bounce">⚠️</div>
+    <h3 class="font-orbitron text-lg font-bold text-amber-400">EVENING TASK PENDING: PROOF REQUIRED</h3>
+    <p class="text-xs text-neutral-300 font-body leading-relaxed">
+      Shyam ke 4 baj chuke hain! Jab tak aap apna evening target completed photo Telegram par bhej kar niche diye gaye button par click nahi karenge, yeh pop-up nahi hatega aur aap classroom access nahi kar payenge.
+    </p>
+    
+    <!-- Telegram Redirect Button -->
+    <a href="#" onclick="openTelegramEveningPopup(event)" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+      <span>✅</span> Send target completed photo to Telegram
+    </a>
+
+    <!-- Confirmation Button (Removes popup upon completion) -->
+    <button onclick="submitEveningPopupProof()" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg">
+      I have sent completed task proof &rarr; Unlock Classroom
     </button>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const app = initializeApp({
     apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -46,487 +55,294 @@
     return now.toDateString();
   }
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user && AUTHORIZED_EMAILS.includes(user.email)) {
-      try {
-        const snap = await getDoc(doc(db, "daily_target_students", user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          const now = new Date();
-          const currentHour = now.getHours();
-          const cycleStr = getTacticalCycleDate();
+  let unsubscribeSnapshot = null;
+  let currentCadetName = "Cadet";
 
-          const isAfter4PM = currentHour >= 16;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      window.location.href = "index.html";
+      return;
+    }
+
+    if (AUTHORIZED_EMAILS.includes(user.email)) {
+      try {
+        const cadetRef = doc(db, "daily_target_students", user.uid);
+        const snap = await getDoc(cadetRef);
+        
+        const now = new Date();
+        const currentHour = now.getHours();
+        const cycleStr = getTacticalCycleDate();
+
+        let needsTargetRedirect = false;
+
+        if (!snap.exists()) {
+          needsTargetRedirect = true; 
+        } else {
+          const data = snap.data();
+          currentCadetName = data.name || "Cadet";
           const morningDone = data.morningTargetDoneCycle === cycleStr;
           const eveningDone = data.eveningTargetDoneCycle === cycleStr;
 
-          if (isAfter4PM && morningDone && !eveningDone) {
-            document.getElementById("eveningPopupModal").classList.remove("hidden");
+          // 1. STRICT MORNING CHECK: Subah 6 se 4 ke beech agar morning target nahi hua, toh seedha targets.html par bhejo
+          if (currentHour >= 6 && currentHour < 16 && !morningDone) {
+            needsTargetRedirect = true; 
+          } 
+          // 2. STRICT EVENING CHECK: Shaam 4 ke baad agar morning ya evening me se kuch bhi pending hai, toh targets.html par bhejo
+          else if (currentHour >= 16 && (!morningDone || !eveningDone)) {
+            // Agar morning done hai par evening pending hai, toh hum chahein toh targets.html bhej sakte hain ya sticky popup dikha sakte hain.
+            // Tumne kaha tha pop-up show ho, toh agar morning ho gaya hai aur evening pending hai, toh pop-up dikhayenge!
+            if (morningDone && !eveningDone) {
+              document.getElementById("eveningPopupModal").classList.remove("hidden");
+            } else {
+              needsTargetRedirect = true;
+            }
           }
         }
+
+        if (needsTargetRedirect) {
+          window.location.href = "targets.html";
+          return;
+        }
+
       } catch (e) {
-        console.error("Popup check error:", e);
+        console.error("Gatekeeper error:", e);
       }
     }
-  });
-</script>
-<style>
-  /* 1. Corner Live Time Tracker Widget */
-  #phantomStudyTimerWidget {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    z-index: 99999;
-    background: rgba(4, 7, 13, 0.95);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-family: 'Orbitron', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(8px);
-  }
-  #phantomStudyTimerWidget .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #f59e0b;
-    border-radius: 50%;
-    animation: phantomPulse 1.5s infinite;
-  }
-  @keyframes phantomPulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #f59e0b; }
-    100% { transform: scale(0.95); opacity: 0.8; }
-  }
 
-  /* 2. Floating Focus Status Dock (Bottom Center) */
-  #phantomFocusDock {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 99998;
-    background: rgba(10, 15, 22, 0.96);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-    padding: 8px 18px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-family: 'Orbitron', sans-serif;
-    backdrop-filter: blur(10px);
-    font-size: 11px;
-    color: #f59e0b;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-</style>
+    // Realtime Single-Device Listener
+    unsubscribeSnapshot = onSnapshot(doc(db, "daily_target_students", user.uid), (docSnap) => {
+      const data = docSnap.exists() ? docSnap.data() : { name: user.displayName || "Cadet", email: user.email };
+      const localToken = localStorage.getItem("phantom_session_token");
 
-<!-- Top Corner Live Time Tracker (Auto-running continuously) -->
-<div id="phantomStudyTimerWidget">
-  <div class="pulse-dot"></div>
-  <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
-  <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
-</div>
-
-<!-- Bottom Floating Status Dock -->
-<div id="phantomFocusDock">
-  <span>🛡️️ MISSION MODE: ACTIVE</span>
-  <span>|</span>
-  <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
-  <span>|</span>
-  <span>🎵 AUDIO: ON</span>
-</div>
-
-<!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
-<audio id="ambientAudio" autoplay loop>
-  <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
-</audio>
-
-<script>
-  // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
-  (function() {
-    const todayStr = new Date().toDateString();
-    const lastDate = localStorage.getItem("phantom_study_date");
-    
-    if (lastDate !== todayStr) {
-      localStorage.setItem("phantom_study_date", todayStr);
-      localStorage.setItem("phantom_daily_seconds", "0");
-    }
-
-    let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-    let sessionSeconds = 0; // Infinite counting session timer
-
-    // Continuous infinite tracking as long as cadet is on website
-    setInterval(() => {
-      totalSeconds++;
-      sessionSeconds++;
-      localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
-
-      // Update Top Corner Daily Total Timer
-      const hrs = Math.floor(totalSeconds / 3600);
-      const mins = Math.floor((totalSeconds % 3600) / 60);
-      const secs = totalSeconds % 60;
-      const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-      const displayEl = document.getElementById("phantomTimerDisplay");
-      if (displayEl) {
-        displayEl.innerText = displayStr;
-      }
-
-      // Update Bottom Floating Dock Session Timer (Counts up infinitely without stopping)
-      const pHrs = Math.floor(sessionSeconds / 3600);
-      const pMins = Math.floor((sessionSeconds % 3600) / 60);
-      const pSecs = sessionSeconds % 60;
-      const pDisplayStr = pHrs > 0 
-        ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-        : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
-      
-      const autoPomoEl = document.getElementById("autoPomoDisplay");
-      if (autoPomoEl) {
-        autoPomoEl.innerText = pDisplayStr;
-      }
-    }, 1000);
-  })();
-
-  // 2. Automatic Daily Mission Briefing on Entry (No clicks required)
-  window.addEventListener('DOMContentLoaded', () => {
-    const lastBriefDate = localStorage.getItem("phantom_brief_date");
-    const todayStr = new Date().toDateString();
-
-    if (lastBriefDate !== todayStr) {
-      localStorage.setItem("phantom_brief_date", todayStr);
-      setTimeout(() => {
-        const quotes = [
-          "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-          "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-          "\"Discipline is choosing between what you want now and what you want most.\""
-        ];
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
-      }, 800);
-    }
-  });
-
-  // 3. Auto-play Ambient Audio safely on load/interaction
-  window.addEventListener('load', () => {
-    const audio = document.getElementById("ambientAudio");
-    if (audio) {
-      audio.volume = 0.4;
-      audio.play().catch(() => {
-        // Fallback to play on first user interaction if browser blocks autoplay
-        document.addEventListener('click', () => {
-          audio.play().catch(() => {});
-        }, { once: true });
-      });
-    }
-  });
-</script>
-  <script>
-  (() => {
-    // 1. Right Click Disable
-    document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
-    document.addEventListener('keydown', e => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    });
-
-    // 3. DevTools Freezing Trap
-    setInterval(() => {
-      const start = performance.now();
-      debugger;
-      const end = performance.now();
-      if (end - start > 100) {
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-      }
-    }, 1000);
-
-    // 4. Console Auto Clear
-    setInterval(() => {
-      console.clear();
-    }, 1500);
-  })();
-</script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Military & Tactical Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Team Phantom Official Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-      authDomain: "team-phantom-enrollment.firebaseapp.com",
-      projectId: "team-phantom-enrollment",
-      storageBucket: "team-phantom-enrollment.firebasestorage.app",
-      messagingSenderId: "658049687096",
-      appId: "1:658049687096:web:8464788a43126a6bced0cd"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let unsubscribeSnapshot = null;
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
+      if (data.activeSession && localToken && data.activeSession !== localToken) {
         if (unsubscribeSnapshot) unsubscribeSnapshot();
-        window.location.href = "index.html";
+        alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+        signOut(auth).then(() => {
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
+        });
         return;
       }
 
-      // Realtime Single-Device & Access Verification Listener (UPDATED to daily_target_students)
-      unsubscribeSnapshot = onSnapshot(doc(db, "daily_target_students", user.uid), (docSnap) => {
-        if (!docSnap.exists()) {
-          // Agar document nahi hai toh auto-create kar do ya login hone do
-          return;
-        }
+      document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
+      document.getElementById('cadetEmailDisplay').innerText = data.email || user.email;
 
-        const data = docSnap.data();
-        const localToken = localStorage.getItem("phantom_session_token");
+      applyBatchAccess("cds-math", true);
+      applyBatchAccess("cds-kilo", true);
+      applyBatchAccess("afcat", true);
+      applyBatchAccess("capf", true);
 
-        // Single device session token verification agar activeSession field ho
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          signOut(auth).then(() => {
-            localStorage.removeItem("phantom_session_token");
-            localStorage.removeItem("phantom_uid");
-            window.location.href = "index.html";
-          });
-          return;
-        }
-
-        // Render Cadet Information
-        document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
-        document.getElementById('cadetEmailDisplay').innerText = data.email || user.email;
-
-        // Sabhi authorized cadets ko saare batches ka access denge ya fir default unlocked
-        const hasMath = true;
-        const hasKilo = true;
-        const hasAfcat = true;
-        const hasCapf = true;
-
-        applyBatchAccess("cds-math", hasMath);
-        applyBatchAccess("cds-kilo", hasKilo);
-        applyBatchAccess("afcat", hasAfcat);
-        applyBatchAccess("capf", hasCapf);
-
-        // Render Smart Multi-Group Persistent Telegram Notification Bar
-        const allowed = ["cds-math", "cds-kilo", "afcat", "capf"];
-        renderTelegramNotification(allowed, true, user.uid);
-      });
+      renderTelegramNotification(["cds-math", "cds-kilo", "afcat", "capf"], true, user.uid);
     });
+  });
 
-    function applyBatchAccess(batchId, isUnlocked) {
-      const card = document.getElementById("card-" + batchId);
-      const statusBadge = document.getElementById("badge-" + batchId);
-      const actionBtn = document.getElementById("btn-" + batchId);
+  // Global functions for the sticky popup
+  window.openTelegramEveningPopup = (e) => {
+    e.preventDefault();
+    const msg = encodeURIComponent(`✅ *TARGET COMPLETED PHOTO*\nCadet: ${currentCadetName}\nStatus: Sending evening completion photo! 🟢`);
+    window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+  };
 
-      if (!card) return;
-
-      if (isUnlocked) {
-        card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.add("border-amber-500/50", "shadow-[0_0_30px_rgba(245,158,11,0.2)]");
-        
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
-
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98]";
-        actionBtn.innerText = "ACCESS CLASSROOM";
-        actionBtn.disabled = false;
-        actionBtn.onclick = () => openBatchLectures(batchId);
-      } else {
-        card.classList.add("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.remove("border-amber-500/50", "shadow-[0_0_30px_rgba(245,158,11,0.2)]");
-
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span>&#128274;</span> LOCKED`;
-
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
-        actionBtn.innerText = "NOT ENROLLED";
-        actionBtn.disabled = true;
+  window.submitEveningPopupProof = async () => {
+    const user = auth.currentUser;
+    const cycleStr = getTacticalCycleDate();
+    if (user) {
+      try {
+        await updateDoc(doc(db, "daily_target_students", user.uid), {
+          eveningTargetDoneCycle: cycleStr,
+          lastSubmissionTimestamp: Date.now()
+        });
+        alert("Evening Completion Proof Recorded Successfully!");
+        document.getElementById("eveningPopupModal").classList.add("hidden");
+        location.reload();
+      } catch (err) {
+        alert("Error saving record. Please try again.");
       }
     }
+  };
 
-    // Secure Encrypted/Obfuscated Link Dictionary (Prevents direct scraping)
-    const secureTgRegistry = {
-      "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
-      "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
-      "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
-      "capf": "https://t.me/+JmGvA3F25WY1YjA9"
-    };
+  function applyBatchAccess(batchId, isUnlocked) {
+    const card = document.getElementById("card-" + batchId);
+    const statusBadge = document.getElementById("badge-" + batchId);
+    const actionBtn = document.getElementById("btn-" + batchId);
 
-    window.renderTelegramNotification = function(allowed, isCombo, userId) {
-      const container = document.getElementById("telegramNotificationContainer");
-      if (!container) return;
+    if (!card) return;
 
-      const allGroups = [
-        { id: "afcat", name: "AFCAT SQUADRON GROUP" },
-        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
-        { id: "cds-kilo", name: "CDS OTA SQUADRON" },
-        { id: "capf", name: "CAPF SQUADRON" }
-      ];
+    if (isUnlocked) {
+      card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
+      card.classList.add("border-amber-500/50", "shadow-[0_0_30px_rgba(245,158,11,0.2)]");
+      
+      statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+      statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
 
-      let userGroups = allGroups;
+      actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98]";
+      actionBtn.innerText = "ACCESS CLASSROOM";
+      actionBtn.disabled = false;
+      actionBtn.onclick = () => openBatchLectures(batchId);
+    } else {
+      card.classList.add("opacity-45", "grayscale", "border-neutral-800");
+      card.classList.remove("border-amber-500/50", "shadow-[0_0_30px_rgba(245,158,11,0.2)]");
 
-      let clickedStorageKey = "phantom_clicked_groups_" + userId;
-      let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
+      statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+      statusBadge.innerHTML = `<span>&#128274;</span> LOCKED`;
 
-      const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
-      if (allClicked) {
-        container.innerHTML = "";
-        return;
+      actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
+      actionBtn.innerText = "NOT ENROLLED";
+      actionBtn.disabled = true;
+    }
+  }
+
+  const secureTgRegistry = {
+    "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
+    "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
+    "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
+    "capf": "https://t.me/+JmGvA3F25WY1YjA9"
+  };
+
+  window.renderTelegramNotification = function(allowed, isCombo, userId) {
+    const container = document.getElementById("telegramNotificationContainer");
+    if (!container) return;
+
+    const allGroups = [
+      { id: "afcat", name: "AFCAT SQUADRON GROUP" },
+      { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
+      { id: "cds-kilo", name: "CDS OTA SQUADRON" },
+      { id: "capf", name: "CAPF SQUADRON" }
+    ];
+
+    let userGroups = allGroups;
+    let clickedStorageKey = "phantom_clicked_groups_" + userId;
+    let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
+
+    const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
+    if (allClicked) {
+      container.innerHTML = "";
+      return;
+    }
+
+    let groupsHtml = "";
+    userGroups.forEach((group) => {
+      const isAlreadyClicked = clickedGroups.includes(group.id);
+      if (isAlreadyClicked) {
+        groupsHtml += `
+          <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
+            <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Visited)</span>
+            <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-400 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
+          </div>
+        `;
+      } else {
+        groupsHtml += `
+          <div class="p-3 rounded-xl bg-black/95 border border-amber-500/30 flex items-center justify-between gap-3">
+            <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
+            <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer">
+              JOIN GROUP &rarr;
+            </button>
+          </div>
+        `;
       }
+    });
 
-      let groupsHtml = "";
-      userGroups.forEach((group) => {
-        const isAlreadyClicked = clickedGroups.includes(group.id);
-        
-        if (isAlreadyClicked) {
-          groupsHtml += `
-            <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
-              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Visited)</span>
-              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-400 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
-            </div>
-          `;
-        } else {
-          groupsHtml += `
-            <div class="p-3 rounded-xl bg-black/95 border border-amber-500/30 flex items-center justify-between gap-3">
-              <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
-              <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer">
-                JOIN GROUP &rarr;
-              </button>
-            </div>
-          `;
-        }
-      });
+    const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
 
-      const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
-
-      container.innerHTML = `
-        <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
-          <div class="armor-panel border-amber-500/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(245,158,11,0.15)] flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">
-                ⚡
-              </div>
-              <div>
-                <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
-                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
-              </div>
+    container.innerHTML = `
+      <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
+        <div class="armor-panel border-amber-500/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(245,158,11,0.15)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">
+              ⚡
             </div>
-            <div class="flex items-center gap-3 w-full md:w-auto">
-              <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
-                VIEW PENDING GROUPS (${remainingCount})
-              </button>
+            <div>
+              <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
+              <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
             </div>
           </div>
-          <!-- Expandable Secure Join Options Box -->
-          <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-500/40 space-y-3 max-w-xl mx-auto">
-            <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
-            ${groupsHtml}
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+              VIEW PENDING GROUPS (${remainingCount})
+            </button>
           </div>
         </div>
-      `;
+        <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-500/40 space-y-3 max-w-xl mx-auto">
+          <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
+          ${groupsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  window.toggleJoinOptions = function() {
+    const dropdown = document.getElementById("joinDropdown");
+    if (dropdown) dropdown.classList.toggle("hidden");
+  }
+
+  window.secureRedirect = function(groupId, userId) {
+    let storageKey = "phantom_clicked_groups_" + userId;
+    let clickedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    if (!clickedGroups.includes(groupId)) {
+      clickedGroups.push(groupId);
+      localStorage.setItem(storageKey, JSON.stringify(clickedGroups));
     }
+    const targetUrl = secureTgRegistry[groupId];
+    if (targetUrl) window.open(targetUrl, '_blank');
+    setTimeout(() => { location.reload(); }, 300);
+  }
 
-    window.toggleJoinOptions = function() {
-      const dropdown = document.getElementById("joinDropdown");
-      if (dropdown) {
-        dropdown.classList.toggle("hidden");
-      }
-    }
+  function openBatchLectures(batchId) {
+    window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+  }
 
-    // Secure handler to mark clicked instantly and open link cleanly
-    window.secureRedirect = function(groupId, userId) {
-      let storageKey = "phantom_clicked_groups_" + userId;
-      let clickedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      
-      if (!clickedGroups.includes(groupId)) {
-        clickedGroups.push(groupId);
-        localStorage.setItem(storageKey, JSON.stringify(clickedGroups));
-      }
+  window.logoutCadet = function() {
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+    signOut(auth).then(() => {
+      localStorage.removeItem("phantom_session_token");
+      localStorage.removeItem("phantom_uid");
+      window.location.href = "index.html";
+    });
+  };
+</script>
 
-      const targetUrl = secureTgRegistry[groupId];
-      if (targetUrl) {
-        window.open(targetUrl, '_blank');
-      }
+<style>
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: #04070b;
+  }
+  .font-stencil { font-family: 'Black Ops One', cursive; }
+  .font-orbitron { font-family: 'Orbitron', sans-serif; }
+  .font-body { font-family: 'Inter', sans-serif; }
 
-      setTimeout(() => {
-        location.reload();
-      }, 300);
-    }
+  .tactical-bg {
+    background: 
+      radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
+      radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
+      radial-gradient(circle at 85% 60%, rgba(234, 179, 8, 0.14) 0%, transparent 50%),
+      linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%),
+      url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=2000&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
 
-    function openBatchLectures(batchId) {
-      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
-    }
+  .hud-grid {
+    background-image: 
+      linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
 
-    window.logoutCadet = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      signOut(auth).then(() => {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
-        window.location.href = "index.html";
-      });
-    };
-  </script>
-
-  <style>
-    body {
-      font-family: 'Rajdhani', sans-serif;
-      background-color: #04070b;
-    }
-    .font-stencil { font-family: 'Black Ops One', cursive; }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; }
-    .font-body { font-family: 'Inter', sans-serif; }
-
-    .tactical-bg {
-      background: 
-        radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
-        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
-        radial-gradient(circle at 85% 60%, rgba(234, 179, 8, 0.14) 0%, transparent 50%),
-        linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%),
-        url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=2000&q=80');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
-
-    .hud-grid {
-      background-image: 
-        linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
-    }
-
-    .armor-panel {
-      background: rgba(10, 15, 22, 0.94);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
-    }
-  </style>
+  .armor-panel {
+    background: rgba(10, 15, 22, 0.94);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+  }
+  
+  .armor-card {
+    background: rgba(10, 15, 20, 0.98);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
+  }
+</style>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
