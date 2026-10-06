@@ -103,14 +103,30 @@
         <p class="text-xs font-mono text-neutral-400 text-center uppercase tracking-wider">Select operational action below:</p>
 
         <!-- 1. Send Target Photo (Morning) -->
-        <a id="sendTargetBtn" href="#" target="_blank" onclick="prepareTargetTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
-          <span>📷</span> SEND TARGET PHOTO (MORNING)
+        <a id="sendTargetBtn" href="#" onclick="prepareTargetTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+          <span>📷</span> 1. SEND TARGET PHOTO (TELEGRAM)
         </a>
 
+        <!-- Morning Confirmation Box (Appears after clicking Telegram button) -->
+        <div id="morningConfirmBox" class="hidden p-4 rounded-xl bg-blue-950/70 border border-blue-500 space-y-2 text-center">
+          <p class="text-xs text-blue-300 font-mono">Kya aapne Telegram par photo bhej di hai?</p>
+          <button onclick="confirmMorningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+            YES, I HAVE SENT &rarr; UNLOCK CLASSROOM
+          </button>
+        </div>
+
         <!-- 2. Target Completed Proof (Evening) -->
-        <a id="completeTargetBtn" href="#" target="_blank" onclick="prepareCompleteTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
-          <span>✅</span> TARGET COMPLETED PROOF (EVENING)
+        <a id="completeTargetBtn" href="#" onclick="prepareCompleteTelegram(event)" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-orbitron font-bold text-xs sm:text-sm tracking-wider uppercase shadow-lg text-center flex items-center justify-center gap-2 no-underline transition cursor-pointer">
+          <span>✅</span> 2. TARGET COMPLETED PROOF (EVENING)
         </a>
+
+        <!-- Evening Confirmation Box (Appears after clicking Evening Telegram button) -->
+        <div id="eveningConfirmBox" class="hidden p-4 rounded-xl bg-emerald-950/70 border border-emerald-500 space-y-2 text-center">
+          <p class="text-xs text-emerald-300 font-mono">Kya aapne evening proof bhej diya hai?</p>
+          <button onclick="confirmEveningAttendance()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">
+            CONFIRM & SUBMIT TO ADMIN
+          </button>
+        </div>
       </div>
 
       <div id="statusBox" class="p-3 rounded-lg text-xs font-mono hidden"></div>
@@ -125,7 +141,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -157,27 +173,52 @@
       if (!user) { window.location.href = "index.html"; return; }
       try {
         const cadetRef = doc(db, "cadets", user.uid);
-        const cadetSnap = await getDoc(cadetRef);
-        if (!cadetSnap.exists()) { document.getElementById('unauthorizedView').classList.remove('hidden'); return; }
+        let cadetSnap = await getDoc(cadetRef);
+        
+        const userEmail = user.email;
+        const isAllowed = AUTHORIZED_EMAILS.includes(userEmail);
+
+        if (!isAllowed) { 
+          document.getElementById('unauthorizedView').classList.remove('hidden'); 
+          return; 
+        }
+
+        // Agar naya user hai toh database me default entry bana do
+        if (!cadetSnap.exists()) {
+          await setDoc(cadetRef, {
+            email: userEmail,
+            name: user.displayName || "Cadet",
+            streak: 0,
+            morningTargetDoneDate: "",
+            eveningTargetDoneDate: "",
+            lastSubmissionTimestamp: 0
+          });
+          cadetSnap = await getDoc(cadetRef);
+        }
 
         const cadetData = cadetSnap.data();
-        const userEmail = cadetData.email || user.email;
         currentCadetName = cadetData.name || "Cadet";
-
-        const isAllowed = AUTHORIZED_EMAILS.includes(userEmail) || cadetData.targetAccess === true;
-        if (!isAllowed) { document.getElementById('unauthorizedView').classList.remove('hidden'); return; }
 
         document.getElementById('authorizedView').classList.remove('hidden');
         document.getElementById('cadetDisplayName').innerText = currentCadetName;
         document.getElementById('streakCount').innerText = `🔥 ${cadetData.streak || 0} Days`;
       } catch (e) {
+        console.error("Auth error:", e);
         document.getElementById('unauthorizedView').classList.remove('hidden');
       }
     });
 
-    // Morning Target Submission (Marks morning attendance and opens telegram)
-    window.prepareTargetTelegram = async (e) => {
+    // 1. Morning Target: Telegram खोलेगा, फिर यूजर खुद कन्फर्म करेगा
+    window.prepareTargetTelegram = (e) => {
       e.preventDefault();
+      const msg = encodeURIComponent(`🎯 *MORNING TARGET SUBMISSION*\nCadet: ${currentCadetName}\nStatus: Target photo ready for submission! 🟢`);
+      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      
+      // Confirmation box dikhao taaki bina photo bheje koi aage na badh sake
+      document.getElementById('morningConfirmBox').classList.remove('hidden');
+    };
+
+    window.confirmMorningAttendance = async () => {
       const user = auth.currentUser;
       const todayStr = new Date().toDateString();
 
@@ -189,23 +230,25 @@
             lastTargetDate: todayStr,
             lastSubmissionTimestamp: Date.now()
           });
+          alert("Attendance Recorded! Entering Classroom...");
+          window.location.href = "classroom.html";
         } catch (err) {
           console.error("Morning update error", err);
+          alert("Error recording attendance. Please try again.");
         }
       }
-
-      const msg = encodeURIComponent(`🎯 *MORNING TARGET SUBMISSION*\nCadet: ${currentCadetName}\nStatus: Target photo ready for submission! 🟢`);
-      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
-
-      // Thodi der baad classroom bhej do
-      setTimeout(() => {
-        window.location.href = "classroom.html";
-      }, 1500);
     };
 
-    // Evening Target Completion Confirmation & Classroom Return
-    window.prepareCompleteTelegram = async (e) => {
+    // 2. Evening Target Proof
+    window.prepareCompleteTelegram = (e) => {
       e.preventDefault();
+      const msg = encodeURIComponent(`✅ *TARGET COMPLETED* ☑️\nCadet: ${currentCadetName}\nStatus: All assigned tasks finished successfully! 🟢 [CHECKED]`);
+      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
+      
+      document.getElementById('eveningConfirmBox').classList.remove('hidden');
+    };
+
+    window.confirmEveningAttendance = async () => {
       const user = auth.currentUser;
       const todayStr = new Date().toDateString();
 
@@ -216,17 +259,13 @@
             eveningTargetDoneDate: todayStr,
             lastSubmissionTimestamp: Date.now()
           });
+          alert("Evening Completion Proof Recorded!");
+          window.location.href = "classroom.html";
         } catch (err) {
           console.error("Evening update error", err);
+          alert("Error recording proof. Please try again.");
         }
       }
-
-      const msg = encodeURIComponent(`✅ *TARGET COMPLETED* ☑️\nCadet: ${currentCadetName}\nStatus: All assigned tasks finished successfully! 🟢 [CHECKED]`);
-      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
-
-      setTimeout(() => {
-        window.location.href = "classroom.html";
-      }, 1500);
     };
   </script>
 
