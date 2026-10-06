@@ -258,7 +258,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-orbitron text-sm font-bold text-amber-400">⚡ STUDENT DAILY TARGET MONITOR</h3>
-            <p class="text-xs text-neutral-400">Live overview of Morning and Evening submissions and Inactive Defaulters.</p>
+            <p class="text-xs text-neutral-400">Live overview of Morning and Evening submissions and 3+ Days Inactive Defaulters.</p>
           </div>
           <button onclick="loadTargetMonitor()" class="bg-amber-600 hover:bg-amber-500 text-black font-orbitron font-bold px-4 py-2 rounded-xl transition text-xs tracking-wider cursor-pointer">
             REFRESH MONITOR
@@ -422,14 +422,13 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    // Helper for tactical cycle
     function getTacticalCycleDate() {
       const now = new Date();
       if (now.getHours() < 6) now.setDate(now.getDate() - 1);
       return now.toDateString();
     }
 
-    // Load Target Monitor Data from Firestore collection `daily_target_students`
+    // Load Target Monitor Data with 3+ days inactive strict check
     window.loadTargetMonitor = async () => {
       const completedBody = document.getElementById("completedTableBody");
       const defaultersBody = document.getElementById("defaultersTableBody");
@@ -445,7 +444,7 @@
         let statusCount = 0;
         let defaultersCount = 0;
 
-        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000; // 3 din (72 ghante)
         const now = Date.now();
         const currentCycleStr = getTacticalCycleDate();
 
@@ -458,8 +457,10 @@
             const morningCycle = data.morningTargetDoneCycle || "";
             const eveningCycle = data.eveningTargetDoneCycle || "";
             
-            const diff = now - lastTimestamp;
-            const isInactive = diff > threeDaysMs || lastTimestamp === 0;
+            const timeSinceLastSubmit = now - lastTimestamp;
+            
+            // STRICT 3+ DAYS CHECK: Sirf tabhi inactive mana jayega jab last submission ko 3 din ya usse zyada ho gaye hon
+            const isInactive = lastTimestamp === 0 || timeSinceLastSubmit >= threeDaysMs;
 
             const isMorningDone = morningCycle === currentCycleStr;
             const isEveningDone = eveningCycle === currentCycleStr;
@@ -484,7 +485,7 @@
               </tr>
             `;
 
-            // SECTION 2: Inactive Defaulters (3+ Days Pending)
+            // SECTION 2: Inactive Defaulters (Sirf 3+ days continuous gap hone par hi show hoga, submission hote hi hat jayega)
             if (isInactive) {
               defaultersCount++;
               const lastDateStr = lastTimestamp ? new Date(lastTimestamp).toLocaleString() : "Never Submitted";
@@ -513,7 +514,7 @@
         });
 
         completedBody.innerHTML = statusCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No student records found in database.</td></tr>` : statusHtml;
-        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Daily Target cadets are active.</td></tr>` : defaultersHtml;
+        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All cadets are active within the 3-day window.</td></tr>` : defaultersHtml;
 
       } catch (e) {
         completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
