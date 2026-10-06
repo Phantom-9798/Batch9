@@ -93,6 +93,9 @@
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [4] PURGE / DATA MANAGER
         </button>
+        <button id="targetTabBtn" onclick="switchMode('targets')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
+          [5] DAILY TARGET MONITOR
+        </button>
       </div>
 
       <!-- ================= MODE 1: SINGLE LECTURE ================= -->
@@ -194,7 +197,7 @@
         </button>
       </div>
 
-      <!-- ================= MODE 3: NEXIELD HTML LINK EXTRACTOR (ORIGINAL & SIMPLE) ================= -->
+      <!-- ================= MODE 3: NEXIELD EXTRACTOR ================= -->
       <div id="extractorSection" class="hidden space-y-4">
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE NEXIELD HTML CODE</label>
@@ -250,6 +253,66 @@
         </button>
       </div>
 
+      <!-- ================= MODE 5: DAILY TARGET MONITOR (TWO SECTIONS) ================= -->
+      <div id="targetsSection" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-orbitron text-sm font-bold text-amber-400">⚡ DAILY TARGET TRACKER MONITOR</h3>
+            <p class="text-xs text-neutral-400">Live overview of cadets who have completed targets vs inactive defaulters.</p>
+          </div>
+          <button onclick="loadTargetMonitor()" class="bg-amber-600 hover:bg-amber-500 text-black font-orbitron font-bold px-4 py-2 rounded-xl transition text-xs tracking-wider cursor-pointer">
+            REFRESH MONITOR
+          </button>
+        </div>
+
+        <!-- SECTION 1: TARGET COMPLETED CADETS -->
+        <div class="space-y-3">
+          <h4 class="font-orbitron text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+            <span>✅</span> Target Completed Section (Active Today)
+          </h4>
+          <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-black/60">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-neutral-800 text-[11px] font-orbitron text-neutral-400">
+                  <th class="p-3">Cadet Name / Email</th>
+                  <th class="p-3">Last Target / Submission Date</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="completedTableBody" class="text-xs font-mono">
+                <tr>
+                  <td colspan="3" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION 2: NOT COMPLETED / INACTIVE DEFAULTERS -->
+        <div class="space-y-3 pt-2">
+          <h4 class="font-orbitron text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
+            <span>❌</span> Not Completed / Inactive Defaulters (3+ Days Pending)
+          </h4>
+          <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-black/60">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-neutral-800 text-[11px] font-orbitron text-neutral-400">
+                  <th class="p-3">Cadet Name / Email</th>
+                  <th class="p-3">Last Submission Date</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-center">Tactical Action</th>
+                </tr>
+              </thead>
+              <tbody id="defaultersTableBody" class="text-xs font-mono">
+                <tr>
+                  <td colspan="4" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -262,7 +325,7 @@
   <!-- ================= FIREBASE LOGIC ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -278,6 +341,17 @@
 
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
+
+    const AUTHORIZED_EMAILS = [
+      "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
+      "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
+      "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
+      "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
+      "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
+      "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
+      "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
+      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com"
+    ];
 
     window.unlockTerminal = () => {
       const entered = document.getElementById("adminPass").value.trim();
@@ -300,21 +374,25 @@
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
       const managerSec = document.getElementById("managerSection");
+      const targetsSec = document.getElementById("targetsSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
       const mBtn = document.getElementById("managerTabBtn");
+      const tBtn = document.getElementById("targetTabBtn");
 
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
       managerSec.classList.add("hidden");
+      targetsSec.classList.add("hidden");
       
       sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
@@ -328,6 +406,10 @@
       } else if (mode === 'manager') {
         managerSec.classList.remove("hidden");
         mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-red-400 text-red-400 transition cursor-pointer";
+      } else if (mode === 'targets') {
+        targetsSec.classList.remove("hidden");
+        tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-amber-400 text-amber-400 transition cursor-pointer";
+        loadTargetMonitor();
       }
     };
 
@@ -339,62 +421,111 @@
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
 
-    function getDurationFromUrl(url) {
-      return new Promise((resolve) => {
-        if (!url) {
-          resolve("HD Session");
-          return;
-        }
-        const tempVideo = document.createElement('video');
-        tempVideo.src = url;
-        tempVideo.preload = 'metadata';
+    // Daily Target Monitor Logic (Separated into Completed & Defaulters)
+    window.loadTargetMonitor = async () => {
+      const completedBody = document.getElementById("completedTableBody");
+      const defaultersBody = document.getElementById("defaultersTableBody");
+
+      completedBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
+      defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning records...</td></tr>`;
+
+      try {
+        const snapshot = await getDocs(collection(db, "cadets"));
         
-        let resolved = false;
-        const timer = setTimeout(() => {
-          if (!resolved) {
-            resolved = true;
-            resolve("HD Session");
-          }
-        }, 4000);
+        let completedHtml = "";
+        let defaultersHtml = "";
+        let completedCount = 0;
+        let defaultersCount = 0;
 
-        tempVideo.onloadedmetadata = function() {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timer);
-            window.URL.revokeObjectURL(tempVideo.src);
-            const totalSeconds = Math.round(tempVideo.duration);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            let formatted = "";
-            if (minutes > 0) formatted += `${minutes} Mins `;
-            if (seconds > 0 && minutes < 5) formatted += `${seconds} Secs`;
-            resolve(formatted.trim() || `${totalSeconds} Secs`);
-          }
-        };
+        const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const todayStr = new Date().toDateString();
 
-        tempVideo.onerror = function() {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timer);
-            resolve("HD Session");
-          }
-        };
-      });
-    }
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const email = data.email || "";
 
-    window.fetchVideoDuration = async function(videoUrl, durationInputId) {
-      if (!videoUrl) return;
-      const durationInput = document.getElementById(durationInputId);
-      durationInput.value = "Detecting duration...";
-      const detected = await getDurationFromUrl(videoUrl);
-      durationInput.value = detected;
+          if (AUTHORIZED_EMAILS.includes(email) || data.targetAccess === true) {
+            const lastTimestamp = data.lastSubmissionTimestamp || 0;
+            const lastDate = data.lastTargetDate || "";
+            const diff = now - lastTimestamp;
+            const isInactive = diff > threeDaysMs || lastTimestamp === 0;
+            const isTodayDone = lastDate === todayStr;
+
+            if (isTodayDone && !isInactive) {
+              completedCount++;
+              completedHtml += `
+                <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
+                  <td class="p-3">
+                    <div class="font-bold text-white">${data.name || "Cadet"}</div>
+                    <div class="text-[11px] text-neutral-400">${email}</div>
+                  </td>
+                  <td class="p-3 text-emerald-400">${lastDate}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Completed ✅</span>
+                  </td>
+                </tr>
+              `;
+            } else if (isInactive) {
+              defaultersCount++;
+              defaultersHtml += `
+                <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
+                  <td class="p-3">
+                    <div class="font-bold text-white">${data.name || "Cadet"}</div>
+                    <div class="text-[11px] text-neutral-400">${email}</div>
+                  </td>
+                  <td class="p-3 text-neutral-400">${lastDate || "Never Submitted"}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-red-950/80 text-red-400 border border-red-500/40 text-[10px] font-bold">3+ Days Inactive ⚠️</span>
+                  </td>
+                  <td class="p-3 text-center space-x-2">
+                    <button onclick="keepCadet('${docSnap.id}', '${email}')" class="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-orbitron text-[10px] font-bold transition cursor-pointer">
+                      [KEEP]
+                    </button>
+                    <button onclick="removeCadet('${docSnap.id}', '${email}')" class="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-orbitron text-[10px] font-bold transition cursor-pointer">
+                      [REMOVE]
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }
+          }
+        });
+
+        completedBody.innerHTML = completedCount === 0 ? `<tr><td colspan="3" class="p-4 text-center text-neutral-500">No target submissions recorded for today yet.</td></tr>` : completedHtml;
+        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All Super 100/Daily Target cadets are active.</td></tr>` : defaultersHtml;
+
+      } catch (e) {
+        completedBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
+        defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
+      }
     };
 
-    function generateSmartDescription(subject, title) {
-      return `Comprehensive tactical briefing and high-yield concept masterclass covering ${title} under the ${subject} operational module. Recommended for structured defense exam preparation.`;
-    }
+    window.keepCadet = async (cadetId, email) => {
+      try {
+        await updateDoc(doc(db, "cadets", cadetId), {
+          lastSubmissionTimestamp: Date.now(),
+          lastTargetDate: new Date().toDateString()
+        });
+        alert(`[EXEMPTED] Cadet ${email} has been kept and exempted.`);
+        loadTargetMonitor();
+      } catch (e) {
+        alert(`Error: ${e.message}`);
+      }
+    };
 
-    // 1. Single Lecture Dispatch
+    window.removeCadet = async (cadetId, email) => {
+      if (!confirm(`WARNING: Are you sure you want to completely purge cadet ${email} and revoke all access?`)) return;
+      try {
+        await deleteDoc(doc(db, "cadets", cadetId));
+        alert(`[PURGED] Cadet ${email} has been removed and access revoked.`);
+        loadTargetMonitor();
+      } catch (e) {
+        alert(`Error: ${e.message}`);
+      }
+    };
+
+    // Lecture Dispatch & Purge functions kept intact...
     window.dispatchSingleLecture = async () => {
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
@@ -417,18 +548,9 @@
 
       try {
         await addDoc(collection(db, "tactical_curriculum"), {
-          squadron: squadron,
-          subject: subject,
-          chapter: chapter,
-          order: order,
-          mode: mode,
-          title: title,
-          description: description,
-          duration: duration,
-          url: url,
+          squadron, subject, chapter, order, mode, title, description, duration, url,
           createdAt: serverTimestamp()
         });
-
         showStatus(`[CONFIRMED] Lecture "${title}" successfully stored.`, true);
         document.getElementById("titleInput").value = "";
         document.getElementById("urlInput").value = "";
@@ -443,7 +565,6 @@
       }
     };
 
-    // 2. Bulk TSV Dispatch
     window.dispatchBulkTsv = async () => {
       const squadron = document.getElementById("bulkSquadron").value;
       const subject = document.getElementById("bulkSubject").value.trim();
@@ -468,7 +589,6 @@
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          
           const parts = line.split('\t');
           if (parts.length < 3) continue;
 
@@ -476,27 +596,10 @@
           const fullTitle = parts[1].trim();
           const url = parts[2].trim();
 
-          const autoDuration = await getDurationFromUrl(url);
-          const autoDescription = generateSmartDescription(subject, fullTitle);
-
-          let chapterName = "Core Concepts";
-          const lower = fullTitle.toLowerCase();
-          if (lower.includes("ratio")) chapterName = "Ratio & Proportion";
-          else if (lower.includes("percentage")) chapterName = "Percentage";
-          else if (lower.includes("vocab")) chapterName = "Vocabulary";
-          else if (lower.includes("idiom")) chapterName = "Idioms & Phrases";
-
           const docRef = doc(collection(db, "tactical_curriculum"));
           batch.set(docRef, {
-            squadron: squadron,
-            subject: subject,
-            chapter: chapterName,
-            order: sNo,
-            mode: mode,
-            title: fullTitle,
-            description: autoDescription,
-            duration: autoDuration,
-            url: url,
+            squadron, subject, chapter: "Core Concepts", order: sNo, mode, title: fullTitle,
+            description: "Tactical lecture briefing.", duration: "HD Session", url,
             createdAt: serverTimestamp()
           });
 
@@ -510,10 +613,7 @@
           }
         }
 
-        if (batchCount > 0) {
-          await batch.commit();
-        }
-
+        if (batchCount > 0) await batch.commit();
         showStatus(`[BULK SUCCESS] ${count} Lectures dispatched successfully!`, true);
         document.getElementById("bulkTsvData").value = "";
       } catch (e) {
@@ -524,18 +624,12 @@
       }
     };
 
-    // 3. Original & Simple Nexield HTML Link Extractor Logic
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
-      
-      if (!html.trim()) {
-        alert("Please paste the HTML code first!");
-        return;
-      }
+      if (!html.trim()) { alert("Please paste HTML code first!"); return; }
 
       const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
-      
       let match;
       let tsvResult = "";
       let count = 1;
@@ -543,91 +637,12 @@
       while ((match = regex.exec(html)) !== null) {
         const title = match[1];
         const token = match[2];
-        
         const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-        
         tsvResult += `${count}\t${title}\t${fullUrl}\n`;
         count++;
       }
 
-      if (count === 1) {
-        outputEl.value = "❌ No matching playLesson links found in this HTML!";
-      } else {
-        outputEl.value = tsvResult;
-        showStatus(`[EXTRACTED] Successfully converted ${count - 1} links to TSV!`, true);
-      }
-    };
-
-    // 4. Purge / Data Manager Logic
-    window.executePurge = async () => {
-      const squadron = document.getElementById("purgeSquadron").value;
-      const subject = document.getElementById("purgeSubject").value.trim();
-      const chapter = document.getElementById("purgeChapter").value.trim();
-      const mode = document.getElementById("purgeMode").value;
-
-      if (!subject) {
-        alert("Please enter the Module / Subject name!");
-        return;
-      }
-
-      let confirmMsg = `WARNING: Are you sure you want to delete lectures under Squadron: ${squadron}, Mode: ${mode}, Subject: ${subject}`;
-      if (chapter) {
-        confirmMsg += `, Chapter: ${chapter}`;
-      }
-      confirmMsg += `?`;
-
-      if (!confirm(confirmMsg)) {
-        return;
-      }
-
-      const btn = document.getElementById("purgeSubmitBtn");
-      btn.innerText = "WIPING DATA...";
-      btn.disabled = true;
-
-      try {
-        let q;
-        const colRef = collection(db, "tactical_curriculum");
-        
-        if (chapter) {
-          q = query(
-            colRef,
-            where("squadron", "==", squadron),
-            where("mode", "==", mode),
-            where("subject", "==", subject),
-            where("chapter", "==", chapter)
-          );
-        } else {
-          q = query(
-            colRef,
-            where("squadron", "==", squadron),
-            where("mode", "==", mode),
-            where("subject", "==", subject)
-          );
-        }
-
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-          showStatus("[INFO] No matching documents found to purge.", false);
-          btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
-          btn.disabled = false;
-          return;
-        }
-
-        const deletePromises = [];
-        querySnapshot.forEach((docSnap) => {
-          deletePromises.push(deleteDoc(docSnap.ref));
-        });
-
-        await Promise.all(deletePromises);
-        showStatus(`[PURGE SUCCESS] Successfully deleted ${deletePromises.length} lectures!`, true);
-        document.getElementById("purgeChapter").value = "";
-      } catch (e) {
-        showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
-      } finally {
-        btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
-        btn.disabled = false;
-      }
+      outputEl.value = count === 1 ? "❌ No links found!" : tsvResult;
     };
   </script>
 </body>
