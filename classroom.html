@@ -18,7 +18,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -45,37 +45,48 @@
   ];
 
   onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-        const snap = await getDoc(doc(db, "cadets", user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          const email = data.email || user.email;
-          const today = new Date().toDateString();
-          const currentHour = new Date().getHours(); // 24-hour format
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
 
-          if (AUTHORIZED_EMAILS.includes(email) || data.targetAccess === true) {
-            
-            // 1. Subah ka target check: Agar subah ka nahi hua, toh seedha targets.html par kheench kar le jao (Strict Mode)
-            const morningDone = data.morningTargetDoneDate === today;
-            if (!morningDone) {
-              window.location.href = "targets.html";
-              return;
-            }
+    try {
+      const userEmail = user.email;
+      const isAllowed = AUTHORIZED_TARGET_EMAILS.includes(userEmail);
 
-            // 2. Sham ke 4 baje ke baad ka popup check (Hour >= 16 matlab 4 PM ke baad)
-            const eveningTimeReached = currentHour >= 16;
-            const eveningDone = data.eveningTargetDoneDate === today;
-
-            if (eveningTimeReached && !eveningDone) {
-              // Class room access nahi rokenge, bas upar chamakta hua popup dikha denge!
-              document.getElementById("eveningPopupBanner").classList.remove("hidden");
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Popup Guard Error:", err);
+      if (!isAllowed) {
+        return; // Agar list me nahi hai toh classroom ka default access jo hai rehne do
       }
+
+      const cadetRef = doc(db, "cadets", user.uid);
+      let cadetSnap = await getDoc(cadetRef);
+      const today = new Date().toDateString();
+
+      // Agar database me cadet ka record nahi hai, toh turant naya record banao
+      if (!cadetSnap.exists()) {
+        await setDoc(cadetRef, {
+          email: userEmail,
+          name: user.displayName || "Cadet",
+          streak: 0,
+          morningTargetDoneDate: "", // Khali rakhna zaroori hai taaki target page khule!
+          eveningTargetDoneDate: "",
+          lastSubmissionTimestamp: 0
+        });
+        // Naya record bante hi turant targets.html par bhej do
+        window.location.href = "targets.html";
+        return;
+      }
+
+      const data = cadetSnap.data();
+      const morningDone = data.morningTargetDoneDate === today;
+
+      // STRICT CHECK: Agar subah ka target aaj ki date me done nahi hai, toh classroom mat kholne do, seedha targets.html bhejo!
+      if (!morningDone) {
+        window.location.href = "targets.html";
+      }
+
+    } catch (err) {
+      console.error("Classroom Guard Error:", err);
     }
   });
 </script>
