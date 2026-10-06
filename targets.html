@@ -176,9 +176,6 @@
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
       try {
-        const cadetRef = doc(db, "daily_target_students", user.uid);
-        let cadetSnap = await getDoc(cadetRef);
-        
         const userEmail = user.email;
         const isAllowed = AUTHORIZED_EMAILS.includes(userEmail);
 
@@ -186,6 +183,9 @@
           document.getElementById('unauthorizedView').classList.remove('hidden'); 
           return; 
         }
+
+        const cadetRef = doc(db, "daily_target_students", user.uid);
+        let cadetSnap = await getDoc(cadetRef);
 
         if (!cadetSnap.exists()) {
           await setDoc(cadetRef, {
@@ -227,7 +227,6 @@
       const instruction = document.getElementById("targetInstruction");
 
       if (currentHour < 16) {
-        // Subah 4 baje se pehle sirf morning target
         if (!morningDone) {
           morningSec.classList.remove("hidden");
           instruction.innerText = "Morning Session: Submit morning target photo to proceed.";
@@ -235,12 +234,10 @@
           instruction.innerText = "Morning target already submitted! Evening proof will unlock after 4:00 PM.";
         }
       } else {
-        // Sham ke 4 baje ke baad
         if (!morningDone) {
           morningSec.classList.remove("hidden");
           instruction.innerText = "ACCESS DENIED: Pehle apna morning target submit karo, tabhi evening target khulega!";
         } else if (!eveningDone) {
-          // Subah ho chuka hai, ab sirf evening proof ka section dikhao
           eveningSec.classList.remove("hidden");
           instruction.innerText = "Evening Session: Morning verified. Submit your evening completion proof.";
         } else {
