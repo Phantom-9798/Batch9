@@ -402,23 +402,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const AUTHORIZED_EMAILS = [
-      "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
-      "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
-      "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
-      "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
-      "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
-      "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
-      "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
-      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
-    ];
-
-    function getTacticalCycleDate() {
-      const now = new Date();
-      if (now.getHours() < 6) now.setDate(now.getDate() - 1);
-      return now.toDateString();
-    }
-
     let unsubscribeSnapshot = null;
     let currentCadetName = "Cadet";
 
@@ -429,47 +412,7 @@
         return;
       }
 
-      if (AUTHORIZED_EMAILS.includes(user.email)) {
-        try {
-          const cadetRef = doc(db, "daily_target_students", user.uid);
-          const snap = await getDoc(cadetRef);
-          
-          const now = new Date();
-          const currentHour = now.getHours();
-          const cycleStr = getTacticalCycleDate();
-
-          let needsTargetRedirect = false;
-
-          if (!snap.exists()) {
-            needsTargetRedirect = true; 
-          } else {
-            const data = snap.data();
-            currentCadetName = data.name || "Cadet";
-            const morningDone = data.morningTargetDoneCycle === cycleStr;
-            const eveningDone = data.eveningTargetDoneCycle === cycleStr;
-
-            if (currentHour >= 6 && currentHour < 16 && !morningDone) {
-              needsTargetRedirect = true; 
-            } else if (currentHour >= 16 && (!morningDone || !eveningDone)) {
-              if (morningDone && !eveningDone) {
-                document.getElementById("eveningPopupModal").classList.remove("hidden");
-              } else {
-                needsTargetRedirect = true;
-              }
-            }
-          }
-
-          if (needsTargetRedirect) {
-            window.location.href = "targets.html";
-            return;
-          }
-
-        } catch (e) {
-          console.error("Gatekeeper error:", e);
-        }
-      }
-
-      // Realtime Single-Device Listener
+      // Realtime Single-Device Listener (Direct Classroom Access)
       unsubscribeSnapshot = onSnapshot(doc(db, "daily_target_students", user.uid), (docSnap) => {
         const data = docSnap.exists() ? docSnap.data() : { name: user.displayName || "Cadet", email: user.email };
         const localToken = localStorage.getItem("phantom_session_token");
@@ -496,31 +439,6 @@
         renderTelegramNotification(["cds-math", "cds-kilo", "afcat", "capf"], true, user.uid);
       });
     });
-
-    // Global functions for the sticky popup
-    window.openTelegramEveningPopup = (e) => {
-      e.preventDefault();
-      const msg = encodeURIComponent(`✅ *TARGET COMPLETED PHOTO*\nCadet: ${currentCadetName}\nStatus: Sending evening completion photo! 🟢`);
-      window.open(`https://t.me/teamPhantom98?text=${msg}`, '_blank');
-    };
-
-    window.submitEveningPopupProof = async () => {
-      const user = auth.currentUser;
-      const cycleStr = getTacticalCycleDate();
-      if (user) {
-        try {
-          await updateDoc(doc(db, "daily_target_students", user.uid), {
-            eveningTargetDoneCycle: cycleStr,
-            lastSubmissionTimestamp: Date.now()
-          });
-          alert("Evening Completion Proof Recorded Successfully!");
-          document.getElementById("eveningPopupModal").classList.add("hidden");
-          location.reload();
-        } catch (err) {
-          alert("Error saving record. Please try again.");
-        }
-      }
-    };
 
     function applyBatchAccess(batchId, isUnlocked) {
       const card = document.getElementById("card-" + batchId);
