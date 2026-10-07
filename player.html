@@ -155,40 +155,32 @@
     }
   });
 </script>
-  <script>
-(() => {
-  // 1. Right Click Block
-  document.addEventListener('contextmenu', e => e.preventDefault());
-
-  // 2. F12, DevTools shortcuts, Save & Print Block
-  document.addEventListener('keydown', e => {
-    if (
-      e.key === 'F12' ||
-      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-      (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  });
-
-  // 3. Ultra-Fast Console Trap (Freezes browser debugger instantly)
-  setInterval(() => {
-    const start = performance.now();
-    debugger;
-    const end = performance.now();
-    if (end - start > 100) {
-      document.body.innerHTML = '<div style="background:#000;color:#ef4444;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:bold;font-size:20px;text-align:center;">[SECURITY BREACH DETECTED]<br>TERMINAL LOCKED - DEVTOOLS PROHIBITED</div>';
-    }
-  }, 800);
-
-  // 4. Memory Scrub
-  setInterval(() => {
-    console.clear();
-  }, 1200);
-})();
-</script>
+<script>
+    // ================= TIGHT SECURITY & TAMPER BLOCK =================
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+      setInterval(() => {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100) {
+          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        }
+      }, 1000);
+      setInterval(() => { console.clear(); }, 1500);
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Tactical Video Console</title>
