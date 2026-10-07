@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} }
+    }
+  </script>
   
   <!-- Military & Tactical Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +25,12 @@
     .font-stencil { font-family: 'Black Ops One', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-body { font-family: 'Inter', sans-serif; }
+
+    /* Image Safety Rule */
+    img {
+      max-width: 100%;
+      height: auto;
+    }
 
     .tactical-bg {
       background: 
@@ -162,7 +174,7 @@
       
       <!-- BRANDING & LOGO -->
       <div class="flex items-center gap-4">
-        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center">
+        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center overflow-hidden">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
         </div>
         <div>
