@@ -389,7 +389,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp({
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -403,7 +403,6 @@
     const db = getFirestore(app);
 
     let unsubscribeSnapshot = null;
-    let currentCadetName = "Cadet";
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -412,8 +411,8 @@
         return;
       }
 
-      // Realtime Single-Device Listener (Direct Classroom Access)
-      unsubscribeSnapshot = onSnapshot(doc(db, "daily_target_students", user.uid), (docSnap) => {
+      // Realtime Single-Device Listener using 'cadets' collection
+      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
         const data = docSnap.exists() ? docSnap.data() : { name: user.displayName || "Cadet", email: user.email };
         const localToken = localStorage.getItem("phantom_session_token");
 
