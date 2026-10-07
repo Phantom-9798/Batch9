@@ -423,9 +423,9 @@
         return;
       }
 
-      // Realtime Single-Device Listener using 'cadets' collection
+      // Realtime Single-Device & Allowed Batches Listener from 'cadets' collection
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
-        const data = docSnap.exists() ? docSnap.data() : { name: user.displayName || "Cadet", email: user.email };
+        const data = docSnap.exists() ? docSnap.data() : { name: user.displayName || "Cadet", email: user.email, allowedBatches: [] };
         const localToken = localStorage.getItem("phantom_session_token");
 
         if (data.activeSession && localToken && data.activeSession !== localToken) {
@@ -442,12 +442,18 @@
         document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
         document.getElementById('cadetEmailDisplay').innerText = data.email || user.email;
 
-        applyBatchAccess("cds-math", true);
-        applyBatchAccess("cds-kilo", true);
-        applyBatchAccess("afcat", true);
-        applyBatchAccess("capf", true);
+        // Student ke database record se check karo ki kaun-kaun se batches allowed hain
+        const allowed = data.allowedBatches || [];
+        const isCombo = allowed.includes("combo") || allowed.length >= 4;
 
-        renderTelegramNotification(["cds-math", "cds-kilo", "afcat", "capf"], true, user.uid);
+        // Har batch ke liye check karo ki student ke paas access hai ya nahi
+        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+        batchesList.forEach(batchId => {
+          const hasAccess = isCombo || allowed.includes(batchId);
+          applyBatchAccess(batchId, hasAccess);
+        });
+
+        renderTelegramNotification(allowed, isCombo, user.uid);
       });
     });
 
@@ -479,6 +485,7 @@
         actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
         actionBtn.innerText = "NOT ENROLLED";
         actionBtn.disabled = true;
+        actionBtn.onclick = null;
       }
     }
 
@@ -500,7 +507,13 @@
         { id: "capf", name: "CAPF SQUADRON" }
       ];
 
-      let userGroups = allGroups;
+      // Sirf wahi groups dikhao jo student ko allowed hain
+      let userGroups = allGroups.filter(g => isCombo || allowed.includes(g.id));
+      if (userGroups.length === 0) {
+        container.innerHTML = "";
+        return;
+      }
+
       let clickedStorageKey = "phantom_clicked_groups_" + userId;
       let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
 
