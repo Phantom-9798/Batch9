@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      <!-- Tab Switcher (Added Student Daily Target) -->
+      <!-- Tab Switcher (Target Monitor Tab Removed) -->
       <div class="flex border-b border-neutral-800 mb-6 gap-2 flex-wrap">
         <button id="singleTabBtn" onclick="switchMode('single')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer">
           [1] SINGLE LECTURE
@@ -92,9 +92,6 @@
         </button>
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
           [4] PURGE / DATA MANAGER
-        </button>
-        <button id="targetTabBtn" onclick="switchMode('targets')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [5] STUDENT DAILY TARGET
         </button>
       </div>
 
@@ -142,8 +139,8 @@
         </div>
 
         <div>
-          <label class="text-xs text-neutral-400 font-mono mb-1 block">NEXIELD / TARGET VIDEO STREAM URL</label>
-          <input id="urlInput" type="text" placeholder="https://vimpd.nexield.in/?title=...&link=..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">VIDEO / ZOOM / YOUTUBE STREAM URL</label>
+          <input id="urlInput" type="text" placeholder="https://..." class="w-full bg-black border border-neutral-700 text-white p-2.5 rounded-lg text-sm outline-none focus:border-emerald-500 font-mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -189,7 +186,7 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE TSV DATA (S.No [TAB] Title [TAB] URL)</label>
-          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://vimpd.nexield.in/...&#10;2	2. Ratio Class 2	https://vimpd.nexield.in/..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://...&#10;2	2. Ratio Class 2	https://..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="dispatchBulkTsv()" id="bulkSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
@@ -253,67 +250,6 @@
         </button>
       </div>
 
-      <!-- ================= MODE 5: STUDENT DAILY TARGET MONITOR ================= -->
-      <div id="targetsSection" class="hidden space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-orbitron text-sm font-bold text-amber-400">⚡ STUDENT DAILY TARGET MONITOR</h3>
-            <p class="text-xs text-neutral-400">Live overview of Morning and Evening submissions and 3+ Days Inactive Defaulters.</p>
-          </div>
-          <button onclick="loadTargetMonitor()" class="bg-amber-600 hover:bg-amber-500 text-black font-orbitron font-bold px-4 py-2 rounded-xl transition text-xs tracking-wider cursor-pointer">
-            REFRESH MONITOR
-          </button>
-        </div>
-
-        <!-- SECTION 1: DAILY TARGET STATUS (Morning & Evening) -->
-        <div class="space-y-3">
-          <h4 class="font-orbitron text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-            <span>✅</span> Daily Target Status (Today's Cycle)
-          </h4>
-          <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-black/60">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-neutral-800 text-[11px] font-orbitron text-neutral-400">
-                  <th class="p-3">Cadet Name / Email</th>
-                  <th class="p-3">Morning Status</th>
-                  <th class="p-3">Evening Status</th>
-                  <th class="p-3">Overall Progress</th>
-                </tr>
-              </thead>
-              <tbody id="completedTableBody" class="text-xs font-mono">
-                <tr>
-                  <td colspan="4" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- SECTION 2: INACTIVE DEFAULTERS (3+ Days Pending - Keep / Remove) -->
-        <div class="space-y-3 pt-2">
-          <h4 class="font-orbitron text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
-            <span>❌</span> Inactive Defaulters (3+ Days Pending)
-          </h4>
-          <div class="overflow-x-auto border border-neutral-800 rounded-xl bg-black/60">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="border-b border-neutral-800 text-[11px] font-orbitron text-neutral-400">
-                  <th class="p-3">Cadet Name / Email</th>
-                  <th class="p-3">Last Submission Timestamp</th>
-                  <th class="p-3">Status</th>
-                  <th class="p-3 text-center">Tactical Action (Keep / Remove)</th>
-                </tr>
-              </thead>
-              <tbody id="defaultersTableBody" class="text-xs font-mono">
-                <tr>
-                  <td colspan="4" class="p-4 text-center text-neutral-500">Click 'Refresh Monitor' to load data...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -326,7 +262,7 @@
   <!-- ================= FIREBASE LOGIC ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -342,17 +278,6 @@
 
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
-
-    const AUTHORIZED_EMAILS = [
-      "mauryaabhijit055@gmail.com", "pr7056972@gmail.com", "veerbhogayavasundhara4@gmail.com",
-      "Suhanikumari079@gmail.com", "sushmitasahani4050@gmail.com", "maneeshkumar0086895@gmail.com",
-      "rishuraj01012006@gmail.com", "aakankshasingh215@gmail.com", "princekumar.yadav0749@gmail.com",
-      "pathakaryansh1@gmail.com", "payalparihar483@gmail.com", "asheeshpathak459@gmail.com",
-      "ruthlesstiwari2005@gmail.com", "hewassunshine12@gmail.com", "reshabbhattacharjee@gmail.com",
-      "yrithik2@gmail.com", "aakhyaa7@gmail.com", "collaboration9602@gmail.com",
-      "ss4193872@gmail.com", "gladiatorscoy@gmail.com", "jaiakash308@gmail.com",
-      "sandeshshindedattatraykvs@gmail.com", "kamranfaraz41@gmail.com", "prachi00000012@gmail.com", "hkr9835@gmail.com"
-    ];
 
     window.unlockTerminal = () => {
       const entered = document.getElementById("adminPass").value.trim();
@@ -375,25 +300,21 @@
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
       const managerSec = document.getElementById("managerSection");
-      const targetsSec = document.getElementById("targetsSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
       const mBtn = document.getElementById("managerTabBtn");
-      const tBtn = document.getElementById("targetTabBtn");
 
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
       managerSec.classList.add("hidden");
-      targetsSec.classList.add("hidden");
       
       sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
-      tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
@@ -407,10 +328,6 @@
       } else if (mode === 'manager') {
         managerSec.classList.remove("hidden");
         mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-red-400 text-red-400 transition cursor-pointer";
-      } else if (mode === 'targets') {
-        targetsSec.classList.remove("hidden");
-        tBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-amber-400 text-amber-400 transition cursor-pointer";
-        loadTargetMonitor();
       }
     };
 
@@ -421,134 +338,6 @@
       box.classList.remove("hidden");
       setTimeout(() => box.classList.add("hidden"), 6000);
     }
-
-    function getTacticalCycleDate() {
-      const now = new Date();
-      if (now.getHours() < 6) now.setDate(now.getDate() - 1);
-      return now.toDateString();
-    }
-
-    // Load Target Monitor Data with Strict Independent Morning/Evening Check
-    window.loadTargetMonitor = async () => {
-      const completedBody = document.getElementById("completedTableBody");
-      const defaultersBody = document.getElementById("defaultersTableBody");
-
-      completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning daily targets...</td></tr>`;
-      defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-amber-400 animate-pulse">Scanning defaulters...</td></tr>`;
-
-      try {
-        const snapshot = await getDocs(collection(db, "daily_target_students"));
-        
-        let statusHtml = "";
-        let defaultersHtml = "";
-        let statusCount = 0;
-        let defaultersCount = 0;
-
-        const threeDaysMs = 3 * 24 * 60 * 60 * 1000; // 3 din (72 ghante)
-        const now = Date.now();
-        const currentCycleStr = getTacticalCycleDate();
-
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const email = data.email || "";
-
-          if (AUTHORIZED_EMAILS.includes(email) || data.targetAccess === true) {
-            const lastTimestamp = data.lastSubmissionTimestamp || 0;
-            const morningCycle = data.morningTargetDoneCycle || "";
-            const eveningCycle = data.eveningTargetDoneCycle || "";
-            
-            const timeSinceLastSubmit = now - lastTimestamp;
-            const isInactive = lastTimestamp === 0 || timeSinceLastSubmit >= threeDaysMs;
-
-            // INDEPENDENT STATUS CHECK
-            const isMorningDone = (morningCycle === currentCycleStr);
-            const isEveningDone = (eveningCycle === currentCycleStr);
-
-            // SECTION 1: Daily Target Status (Morning & Evening Alag-Alag)
-            statusCount++;
-            const morningBadge = isMorningDone 
-              ? `<span class="text-emerald-400 font-bold">Done ✅</span>` 
-              : `<span class="text-red-400 font-bold">Pending ❌</span>`;
-            
-            const eveningBadge = isEveningDone 
-              ? `<span class="text-emerald-400 font-bold">Done ✅</span>` 
-              : `<span class="text-red-400 font-bold">Pending ❌</span>`;
-
-            const overallBadge = (isMorningDone && isEveningDone) 
-              ? `<span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold">Completed 🔥</span>`
-              : `<span class="px-2 py-0.5 rounded bg-amber-950/80 text-amber-400 border border-amber-500/40 text-[10px] font-bold">Incomplete ⏳</span>`;
-
-            statusHtml += `
-              <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
-                <td class="p-3">
-                  <div class="font-bold text-white">${data.name || "Cadet"}</div>
-                  <div class="text-[11px] text-neutral-400">${email}</div>
-                </td>
-                <td class="p-3">${morningBadge}</td>
-                <td class="p-3">${eveningBadge}</td>
-                <td class="p-3">${overallBadge}</td>
-              </tr>
-            `;
-
-            // SECTION 2: Inactive Defaulters (3+ Days Pending)
-            if (isInactive) {
-              defaultersCount++;
-              const lastDateStr = lastTimestamp ? new Date(lastTimestamp).toLocaleString() : "Never Submitted";
-              defaultersHtml += `
-                <tr class="border-b border-neutral-900 hover:bg-neutral-900/40">
-                  <td class="p-3">
-                    <div class="font-bold text-white">${data.name || "Cadet"}</div>
-                    <div class="text-[11px] text-neutral-400">${email}</div>
-                  </td>
-                  <td class="p-3 text-neutral-400">${lastDateStr}</td>
-                  <td class="p-3">
-                    <span class="px-2 py-0.5 rounded bg-red-950/80 text-red-400 border border-red-500/40 text-[10px] font-bold">3+ Days Inactive ⚠️</span>
-                  </td>
-                  <td class="p-3 text-center space-x-2">
-                    <button onclick="keepCadet('${docSnap.id}', '${email}')" class="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-orbitron text-[10px] font-bold transition cursor-pointer">
-                      [KEEP]
-                    </button>
-                    <button onclick="removeCadet('${docSnap.id}', '${email}')" class="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-orbitron text-[10px] font-bold transition cursor-pointer">
-                      [REMOVE]
-                    </button>
-                  </td>
-                </tr>
-              `;
-            }
-          }
-        });
-
-        completedBody.innerHTML = statusCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-neutral-500">No student records found in database.</td></tr>` : statusHtml;
-        defaultersBody.innerHTML = defaultersCount === 0 ? `<tr><td colspan="4" class="p-4 text-center text-emerald-400">✅ No defaulters! All cadets are active within the 3-day window.</td></tr>` : defaultersHtml;
-
-      } catch (e) {
-        completedBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
-        defaultersBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Error: ${e.message}</td></tr>`;
-      }
-    };
-
-    window.keepCadet = async (cadetId, email) => {
-      try {
-        await updateDoc(doc(db, "daily_target_students", cadetId), {
-          lastSubmissionTimestamp: Date.now()
-        });
-        alert(`[EXEMPTED] Cadet ${email} has been kept and exempted.`);
-        loadTargetMonitor();
-      } catch (e) {
-        alert(`Error: ${e.message}`);
-      }
-    };
-
-    window.removeCadet = async (cadetId, email) => {
-      if (!confirm(`WARNING: Are you sure you want to completely purge cadet ${email} and revoke all access from Firestore?`)) return;
-      try {
-        await deleteDoc(doc(db, "daily_target_students", cadetId));
-        alert(`[PURGED] Cadet ${email} has been removed and all associated database records cleared.`);
-        loadTargetMonitor();
-      } catch (e) {
-        alert(`Error: ${e.message}`);
-      }
-    };
 
     // Lecture Dispatch Logic
     window.dispatchSingleLecture = async () => {
