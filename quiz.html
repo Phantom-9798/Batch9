@@ -41,10 +41,14 @@
     .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 14px; color: #facc15; }
     
     /* Main Layout */
-    .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; }
-    .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }
+    .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; position: relative; }
+    .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
     
-    .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }
+    .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.3s; position: relative; }
+    .sidebar-panel.collapsed { margin-right: -300px; }
+    
+    .toggle-sidebar-btn { position: absolute; left: -35px; top: 15px; width: 35px; height: 35px; background: #1e293b; border: 1px solid #334155; border-right: none; color: #facc15; font-size: 16px; cursor: pointer; border-top-left-radius: 6px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 100; }
+    
     .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
     
     .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
@@ -77,9 +81,9 @@
     .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 14px; }
 
     /* Scorecard */
-    .scorecard { padding: 40px; text-align: center; display: none; max-width: 650px; margin: 30px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
-    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
-    .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }
+    .scorecard { padding: 30px; text-align: center; display: none; max-width: 650px; margin: 20px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+    .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }
 
     /* Generator Console */
     #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
@@ -180,9 +184,11 @@
         '        .brand-text h2 { margin: 0; font-size: 18px; font-family: "Black Ops One", cursive; color: #facc15; letter-spacing: 1px; }\n' +
         '        .brand-text p { margin: 2px 0 0 0; font-size: 11px; font-family: "Orbitron", sans-serif; color: #34d399; letter-spacing: 2px; font-weight: bold; }\n' +
         '        .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: "Orbitron", sans-serif; font-size: 14px; color: #facc15; }\n' +
-        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; }\n' +
-        '        .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }\n' +
-        '        .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }\n' +
+        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; position: relative; }\n' +
+        '        .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }\n' +
+        '        .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.3s; position: relative; }\n' +
+        '        .sidebar-panel.collapsed { margin-right: -300px; }\n' +
+        '        .toggle-sidebar-btn { position: absolute; left: -35px; top: 15px; width: 35px; height: 35px; background: #1e293b; border: 1px solid #334155; border-right: none; color: #facc15; font-size: 16px; cursor: pointer; border-top-left-radius: 6px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 100; }\n' +
         '        .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }\n' +
         '        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }\n' +
         '        .palette-btn { width: 40px; height: 40px; background: #334155; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }\n' +
@@ -205,9 +211,9 @@
         '        .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
         '        .solution-box h4 { color: #34d399; margin-top: 0; font-family: "Orbitron", sans-serif; }\n' +
         '        .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: "Orbitron", sans-serif; font-size: 14px; }\n' +
-        '        .scorecard { padding: 40px; text-align: center; display: none; max-width: 650px; margin: 30px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
-        '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }\n' +
-        '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }\n' +
+        '        .scorecard { padding: 30px; text-align: center; display: none; max-width: 650px; margin: 20px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
+        '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }\n' +
+        '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }\n' +
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
         '    </style>\n' +
@@ -243,6 +249,7 @@
         '\n' +
         '            <div id="scorecard-box" class="scorecard">\n' +
         '                <h2 style="font-family: \'Orbitron\'; color: #facc15; margin-top:0;">MISSION REPORT CARD</h2>\n' +
+        '                <button onclick="backToQuiz()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: \'Orbitron\'; margin-bottom: 15px;">⬅ Back to Test / Review</button>\n' +
         '                <p id="final-score-title" style="font-size: 20px; color: #34d399; font-weight: bold;"></p>\n' +
         '                <div class="stat-grid">\n' +
         '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">TOTAL ATTEMPTED</h4><p id="st-attempted" style="margin:5px 0 0; font-size:24px;">0</p></div>\n' +
@@ -254,7 +261,8 @@
         '            </div>\n' +
         '        </div>\n' +
         '\n' +
-        '        <div class="sidebar-panel">\n' +
+        '        <div class="sidebar-panel" id="sidebarPanel">\n' +
+        '            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>\n' +
         '            <div class="user-profile">\n' +
         '                <div style="width:35px; height:35px; border-radius:50%; background:#10b981; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#000;">TP</div>\n' +
         '                <div>\n' +
@@ -262,7 +270,7 @@
         '                    <div style="font-size:11px; color:#10b981;">● Online</div>\n' +
         '                </div>\n' +
         '            </div>\n' +
-        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE (' + (quizData.data.sections[0].questions ? quizData.data.sections[0].questions.length : 0) + ')</div>\n' +
+        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE (<span id="total-q-count">0</span>)</div>\n' +
         '            <div class="palette-grid" id="paletteGrid"></div>\n' +
         '        </div>\n' +
         '    </div>\n' +
@@ -293,6 +301,7 @@
         '        var currentIndex = 0;\n' +
         '        var userResponses = {};\n' +
         '        var markedStatus = {};\n' +
+        '        document.getElementById("total-q-count").innerText = questions.length;\n' +
         '\n' +
         '        // Timer logic\n' +
         '        var totalSeconds = config.testDuration;\n' +
@@ -306,6 +315,13 @@
         '                (mins < 10 ? "0" + mins : mins) + ":" + \n' +
         '                (secs < 10 ? "0" + secs : secs);\n' +
         '        }, 1000);\n' +
+        '\n' +
+        '        function toggleSidebar() {\n' +
+        '            var sidebar = document.getElementById("sidebarPanel");\n' +
+        '            var btn = document.querySelector(".toggle-sidebar-btn");\n' +
+        '            sidebar.classList.toggle("collapsed");\n' +
+        '            btn.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";\n' +
+        '        }\n' +
         '\n' +
         '        function decodeHtml(html) {\n' +
         '            var txt = document.createElement("textarea");\n' +
@@ -341,8 +357,7 @@
         '            var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '            var meta = analysisData[q._id] || {};\n' +
         '            \n' +
-        '            // Robust correct option finder\n' +
-        '            var correctOpt = meta.correctOption || q.correctOption || "1";\n' +
+        '            var correctOpt = meta.correctOption || q.correctOption;\n' +
         '            var solText = "";\n' +
         '            if (meta.sol && meta.sol.en && meta.sol.en.value) {\n' +
         '                solText = meta.sol.en.value;\n' +
@@ -425,7 +440,7 @@
         '                if (userResponses[i] !== undefined) {\n' +
         '                    attempted++;\n' +
         '                    var meta = analysisData[q._id] || {};\n' +
-        '                    var correctOpt = meta.correctOption || q.correctOption || "1";\n' +
+        '                    var correctOpt = meta.correctOption || q.correctOption;\n' +
         '                    var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '                    var userPrompt = options[userResponses[i]] ? options[userResponses[i]].prompt : "";\n' +
         '                    if (userPrompt.toString() === correctOpt.toString()) correct++;\n' +
@@ -449,6 +464,13 @@
         '            document.getElementById("remark-box").innerHTML = remark;\n' +
         '        }\n' +
         '\n' +
+        '        function backToQuiz() {\n' +
+        '            document.getElementById("quiz-main-area").style.display = "block";\n' +
+        '            document.getElementById("cbtFooter").style.display = "flex";\n' +
+        '            document.getElementById("scorecard-box").style.display = "none";\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '\n' +
         '        loadQuestion();\n' +
         '    <' + '/script>\n' +
         '</body>\n' +
@@ -462,7 +484,7 @@
       link.click();
       document.body.removeChild(link);
 
-      alert("सफलता! टेस्टबुक जैसा CBT क्विज़ पोर्टल '" + safeFilename + "' डाउनलोड हो चुका है।");
+      alert("सफलता! CBT क्विज़ पोर्टल '" + safeFilename + "' सफलतापूर्वक डाउनलोड हो चुका है।");
     };
   </script>
 </body>
