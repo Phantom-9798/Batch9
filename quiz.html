@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | SECURE QUIZ MAKER</title>
+  <title>TEAM PHANTOM | SECURE CBT PORTAL</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
     // ================= TIGHT SECURITY GATE =================
@@ -29,126 +29,99 @@
 
   <style>
     * { box-sizing: border-box; }
-    body { 
-      font-family: 'Rajdhani', sans-serif; 
-      background-color: #04070b; 
-      color: #e5e7eb; 
-      margin: 0; 
-      padding: 16px; 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-    }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; }
-    .font-stencil { font-family: 'Black Ops One', cursive; }
-    .terminal-panel {
-      background: rgba(10, 15, 22, 0.95);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
-      border-radius: 1rem;
-      padding: 24px;
-      max-width: 800px;
-      margin: 24px auto;
-      width: 100%;
-    }
-    input, textarea {
-      width: 100%;
-      background: #000;
-      border: 1px solid #334155;
-      color: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 13px;
-      outline: none;
-      margin-top: 6px;
-      margin-bottom: 16px;
-    }
-    input:focus, textarea:focus { border-color: #10b981; }
-    label {
-      font-size: 12px;
-      color: #94a3b8;
-      font-family: monospace;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .action-btn {
-      width: 100%;
-      padding: 12px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: bold;
-      font-size: 12px;
-      letter-spacing: 1px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+    body { font-family: 'Rajdhani', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Top Navbar */
+    .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .brand-area { display: flex; align-items: center; gap: 12px; }
+    .brand-area img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }
+    .brand-text h2 { margin: 0; font-size: 16px; font-family: 'Orbitron', sans-serif; color: #34d399; letter-spacing: 1px; }
+    .brand-text p { margin: 0; font-size: 10px; color: #94a3b8; letter-spacing: 1.5px; }
+    
+    .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 14px; color: #facc15; }
+    
+    /* Main Layout */
+    .cbt-body { display: flex; flex: 1; height: calc(100vh - 120px); overflow: hidden; }
+    .question-panel { flex: 1; padding: 20px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }
+    .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
+    .user-profile img { width: 35px; height: 35px; border-radius: 50%; background: #334155; }
+    
+    .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
+    .palette-btn { width: 40px; height: 40px; background: #334155; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+    .palette-btn.attempted { background: #10b981; color: #000; }
+    .palette-btn.marked { background: #9333ea; color: #fff; }
+    .palette-btn.current { border: 2px solid #facc15; }
+
+    /* Question Area */
+    .q-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; }
+    .marks-tag { font-size: 13px; font-family: 'Orbitron', sans-serif; }
+    .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }
+    .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }
+
+    .option-btn { display: block; width: 100%; padding: 12px 16px; margin: 10px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 15px; transition: 0.2s; }
+    .option-btn:hover { background: #1f2937; border-color: #06b6d4; }
+
+    /* Footer Buttons */
+    .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }
+    .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
+    .btn-review { background: #d97706; color: #000; }
+    .btn-clear { background: #475569; color: #fff; }
+    .btn-next { background: #2563eb; color: #fff; }
+    .btn-submit { background: #10b981; color: #000; }
+
+    /* Solution Box */
+    .solution-box { margin-top: 20px; padding: 15px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }
+    .solution-box h4 { color: #34d399; margin-top: 0; font-family: 'Orbitron', sans-serif; }
+    .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 13px; }
+
+    /* Scorecard */
+    .scorecard { padding: 30px; text-align: center; display: none; max-width: 600px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+    .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }
+
+    /* Generator Screen */
+    #makerConsole { padding: 40px; max-width: 800px; margin: auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; margin-top: 40px; }
+    input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
   <!-- ================= AUTH GATE ================= -->
-  <div id="authGate" class="terminal-panel" style="max-width: 400px; text-align: center; margin: auto;">
-    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin: 0 auto 12px; box-shadow: 0 0 10px #10b981;"></div>
-    <h2 class="font-stencil" style="font-size: 24px; color: #facc15; margin-bottom: 4px;">
-      SECURE QUIZ GATE
-    </h2>
-    <p class="font-orbitron" style="font-size: 10px; color: #94a3b8; letter-spacing: 2px; margin-bottom: 20px;">
-      ENTER CLEARANCE KEY TO PROCEED
-    </p>
-    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; color: #34d399; font-family: monospace; letter-spacing: 3px; font-size: 16px;">
-    <button onclick="unlockQuizTerminal()" class="action-btn" style="background: #10b981; color: #000;">
-      VERIFY IDENTITY
-    </button>
+  <div id="authGate" style="max-width: 400px; margin: 100px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #10b981; text-align: center;">
+    <h2 style="font-family: 'Orbitron'; color: #facc15; margin-top: 0;">SECURE QUIZ GATE</h2>
+    <p style="font-size: 12px; color: #94a3b8;">ENTER CLEARANCE KEY TO PROCEED</p>
+    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;">
+    <button onclick="unlockQuizTerminal()" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
   </div>
 
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
   <main id="makerConsole" class="hidden">
-    <div class="terminal-panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 24px;">
-        <div>
-          <h1 class="font-stencil" style="font-size: 20px; color: #34d399;">TESTBOOK QUIZ CONVERTER</h1>
-          <p class="font-orbitron" style="font-size: 10px; color: #94a3b8;">ADVANCED SCORING & DISPATCH PROTOCOL</p>
-        </div>
-        <span style="font-size: 11px; font-family: monospace; color: #10b981; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 4px;">SECURE ACTIVE</span>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-        <div>
-          <label>POSITIVE MARKS PER QUESTION (e.g. 0.83)</label>
-          <input id="posMarksInput" type="number" step="0.01" value="0.83">
-        </div>
-        <div>
-          <label>NEGATIVE MARKS PER QUESTION (e.g. 0.27)</label>
-          <input id="negMarksInput" type="number" step="0.01" value="0.27">
-        </div>
-      </div>
-
+    <h2 style="font-family: 'Orbitron'; color: #34d399; margin-top: 0;">TESTBOOK CBT QUIZ CONVERTER</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
       <div>
-        <label>PASTE TESTBOOK RAW JSON DATA</label>
-        <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
+        <label>POSITIVE MARKS</label>
+        <input id="posMarksInput" type="number" step="0.01" value="0.83">
       </div>
-
-      <button onclick="generateQuiz()" class="action-btn" style="background: #06b6d4; color: #000; margin-top: 8px;">
-        GENERATE & DOWNLOAD CLEAN QUIZ FILE (.HTML)
-      </button>
+      <div>
+        <label>NEGATIVE MARKS</label>
+        <input id="negMarksInput" type="number" step="0.01" value="0.27">
+      </div>
     </div>
+    <label>PASTE TESTBOOK RAW JSON DATA</label>
+    <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
+    <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
-  <footer style="text-align: center; padding: 10px; font-size: 10px; font-family: monospace; color: #475569;">
-    TEAM PHANTOM MILITARY DISPATCH GATEWAY &bull; CONFIDENTIAL
-  </footer>
-
+  <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
   <script>
     const TERMINAL_KEY = "Hima Phantom 74";
 
     function unlockQuizTerminal() {
-      const entered = document.getElementById("quizPass").value.trim();
-      if (entered === TERMINAL_KEY) {
+      if (document.getElementById("quizPass").value.trim() === TERMINAL_KEY) {
         document.getElementById("authGate").classList.add("hidden");
         document.getElementById("makerConsole").classList.remove("hidden");
       } else {
@@ -165,26 +138,16 @@
       var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
       var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
 
-      if (!rawText) {
-        alert("भाई, पहले टेस्टबुक का JSON डेटा यहाँ पेस्ट करो!");
-        return;
-      }
+      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
 
       var quizData;
-      try {
-        quizData = JSON.parse(rawText);
-      } catch (e) {
-        alert("JSON डेटा में सिंटैक्स एरर है! चेक करो: " + e.message);
-        return;
-      }
+      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
       var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
-      
       quizData.phantomConfig = { posMarks: posM, negMarks: negM };
 
-      var jsonString = JSON.stringify(quizData);
-      var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
+      var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
 
       var htmlTemplate = '<!DOCTYPE html>\n' +
         '<html lang="hi">\n' +
@@ -194,210 +157,279 @@
         '    <title>' + quizTitle + '</title>\n' +
         '    <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
         '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
-        '    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">\n' +
+        '    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">\n' +
         '    <style>\n' +
-        '        body { font-family: "Rajdhani", sans-serif; background-color: #04070b; color: #e5e7eb; margin: 0; padding: 20px; }\n' +
-        '        .font-orbitron { font-family: "Orbitron", sans-serif; }\n' +
-        '        .font-stencil { font-family: "Black Ops One", cursive; }\n' +
-        '        .quiz-container { max-width: 800px; background: #0a0f16; margin: 20px auto; padding: 30px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.8); }\n' +
-        '        .header-brand { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px; }\n' +
-        '        .header-brand img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }\n' +
-        '        .brand-title { font-family: "Black Ops One", cursive; font-size: 22px; color: #34d399; letter-spacing: 1px; margin: 0; }\n' +
-        '        .brand-sub { font-family: "Orbitron", sans-serif; font-size: 11px; color: #facc15; letter-spacing: 2px; margin: 2px 0 0 0; }\n' +
-        '        h3 { color: #f8fafc; line-height: 1.6; font-size: 18px; }\n' +
-        '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
-        '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
-        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; font-family: inherit; transition: 0.2s; }\n' +
+        '        * { box-sizing: border-box; }\n' +
+        '        body { font-family: "Rajdhani", sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }\n' +
+        '        .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }\n' +
+        '        .brand-area { display: flex; align-items: center; gap: 12px; }\n' +
+        '        .brand-area img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }\n' +
+        '        .brand-text h2 { margin: 0; font-size: 16px; font-family: "Orbitron", sans-serif; color: #34d399; letter-spacing: 1px; }\n' +
+        '        .brand-text p { margin: 0; font-size: 10px; color: #94a3b8; letter-spacing: 1.5px; }\n' +
+        '        .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: "Orbitron", sans-serif; font-size: 14px; color: #facc15; }\n' +
+        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 120px); overflow: hidden; }\n' +
+        '        .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }\n' +
+        '        .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }\n' +
+        '        .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }\n' +
+        '        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }\n' +
+        '        .palette-btn { width: 40px; height: 40px; background: #334155; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }\n' +
+        '        .palette-btn.attempted { background: #10b981; color: #000; }\n' +
+        '        .palette-btn.marked { background: #9333ea; color: #fff; }\n' +
+        '        .palette-btn.current { border: 2px solid #facc15; }\n' +
+        '        .q-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; }\n' +
+        '        .marks-tag { font-size: 13px; font-family: "Orbitron", sans-serif; }\n' +
+        '        .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }\n' +
+        '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
-        '        .nav-btns { margin-top: 30px; display: flex; justify-content: space-between; gap: 10px; }\n' +
-        '        button.action-btn { padding: 12px 20px; background: #06b6d4; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: "Orbitron", sans-serif; flex: 1; }\n' +
-        '        button.action-btn:hover { background: #0891b2; }\n' +
-        '        #q-number { color: #06b6d4; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }\n' +
+        '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }\n' +
+        '        .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }\n' +
+        '        .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: "Orbitron", sans-serif; transition: 0.2s; }\n' +
+        '        .btn-review { background: #d97706; color: #000; }\n' +
+        '        .btn-clear { background: #475569; color: #fff; }\n' +
+        '        .btn-next { background: #2563eb; color: #fff; }\n' +
+        '        .btn-submit { background: #10b981; color: #000; }\n' +
         '        .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
         '        .solution-box h4 { color: #34d399; margin-top: 0; font-family: "Orbitron", sans-serif; }\n' +
-        '        .scorecard { text-align: center; padding: 20px; display: none; }\n' +
-        '        .scorecard h2 { font-family: "Black Ops One", cursive; color: #facc15; font-size: 28px; margin-bottom: 10px; }\n' +
+        '        .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: "Orbitron", sans-serif; font-size: 13px; }\n' +
+        '        .scorecard { padding: 40px; text-align: center; display: none; max-width: 650px; margin: 30px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
         '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }\n' +
-        '        .stat-card { background: #111827; border: 1px solid #334155; padding: 15px; border-radius: 8px; }\n' +
-        '        .stat-card h4 { margin: 0 0 5px 0; color: #94a3b8; font-size: 12px; font-family: "Orbitron", sans-serif; }\n' +
-        '        .stat-card p { margin: 0; font-size: 22px; font-weight: bold; color: #34d399; }\n' +
+        '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }\n' +
+        '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
+        '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
         '    </style>\n' +
         '</head>\n' +
         '<body>\n' +
-        '<div class="quiz-container">\n' +
-        '    <div class="header-brand">\n' +
-        '        <img src="logo.jpeg" alt="Team Phantom Logo">\n' +
-        '        <div>\n' +
-        '            <h1 class="brand-title">TEAM PHANTOM</h1>\n' +
-        '            <p class="brand-sub">TACTICAL QUIZ CENTER</p>\n' +
+        '    <header class="cbt-header">\n' +
+        '        <div class="brand-area">\n' +
+        '            <img src="logo.jpeg" alt="Logo">\n' +
+        '            <div class="brand-text">\n' +
+        '                <h2>TEAM PHANTOM</h2>\n' +
+        '                <p>TACTICAL CBT CENTER</p>\n' +
+        '            </div>\n' +
         '        </div>\n' +
-        '    </div>\n' +
-        '    \n' +
-        '    <div id="question-box">\n' +
-        '        <div id="q-number">Question 1 of N</div>\n' +
-        '        <h3 id="q-text">Loading...</h3>\n' +
-        '        <div id="options-box"></div>\n' +
-        '        <div id="solution-box" class="solution-box">\n' +
-        '            <h4>DETAILED EXPLANATION:</h4>\n' +
-        '            <div id="solution-text"></div>\n' +
+        '        <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;">' + quizTitle + '</div>\n' +
+        '        <div class="timer-box" id="timer">Time Left: 02:00:00</div>\n' +
+        '    </header>\n' +
+        '\n' +
+        '    <div class="cbt-body">\n' +
+        '        <div class="question-panel">\n' +
+        '            <div id="quiz-main-area">\n' +
+        '                <div class="q-header-bar">\n' +
+        '                    <div id="q-number" style="font-family: \'Orbitron\'; color: #38bdf8; font-weight: bold;">Question 1</div>\n' +
+        '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
+        '                </div>\n' +
+        '                <h3 id="q-text" style="line-height: 1.6;">Loading...</h3>\n' +
+        '                <div id="options-box"></div>\n' +
+        '                <div id="solution-box" class="solution-box">\n' +
+        '                    <div id="correct-ans-display" class="correct-ans-label"></div>\n' +
+        '                    <h4>DETAILED EXPLANATION:</h4>\n' +
+        '                    <div id="solution-text"></div>\n' +
+        '                </div>\n' +
+        '            </div>\n' +
+        '\n' +
+        '            <div id="scorecard-box" class="scorecard">\n' +
+        '                <h2 style="font-family: \'Orbitron\'; color: #facc15; margin-top:0;">MISSION REPORT CARD</h2>\n' +
+        '                <p id="final-score-title" style="font-size: 20px; color: #34d399; font-weight: bold;"></p>\n' +
+        '                <div class="stat-grid">\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">TOTAL ATTEMPTED</h4><p id="st-attempted" style="margin:5px 0 0; font-size:24px;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">CORRECT ANSWERS</h4><p id="st-correct" style="margin:5px 0 0; font-size:24px; color:#10b981;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">INCORRECT ANSWERS</h4><p id="st-incorrect" style="margin:5px 0 0; font-size:24px; color:#ef4444;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">SKIPPED</h4><p id="st-skipped" style="margin:5px 0 0; font-size:24px; color:#facc15;">0</p></div>\n' +
+        '                </div>\n' +
+        '                <div id="remark-box" style="background: #0f172a; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '\n' +
+        '        <div class="sidebar-panel">\n' +
+        '            <div class="user-profile">\n' +
+        '                <div style="width:35px; height:35px; border-radius:50%; background:#10b981; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#000;">TP</div>\n' +
+        '                <div>\n' +
+        '                    <div style="font-weight:bold; font-size:14px;">Cadet Officer</div>\n' +
+        '                    <div style="font-size:11px; color:#10b981;">● Online</div>\n' +
+        '                </div>\n' +
+        '            </div>\n' +
+        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE</div>\n' +
+        '            <div class="palette-grid" id="paletteGrid"></div>\n' +
         '        </div>\n' +
         '    </div>\n' +
         '\n' +
-        '    <div id="scorecard-box" class="scorecard">\n' +
-        '        <h2>MISSION REPORT CARD</h2>\n' +
-        '        <p id="final-score-title" style="font-size: 18px; color: #34d399; font-weight: bold;"></p>\n' +
-        '        <div class="stat-grid">\n' +
-        '            <div class="stat-card"><h4>TOTAL ATTEMPTED</h4><p id="st-attempted">0</p></div>\n' +
-        '            <div class="stat-card"><h4>CORRECT ANSWERS</h4><p id="st-correct" style="color: #10b981;">0</p></div>\n' +
-        '            <div class="stat-card"><h4>INCORRECT ANSWERS</h4><p id="st-incorrect" style="color: #ef4444;">0</p></div>\n' +
-        '            <div class="stat-card"><h4>SKIPPED</h4><p id="st-skipped" style="color: #facc15;">0</p></div>\n' +
+        '    <footer class="cbt-footer" id="cbtFooter">\n' +
+        '        <div class="footer-left-btns">\n' +
+        '            <button class="btn-action btn-review" onclick="markForReview()">Mark for Review & Next</button>\n' +
+        '            <button class="btn-action btn-clear" onclick="clearResponse()">Clear Response</button>\n' +
         '        </div>\n' +
-        '        <div id="remark-box" style="background: #111827; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
-        '    </div>\n' +
+        '        <div class="footer-right-btns">\n' +
+        '            <button class="btn-action btn-next" onclick="nextQuestion()">Save & Next</button>\n' +
+        '            <button class="btn-action btn-submit" onclick="showScorecard()">Submit Test</button>\n' +
+        '        </div>\n' +
+        '    </footer>\n' +
         '\n' +
-        '    <div class="nav-btns" id="nav-buttons-bar">\n' +
-        '        <button class="action-btn" onclick="prevQuestion()">पिछला (Previous)</button>\n' +
-        '        <button class="action-btn" onclick="nextQuestion()">अगला (Next)</button>\n' +
-        '    </div>\n' +
-        '</div>\n' +
-        '<script>\n' +
-        '    var base64Data = "' + encodedJson + '";\n' +
-        '    var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
-        '    var questions = [];\n' +
-        '    var analysisData = {};\n' +
-        '    var config = { posMarks: 1, negMarks: 0 };\n' +
-        '    try {\n' +
-        '        questions = quizData.data.sections[0].questions;\n' +
-        '        analysisData = quizData.data;\n' +
-        '        if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
-        '    } catch(err) {\n' +
-        '        console.error("Invalid Quiz Structure");\n' +
-        '    }\n' +
-        '    var currentIndex = 0;\n' +
-        '    var selectedAnswers = {};\n' +
-        '    function decodeHtml(html) {\n' +
-        '        var txt = document.createElement("textarea");\n' +
-        '        txt.innerHTML = html;\n' +
-        '        return txt.value;\n' +
-        '    }\n' +
-        '    function loadQuestion() {\n' +
-        '        document.getElementById("question-box").style.display = "block";\n' +
-        '        document.getElementById("scorecard-box").style.display = "none";\n' +
-        '        document.getElementById("nav-buttons-bar").style.display = "flex";\n' +
-        '        \n' +
-        '        var q = questions[currentIndex];\n' +
-        '        document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
-        '        var rawQText = (q.en && q.en.value) ? q.en.value : "Question text not available";\n' +
-        '        document.getElementById("q-text").innerHTML = decodeHtml(rawQText);\n' +
-        '        \n' +
-        '        var optionsBox = document.getElementById("options-box");\n' +
-        '        optionsBox.innerHTML = "";\n' +
-        '        var options = (q.en && q.en.options) ? q.en.options : [];\n' +
-        '        \n' +
-        '        var qId = q._id;\n' +
-        '        var meta = analysisData[qId] || {};\n' +
-        '        var correctOpt = meta.correctOption;\n' +
-        '        var solText = (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : "";\n' +
-        '        \n' +
-        '        var solBox = document.getElementById("solution-box");\n' +
-        '        if (selectedAnswers[currentIndex] !== undefined) {\n' +
-        '            solBox.style.display = "block";\n' +
-        '        } else {\n' +
-        '            solBox.style.display = "none";\n' +
+        '    <script>\n' +
+        '        var base64Data = "' + encodedJson + '";\n' +
+        '        var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
+        '        var questions = [];\n' +
+        '        var analysisData = {};\n' +
+        '        var config = { posMarks: 0.83, negMarks: 0.27 };\n' +
+        '        try {\n' +
+        '            questions = quizData.data.sections[0].questions;\n' +
+        '            analysisData = quizData.data;\n' +
+        '            if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
+        '        } catch(err) { console.error("Error loading structure"); }\n' +
+        '\n' +
+        '        var currentIndex = 0;\n' +
+        '        var userResponses = {};\n' +
+        '        var markedStatus = {};\n' +
+        '\n' +
+        '        // Timer logic\n' +
+        '        var totalSeconds = 7200;\n' +
+        '        setInterval(function() {\n' +
+        '            if (totalSeconds > 0) totalSeconds--;\n' +
+        '            var hrs = Math.floor(totalSeconds / 3600);\n' +
+        '            var mins = Math.floor((totalSeconds % 3600) / 60);\n' +
+        '            var secs = totalSeconds % 60;\n' +
+        '            document.getElementById("timer").innerText = "Time Left: " + \n' +
+        '                (hrs < 10 ? "0" + hrs : hrs) + ":" + \n' +
+        '                (mins < 10 ? "0" + mins : mins) + ":" + \n' +
+        '                (secs < 10 ? "0" + secs : secs);\n' +
+        '        }, 1000);\n' +
+        '\n' +
+        '        function decodeHtml(html) {\n' +
+        '            var txt = document.createElement("textarea");\n' +
+        '            txt.innerHTML = html;\n' +
+        '            return txt.value;\n' +
         '        }\n' +
-        '        document.getElementById("solution-text").innerHTML = decodeHtml(solText);\n' +
-        '        \n' +
-        '        options.forEach(function(opt, idx) {\n' +
-        '            var btn = document.createElement("button");\n' +
-        '            btn.className = "option-btn";\n' +
-        '            var optVal = (opt.value !== undefined && opt.value !== null) ? opt.value : "";\n' +
-        '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(optVal);\n' +
-        '            \n' +
-        '            if (selectedAnswers[currentIndex] !== undefined) {\n' +
-        '                var userSelected = selectedAnswers[currentIndex];\n' +
-        '                if (idx === userSelected) {\n' +
+        '\n' +
+        '        function buildPalette() {\n' +
+        '            var grid = document.getElementById("paletteGrid");\n' +
+        '            grid.innerHTML = "";\n' +
+        '            questions.forEach(function(q, i) {\n' +
+        '                var btn = document.createElement("button");\n' +
+        '                btn.className = "palette-btn";\n' +
+        '                btn.innerText = i + 1;\n' +
+        '                if (i === currentIndex) btn.classList.add("current");\n' +
+        '                if (userResponses[i] !== undefined) btn.classList.add("attempted");\n' +
+        '                if (markedStatus[i]) btn.classList.add("marked");\n' +
+        '                btn.onclick = function() { currentIndex = i; loadQuestion(); };\n' +
+        '                grid.appendChild(btn);\n' +
+        '            });\n' +
+        '        }\n' +
+        '\n' +
+        '        function loadQuestion() {\n' +
+        '            buildPalette();\n' +
+        '            var q = questions[currentIndex];\n' +
+        '            document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
+        '            document.getElementById("pos-m").innerText = "+" + config.posMarks;\n' +
+        '            document.getElementById("neg-m").innerText = "-" + config.negMarks;\n' +
+        '            document.getElementById("q-text").innerHTML = decodeHtml(q.en && q.en.value ? q.en.value : "");\n' +
+        '\n' +
+        '            var optionsBox = document.getElementById("options-box");\n' +
+        '            optionsBox.innerHTML = "";\n' +
+        '            var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '            var meta = analysisData[q._id] || {};\n' +
+        '            var correctOpt = meta.correctOption;\n' +
+        '            var solText = (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : "";\n' +
+        '\n' +
+        '            var solBox = document.getElementById("solution-box");\n' +
+        '            if (userResponses[currentIndex] !== undefined) {\n' +
+        '                solBox.style.display = "block";\n' +
+        '                document.getElementById("correct-ans-display").innerText = "Correct Answer: Option " + correctOpt;\n' +
+        '            } else {\n' +
+        '                solBox.style.display = "none";\n' +
+        '            }\n' +
+        '            document.getElementById("solution-text").innerHTML = decodeHtml(solText);\n' +
+        '\n' +
+        '            options.forEach(function(opt, idx) {\n' +
+        '                var btn = document.createElement("button");\n' +
+        '                btn.className = "option-btn";\n' +
+        '                btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(opt.value);\n' +
+        '\n' +
+        '                if (userResponses[currentIndex] !== undefined) {\n' +
+        '                    var userSel = userResponses[currentIndex];\n' +
+        '                    if (idx === userSel) {\n' +
+        '                        if (opt.prompt === correctOpt) {\n' +
+        '                            btn.style.borderColor = "#10b981";\n' +
+        '                            btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
+        '                        } else {\n' +
+        '                            btn.style.borderColor = "#ef4444";\n' +
+        '                            btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
+        '                        }\n' +
+        '                    }\n' +
         '                    if (opt.prompt === correctOpt) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
         '                        btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
-        '                    } else {\n' +
-        '                        btn.style.borderColor = "#ef4444";\n' +
-        '                        btn.style.background = "rgba(239, 68, 68, 0.15)";\n' +
         '                    }\n' +
-        '                }\n' +
-        '                if (opt.prompt === correctOpt) {\n' +
-        '                    btn.style.borderColor = "#10b981";\n' +
-        '                }\n' +
-        '                btn.disabled = true;\n' +
-        '            } else {\n' +
-        '                btn.onclick = function() { selectOption(idx); };\n' +
-        '            }\n' +
-        '            optionsBox.appendChild(btn);\n' +
-        '        });\n' +
-        '    }\n' +
-        '    function selectOption(optIdx) {\n' +
-        '        selectedAnswers[currentIndex] = optIdx;\n' +
-        '        loadQuestion();\n' +
-        '    }\n' +
-        '    function nextQuestion() {\n' +
-        '        if (currentIndex < questions.length - 1) {\n' +
-        '            currentIndex++;\n' +
-        '            loadQuestion();\n' +
-        '        } else {\n' +
-        '            showScorecard();\n' +
-        '        }\n' +
-        '    }\n' +
-        '    function prevQuestion() {\n' +
-        '        if (currentIndex > 0) {\n' +
-        '            currentIndex--;\n' +
-        '            loadQuestion();\n' +
-        '        }\n' +
-        '    }\n' +
-        '    function showScorecard() {\n' +
-        '        document.getElementById("question-box").style.display = "none";\n' +
-        '        document.getElementById("scorecard-box").style.display = "block";\n' +
-        '        document.getElementById("nav-buttons-bar").style.display = "none";\n' +
-        '        \n' +
-        '        var correctCount = 0;\n' +
-        '        var incorrectCount = 0;\n' +
-        '        var attemptedCount = 0;\n' +
-        '        \n' +
-        '        questions.forEach(function(q, i) {\n' +
-        '            if (selectedAnswers[i] !== undefined) {\n' +
-        '                attemptedCount++;\n' +
-        '                var meta = analysisData[q._id] || {};\n' +
-        '                var correctOpt = meta.correctOption;\n' +
-        '                var options = (q.en && q.en.options) ? q.en.options : [];\n' +
-        '                var userOptPrompt = options[selectedAnswers[i]] ? options[selectedAnswers[i]].prompt : "";\n' +
-        '                if (userOptPrompt === correctOpt) {\n' +
-        '                    correctCount++;\n' +
+        '                    btn.disabled = true;\n' +
         '                } else {\n' +
-        '                    incorrectCount++;\n' +
+        '                    btn.onclick = function() {\n' +
+        '                        userResponses[currentIndex] = idx;\n' +
+        '                        loadQuestion();\n' +
+        '                    };\n' +
         '                }\n' +
-        '            }\n' +
-        '        });\n' +
-        '        var skippedCount = questions.length - attemptedCount;\n' +
-        '        var finalScore = (correctCount * config.posMarks) - (incorrectCount * config.negMarks);\n' +
-        '        if (finalScore < 0) finalScore = 0;\n' +
-        '        \n' +
-        '        document.getElementById("final-score-title").innerText = "FINAL SCORE: " + finalScore.toFixed(2) + " Marks";\n' +
-        '        document.getElementById("st-attempted").innerText = attemptedCount;\n' +
-        '        document.getElementById("st-correct").innerText = correctCount;\n' +
-        '        document.getElementById("st-incorrect").innerText = incorrectCount;\n' +
-        '        document.getElementById("st-skipped").innerText = skippedCount;\n' +
-        '        \n' +
-        '        var percentage = (correctCount / questions.length) * 100;\n' +
-        '        var remarkText = "";\n' +
-        '        if (percentage >= 80) {\n' +
-        '            remarkText = "🌟 <b>अति उत्तम (Outstanding)!</b> आपकी तैयारी एकदम तगड़ी है। इसी तरह फोकस बनाए रखिए, आप एग्जाम में फोड़ देंगे!";\n' +
-        '        } else if (percentage >= 50) {\n' +
-        '            remarkText = "⚡ <b>संतोषजनक (Good Performance)!</b> प्रदर्शन अच्छा है, लेकिन कुछ और विषयों और कमजोर टॉपिक्स पर मेहनत करने की जरूरत है। सुधार गुंजाइश बाकी है!";\n' +
-        '        } else {\n' +
-        '            remarkText = "⚠️ <b>गंभीर मेहनत की आवश्यकता (Needs Hard Work)!</b> स्कोर काफी कम है। आपको बुनियादी कॉन्सेप्ट्स (Core Concepts) को दोबारा पढ़ने और बार-बार प्रैक्टिस करने की सख्त जरूरत है। मैदान छोड़ना नहीं है, लगे रहो!";\n' +
+        '                optionsBox.appendChild(btn);\n' +
+        '            });\n' +
         '        }\n' +
-        '        document.getElementById("remark-box").innerHTML = remarkText;\n' +
-        '    }\n' +
-        '    loadQuestion();\n' +
-        '<' + '/script>\n' +
+        '\n' +
+        '        function nextQuestion() {\n' +
+        '            if (currentIndex < questions.length - 1) {\n' +
+        '                currentIndex++;\n' +
+        '                loadQuestion();\n' +
+        '            }\n' +
+        '        }\n' +
+        '\n' +
+        '        function prevQuestion() {\n' +
+        '            if (currentIndex > 0) {\n' +
+        '                currentIndex--;\n' +
+        '                loadQuestion();\n' +
+        '            }\n' +
+        '        }\n' +
+        '\n' +
+        '        function markForReview() {\n' +
+        '            markedStatus[currentIndex] = true;\n' +
+        '            nextQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        function clearResponse() {\n' +
+        '            delete userResponses[currentIndex];\n' +
+        '            delete markedStatus[currentIndex];\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        function showScorecard() {\n' +
+        '            document.getElementById("quiz-main-area").style.display = "none";\n' +
+        '            document.getElementById("cbtFooter").style.display = "none";\n' +
+        '            document.getElementById("scorecard-box").style.display = "block";\n' +
+        '\n' +
+        '            var correct = 0, incorrect = 0, attempted = 0;\n' +
+        '            questions.forEach(function(q, i) {\n' +
+        '                if (userResponses[i] !== undefined) {\n' +
+        '                    attempted++;\n' +
+        '                    var meta = analysisData[q._id] || {};\n' +
+        '                    var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '                    var userPrompt = options[userResponses[i]] ? options[userResponses[i]].prompt : "";\n' +
+        '                    if (userPrompt === meta.correctOption) correct++;\n' +
+        '                    else incorrect++;\n' +
+        '                }\n' +
+        '            });\n' +
+        '            var skipped = questions.length - attempted;\n' +
+        '            var finalScore = (correct * config.posMarks) - (incorrect * config.negMarks);\n' +
+        '            if (finalScore < 0) finalScore = 0;\n' +
+        '\n' +
+        '            document.getElementById("final-score-title").innerText = "FINAL SCORE: " + finalScore.toFixed(2) + " Marks";\n' +
+        '            document.getElementById("st-attempted").innerText = attempted;\n' +
+        '            document.getElementById("st-correct").innerText = correct;\n' +
+        '            document.getElementById("st-incorrect").innerText = incorrect;\n' +
+        '            document.getElementById("st-skipped").innerText = skipped;\n' +
+        '\n' +
+        '            var pct = (correct / questions.length) * 100;\n' +
+        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में टॉप करोगे!" :\n' +
+        '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
+        '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
+        '            document.getElementById("remark-box").innerHTML = remark;\n' +
+        '        }\n' +
+        '\n' +
+        '        loadQuestion();\n' +
+        '    <' + '/script>\n' +
         '</body>\n' +
         '</html>';
 
@@ -409,7 +441,7 @@
       link.click();
       document.body.removeChild(link);
 
-      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' स्कोरकार्ड और नेगेटिव मार्किंग के साथ डाउनलोड हो चुकी है।");
+      alert("सफलता! टेस्टबुक जैसा CBT क्विज़ पोर्टल '" + safeFilename + "' डाउनलोड हो चुका है।");
     };
   </script>
 </body>
