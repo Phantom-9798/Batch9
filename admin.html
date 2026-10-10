@@ -533,7 +533,7 @@
       }
     };
 
-    // Testbook Quiz File Generator Logic (Cleaned & Safe)
+    // Testbook Quiz File Generator Logic (Safe Base64 Method)
     window.generateTestbookQuizFile = function() {
       var rawText = document.getElementById('testbookJsonInput').value.trim();
       if (!rawText) {
@@ -551,103 +551,105 @@
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Team Phantom - Quiz Player";
       var jsonString = JSON.stringify(quizData);
+      var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
 
-      var htmlTemplate = "<!DOCTYPE html>\n" +
-        "<html lang='hi'>\n" +
-        "<head>\n" +
-        "    <meta charset='UTF-8'>\n" +
-        "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
-        "    <title>" + quizTitle + "</title>\n" +
-        "    <style>\n" +
-        "        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }\n" +
-        "        .quiz-container { max-width: 750px; background: #fff; margin: 40px auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }\n" +
-        "        h3 { color: #333; line-height: 1.6; }\n" +
-        "        table { border-collapse: collapse; max-width: 100%; margin: 10px 0; }\n" +
-        "        table, th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }\n" +
-        "        .option-btn { display: block; width: 100%; padding: 12px 15px; margin: 10px 0; background: #fff; border: 2px solid #ddd; border-radius: 5px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n" +
-        "        .option-btn:hover { background: #f0f8ff; border-color: #1fbad6; }\n" +
-        "        .nav-btns { margin-top: 25px; display: flex; justify-content: space-between; }\n" +
-        "        button.action-btn { padding: 10px 20px; background: #1fbad6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }\n" +
-        "        button.action-btn:hover { background: #1ca7c0; }\n" +
-        "        #q-number { color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }\n" +
-        "    </style>\n" +
-        "</head>\n" +
-        "<body>\n" +
-        "<div class='quiz-container'>\n" +
-        "    <div id='question-box'>\n" +
-        "        <div id='q-number'>Question 1 of N</div>\n" +
-        "        <h3 id='q-text'>Loading...</h3>\n" +
-        "        <div id='options-box'></div>\n" +
-        "    </div>\n" +
-        "    <div class='nav-btns'>\n" +
-        "        <button class='action-btn' onclick='prevQuestion()'>Previous</button>\n" +
-        "        <button class='action-btn' onclick='nextQuestion()'>Next</button>\n" +
-        "    </div>\n" +
-        "</div>\n" +
-        "<script>\n" +
-        "    var quizData = " + jsonString + ";\n" +
-        "    var questions = [];\n" +
-        "    try {\n" +
-        "        questions = quizData.data.sections[0].questions;\n" +
-        "    } catch(err) {\n" +
-        "        console.error('Invalid Quiz Structure');\n" +
-        "    }\n" +
-        "    var currentIndex = 0;\n" +
-        "    var selectedAnswers = {};\n" +
-        "    function loadQuestion() {\n" +
-        "        if (!questions || questions.length === 0) {\n" +
-        "            document.getElementById('q-text').innerText = 'No questions found!';\n" +
-        "            return;\n" +
-        "        }\n" +
-        "        var q = questions[currentIndex];\n" +
-        "        document.getElementById('q-number').innerText = 'Question ' + (currentIndex + 1) + ' of ' + questions.length;\n" +
-        "        var qText = (q.en && q.en.value) ? q.en.value : 'Question text not available';\n" +
-        "        document.getElementById('q-text').innerHTML = qText;\n" +
-        "        var optionsBox = document.getElementById('options-box');\n" +
-        "        optionsBox.innerHTML = '';\n" +
-        "        var options = (q.en && q.en.options) ? q.en.options : [];\n" +
-        "        options.forEach(function(opt, idx) {\n" +
-        "            var btn = document.createElement('button');\n" +
-        "            btn.className = 'option-btn';\n" +
-        "            btn.innerHTML = '<b>' + opt.prompt + '.</b> ' + opt.value;\n" +
-        "            if (selectedAnswers[currentIndex] === idx) {\n" +
-        "                btn.style.borderColor = '#1fbad6';\n" +
-        "                btn.style.background = '#f0f8ff';\n" +
-        "            }\n" +
-        "            btn.onclick = function() { selectOption(idx); };\n" +
-        "            optionsBox.appendChild(btn);\n" +
-        "        });\n" +
-        "    }\n" +
-        "    function selectOption(optIdx) {\n" +
-        "        selectedAnswers[currentIndex] = optIdx;\n" +
-        "        var buttons = document.querySelectorAll('.option-btn');\n" +
-        "        buttons.forEach(function(b, idx) {\n" +
-        "            b.style.background = '#fff';\n" +
-        "            b.style.borderColor = '#ddd';\n" +
-        "            if (idx === optIdx) {\n" +
-        "                b.style.background = '#f0f8ff';\n" +
-        "                b.style.borderColor = '#1fbad6';\n" +
-        "            }\n" +
-        "        });\n" +
-        "    }\n" +
-        "    function nextQuestion() {\n" +
-        "        if (currentIndex < questions.length - 1) {\n" +
-        "            currentIndex++;\n" +
-        "            loadQuestion();\n" +
-        "        } else {\n" +
-        "            alert('Yeh aakhiri sawal tha!');\n" +
-        "        }\n" +
-        "    }\n" +
-        "    function prevQuestion() {\n" +
-        "        if (currentIndex > 0) {\n" +
-        "            currentIndex--;\n" +
-        "            loadQuestion();\n" +
-        "        }\n" +
-        "    }\n" +
-        "    loadQuestion();\n" +
-        "</script>\n" +
-        "</body>\n" +
-        "</html>";
+      var htmlTemplate = '<!DOCTYPE html>\n' +
+        '<html lang="hi">\n' +
+        '<head>\n' +
+        '    <meta charset="UTF-8">\n' +
+        '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+        '    <title>' + quizTitle + '</title>\n' +
+        '    <style>\n' +
+        '        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }\n' +
+        '        .quiz-container { max-width: 750px; background: #fff; margin: 40px auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }\n' +
+        '        h3 { color: #333; line-height: 1.6; }\n' +
+        '        table { border-collapse: collapse; max-width: 100%; margin: 10px 0; }\n' +
+        '        table, th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 12px 15px; margin: 10px 0; background: #fff; border: 2px solid #ddd; border-radius: 5px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .option-btn:hover { background: #f0f8ff; border-color: #1fbad6; }\n' +
+        '        .nav-btns { margin-top: 25px; display: flex; justify-content: space-between; }\n' +
+        '        button.action-btn { padding: 10px 20px; background: #1fbad6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }\n' +
+        '        button.action-btn:hover { background: #1ca7c0; }\n' +
+        '        #q-number { color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }\n' +
+        '    </style>\n' +
+        '</head>\n' +
+        '<body>\n' +
+        '<div class="quiz-container">\n' +
+        '    <div id="question-box">\n' +
+        '        <div id="q-number">Question 1 of N</div>\n' +
+        '        <h3 id="q-text">Loading...</h3>\n' +
+        '        <div id="options-box"></div>\n' +
+        '    </div>\n' +
+        '    <div class="nav-btns">\n' +
+        '        <button class="action-btn" onclick="prevQuestion()">Previous</button>\n' +
+        '        <button class="action-btn" onclick="nextQuestion()">Next</button>\n' +
+        '    </div>\n' +
+        '</div>\n' +
+        '<script>\n' +
+        '    var base64Data = "' + encodedJson + '";\n' +
+        '    var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
+        '    var questions = [];\n' +
+        '    try {\n' +
+        '        questions = quizData.data.sections[0].questions;\n' +
+        '    } catch(err) {\n' +
+        '        console.error("Invalid Quiz Structure");\n' +
+        '    }\n' +
+        '    var currentIndex = 0;\n' +
+        '    var selectedAnswers = {};\n' +
+        '    function loadQuestion() {\n' +
+        '        if (!questions || questions.length === 0) {\n' +
+        '            document.getElementById("q-text").innerText = "No questions found!";\n' +
+        '            return;\n' +
+        '        }\n' +
+        '        var q = questions[currentIndex];\n' +
+        '        document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
+        '        var qText = (q.en && q.en.value) ? q.en.value : "Question text not available";\n' +
+        '        document.getElementById("q-text").innerHTML = qText;\n' +
+        '        var optionsBox = document.getElementById("options-box");\n' +
+        '        optionsBox.innerHTML = "";\n' +
+        '        var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '        options.forEach(function(opt, idx) {\n' +
+        '            var btn = document.createElement("button");\n' +
+        '            btn.className = "option-btn";\n' +
+        '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + opt.value;\n' +
+        '            if (selectedAnswers[currentIndex] === idx) {\n' +
+        '                btn.style.borderColor = "#1fbad6";\n' +
+        '                btn.style.background = "#f0f8ff";\n' +
+        '            }\n' +
+        '            btn.onclick = function() { selectOption(idx); };\n' +
+        '            optionsBox.appendChild(btn);\n' +
+        '        });\n' +
+        '    }\n' +
+        '    function selectOption(optIdx) {\n' +
+        '        selectedAnswers[currentIndex] = optIdx;\n' +
+        '        var buttons = document.querySelectorAll(".option-btn");\n' +
+        '        buttons.forEach(function(b, idx) {\n' +
+        '            b.style.background = "#fff";\n' +
+        '            b.style.borderColor = "#ddd";\n' +
+        '            if (idx === optIdx) {\n' +
+        '                b.style.background = "#f0f8ff";\n' +
+        '                b.style.borderColor = "#1fbad6";\n' +
+        '            }\n' +
+        '        });\n' +
+        '    }\n' +
+        '    function nextQuestion() {\n' +
+        '        if (currentIndex < questions.length - 1) {\n' +
+        '            currentIndex++;\n' +
+        '            loadQuestion();\n' +
+        '        } else {\n' +
+        '            alert("Yeh aakhiri sawal tha!");\n' +
+        '        }\n' +
+        '    }\n' +
+        '    function prevQuestion() {\n' +
+        '        if (currentIndex > 0) {\n' +
+        '            currentIndex--;\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '    }\n' +
+        '    loadQuestion();\n' +
+        '<' + '/script>\n' +
+        '</body>\n' +
+        '</html>';
 
       var blob = new Blob([htmlTemplate], { type: 'text/html' });
       var link = document.createElement('a');
