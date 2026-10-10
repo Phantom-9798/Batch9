@@ -533,7 +533,7 @@
       }
     };
 
-    // Testbook Quiz File Generator Logic (Safe Base64 Method)
+    // Testbook Quiz File Generator Logic (Smart Filename & Clean HTML Rendering)
     window.generateTestbookQuizFile = function() {
       var rawText = document.getElementById('testbookJsonInput').value.trim();
       if (!rawText) {
@@ -549,7 +549,9 @@
         return;
       }
 
-      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Team Phantom - Quiz Player";
+      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "testbook_quiz";
+      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
+
       var jsonString = JSON.stringify(quizData);
       var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
 
@@ -611,7 +613,8 @@
         '        options.forEach(function(opt, idx) {\n' +
         '            var btn = document.createElement("button");\n' +
         '            btn.className = "option-btn";\n' +
-        '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + opt.value;\n' +
+        '            var optVal = (opt.value !== undefined && opt.value !== null) ? opt.value : "";\n' +
+        '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + optVal;\n' +
         '            if (selectedAnswers[currentIndex] === idx) {\n' +
         '                btn.style.borderColor = "#1fbad6";\n' +
         '                btn.style.background = "#f0f8ff";\n' +
@@ -654,12 +657,12 @@
       var blob = new Blob([htmlTemplate], { type: 'text/html' });
       var link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'testbook_quiz.html';
+      link.download = safeFilename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      alert("Success! Quiz HTML file successfully download ho chuki hai.");
+      alert("Success! Quiz HTML file '" + safeFilename + "' successfully download ho chuki hai.");
     };
   </script>
 </body>
