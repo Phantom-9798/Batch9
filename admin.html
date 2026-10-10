@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      <!-- Tab Switcher (Target Monitor Tab Removed) -->
+      <!-- Tab Switcher -->
       <div class="flex border-b border-neutral-800 mb-6 gap-2 flex-wrap">
         <button id="singleTabBtn" onclick="switchMode('single')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-emerald-400 text-emerald-400 transition cursor-pointer">
           [1] SINGLE LECTURE
@@ -91,7 +91,10 @@
           [3] NEXIELD EXTRACTOR
         </button>
         <button id="managerTabBtn" onclick="switchMode('manager')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
-          [4] PURGE / DATA MANAGER
+          [4] PURGE MANAGER
+        </button>
+        <button id="quizTabBtn" onclick="switchMode('quiz')" class="px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer">
+          [5] TESTBOOK QUIZ CONVERTER
         </button>
       </div>
 
@@ -186,7 +189,7 @@
 
         <div>
           <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE TSV DATA (S.No [TAB] Title [TAB] URL)</label>
-          <textarea id="bulkTsvData" rows="8" placeholder="1	1. Ratio Class 1	https://...&#10;2	2. Ratio Class 2	https://..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
+          <textarea id="bulkTsvData" rows="8" placeholder="1	Ratio Class 1	https://..." class="w-full bg-black border border-neutral-700 text-emerald-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-emerald-500"></textarea>
         </div>
 
         <button onclick="dispatchBulkTsv()" id="bulkSubmitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
@@ -250,6 +253,23 @@
         </button>
       </div>
 
+      <!-- ================= MODE 5: TESTBOOK QUIZ CONVERTER ================= -->
+      <div id="quizSection" class="hidden space-y-4">
+        <div class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30 mb-4">
+          <h3 class="font-orbitron text-sm font-bold text-cyan-400 mb-1">⚡ TESTBOOK QUIZ JSON CONVERTER</h3>
+          <p class="text-xs text-neutral-400">Paste your raw Testbook quiz JSON data below. This tool will automatically format tables, math symbols, match-the-following structures, and options, then generate a ready-to-deploy interactive quiz HTML file.</p>
+        </div>
+
+        <div>
+          <label class="text-xs text-neutral-400 font-mono mb-1 block">PASTE TESTBOOK RAW JSON DATA</label>
+          <textarea id="testbookJsonInput" rows="10" placeholder="{ &quot;success&quot;: true, &quot;data&quot;: { ... } }" class="w-full bg-black border border-neutral-700 text-cyan-400 font-mono text-xs p-3 rounded-lg outline-none focus:border-cyan-500"></textarea>
+        </div>
+
+        <button onclick="generateTestbookQuizFile()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-bold py-3 rounded-xl transition text-xs tracking-wider cursor-pointer">
+          GENERATE & DOWNLOAD CLEAN QUIZ HTML
+        </button>
+      </div>
+
       <div id="statusMessage" class="mt-4 p-3 rounded-lg text-xs font-mono hidden"></div>
 
     </div>
@@ -259,7 +279,7 @@
     TEAM PHANTOM MILITARY DISPATCH GATEWAY &bull; CONFIDENTIAL
   </footer>
 
-  <!-- ================= FIREBASE LOGIC ================= -->
+  <!-- ================= FIREBASE & APP LOGIC ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, writeBatch, doc, serverTimestamp, query, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -300,21 +320,25 @@
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
       const managerSec = document.getElementById("managerSection");
+      const quizSec = document.getElementById("quizSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
       const mBtn = document.getElementById("managerTabBtn");
+      const qBtn = document.getElementById("quizTabBtn");
 
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
       managerSec.classList.add("hidden");
+      quizSec.classList.add("hidden");
       
       sBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       bBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       eBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
       mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
+      qBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-transparent text-neutral-400 hover:text-white transition cursor-pointer";
 
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
@@ -328,6 +352,9 @@
       } else if (mode === 'manager') {
         managerSec.classList.remove("hidden");
         mBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-red-400 text-red-400 transition cursor-pointer";
+      } else if (mode === 'quiz') {
+        quizSec.classList.remove("hidden");
+        qBtn.className = "px-4 py-2 font-orbitron text-xs font-bold border-b-2 border-cyan-400 text-cyan-400 transition cursor-pointer";
       }
     };
 
@@ -504,6 +531,146 @@
         btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
         btn.disabled = false;
       }
+    };
+
+    // Testbook Quiz File Generator Logic
+    window.generateTestbookQuizFile = () => {
+      let rawText = document.getElementById('testbookJsonInput').value.trim();
+      if (!rawText) {
+        alert("Pehle Testbook ka JSON data paste karo bhai!");
+        return;
+      }
+
+      let quizData;
+      try {
+        quizData = JSON.parse(rawText);
+      } catch (e) {
+        alert("JSON data mein syntax error hai! Check karo: " + e.message);
+        return;
+      }
+
+      let htmlTemplate = `<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${quizData.data && quizData.data.title ? quizData.data.title : "Team Phantom - Quiz Player"}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .quiz-container { max-width: 750px; background: #fff; margin: 40px auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h3 { color: #333; line-height: 1.6; }
+        table { border-collapse: collapse; max-width: 100%; margin: 10px 0; }
+        table, th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+        .option-btn { display: block; width: 100%; padding: 12px 15px; margin: 10px 0; background: #fff; border: 2px solid #ddd; border-radius: 5px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: #1fbad6; }
+        .nav-btns { margin-top: 25px; display: flex; justify-content: space-between; }
+        button.action-btn { padding: 10px 20px; background: #1fbad6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button.action-btn:hover { background: #1ca7c0; }
+        #q-number { color: #666; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="question-box">
+        <div id="q-number">Question 1 of N</div>
+        <h3 id="q-text">Loading...</h3>
+        <div id="options-box"></div>
+    </div>
+    <div class="nav-btns">
+        <button class="action-btn" onclick="prevQuestion()">Previous</button>
+        <button class="action-btn" onclick="nextQuestion()">Next</button>
+    </div>
+</div>
+
+<script>
+    const quizData = ${JSON.stringify(quizData, null, 4)};
+
+    let questions = [];
+    try {
+        questions = quizData.data.sections[0].questions;
+    } catch(err) {
+        console.error("Invalid Quiz Structure");
+    }
+
+    let currentIndex = 0;
+    let selectedAnswers = {};
+
+    function loadQuestion() {
+        if (!questions || questions.length === 0) {
+            document.getElementById('q-text').innerText = "No questions found!";
+            return;
+        }
+        
+        let q = questions[currentIndex];
+        document.getElementById('q-number').innerText = \`Question \${currentIndex + 1} of \${questions.length}\`;
+        
+        let qText = (q.en && q.en.value) ? q.en.value : "Question text not available";
+        document.getElementById('q-text').innerHTML = qText;
+
+        let optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = "";
+
+        let options = (q.en && q.en.options) ? q.en.options : [];
+        options.forEach((opt, idx) => {
+            let btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = \`<b>\${opt.prompt}.</b> \${opt.value}\`;
+            
+            if (selectedAnswers[currentIndex] === idx) {
+                btn.style.borderColor = '#1fbad6';
+                btn.style.background = '#f0f8ff';
+            }
+
+            btn.onclick = () => selectOption(idx);
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    function selectOption(optIdx) {
+        selectedAnswers[currentIndex] = optIdx;
+        let buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach((b, idx) => {
+            b.style.background = '#fff';
+            b.style.borderColor = '#ddd';
+            if (idx === optIdx) {
+                b.style.background = '#f0f8ff';
+                b.style.borderColor = '#1fbad6';
+            }
+        });
+    }
+
+    function nextQuestion() {
+        if (currentIndex < questions.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        } else {
+            alert("Yeh aakhiri sawal tha!");
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>`;
+
+      let blob = new Blob([htmlTemplate], { type: 'text/html' });
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'testbook_quiz.html';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("Success! Quiz HTML file successfully download ho chuki hai.");
     };
   </script>
 </body>
