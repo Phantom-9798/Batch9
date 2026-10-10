@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM PHANTOM | SECURE QUIZ TERMINAL</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    // ================= TIGHT SECURITY GATE =================
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Rajdhani', sans-serif; 
+      background-color: #04070b; 
+      color: #e5e7eb; 
+      margin: 0; 
+      padding: 16px; 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+    }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .terminal-panel {
+      background: rgba(10, 15, 22, 0.95);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.95);
+      border-radius: 1rem;
+      padding: 24px;
+      max-width: 800px;
+      margin: 24px auto;
+      width: 100%;
+    }
+    input, textarea {
+      width: 100%;
+      background: #000;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      outline: none;
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
+    input:focus, textarea:focus { border-color: #10b981; }
+    label {
+      font-size: 12px;
+      color: #94a3b8;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      font-size: 12px;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 16px;
+      margin: 10px 0;
+      background: #0a0f16;
+      border: 1px solid #334155;
+      color: #e5e7eb;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+    .option-btn:hover { background: #111827; border-color: #10b981; }
+    .hidden { display: none !important; }
+    table { border-collapse: collapse; max-width: 100%; margin: 12px 0; background: #000; }
+    table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= AUTH GATE ================= -->
+  <div id="authGate" class="terminal-panel" style="max-width: 400px; text-align: center; margin: auto;">
+    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin: 0 auto 12px; box-shadow: 0 0 10px #10b981;"></div>
+    <h2 class="font-stencil" style="font-size: 24px; color: #facc15; margin-bottom: 4px;">
+      SECURE QUIZ GATE
+    </h2>
+    <p class="font-orbitron" style="font-size: 10px; color: #94a3b8; letter-spacing: 2px; margin-bottom: 20px;">
+      ENTER CLEARANCE KEY TO PROCEED
+    </p>
+    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; color: #34d399; font-family: monospace; letter-spacing: 3px; font-size: 16px;">
+    <button onclick="unlockQuizTerminal()" class="action-btn" style="background: #10b981; color: #000;">
+      VERIFY IDENTITY
+    </button>
+  </div>
+
+  <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
+  <main id="makerConsole" class="hidden">
+    <div class="terminal-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 24px;">
+        <div>
+          <h1 class="font-stencil" style="font-size: 20px; color: #34d399;">TESTBOOK QUIZ CONVERTER</h1>
+          <p class="font-orbitron" style="font-size: 10px; color: #94a3b8;">STANDALONE GS-1 DISPATCH PROTOCOL</p>
+        </div>
+        <span style="font-size: 11px; font-family: monospace; color: #10b981; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 4px;">SECURE ACTIVE</span>
+      </div>
+
+      <div>
+        <label>PASTE TESTBOOK RAW JSON DATA</label>
+        <textarea id="jsonInput" rows="10" placeholder='{ "success": true, "data": { ... } }'></textarea>
+      </div>
+
+      <button onclick="generateQuiz()" class="action-btn" style="background: #06b6d4; color: #000; margin-top: 8px;">
+        GENERATE & DOWNLOAD CLEAN QUIZ FILE (.HTML)
+      </button>
+    </div>
+  </main>
+
+  <footer style="text-align: center; padding: 10px; font-size: 10px; font-family: monospace; color: #475569;">
+    TEAM PHANTOM MILITARY DISPATCH GATEWAY &bull; CONFIDENTIAL
+  </footer>
+
+  <script>
+    const TERMINAL_KEY = "Hima Phantom 74";
+
+    function unlockQuizTerminal() {
+      const entered = document.getElementById("quizPass").value.trim();
+      if (entered === TERMINAL_KEY) {
+        document.getElementById("authGate").classList.add("hidden");
+        document.getElementById("makerConsole").classList.remove("hidden");
+      } else {
+        alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
+      }
+    }
+
+    document.getElementById("quizPass").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") unlockQuizTerminal();
+    });
+
+    // Helper to decode HTML entities like &#39;, &nbsp;, etc.
+    function decodeHtml(html) {
+      var txt = document.createElement("textarea");
+      txt.innerHTML = html;
+      return txt.value;
+    }
+
+    window.generateQuiz = function() {
+      var rawText = document.getElementById('jsonInput').value.trim();
+      if (!rawText) {
+        alert("भाई, पहले टेस्टबुक का JSON डेटा यहाँ पेस्ट करो!");
+        return;
+      }
+
+      var quizData;
+      try {
+        quizData = JSON.parse(rawText);
+      } catch (e) {
+        alert("JSON डेटा में सिंटैक्स एरर है! चेक करो: " + e.message);
+        return;
+      }
+
+      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
+      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
+      var jsonString = JSON.stringify(quizData);
+      var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
+
+      // Standalone Quiz Player Template with Clean Parser & Entity Decoder
+      var htmlTemplate = '<!DOCTYPE html>\n' +
+        '<html lang="hi">\n' +
+        '<head>\n' +
+        '    <meta charset="UTF-8">\n' +
+        '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+        '    <title>' + quizTitle + '</title>\n' +
+        '    <style>\n' +
+        '        body { font-family: Arial, sans-serif; background-color: #04070b; color: #e5e7eb; margin: 0; padding: 20px; }\n' +
+        '        .quiz-container { max-width: 800px; background: #0a0f16; margin: 40px auto; padding: 30px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.8); }\n' +
+        '        h3 { color: #f8fafc; line-height: 1.6; font-size: 18px; }\n' +
+        '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
+        '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 1px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
+        '        .nav-btns { margin-top: 30px; display: flex; justify-content: space-between; }\n' +
+        '        button.action-btn { padding: 12px 24px; background: #06b6d4; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }\n' +
+        '        button.action-btn:hover { background: #0891b2; }\n' +
+        '        #q-number { color: #06b6d4; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }\n' +
+        '    </style>\n' +
+        '</head>\n' +
+        '<body>\n' +
+        '<div class="quiz-container">\n' +
+        '    <div id="question-box">\n' +
+        '        <div id="q-number">Question 1 of N</div>\n' +
+        '        <h3 id="q-text">Loading...</h3>\n' +
+        '        <div id="options-box"></div>\n' +
+        '    </div>\n' +
+        '    <div class="nav-btns">\n' +
+        '        <button class="action-btn" onclick="prevQuestion()">पिछला (Previous)</button>\n' +
+        '        <button class="action-btn" onclick="nextQuestion()">अगला (Next)</button>\n' +
+        '    </div>\n' +
+        '</div>\n' +
+        '<script>\n' +
+        '    var base64Data = "' + encodedJson + '";\n' +
+        '    var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
+        '    var questions = [];\n' +
+        '    try {\n' +
+        '        questions = quizData.data.sections[0].questions;\n' +
+        '    } catch(err) {\n' +
+        '        console.error("Invalid Quiz Structure");\n' +
+        '    }\n' +
+        '    var currentIndex = 0;\n' +
+        '    var selectedAnswers = {};\n' +
+        '    function decodeHtml(html) {\n' +
+        '        var txt = document.createElement("textarea");\n' +
+        '        txt.innerHTML = html;\n' +
+        '        return txt.value;\n' +
+        '    }\n' +
+        '    function loadQuestion() {\n' +
+        '        if (!questions || questions.length === 0) {\n' +
+        '            document.getElementById("q-text").innerText = "कोई सवाल नहीं मिला!";\n' +
+        '            return;\n' +
+        '        }\n' +
+        '        var q = questions[currentIndex];\n' +
+        '        document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
+        '        var rawQText = (q.en && q.en.value) ? q.en.value : "Question text not available";\n' +
+        '        document.getElementById("q-text").innerHTML = decodeHtml(rawQText);\n' +
+        '        var optionsBox = document.getElementById("options-box");\n' +
+        '        optionsBox.innerHTML = "";\n' +
+        '        var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '        options.forEach(function(opt, idx) {\n' +
+        '            var btn = document.createElement("button");\n' +
+        '            btn.className = "option-btn";\n' +
+        '            var optVal = (opt.value !== undefined && opt.value !== null) ? opt.value : "";\n' +
+        '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(optVal);\n' +
+        '            if (selectedAnswers[currentIndex] === idx) {\n' +
+        '                btn.style.borderColor = "#06b6d4";\n' +
+        '                btn.style.background = "#112233";\n' +
+        '            }\n' +
+        '            btn.onclick = function() { selectOption(idx); };\n' +
+        '            optionsBox.appendChild(btn);\n' +
+        '        });\n' +
+        '    }\n' +
+        '    function selectOption(optIdx) {\n' +
+        '        selectedAnswers[currentIndex] = optIdx;\n' +
+        '        var buttons = document.querySelectorAll(".option-btn");\n' +
+        '        buttons.forEach(function(b, idx) {\n' +
+        '            b.style.background = "#111827";\n' +
+        '            b.style.borderColor = "#334155";\n' +
+        '            if (idx === optIdx) {\n' +
+        '                b.style.background = "#112233";\n' +
+        '                b.style.borderColor = "#06b6d4";\n' +
+        '            }\n' +
+        '        });\n' +
+        '    }\n' +
+        '    function nextQuestion() {\n' +
+        '        if (currentIndex < questions.length - 1) {\n' +
+        '            currentIndex++;\n' +
+        '            loadQuestion();\n' +
+        '        } else {\n' +
+        '            alert("यह इस क्विज़ का आखिरी सवाल है!");\n' +
+        '        }\n' +
+        '    }\n' +
+        '    function prevQuestion() {\n' +
+        '        if (currentIndex > 0) {\n' +
+        '            currentIndex--;\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '    }\n' +
+        '    loadQuestion();\n' +
+        '<' + '/script>\n' +
+        '</body>\n' +
+        '</html>';
+
+      var blob = new Blob([htmlTemplate], { type: 'text/html' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = safeFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' सफलतापूर्वक डाउनलोड हो चुकी है।");
+    };
+  </script>
+</body>
+</html>
