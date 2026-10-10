@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | SECURE CBT PORTAL</title>
+  <title>TEAM PHANTOM | SECURE CBT MAKER</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <script>
     // ================= TIGHT SECURITY GATE =================
@@ -32,21 +32,20 @@
     body { font-family: 'Rajdhani', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     
     /* Top Navbar */
-    .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }
     .brand-area { display: flex; align-items: center; gap: 12px; }
-    .brand-area img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }
-    .brand-text h2 { margin: 0; font-size: 16px; font-family: 'Orbitron', sans-serif; color: #34d399; letter-spacing: 1px; }
-    .brand-text p { margin: 0; font-size: 10px; color: #94a3b8; letter-spacing: 1.5px; }
+    .brand-area img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover; }
+    .brand-text h2 { margin: 0; font-size: 18px; font-family: 'Black Ops One', cursive; color: #facc15; letter-spacing: 1px; }
+    .brand-text p { margin: 2px 0 0 0; font-size: 11px; font-family: 'Orbitron', sans-serif; color: #34d399; letter-spacing: 2px; font-weight: bold; }
     
     .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 14px; color: #facc15; }
     
     /* Main Layout */
-    .cbt-body { display: flex; flex: 1; height: calc(100vh - 120px); overflow: hidden; }
-    .question-panel { flex: 1; padding: 20px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }
+    .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; }
+    .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }
     
     .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }
     .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
-    .user-profile img { width: 35px; height: 35px; border-radius: 50%; background: #334155; }
     
     .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
     .palette-btn { width: 40px; height: 40px; background: #334155; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
@@ -60,11 +59,11 @@
     .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }
     .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }
 
-    .option-btn { display: block; width: 100%; padding: 12px 16px; margin: 10px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 15px; transition: 0.2s; }
+    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
     .option-btn:hover { background: #1f2937; border-color: #06b6d4; }
 
     /* Footer Buttons */
-    .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }
     .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }
     .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
     .btn-review { background: #d97706; color: #000; }
@@ -73,17 +72,17 @@
     .btn-submit { background: #10b981; color: #000; }
 
     /* Solution Box */
-    .solution-box { margin-top: 20px; padding: 15px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }
+    .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }
     .solution-box h4 { color: #34d399; margin-top: 0; font-family: 'Orbitron', sans-serif; }
-    .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 13px; }
+    .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 14px; }
 
     /* Scorecard */
-    .scorecard { padding: 30px; text-align: center; display: none; max-width: 600px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    .scorecard { padding: 40px; text-align: center; display: none; max-width: 650px; margin: 30px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
     .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
     .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }
 
-    /* Generator Screen */
-    #makerConsole { padding: 40px; max-width: 800px; margin: auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; margin-top: 40px; }
+    /* Generator Console */
+    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
     input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
     .hidden { display: none !important; }
   </style>
@@ -100,8 +99,19 @@
 
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
   <main id="makerConsole" class="hidden">
-    <h2 style="font-family: 'Orbitron'; color: #34d399; margin-top: 0;">TESTBOOK CBT QUIZ CONVERTER</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
+      <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
+      <div>
+        <h2 style="font-family: 'Black Ops One'; color: #facc15; margin: 0; font-size: 18px;">TEAM PHANTOM</h2>
+        <p style="font-family: 'Orbitron'; color: #34d399; margin: 2px 0 0 0; font-size: 11px;">PRACTICE HUB CONVERTER</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+      <div>
+        <label>TEST TIME (MINUTES)</label>
+        <input id="testTimeInput" type="number" value="120">
+      </div>
       <div>
         <label>POSITIVE MARKS</label>
         <input id="posMarksInput" type="number" step="0.01" value="0.83">
@@ -111,8 +121,10 @@
         <input id="negMarksInput" type="number" step="0.01" value="0.27">
       </div>
     </div>
+    
     <label>PASTE TESTBOOK RAW JSON DATA</label>
     <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
+    
     <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
@@ -135,6 +147,7 @@
 
     window.generateQuiz = function() {
       var rawText = document.getElementById('jsonInput').value.trim();
+      var testMins = parseInt(document.getElementById('testTimeInput').value) || 120;
       var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
       var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
 
@@ -145,7 +158,7 @@
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
       var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
-      quizData.phantomConfig = { posMarks: posM, negMarks: negM };
+      quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
 
       var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
 
@@ -157,17 +170,17 @@
         '    <title>' + quizTitle + '</title>\n' +
         '    <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
         '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
-        '    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">\n' +
+        '    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">\n' +
         '    <style>\n' +
         '        * { box-sizing: border-box; }\n' +
         '        body { font-family: "Rajdhani", sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }\n' +
-        '        .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }\n' +
+        '        .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
         '        .brand-area { display: flex; align-items: center; gap: 12px; }\n' +
-        '        .brand-area img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }\n' +
-        '        .brand-text h2 { margin: 0; font-size: 16px; font-family: "Orbitron", sans-serif; color: #34d399; letter-spacing: 1px; }\n' +
-        '        .brand-text p { margin: 0; font-size: 10px; color: #94a3b8; letter-spacing: 1.5px; }\n' +
+        '        .brand-area img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover; }\n' +
+        '        .brand-text h2 { margin: 0; font-size: 18px; font-family: "Black Ops One", cursive; color: #facc15; letter-spacing: 1px; }\n' +
+        '        .brand-text p { margin: 2px 0 0 0; font-size: 11px; font-family: "Orbitron", sans-serif; color: #34d399; letter-spacing: 2px; font-weight: bold; }\n' +
         '        .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: "Orbitron", sans-serif; font-size: 14px; color: #facc15; }\n' +
-        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 120px); overflow: hidden; }\n' +
+        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; }\n' +
         '        .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; }\n' +
         '        .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; }\n' +
         '        .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }\n' +
@@ -182,7 +195,7 @@
         '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
         '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
-        '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }\n' +
+        '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
         '        .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }\n' +
         '        .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: "Orbitron", sans-serif; transition: 0.2s; }\n' +
         '        .btn-review { background: #d97706; color: #000; }\n' +
@@ -191,7 +204,7 @@
         '        .btn-submit { background: #10b981; color: #000; }\n' +
         '        .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
         '        .solution-box h4 { color: #34d399; margin-top: 0; font-family: "Orbitron", sans-serif; }\n' +
-        '        .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: "Orbitron", sans-serif; font-size: 13px; }\n' +
+        '        .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: "Orbitron", sans-serif; font-size: 14px; }\n' +
         '        .scorecard { padding: 40px; text-align: center; display: none; max-width: 650px; margin: 30px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
         '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }\n' +
         '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; }\n' +
@@ -205,11 +218,11 @@
         '            <img src="logo.jpeg" alt="Logo">\n' +
         '            <div class="brand-text">\n' +
         '                <h2>TEAM PHANTOM</h2>\n' +
-        '                <p>TACTICAL CBT CENTER</p>\n' +
+        '                <p>PRACTICE HUB</p>\n' +
         '            </div>\n' +
         '        </div>\n' +
         '        <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;">' + quizTitle + '</div>\n' +
-        '        <div class="timer-box" id="timer">Time Left: 02:00:00</div>\n' +
+        '        <div class="timer-box" id="timer">Time Left: 00:00:00</div>\n' +
         '    </header>\n' +
         '\n' +
         '    <div class="cbt-body">\n' +
@@ -249,7 +262,7 @@
         '                    <div style="font-size:11px; color:#10b981;">● Online</div>\n' +
         '                </div>\n' +
         '            </div>\n' +
-        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE</div>\n' +
+        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE (' + (quizData.data.sections[0].questions ? quizData.data.sections[0].questions.length : 0) + ')</div>\n' +
         '            <div class="palette-grid" id="paletteGrid"></div>\n' +
         '        </div>\n' +
         '    </div>\n' +
@@ -270,7 +283,7 @@
         '        var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
         '        var questions = [];\n' +
         '        var analysisData = {};\n' +
-        '        var config = { posMarks: 0.83, negMarks: 0.27 };\n' +
+        '        var config = { posMarks: 0.83, negMarks: 0.27, testDuration: 7200 };\n' +
         '        try {\n' +
         '            questions = quizData.data.sections[0].questions;\n' +
         '            analysisData = quizData.data;\n' +
@@ -282,7 +295,7 @@
         '        var markedStatus = {};\n' +
         '\n' +
         '        // Timer logic\n' +
-        '        var totalSeconds = 7200;\n' +
+        '        var totalSeconds = config.testDuration;\n' +
         '        setInterval(function() {\n' +
         '            if (totalSeconds > 0) totalSeconds--;\n' +
         '            var hrs = Math.floor(totalSeconds / 3600);\n' +
@@ -327,13 +340,20 @@
         '            optionsBox.innerHTML = "";\n' +
         '            var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '            var meta = analysisData[q._id] || {};\n' +
-        '            var correctOpt = meta.correctOption;\n' +
-        '            var solText = (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : "";\n' +
+        '            \n' +
+        '            // Robust correct option finder\n' +
+        '            var correctOpt = meta.correctOption || q.correctOption || "1";\n' +
+        '            var solText = "";\n' +
+        '            if (meta.sol && meta.sol.en && meta.sol.en.value) {\n' +
+        '                solText = meta.sol.en.value;\n' +
+        '            } else if (q.sol && q.sol.en && q.sol.en.value) {\n' +
+        '                solText = q.sol.en.value;\n' +
+        '            }\n' +
         '\n' +
         '            var solBox = document.getElementById("solution-box");\n' +
         '            if (userResponses[currentIndex] !== undefined) {\n' +
         '                solBox.style.display = "block";\n' +
-        '                document.getElementById("correct-ans-display").innerText = "Correct Answer: Option " + correctOpt;\n' +
+        '                document.getElementById("correct-ans-display").innerText = "Correct Answer : Option (" + correctOpt + ")";\n' +
         '            } else {\n' +
         '                solBox.style.display = "none";\n' +
         '            }\n' +
@@ -347,7 +367,7 @@
         '                if (userResponses[currentIndex] !== undefined) {\n' +
         '                    var userSel = userResponses[currentIndex];\n' +
         '                    if (idx === userSel) {\n' +
-        '                        if (opt.prompt === correctOpt) {\n' +
+        '                        if (opt.prompt.toString() === correctOpt.toString()) {\n' +
         '                            btn.style.borderColor = "#10b981";\n' +
         '                            btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
         '                        } else {\n' +
@@ -355,7 +375,7 @@
         '                            btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
         '                        }\n' +
         '                    }\n' +
-        '                    if (opt.prompt === correctOpt) {\n' +
+        '                    if (opt.prompt.toString() === correctOpt.toString()) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
         '                        btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
         '                    }\n' +
@@ -405,9 +425,10 @@
         '                if (userResponses[i] !== undefined) {\n' +
         '                    attempted++;\n' +
         '                    var meta = analysisData[q._id] || {};\n' +
+        '                    var correctOpt = meta.correctOption || q.correctOption || "1";\n' +
         '                    var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '                    var userPrompt = options[userResponses[i]] ? options[userResponses[i]].prompt : "";\n' +
-        '                    if (userPrompt === meta.correctOption) correct++;\n' +
+        '                    if (userPrompt.toString() === correctOpt.toString()) correct++;\n' +
         '                    else incorrect++;\n' +
         '                }\n' +
         '            });\n' +
@@ -422,7 +443,7 @@
         '            document.getElementById("st-skipped").innerText = skipped;\n' +
         '\n' +
         '            var pct = (correct / questions.length) * 100;\n' +
-        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में टॉप करोगे!" :\n' +
+        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :\n' +
         '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
         '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
         '            document.getElementById("remark-box").innerHTML = remark;\n' +
