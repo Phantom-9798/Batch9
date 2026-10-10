@@ -533,7 +533,7 @@
       }
     };
 
-    // Testbook Quiz File Generator Logic
+    // Testbook Quiz File Generator Logic (Safe Encoded)
     window.generateTestbookQuizFile = () => {
       let rawText = document.getElementById('testbookJsonInput').value.trim();
       if (!rawText) {
@@ -549,12 +549,15 @@
         return;
       }
 
+      let quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Team Phantom - Quiz Player";
+      let quizDataJsonStr = JSON.stringify(quizData);
+
       let htmlTemplate = `<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${quizData.data && quizData.data.title ? quizData.data.title : "Team Phantom - Quiz Player"}</title>
+    <title>${quizTitle}</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
         .quiz-container { max-width: 750px; background: #fff; margin: 40px auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -584,7 +587,7 @@
 </div>
 
 <script>
-    const quizData = ${JSON.stringify(quizData, null, 4)};
+    const quizData = JSON.parse(decodeURIComponent(escape(window.atob("${window.btoa(unescape(encodeURIComponent(quizDataJsonStr)))}"))));
 
     let questions = [];
     try {
@@ -603,7 +606,7 @@
         }
         
         let q = questions[currentIndex];
-        document.getElementById('q-number').innerText = \`Question \${currentIndex + 1} of \${questions.length}\`;
+        document.getElementById('q-number').innerText = 'Question ' + (currentIndex + 1) + ' of ' + questions.length;
         
         let qText = (q.en && q.en.value) ? q.en.value : "Question text not available";
         document.getElementById('q-text').innerHTML = qText;
@@ -615,7 +618,7 @@
         options.forEach((opt, idx) => {
             let btn = document.createElement('button');
             btn.className = 'option-btn';
-            btn.innerHTML = \`<b>\${opt.prompt}.</b> \${opt.value}\`;
+            btn.innerHTML = '<b>' + opt.prompt + '.</b> ' + opt.value;
             
             if (selectedAnswers[currentIndex] === idx) {
                 btn.style.borderColor = '#1fbad6';
