@@ -90,7 +90,7 @@
       display: block;
       width: 100%;
       padding: 14px 16px;
-      margin: 10px 0;
+      margin: 12px 0;
       background: #0a0f16;
       border: 1px solid #334155;
       color: #e5e7eb;
@@ -101,7 +101,7 @@
       font-family: inherit;
       transition: 0.2s;
     }
-    .option-btn:hover { background: #111827; border-color: #10b981; }
+    .option-btn:hover { background: #111827; border-color: #06b6d4; }
     .hidden { display: none !important; }
     table { border-collapse: collapse; max-width: 100%; margin: 12px 0; background: #000; }
     table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
@@ -167,13 +167,6 @@
       if (e.key === "Enter") unlockQuizTerminal();
     });
 
-    // Helper to decode HTML entities like &#39;, &nbsp;, etc.
-    function decodeHtml(html) {
-      var txt = document.createElement("textarea");
-      txt.innerHTML = html;
-      return txt.value;
-    }
-
     window.generateQuiz = function() {
       var rawText = document.getElementById('jsonInput').value.trim();
       if (!rawText) {
@@ -194,7 +187,6 @@
       var jsonString = JSON.stringify(quizData);
       var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
 
-      // Standalone Quiz Player Template with Clean Parser & Entity Decoder
       var htmlTemplate = '<!DOCTYPE html>\n' +
         '<html lang="hi">\n' +
         '<head>\n' +
@@ -207,12 +199,14 @@
         '        h3 { color: #f8fafc; line-height: 1.6; font-size: 18px; }\n' +
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
-        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 1px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 1px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; font-family: inherit; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
         '        .nav-btns { margin-top: 30px; display: flex; justify-content: space-between; }\n' +
         '        button.action-btn { padding: 12px 24px; background: #06b6d4; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }\n' +
         '        button.action-btn:hover { background: #0891b2; }\n' +
         '        #q-number { color: #06b6d4; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }\n' +
+        '        .solution-box { margin-top: 20px; padding: 15px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
+        '        .solution-box h4 { color: #34d399; margin-top: 0; }\n' +
         '    </style>\n' +
         '</head>\n' +
         '<body>\n' +
@@ -221,6 +215,11 @@
         '        <div id="q-number">Question 1 of N</div>\n' +
         '        <h3 id="q-text">Loading...</h3>\n' +
         '        <div id="options-box"></div>\n' +
+        '        <button id="sol-toggle-btn" class="action-btn" style="background:#10b981; color:#000; margin-top:15px; display:none;" onclick="toggleSolution()">सॉल्यूशन देखें (View Solution)</button>\n' +
+        '        <div id="solution-box" class="solution-box">\n' +
+        '            <h4>Detailed Solution:</h4>\n' +
+        '            <div id="solution-text"></div>\n' +
+        '        </div>\n' +
         '    </div>\n' +
         '    <div class="nav-btns">\n' +
         '        <button class="action-btn" onclick="prevQuestion()">पिछला (Previous)</button>\n' +
@@ -231,8 +230,10 @@
         '    var base64Data = "' + encodedJson + '";\n' +
         '    var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
         '    var questions = [];\n' +
+        '    var solutionsMap = {};\n' +
         '    try {\n' +
         '        questions = quizData.data.sections[0].questions;\n' +
+        '        solutionsMap = quizData.data;\n' +
         '    } catch(err) {\n' +
         '        console.error("Invalid Quiz Structure");\n' +
         '    }\n' +
@@ -252,33 +253,54 @@
         '        document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
         '        var rawQText = (q.en && q.en.value) ? q.en.value : "Question text not available";\n' +
         '        document.getElementById("q-text").innerHTML = decodeHtml(rawQText);\n' +
+        '        \n' +
         '        var optionsBox = document.getElementById("options-box");\n' +
         '        optionsBox.innerHTML = "";\n' +
         '        var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '        \n' +
+        '        var qId = q._id;\n' +
+        '        var qMeta = solutionsMap[qId] || {};\n' +
+        '        var correctOpt = qMeta.correctOption;\n' +
+        '        var solText = (qMeta.sol && qMeta.sol.en && qMeta.sol.en.value) ? qMeta.sol.en.value : "";\n' +
+        '        \n' +
+        '        document.getElementById("solution-box").style.display = "none";\n' +
+        '        document.getElementById("sol-toggle-btn").style.display = solText ? "block" : "none";\n' +
+        '        document.getElementById("solution-text").innerHTML = decodeHtml(solText);\n' +
+        '        \n' +
         '        options.forEach(function(opt, idx) {\n' +
         '            var btn = document.createElement("button");\n' +
         '            btn.className = "option-btn";\n' +
         '            var optVal = (opt.value !== undefined && opt.value !== null) ? opt.value : "";\n' +
         '            btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(optVal);\n' +
-        '            if (selectedAnswers[currentIndex] === idx) {\n' +
-        '                btn.style.borderColor = "#06b6d4";\n' +
-        '                btn.style.background = "#112233";\n' +
+        '            \n' +
+        '            if (selectedAnswers[currentIndex] !== undefined) {\n' +
+        '                var userSelected = selectedAnswers[currentIndex];\n' +
+        '                if (idx === userSelected) {\n' +
+        '                    if (opt.prompt === correctOpt) {\n' +
+        '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
+        '                        btn.style.borderColor = "#10b981";\n' +
+        '                    } else {\n' +
+        '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
+        '                        btn.style.borderColor = "#ef4444";\n' +
+        '                    }\n' +
+        '                }\n' +
+        '                if (opt.prompt === correctOpt) {\n' +
+        '                    btn.style.borderColor = "#10b981";\n' +
+        '                }\n' +
+        '                btn.disabled = true;\n' +
+        '            } else {\n' +
+        '                btn.onclick = function() { selectOption(idx, opt.prompt, correctOpt); };\n' +
         '            }\n' +
-        '            btn.onclick = function() { selectOption(idx); };\n' +
         '            optionsBox.appendChild(btn);\n' +
         '        });\n' +
         '    }\n' +
-        '    function selectOption(optIdx) {\n' +
+        '    function selectOption(optIdx, promptVal, correctOpt) {\n' +
         '        selectedAnswers[currentIndex] = optIdx;\n' +
-        '        var buttons = document.querySelectorAll(".option-btn");\n' +
-        '        buttons.forEach(function(b, idx) {\n' +
-        '            b.style.background = "#111827";\n' +
-        '            b.style.borderColor = "#334155";\n' +
-        '            if (idx === optIdx) {\n' +
-        '                b.style.background = "#112233";\n' +
-        '                b.style.borderColor = "#06b6d4";\n' +
-        '            }\n' +
-        '        });\n' +
+        '        loadQuestion();\n' +
+        '    }\n' +
+        '    function toggleSolution() {\n' +
+        '        var box = document.getElementById("solution-box");\n' +
+        '        box.style.display = box.style.display === "none" ? "block" : "none";\n' +
         '    }\n' +
         '    function nextQuestion() {\n' +
         '        if (currentIndex < questions.length - 1) {\n' +
@@ -307,7 +329,7 @@
       link.click();
       document.body.removeChild(link);
 
-      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' सफलतापूर्वक डाउनलोड हो चुकी है।");
+      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' सॉल्यूशन के साथ सफलतापूर्वक डाउनलोड हो चुकी है।");
     };
   </script>
 </body>
