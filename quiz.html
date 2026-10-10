@@ -368,7 +368,7 @@
         '            var solBox = document.getElementById("solution-box");\n' +
         '            if (userResponses[currentIndex] !== undefined) {\n' +
         '                solBox.style.display = "block";\n' +
-        '                document.getElementById("correct-ans-display").innerText = "Correct Answer : Option (" + correctOpt + ")";\n' +
+        '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Answer : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
         '            } else {\n' +
         '                solBox.style.display = "none";\n' +
         '            }\n' +
@@ -379,28 +379,29 @@
         '                btn.className = "option-btn";\n' +
         '                btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(opt.value);\n' +
         '\n' +
-        '                if (userResponses[currentIndex] !== undefined) {\n' +
-        '                    var userSel = userResponses[currentIndex];\n' +
-        '                    if (idx === userSel) {\n' +
-        '                        if (opt.prompt.toString() === correctOpt.toString()) {\n' +
-        '                            btn.style.borderColor = "#10b981";\n' +
-        '                            btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
-        '                        } else {\n' +
-        '                            btn.style.borderColor = "#ef4444";\n' +
-        '                            btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
-        '                        }\n' +
-        '                    }\n' +
-        '                    if (opt.prompt.toString() === correctOpt.toString()) {\n' +
+        '                // Keep options clickable / selectable without disappearing\n' +
+        '                if (userResponses[currentIndex] !== undefined && userResponses[currentIndex] === idx) {\n' +
+        '                    if (correctOpt && opt.prompt.toString() === correctOpt.toString()) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
-        '                        btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
+        '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
+        '                    } else if (correctOpt) {\n' +
+        '                        btn.style.borderColor = "#ef4444";\n' +
+        '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
+        '                    } else {\n' +
+        '                        btn.style.borderColor = "#06b6d4";\n' +
+        '                        btn.style.background = "rgba(6, 182, 212, 0.15)";\n' +
         '                    }\n' +
-        '                    btn.disabled = true;\n' +
-        '                } else {\n' +
-        '                    btn.onclick = function() {\n' +
-        '                        userResponses[currentIndex] = idx;\n' +
-        '                        loadQuestion();\n' +
-        '                    };\n' +
         '                }\n' +
+        '                // Highlight correct answer if evaluated\n' +
+        '                if (correctOpt && opt.prompt.toString() === correctOpt.toString() && userResponses[currentIndex] !== undefined) {\n' +
+        '                    btn.style.borderColor = "#10b981";\n' +
+        '                    btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
+        '                }\n' +
+        '\n' +
+        '                btn.onclick = function() {\n' +
+        '                    userResponses[currentIndex] = idx;\n' +
+        '                    loadQuestion();\n' +
+        '                };\n' +
         '                optionsBox.appendChild(btn);\n' +
         '            });\n' +
         '        }\n' +
@@ -443,8 +444,8 @@
         '                    var correctOpt = meta.correctOption || q.correctOption;\n' +
         '                    var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '                    var userPrompt = options[userResponses[i]] ? options[userResponses[i]].prompt : "";\n' +
-        '                    if (userPrompt.toString() === correctOpt.toString()) correct++;\n' +
-        '                    else incorrect++;\n' +
+        '                    if (correctOpt && userPrompt.toString() === correctOpt.toString()) correct++;\n' +
+        '                    else if (correctOpt) incorrect++;\n' +
         '                }\n' +
         '            });\n' +
         '            var skipped = questions.length - attempted;\n' +
