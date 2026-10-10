@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | SECURE QUIZ TERMINAL</title>
+  <title>TEAM PHANTOM | SECURE QUIZ MAKER</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,25 +86,6 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    .option-btn {
-      display: block;
-      width: 100%;
-      padding: 14px 16px;
-      margin: 12px 0;
-      background: #0a0f16;
-      border: 1px solid #334155;
-      color: #e5e7eb;
-      border-radius: 8px;
-      text-align: left;
-      cursor: pointer;
-      font-size: 16px;
-      font-family: inherit;
-      transition: 0.2s;
-    }
-    .option-btn:hover { background: #111827; border-color: #06b6d4; }
-    .hidden { display: none !important; }
-    table { border-collapse: collapse; max-width: 100%; margin: 12px 0; background: #000; }
-    table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
   </style>
 </head>
 <body>
@@ -130,14 +111,25 @@
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 24px;">
         <div>
           <h1 class="font-stencil" style="font-size: 20px; color: #34d399;">TESTBOOK QUIZ CONVERTER</h1>
-          <p class="font-orbitron" style="font-size: 10px; color: #94a3b8;">STANDALONE GS-1 DISPATCH PROTOCOL</p>
+          <p class="font-orbitron" style="font-size: 10px; color: #94a3b8;">ADVANCED SCORING & DISPATCH PROTOCOL</p>
         </div>
         <span style="font-size: 11px; font-family: monospace; color: #10b981; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 4px;">SECURE ACTIVE</span>
       </div>
 
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label>POSITIVE MARKS PER QUESTION (e.g. 0.83)</label>
+          <input id="posMarksInput" type="number" step="0.01" value="0.83">
+        </div>
+        <div>
+          <label>NEGATIVE MARKS PER QUESTION (e.g. 0.27)</label>
+          <input id="negMarksInput" type="number" step="0.01" value="0.27">
+        </div>
+      </div>
+
       <div>
         <label>PASTE TESTBOOK RAW JSON DATA</label>
-        <textarea id="jsonInput" rows="10" placeholder='{ "success": true, "data": { ... } }'></textarea>
+        <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
       </div>
 
       <button onclick="generateQuiz()" class="action-btn" style="background: #06b6d4; color: #000; margin-top: 8px;">
@@ -169,6 +161,9 @@
 
     window.generateQuiz = function() {
       var rawText = document.getElementById('jsonInput').value.trim();
+      var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
+      var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
+
       if (!rawText) {
         alert("भाई, पहले टेस्टबुक का JSON डेटा यहाँ पेस्ट करो!");
         return;
@@ -184,6 +179,10 @@
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
       var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
+      
+      // Pack config into metadata
+      quizData.phantomConfig = { posMarks: posM, negMarks: negM };
+
       var jsonString = JSON.stringify(quizData);
       var encodedJson = btoa(unescape(encodeURIComponent(jsonString)));
 
@@ -193,35 +192,70 @@
         '    <meta charset="UTF-8">\n' +
         '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
         '    <title>' + quizTitle + '</title>\n' +
+        '    <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+        '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+        '    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">\n' +
         '    <style>\n' +
-        '        body { font-family: Arial, sans-serif; background-color: #04070b; color: #e5e7eb; margin: 0; padding: 20px; }\n' +
-        '        .quiz-container { max-width: 800px; background: #0a0f16; margin: 40px auto; padding: 30px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.8); }\n' +
+        '        body { font-family: "Rajdhani", sans-serif; background-color: #04070b; color: #e5e7eb; margin: 0; padding: 20px; }\n' +
+        '        .font-orbitron { font-family: "Orbitron", sans-serif; }\n' +
+        '        .font-stencil { font-family: "Black Ops One", cursive; }\n' +
+        '        .quiz-container { max-width: 800px; background: #0a0f16; margin: 20px auto; padding: 30px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.8); }\n' +
+        '        .header-brand { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 15px; margin-bottom: 25px; }\n' +
+        '        .header-brand img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #10b981; object-fit: cover; }\n' +
+        '        .brand-title { font-family: "Black Ops One", cursive; font-size: 22px; color: #34d399; letter-spacing: 1px; margin: 0; }\n' +
+        '        .brand-sub { font-family: "Orbitron", sans-serif; font-size: 11px; color: #facc15; letter-spacing: 2px; margin: 2px 0 0 0; }\n' +
         '        h3 { color: #f8fafc; line-height: 1.6; font-size: 18px; }\n' +
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
-        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 1px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; font-family: inherit; transition: 0.2s; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; font-family: inherit; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
-        '        .nav-btns { margin-top: 30px; display: flex; justify-content: space-between; }\n' +
-        '        button.action-btn { padding: 12px 24px; background: #06b6d4; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }\n' +
+        '        .nav-btns { margin-top: 30px; display: flex; justify-content: space-between; gap: 10px; }\n' +
+        '        button.action-btn { padding: 12px 20px; background: #06b6d4; color: #000; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; font-family: "Orbitron", sans-serif; flex: 1; }\n' +
         '        button.action-btn:hover { background: #0891b2; }\n' +
         '        #q-number { color: #06b6d4; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }\n' +
-        '        .solution-box { margin-top: 20px; padding: 15px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
-        '        .solution-box h4 { color: #34d399; margin-top: 0; }\n' +
+        '        .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
+        '        .solution-box h4 { color: #34d399; margin-top: 0; font-family: "Orbitron", sans-serif; }\n' +
+        '        .scorecard { text-align: center; padding: 20px; display: none; }\n' +
+        '        .scorecard h2 { font-family: "Black Ops One", cursive; color: #facc15; font-size: 28px; margin-bottom: 10px; }\n' +
+        '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }\n' +
+        '        .stat-card { background: #111827; border: 1px solid #334155; padding: 15px; border-radius: 8px; }\n' +
+        '        .stat-card h4 { margin: 0 0 5px 0; color: #94a3b8; font-size: 12px; font-family: "Orbitron", sans-serif; }\n' +
+        '        .stat-card p { margin: 0; font-size: 22px; font-weight: bold; color: #34d399; }\n' +
         '    </style>\n' +
         '</head>\n' +
         '<body>\n' +
         '<div class="quiz-container">\n' +
+        '    <div class="header-brand">\n' +
+        '        <img src="logo.jpeg" alt="Team Phantom Logo">\n' +
+        '        <div>\n' +
+        '            <h1 class="brand-title">TEAM PHANTOM</h1>\n' +
+        '            <p class="brand-sub">TACTICAL QUIZ CENTER</p>\n' +
+        '        </div>\n' +
+        '    </div>\n' +
+        '    \n' +
         '    <div id="question-box">\n' +
         '        <div id="q-number">Question 1 of N</div>\n' +
         '        <h3 id="q-text">Loading...</h3>\n' +
         '        <div id="options-box"></div>\n' +
-        '        <button id="sol-toggle-btn" class="action-btn" style="background:#10b981; color:#000; margin-top:15px; display:none;" onclick="toggleSolution()">सॉल्यूशन देखें (View Solution)</button>\n' +
         '        <div id="solution-box" class="solution-box">\n' +
-        '            <h4>Detailed Solution:</h4>\n' +
+        '            <h4>DETAILED EXPLANATION:</h4>\n' +
         '            <div id="solution-text"></div>\n' +
         '        </div>\n' +
         '    </div>\n' +
-        '    <div class="nav-btns">\n' +
+        '\n' +
+        '    <div id="scorecard-box" class="scorecard">\n' +
+        '        <h2>MISSION REPORT CARD</h2>\n' +
+        '        <p id="final-score-title" style="font-size: 18px; color: #34d399; font-weight: bold;"></p>\n' +
+        '        <div class="stat-grid">\n' +
+        '            <div class="stat-card"><h4>TOTAL ATTEMPTED</h4><p id="st-attempted">0</p></div>\n' +
+        '            <div class="stat-card"><h4>CORRECT ANSWERS</h4><p id="st-correct" style="color: #10b981;">0</p></div>\n' +
+        '            <div class="stat-card"><h4>INCORRECT ANSWERS</h4><p id="st-incorrect" style="color: #ef4444;">0</p></div>\n' +
+        '            <div class="stat-card"><h4>SKIPPED</h4><p id="st-skipped" style="color: #facc15;">0</p></div>\n' +
+        '        </div>\n' +
+        '        <div id="remark-box" style="background: #111827; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
+        '    </div>\n' +
+        '\n' +
+        '    <div class="nav-btns" id="nav-buttons-bar">\n' +
         '        <button class="action-btn" onclick="prevQuestion()">पिछला (Previous)</button>\n' +
         '        <button class="action-btn" onclick="nextQuestion()">अगला (Next)</button>\n' +
         '    </div>\n' +
@@ -230,10 +264,12 @@
         '    var base64Data = "' + encodedJson + '";\n' +
         '    var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
         '    var questions = [];\n' +
-        '    var solutionsMap = {};\n' +
+        '    var analysisData = {};\n' +
+        '    var config = { posMarks: 1, negMarks: 0 };\n' +
         '    try {\n' +
         '        questions = quizData.data.sections[0].questions;\n' +
-        '        solutionsMap = quizData.data;\n' +
+        '        analysisData = quizData.data;\n' +
+        '        if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
         '    } catch(err) {\n' +
         '        console.error("Invalid Quiz Structure");\n' +
         '    }\n' +
@@ -245,10 +281,10 @@
         '        return txt.value;\n' +
         '    }\n' +
         '    function loadQuestion() {\n' +
-        '        if (!questions || questions.length === 0) {\n' +
-        '            document.getElementById("q-text").innerText = "कोई सवाल नहीं मिला!";\n' +
-        '            return;\n' +
-        '        }\n' +
+        '        document.getElementById("question-box").style.display = "block";\n' +
+        '        document.getElementById("scorecard-box").style.display = "none";\n' +
+        '        document.getElementById("nav-buttons-bar").style.display = "flex";\n' +
+        '        \n' +
         '        var q = questions[currentIndex];\n' +
         '        document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
         '        var rawQText = (q.en && q.en.value) ? q.en.value : "Question text not available";\n' +
@@ -259,12 +295,16 @@
         '        var options = (q.en && q.en.options) ? q.en.options : [];\n' +
         '        \n' +
         '        var qId = q._id;\n' +
-        '        var qMeta = solutionsMap[qId] || {};\n' +
-        '        var correctOpt = qMeta.correctOption;\n' +
-        '        var solText = (qMeta.sol && qMeta.sol.en && qMeta.sol.en.value) ? qMeta.sol.en.value : "";\n' +
+        '        var meta = analysisData[qId] || {};\n' +
+        '        var correctOpt = meta.correctOption;\n' +
+        '        var solText = (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : "";\n' +
         '        \n' +
-        '        document.getElementById("solution-box").style.display = "none";\n' +
-        '        document.getElementById("sol-toggle-btn").style.display = solText ? "block" : "none";\n' +
+        '        var solBox = document.getElementById("solution-box");\n' +
+        '        if (selectedAnswers[currentIndex] !== undefined) {\n' +
+        '            solBox.style.display = "block";\n' +
+        '        } else {\n' +
+        '            solBox.style.display = "none";\n' +
+        '        }\n' +
         '        document.getElementById("solution-text").innerHTML = decodeHtml(solText);\n' +
         '        \n' +
         '        options.forEach(function(opt, idx) {\n' +
@@ -277,11 +317,11 @@
         '                var userSelected = selectedAnswers[currentIndex];\n' +
         '                if (idx === userSelected) {\n' +
         '                    if (opt.prompt === correctOpt) {\n' +
-        '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
+        '                        btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
         '                    } else {\n' +
-        '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
         '                        btn.style.borderColor = "#ef4444";\n' +
+        '                        btn.style.background = "rgba(239, 68, 68, 0.15)";\n' +
         '                    }\n' +
         '                }\n' +
         '                if (opt.prompt === correctOpt) {\n' +
@@ -289,25 +329,21 @@
         '                }\n' +
         '                btn.disabled = true;\n' +
         '            } else {\n' +
-        '                btn.onclick = function() { selectOption(idx, opt.prompt, correctOpt); };\n' +
+        '                btn.onclick = function() { selectOption(idx); };\n' +
         '            }\n' +
         '            optionsBox.appendChild(btn);\n' +
         '        });\n' +
         '    }\n' +
-        '    function selectOption(optIdx, promptVal, correctOpt) {\n' +
+        '    function selectOption(optIdx) {\n' +
         '        selectedAnswers[currentIndex] = optIdx;\n' +
         '        loadQuestion();\n' +
-        '    }\n' +
-        '    function toggleSolution() {\n' +
-        '        var box = document.getElementById("solution-box");\n' +
-        '        box.style.display = box.style.display === "none" ? "block" : "none";\n' +
         '    }\n' +
         '    function nextQuestion() {\n' +
         '        if (currentIndex < questions.length - 1) {\n' +
         '            currentIndex++;\n' +
         '            loadQuestion();\n' +
         '        } else {\n' +
-        '            alert("यह इस क्विज़ का आखिरी सवाल है!");\n' +
+        '            showScorecard();\n' +
         '        }\n' +
         '    }\n' +
         '    function prevQuestion() {\n' +
@@ -315,6 +351,50 @@
         '            currentIndex--;\n' +
         '            loadQuestion();\n' +
         '        }\n' +
+        '    }\n' +
+        '    function showScorecard() {\n' +
+        '        document.getElementById("question-box").style.display = "none";\n' +
+        '        document.getElementById("scorecard-box").style.display = "block";\n' +
+        '        document.getElementById("nav-buttons-bar").style.display = "none";\n' +
+        '        \n' +
+        '        var correctCount = 0;\n' +
+        '        var incorrectCount = 0;\n' +
+        '        var attemptedCount = 0;\n' +
+        '        \n' +
+        '        questions.forEach(function(q, i) {\n' +
+        '            if (selectedAnswers[i] !== undefined) {\n' +
+        '                attemptedCount++;\n' +
+        '                var meta = analysisData[q._id] || {};\n' +
+        '                var correctOpt = meta.correctOption;\n' +
+        '                var options = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '                var userOptPrompt = options[selectedAnswers[i]] ? options[selectedAnswers[i]].prompt : "";\n' +
+        '                if (userOptPrompt === correctOpt) {\n' +
+        '                    correctCount++;\n' +
+        '                } else {\n' +
+        '                    incorrectCount++;\n' +
+        '                }\n' +
+        '            }\n' +
+        '        });\n' +
+        '        var skippedCount = questions.length - attemptedCount;\n' +
+        '        var finalScore = (correctCount * config.posMarks) - (incorrectCount * config.negMarks);\n' +
+        '        if (finalScore < 0) finalScore = 0;\n' +
+        '        \n' +
+        '        document.getElementById("final-score-title").innerText = "FINAL SCORE: " + finalScore.toFixed(2) + " Marks";\n' +
+        '        document.getElementById("st-attempted").innerText = attemptedCount;\n' +
+        '        document.getElementById("st-correct").innerText = correctCount;\n' +
+        '        document.getElementById("st-incorrect").innerText = incorrectCount;\n' +
+        '        document.getElementById("st-skipped").innerText = skippedCount;\n' +
+        '        \n' +
+        '        var percentage = (correctCount / questions.length) * 100;\n' +
+        '        var remarkText = "";\n' +
+        '        if (percentage >= 80) {\n' +
+        '            remarkText = "🌟 <b>अति उत्तम (Outstanding)!</b> आपकी तैयारी एकदम तगड़ी है। इसी तरह फोकस बनाए रखिए, आप एग्जाम में फोड़ देंगे!";\n' +
+        '        } else if (percentage >= 50) {\n' +
+        '            remarkText = "⚡ <b>संतोषजनक (Good Performance)!</b> प्रदर्शन अच्छा है, लेकिन कुछ और विषयों और कमजोर टॉपिक्स पर मेहनत करने की जरूरत है। सुधार गुंजाइश बाकी है!";\n' +
+        '        } else {\n' +
+        '            remarkText = "⚠️ <b>गंभीर मेहनत की आवश्यकता (Needs Hard Work)!</b> स्कोर काफी कम है। आपको बुनियादी कॉन्सेप्ट्स (Core Concepts) को दोबारा पढ़ने और बार-बार प्रैक्टिस करने की सख्त जरूरत है। मैदान छोड़ना नहीं है, लगे रहो!";\n' +
+        '        }\n' +
+        '        document.getElementById("remark-box").innerHTML = remarkText;\n' +
         '    }\n' +
         '    loadQuestion();\n' +
         '<' + '/script>\n' +
@@ -329,7 +409,7 @@
       link.click();
       document.body.removeChild(link);
 
-      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' सॉल्यूशन के साथ सफलतापूर्वक डाउनलोड हो चुकी है।");
+      alert("सफलता! क्विज़ फाइल '" + safeFilename + "' स्कोरकार्ड और नेगेटिव मार्किंग के साथ डाउनलोड हो चुकी है।");
     };
   </script>
 </body>
