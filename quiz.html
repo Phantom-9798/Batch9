@@ -133,23 +133,23 @@
 
   <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
   <script>
-       // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
-    window.unlockTerminal = () => {
-      const entered = document.getElementById("adminPass").value.trim();
-      if (entered === TERMINAL_KEY) {
-        document.getElementById("authGate").classList.add("hidden");
-        document.getElementById("adminConsole").classList.remove("hidden");
+    function unlockQuizTerminal() {
+      var passInput = document.getElementById("quizPass");
+      if (!passInput) return;
+      var enteredPass = passInput.value.trim();
+      if (enteredPass === TERMINAL_KEY) {
+        document.getElementById("authGate").style.display = "none";
+        document.getElementById("makerConsole").style.display = "block";
       } else {
         alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
       }
-    };
+    }
 
-    document.getElementById("adminPass").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        window.unlockTerminal();
-      }
+    document.getElementById("quizPass").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") unlockQuizTerminal();
+    });
 
     window.generateQuiz = function() {
       var rawText = document.getElementById('jsonInput').value.trim();
@@ -369,7 +369,7 @@
                 btn.innerText = i + 1;
                 if (i === currentIndex) btn.classList.add("current");
                 if (userResponses[i] !== undefined) {
-                    btn.classList.add("attempted"); // Green when attempted
+                    btn.classList.add("attempted");
                 }
                 if (markedStatus[i]) btn.classList.add("marked");
                 btn.onclick = function() { currentIndex = i; loadQuestion(); };
