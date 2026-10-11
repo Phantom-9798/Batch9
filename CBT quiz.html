@@ -97,7 +97,7 @@
     <h2 style="font-family: 'Orbitron'; color: #facc15; margin-top: 0;">SECURE QUIZ GATE</h2>
     <p style="font-size: 12px; color: #94a3b8;">ENTER CLEARANCE KEY TO PROCEED</p>
     <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;">
-    <button id="verifyBtn" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
+    <button onclick="unlockQuizTerminal()" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
   </div>
 
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
@@ -128,7 +128,7 @@
     <label>PASTE TESTBOOK RAW JSON DATA</label>
     <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
     
-    <button id="generateBtn" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
+    <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
   <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
@@ -147,24 +147,9 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      var verifyBtn = document.getElementById("verifyBtn");
-      if (verifyBtn) {
-        verifyBtn.onclick = unlockQuizTerminal;
-      }
-
-      var quizPass = document.getElementById("quizPass");
-      if (quizPass) {
-        quizPass.onkeypress = function(e) {
-          if (e.key === "Enter") {
-            unlockQuizTerminal();
-          }
-        };
-      }
-
-      var generateBtn = document.getElementById("generateBtn");
-      if (generateBtn) {
-        generateBtn.onclick = generateQuiz;
+    document.getElementById("quizPass").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        unlockQuizTerminal();
       }
     });
 
