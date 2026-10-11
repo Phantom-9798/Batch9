@@ -251,6 +251,10 @@
         '        .review-item summary { cursor: pointer; padding: 14px; font-weight: 700; color: #e2e8f0; }\n' +
         '        .review-content { padding: 0 14px 16px; line-height: 1.6; }\n' +
         '        .review-status { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 8px; }\n' +
+        '        .result-tabs { display:flex; gap:8px; margin:18px 0; flex-wrap:wrap; }\n' +
+        '        .result-tab { padding:10px 16px; border:1px solid #334155; border-radius:7px; background:#0f172a; color:#e2e8f0; cursor:pointer; font-weight:700; }\n' +
+        '        .result-tab.active { background:#2563eb; border-color:#38bdf8; color:#fff; }\n' +
+        '        .language-hidden { display:none !important; }\n' +
 
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
@@ -307,9 +311,9 @@
         '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">SKIPPED</h4><p id="st-skipped" style="margin:5px 0 0; font-size:24px; color:#facc15;">0</p></div>\n' +
         '                </div>\n' +
         '                <div id="remark-box" style="background: #0f172a; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
-        '                <h3 class="review-heading">ANSWER KEY &amp; DETAILED SOLUTIONS</h3>\n' +
-        '                <p class="review-intro">Test submit karne ke baad yahan har question ka aapka answer, correct answer aur explanation milega. Kisi question ko kholne ke liye tap karein.</p>\n' +
-        '                <div id="solutions-review-list"></div>\n' +
+        '                <div class="result-tabs"><button id="score-tab" class="result-tab active" onclick="showResultTab(\'score\')">Scoreboard</button><button id="solutions-tab" class="result-tab" onclick="showResultTab(\'solutions\')">Solutions</button></div>\n' +
+        '                <div id="score-panel"><p class="review-intro">Your test summary is shown above. Open Solutions to review any question.</p></div>\n' +
+        '                <div id="solutions-panel" style="display:none"><h3 class="review-heading">QUESTION-WISE SOLUTIONS</h3><p class="review-intro">Choose a question number to see your answer, correct option, and detailed explanation.</p><div id="solutions-review-list"></div></div>\n' +
         '            </div>\n' +
         '        </div>\n' +
         '\n' +
@@ -362,7 +366,7 @@
         '        var userResponses = {};\n' +
         '        var markedStatus = {};\n' +
         '        var currentLang = "en";\n' +
-        '        document.getElementById("total-q-count").innerText = questions.length;\n' +
+        '        document.getElementById(\"total-q-count\").innerText = questions.length;\n' +
         '        if (quizData.data && quizData.data.title) {\n' +
         '            document.getElementById("header-quiz-title").innerText = quizData.data.title;\n' +
         '        }\n' +
@@ -389,7 +393,12 @@
         '            btn.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";\n' +
         '        }\n' +
         '\n' +
+        '        var subjectName = String((quizData.data && (quizData.data.subjectLang || quizData.data.subject || quizData.data.subjectName)) || quizData.subjectLang || quizData.subject || \"\").toLowerCase();\n' +
+        '        var isEnglishSubject = subjectName === \"english\" || subjectName.includes(\"english language\");\n' +
+        '        if (isEnglishSubject) { document.getElementById(\"lang-en\").style.display = \"none\"; document.getElementById(\"lang-hn\").style.display = \"none\"; currentLang = \"en\"; }\n' +
+        '        function showResultTab(which) { var score = document.getElementById(\"score-panel\"), sol = document.getElementById(\"solutions-panel\"); score.style.display = which === \"score\" ? \"block\" : \"none\"; sol.style.display = which === \"solutions\" ? \"block\" : \"none\"; document.getElementById(\"score-tab\").classList.toggle(\"active\", which === \"score\"); document.getElementById(\"solutions-tab\").classList.toggle(\"active\", which === \"solutions\"); }\n' +
         '        function switchLanguage(lang) {\n' +
+        '            if (isEnglishSubject) lang = \"en\";\n' +
         '            currentLang = lang;\n' +
         '            document.getElementById("lang-en").style.background = lang === "en" ? "#2563eb" : "transparent";\n' +
         '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
@@ -456,8 +465,8 @@
         '            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "");\n' +
         '            var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
         '            \n' +
-        '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn);\n' +
-        '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn);\n' +
+        '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn); document.getElementById("q-text-en").style.display = (isEnglishSubject || currentLang === \"en\") ? \"block\" : \"none\";\n' +
+        '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn); document.getElementById("q-text-hn").style.display = (!isEnglishSubject && currentLang === \"hn\") ? \"block\" : \"none\";\n' +
         '            var passageRaw = (q.en && q.en.comp) ? q.en.comp : ((q.hn && q.hn.comp) ? q.hn.comp : (q.comp || q.comprehension || ""));\n' +
         '            var passageBox = document.getElementById("passage-box");\n' +
         '            var passageText = document.getElementById("passage-text");\n' +
@@ -480,15 +489,8 @@
         '                            (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
         '            solText = decodeHtml(activeSol);\n' +
         '\n' +
-        '            var solBox = document.getElementById("solution-box");\n' +
-        '            if (userResponses[currentIndex] !== undefined) {\n' +
-        '                solBox.style.display = "block";\n' +
-        '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Option : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
-        '            } else {\n' +
-        '                solBox.style.display = "none";\n' +
-        '            }\n' +
-        '            document.getElementById("solution-text").innerHTML = safeHtml(solText);\n' +
-        '\n' +
+        '            var solBox = document.getElementById(\"solution-box\"); solBox.style.display = \"none\";\n' +
+
         '            optionsEn.forEach(function(optEn, idx) {\n' +
         '                var optHn = optionsHn[idx] || {};\n' +
         '                var btn = document.createElement("button");\n' +
@@ -498,19 +500,12 @@
         '                var valHn = optHn.value ? decodeHtml(optHn.value) : "";\n' +
         '                var promptLabel = optEn.prompt || (idx + 1);\n' +
         '\n' +
-        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(valEn) + (valHn ? \'<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(\' + safeHtml(valHn) + \')</div>\' : \'\');\n' +
+        '                var displayVal = (!isEnglishSubject && currentLang === \"hn\" && valHn) ? valHn : valEn; btn.innerHTML = \"<b>\" + safeHtml(promptLabel) + \".</b> \" + safeHtml(displayVal);\n' +
         '\n' +
-        '                if (userResponses[currentIndex] !== undefined) {\n' +
-        '                    if (isCorrectChoice(optionsEn, idx, correctOpt)) {\n' +
-        '                        btn.style.borderColor = "#10b981";\n' +
-        '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
-        '                    } else if (userResponses[currentIndex] === idx) {\n' +
-        '                        btn.style.borderColor = "#ef4444";\n' +
-        '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
-        '                    }\n' +
-        '                }\n' +
+        '                if (userResponses[currentIndex] === idx) { btn.style.borderColor = \"#38bdf8\"; btn.style.background = \"rgba(56,189,248,.16)\"; }\n' +
         '\n' +
         '                btn.onclick = function() {\n' +
+        '                    if (testSubmitted) return;\n' +
         '                    userResponses[currentIndex] = idx;\n' +
         '                    loadQuestion();\n' +
         '                };\n' +
@@ -519,6 +514,7 @@
         '        }\n' +
         '\n' +
         '        function nextQuestion() {\n' +
+        '            if (testSubmitted) return;\n' +
         '            if (currentIndex < questions.length - 1) {\n' +
         '                currentIndex++;\n' +
         '                loadQuestion();\n' +
@@ -533,11 +529,13 @@
         '        }\n' +
         '\n' +
         '        function markForReview() {\n' +
+        '            if (testSubmitted) return;\n' +
         '            markedStatus[currentIndex] = true;\n' +
         '            nextQuestion();\n' +
         '        }\n' +
         '\n' +
         '        function clearResponse() {\n' +
+        '            if (testSubmitted) return;\n' +
         '            delete userResponses[currentIndex];\n' +
         '            delete markedStatus[currentIndex];\n' +
         '            loadQuestion();\n' +
@@ -578,7 +576,7 @@
         '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
         '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
         '            document.getElementById("remark-box").innerHTML = remark;\n' +
-        '            renderSolutionsReview();\n' +
+        '            renderSolutionsReview(); showResultTab(\"score\");\n' +
         '        }\n' +
         '\n' +
         '        function renderSolutionsReview() {\n' +
@@ -597,7 +595,7 @@
         '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\n' +
         '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\n' +
         '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\n' +
-        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\n' +
+        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var shownOpt = (!isEnglishSubject && currentLang === "hn" && textHn) ? textHn : textEn; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\n' +
         '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\n' +
         '            });\n' +
         '        }\n' +
