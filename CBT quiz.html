@@ -12,19 +12,17 @@
 
   <script>
     // ================= TIGHT SECURITY GATE =================
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          return false;
-        }
-      });
-    })();
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+        (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
   </script>
 
   <style>
@@ -96,7 +94,7 @@
   <div id="authGate" style="max-width: 400px; margin: 100px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #10b981; text-align: center;">
     <h2 style="font-family: 'Orbitron'; color: #facc15; margin-top: 0;">SECURE QUIZ GATE</h2>
     <p style="font-size: 12px; color: #94a3b8;">ENTER CLEARANCE KEY TO PROCEED</p>
-    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;">
+    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;" onkeypress="checkEnter(event)">
     <button onclick="unlockQuizTerminal()" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
   </div>
 
@@ -131,7 +129,7 @@
     <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
-  <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
+  <!-- ================= SCRIPT LOGIC ================= -->
   <script>
     const TERMINAL_KEY = "Hima Phantom 74";
 
@@ -139,6 +137,7 @@
       var passInput = document.getElementById("quizPass");
       if (!passInput) return;
       var enteredPass = passInput.value.trim();
+      
       if (enteredPass === TERMINAL_KEY) {
         document.getElementById("authGate").style.display = "none";
         document.getElementById("makerConsole").style.display = "block";
@@ -147,11 +146,11 @@
       }
     }
 
-    document.getElementById("quizPass").addEventListener("keypress", function(e) {
+    function checkEnter(e) {
       if (e.key === "Enter") {
         unlockQuizTerminal();
       }
-    });
+    }
 
     function generateQuiz() {
       var rawText = document.getElementById('jsonInput').value.trim();
@@ -165,7 +164,6 @@
       try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
-      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
       quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
 
       var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
