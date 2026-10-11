@@ -254,6 +254,7 @@
 
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
+        '        @media(max-width:760px){.cbt-header{height:auto;min-height:65px;padding:8px;gap:8px;flex-wrap:wrap}.cbt-body{height:calc(100vh - 130px)}.sidebar-panel{width:115px}.sidebar-panel.collapsed{margin-right:-115px}.palette-grid{grid-template-columns:repeat(2,1fr);padding:8px;gap:6px}.palette-btn{width:38px;height:38px}.question-panel{padding:12px}.cbt-footer{height:auto;min-height:65px;padding:8px;gap:8px;flex-wrap:wrap}.btn-action{font-size:10px;padding:8px}.footer-left-btns,.footer-right-btns{gap:5px}.timer-box{font-size:11px}}\n' +
         '    </style>\n' +
         '</head>\n' +
         '<body>\n' +
@@ -580,32 +581,32 @@
         '            renderSolutionsReview();\n' +
         '        }\n' +
         '\n' +
-        '        function renderSolutionsReview() {\\n' +
-        '            var list = document.getElementById("solutions-review-list");\\n' +
-        '            if (!list) return; list.innerHTML = "";\\n' +
-        '            questions.forEach(function(q, i) {\\n' +
-        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\\n' +
-        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\\n' +
-        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\\n' +
-        '                var userIdx = userResponses[i], correctIdx = -1;\\n' +
-        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\\n' +
-        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\\n' +
-        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\\n' +
-        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\\n' +
-        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\\n' +
-        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\\n' +
-        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\\n' +
-        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\\n' +
-        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\\n' +
-        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\\n' +
-        '            });\\n' +
-        '        }\\n' +
-        '\\n' +
+        '        function renderSolutionsReview() {\n' +
+        '            var list = document.getElementById("solutions-review-list");\n' +
+        '            if (!list) return; list.innerHTML = "";\n' +
+        '            questions.forEach(function(q, i) {\n' +
+        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\n' +
+        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
+        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\n' +
+        '                var userIdx = userResponses[i], correctIdx = -1;\n' +
+        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\n' +
+        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\n' +
+        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\n' +
+        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
+        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
+        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\n' +
+        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\n' +
+        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\n' +
+        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\n' +
+        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\n' +
+        '            });\n' +
+        '        }\n' +
+        '\n' +
         '        function backToQuiz() {\n' +
         '            testSubmitted = false;\n' +
         '            totalSeconds = Math.max(0, totalSeconds);\n' +
         '            document.getElementById("quiz-main-area").style.display = "block";\n' +
-        '            document.getElementById("cbtFooter").style.display = "flex";\n' +
+        '            document.getElementById("cbtFooter").style.display = testSubmitted ? "none" : "flex";\n' +
         '            document.getElementById("scorecard-box").style.display = "none";\n' +
         '            loadQuestion();\n' +
         '        }\n' +
