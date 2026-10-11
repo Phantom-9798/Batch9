@@ -118,21 +118,36 @@
     <label>PASTE TESTBOOK RAW JSON DATA</label>
     <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
     
-    <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
+    <button id="generateBtn" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var generateBtn = document.getElementById("generateBtn");
+      if (generateBtn) {
+        generateBtn.addEventListener("click", generateQuiz);
+      }
+    });
+
     function generateQuiz() {
       var rawText = document.getElementById('jsonInput').value.trim();
       var testMins = parseInt(document.getElementById('testTimeInput').value) || 120;
       var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
       var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
 
-      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
+      if (!rawText) { 
+        alert("भाई, पहले JSON डेटा पेस्ट करो!"); 
+        return; 
+      }
 
       var quizData;
-      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
+      try { 
+        quizData = JSON.parse(rawText); 
+      } catch (e) { 
+        alert("JSON Parsing Error: " + e.message); 
+        return; 
+      }
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
       var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
@@ -474,7 +489,7 @@
             document.getElementById("st-attempted").innerText = attempted;
             document.getElementById("st-correct").innerText = correct;
             document.getElementById("st-incorrect").innerText = incorrect;
-            document.getElementById("st-skipped").innerText = skipped;
+            document.getElementById("st-skipped").innerText, skipped;
 
             var pct = (correct / questions.length) * 100;
             var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :
@@ -492,5 +507,18 @@
 
         loadQuestion();
     </script>
+</body>
+</html>`;
+
+      // Trigger automatic download of the generated HTML quiz file
+      var blob = new Blob([htmlTemplate], { type: 'text/html;charset=utf-8' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = safeFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
 </body>
 </html>
