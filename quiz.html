@@ -63,10 +63,7 @@
     .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }
     .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }
 
-    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #ffffff; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
-    .question-text, .option-btn, .solution-box, .review-content { color: #ffffff; }
-    .question-text * , .option-btn * , .solution-box * , .review-content * { color: #ffffff !important; }
-    .question-text[hidden] { display: none !important; }
+    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
     .option-btn:hover { background: #1f2937; border-color: #06b6d4; }
 
     /* Footer Buttons */
@@ -94,42 +91,21 @@
     .hidden { display: none !important; }
     table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }
     table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
-    @media (max-width: 760px) {
-      body { height: 100dvh; min-height: 100dvh; overflow: auto; }
-      #makerConsole { width: calc(100% - 20px); margin: 10px auto; padding: 16px; }
-      #makerConsole > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; gap: 8px !important; }
-      .cbt-header { height: auto; min-height: 65px; padding: 10px; gap: 8px; flex-wrap: wrap; }
-      .brand-text h2 { font-size: 15px; }
-      .brand-text p { font-size: 9px; }
-      .timer-box { font-size: 11px; padding: 6px 8px; }
-      .cbt-body { height: auto; min-height: calc(100dvh - 130px); overflow: visible; flex-direction: column; }
-      .question-panel { min-height: 55dvh; padding: 14px; overflow: visible; }
-      .sidebar-panel { width: 100%; min-height: 170px; border-left: 0; border-top: 1px solid #334155; }
-      .sidebar-panel.collapsed { margin-right: 0; display: none; }
-      .toggle-sidebar-btn { left: auto; right: 10px; top: -38px; border: 1px solid #334155; border-radius: 6px; }
-      .palette-grid { grid-template-columns: repeat(7, minmax(30px, 1fr)); padding: 10px; gap: 6px; }
-      .palette-btn { width: 100%; height: 36px; }
-      .q-header-bar { gap: 8px; align-items: flex-start; flex-wrap: wrap; }
-      .marks-tag { font-size: 11px; }
-      .option-btn { font-size: 15px; padding: 12px; }
-      .cbt-footer { height: auto; min-height: 65px; padding: 10px; flex-wrap: wrap; gap: 8px; }
-      .footer-left-btns, .footer-right-btns { flex: 1 1 100%; display: flex; flex-wrap: wrap; }
-      .btn-action { flex: 1 1 auto; min-height: 42px; font-size: 11px; padding: 9px; }
-      .scorecard { margin: 10px; padding: 16px; }
-      .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .review-content { overflow-wrap: anywhere; }
-    }
-    @media (min-width: 761px) and (max-width: 1024px) {
-      .sidebar-panel { width: 245px; }
-      .question-panel { padding: 18px; }
-      .palette-grid { grid-template-columns: repeat(4, 1fr); }
-    }
   </style>
 </head>
 <body>
 
+  <!-- ================= COMMAND CENTER ACCESS GATE ================= -->
+  <section id="commandGate" style="padding:30px;max-width:460px;margin:70px auto;background:#1e293b;border:1px solid #10b981;border-radius:12px;">
+    <h2 style="font-family:Orbitron;color:#facc15;margin-top:0">TEAM PHANTOM</h2>
+    <p style="color:#cbd5e1">Command Center Login — authorized access only</p>
+    <label for="commandPassword">PASSWORD</label>
+    <input id="commandPassword" type="password" autocomplete="current-password" placeholder="Enter Command Center password" />
+    <button id="commandLogin" type="button" style="width:100%;padding:12px;background:#2563eb;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer">UNLOCK COMMAND CENTER</button>
+    <p id="commandLoginError" style="color:#f87171;display:none">Incorrect password. Try again.</p>
+  </section>
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
-  <main id="makerConsole">
+  <main id="makerConsole" style="display:none">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
       <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
       <div>
@@ -166,6 +142,22 @@
 
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
+    (function(){
+      var gate = document.getElementById("commandGate");
+      var consolePanel = document.getElementById("makerConsole");
+      var passInput = document.getElementById("commandPassword");
+      function unlockCommandCenter(){
+        if (passInput.value === "Hima Phantom 74") {
+          gate.style.display = "none";
+          consolePanel.style.display = "block";
+        } else {
+          document.getElementById("commandLoginError").style.display = "block";
+          passInput.focus();
+        }
+      }
+      document.getElementById("commandLogin").addEventListener("click", unlockCommandCenter);
+      passInput.addEventListener("keydown", function(e){ if(e.key === "Enter") unlockCommandCenter(); });
+    })();
     window.generateQuiz = function() {
       var questionText = document.getElementById('questionsJsonInput').value.trim();
       var solutionText = document.getElementById('solutionsJsonInput').value.trim();
@@ -238,10 +230,7 @@
         '        .marks-tag { font-size: 13px; font-family: "Orbitron", sans-serif; }\n' +
         '        .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }\n' +
         '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
-        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #ffffff; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
-        '        .question-text, .option-btn, .solution-box, .review-content { color: #ffffff; }\n' +
-        '        .question-text *, .option-btn *, .solution-box *, .review-content * { color: #ffffff !important; }\n' +
-        '        .question-text[hidden] { display: none !important; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
         '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
         '        .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }\n' +
@@ -264,7 +253,6 @@
         '        .review-status { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 8px; }\n' +
 
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
-        '        @media (max-width: 760px) { body { height: 100dvh; min-height: 100dvh; overflow: auto; } .cbt-header { height: auto; min-height: 65px; padding: 10px; gap: 8px; flex-wrap: wrap; } .brand-text h2 { font-size: 15px; } .timer-box { font-size: 11px; padding: 6px 8px; } .cbt-body { height: auto; min-height: calc(100dvh - 130px); overflow: visible; flex-direction: column; } .question-panel { min-height: 55dvh; padding: 14px; overflow: visible; } .sidebar-panel { width: 100%; min-height: 170px; border-left: 0; border-top: 1px solid #334155; } .sidebar-panel.collapsed { margin-right: 0; display: none; } .toggle-sidebar-btn { left: auto; right: 10px; top: -38px; border: 1px solid #334155; border-radius: 6px; } .palette-grid { grid-template-columns: repeat(7, minmax(30px,1fr)); padding: 10px; gap: 6px; } .palette-btn { width: 100%; height: 36px; } .q-header-bar { gap: 8px; flex-wrap: wrap; } .cbt-footer { height: auto; min-height: 65px; padding: 10px; flex-wrap: wrap; gap: 8px; } .footer-left-btns, .footer-right-btns { flex: 1 1 100%; display: flex; flex-wrap: wrap; } .btn-action { flex: 1 1 auto; min-height: 42px; font-size: 11px; padding: 9px; } .scorecard { margin: 10px; padding: 16px; } .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; } }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
         '    </style>\n' +
         '</head>\n' +
@@ -294,10 +282,10 @@
         '                    <div id="q-number" style="font-family: \'Orbitron\'; color: #38bdf8; font-weight: bold;">Question 1</div>\n' +
         '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
         '                </div>\n' +
-        '                <div id="passage-panel" class="question-text" style="display:none; white-space:normal; color:#ffffff; background:#111827; border:1px solid #475569; border-radius:10px; padding:16px; margin:0 0 18px; line-height:1.75; max-height:42vh; overflow:auto;"></div>\n' +
+        '                <div id="passage-box" style="display:none;margin:0 0 18px;padding:16px;background:#111827;border:1px solid #38bdf8;border-left:4px solid #38bdf8;border-radius:8px;line-height:1.7;white-space:normal;"><div style="font-family:Orbitron;color:#38bdf8;font-size:13px;margin-bottom:8px;">COMPREHENSION PASSAGE</div><div id="passage-text"></div></div>\n' +
         '                <div style="margin-bottom: 15px;">\n' +
-        '                    <div id="q-text-en" class="question-text" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px; color:#ffffff;"></div>\n' +
-        '                    <div id="q-text-hn" class="question-text" style="font-size: 16px; color: #ffffff; line-height: 1.6;" hidden></div>\n' +
+        '                    <div id="q-text-en" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px;"></div>\n' +
+        '                    <div id="q-text-hn" style="font-size: 16px; color: #94a3b8; line-height: 1.6;"></div>\n' +
         '                </div>\n' +
         '                <div id="options-box"></div>\n' +
         '                <div id="solution-box" class="solution-box">\n' +
@@ -406,8 +394,6 @@
         '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
         '            document.getElementById("lang-hn").style.background = lang === "hn" ? "#2563eb" : "transparent";\n' +
         '            document.getElementById("lang-hn").style.color = lang === "hn" ? "#fff" : "#94a3b8";\n' +
-        '            document.getElementById("q-text-en").hidden = lang !== "en";\n' +
-        '            document.getElementById("q-text-hn").hidden = lang !== "hn";\n' +
         '            loadQuestion();\n' +
         '        }\n' +
         '\n' +
@@ -468,18 +454,13 @@
         '\n' +
         '            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "");\n' +
         '            var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
-        '            function passageValue(v) { if (!v) return ""; if (typeof v === "string") return v; if (typeof v === "object") return v.value || v.en || v.text || v.content || ""; return ""; }\n' +
-        '            var passageEn = passageValue(q.passage || q.comprehension || q.comprehensionPassage || q.readingPassage || q.stimulus || q.paragraph || q.context || q.passageText || (q.en && (q.en.passage || q.en.comprehension || q.en.passageText)));\n' +
-        '            var passageHn = passageValue(q.hn && (q.hn.passage || q.hn.comprehension || q.hn.passageText));\n' +
-        '            var passageBox = document.getElementById("passage-panel");\n' +
-        '            var activePassage = currentLang === "hn" ? (passageHn || passageEn) : passageEn;\n' +
-        '            passageBox.innerHTML = activePassage ? safeHtml(decodeHtml(activePassage)) : "";\n' +
-        '            passageBox.style.display = activePassage ? "block" : "none";\n' +
         '            \n' +
         '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn);\n' +
         '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn);\n' +
-        '            document.getElementById("q-text-en").hidden = currentLang !== "en";\n' +
-        '            document.getElementById("q-text-hn").hidden = currentLang !== "hn";\n' +
+        '            var passageRaw = (q.en && q.en.comp) ? q.en.comp : ((q.hn && q.hn.comp) ? q.hn.comp : (q.comp || q.comprehension || ""));\n' +
+        '            var passageBox = document.getElementById("passage-box");\n' +
+        '            var passageText = document.getElementById("passage-text");\n' +
+        '            if (passageRaw && String(passageRaw).trim()) { passageBox.style.display = "block"; passageText.innerHTML = safeHtml(decodeHtml(passageRaw)); } else { passageBox.style.display = "none"; passageText.innerHTML = ""; }\n' +
         '\n' +
         '            var optionsBox = document.getElementById("options-box");\n' +
         '            optionsBox.innerHTML = "";\n' +
@@ -499,14 +480,13 @@
         '            solText = decodeHtml(activeSol);\n' +
         '\n' +
         '            var solBox = document.getElementById("solution-box");\n' +
-        '            if (testSubmitted && userResponses[currentIndex] !== undefined) {\n' +
+        '            if (userResponses[currentIndex] !== undefined) {\n' +
         '                solBox.style.display = "block";\n' +
         '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Option : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
         '            } else {\n' +
         '                solBox.style.display = "none";\n' +
         '            }\n' +
         '            document.getElementById("solution-text").innerHTML = safeHtml(solText);\n' +
-        '            document.getElementById("solution-text").style.color = "#ffffff";\n' +
         '\n' +
         '            optionsEn.forEach(function(optEn, idx) {\n' +
         '                var optHn = optionsHn[idx] || {};\n' +
@@ -517,10 +497,9 @@
         '                var valHn = optHn.value ? decodeHtml(optHn.value) : "";\n' +
         '                var promptLabel = optEn.prompt || (idx + 1);\n' +
         '\n' +
-        '                var displayOption = currentLang === "hn" ? (valHn || valEn) : valEn;\n' +
-        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(displayOption);\n' +
+        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(valEn) + (valHn ? \'<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(\' + safeHtml(valHn) + \')</div>\' : \'\');\n' +
         '\n' +
-        '                if (testSubmitted && userResponses[currentIndex] !== undefined) {\n' +
+        '                if (userResponses[currentIndex] !== undefined) {\n' +
         '                    if (isCorrectChoice(optionsEn, idx, correctOpt)) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
         '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
@@ -530,16 +509,7 @@
         '                    }\n' +
         '                }\n' +
         '\n' +
-        '                if (userResponses[currentIndex] !== undefined) {\n' +
-        '                    if (userResponses[currentIndex] === idx) {\n' +
-        '                        btn.style.borderColor = "#38bdf8";\n' +
-        '                        btn.style.background = "rgba(56, 189, 248, 0.22)";\n' +
-        '                        btn.style.boxShadow = "0 0 0 1px #38bdf8 inset";\n' +
-        '                    } else if (!testSubmitted) { btn.style.opacity = "0.65"; }\n' +
-        '                    if (!testSubmitted) btn.title = "Selected answer — click another option to change";\n' +
-        '                }\n' +
         '                btn.onclick = function() {\n' +
-        '                    if (testSubmitted) return;\n' +
         '                    userResponses[currentIndex] = idx;\n' +
         '                    loadQuestion();\n' +
         '                };\n' +
@@ -567,7 +537,6 @@
         '        }\n' +
         '\n' +
         '        function clearResponse() {\n' +
-        '            if (testSubmitted) { alert("Test submit ho chuka hai. Answer ab change nahi ho sakta."); return; }\n' +
         '            delete userResponses[currentIndex];\n' +
         '            delete markedStatus[currentIndex];\n' +
         '            loadQuestion();\n' +
@@ -611,27 +580,27 @@
         '            renderSolutionsReview();\n' +
         '        }\n' +
         '\n' +
-        '        function renderSolutionsReview() {\n' +
-        '            var list = document.getElementById("solutions-review-list");\n' +
-        '            if (!list) return; list.innerHTML = "";\n' +
-        '            questions.forEach(function(q, i) {\n' +
-        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\n' +
-        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
-        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\n' +
-        '                var userIdx = userResponses[i], correctIdx = -1;\n' +
-        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\n' +
-        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\n' +
-        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\n' +
-        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
-        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
-        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\n' +
-        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\n' +
-        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\n' +
-        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\n' +
-        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\n' +
-        '            });\n' +
-        '        }\n' +
-        '\n' +
+        '        function renderSolutionsReview() {\\n' +
+        '            var list = document.getElementById("solutions-review-list");\\n' +
+        '            if (!list) return; list.innerHTML = "";\\n' +
+        '            questions.forEach(function(q, i) {\\n' +
+        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\\n' +
+        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\\n' +
+        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\\n' +
+        '                var userIdx = userResponses[i], correctIdx = -1;\\n' +
+        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\\n' +
+        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\\n' +
+        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\\n' +
+        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\\n' +
+        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\\n' +
+        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\\n' +
+        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\\n' +
+        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\\n' +
+        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\\n' +
+        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\\n' +
+        '            });\\n' +
+        '        }\\n' +
+        '\\n' +
         '        function backToQuiz() {\n' +
         '            testSubmitted = false;\n' +
         '            totalSeconds = Math.max(0, totalSeconds);\n' +
