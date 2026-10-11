@@ -227,7 +227,14 @@
         '                <p>PRACTICE HUB</p>\n' +
         '            </div>\n' +
         '        </div>\n' +
-        '        <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;">' + quizTitle + '</div>\n' +
+        '        <div style="display: flex; align-items: center; gap: 20px;">\n' +
+        '            <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;">' + quizTitle + '</div>\n' +
+        '            <!-- Language Switcher Tab -->\n' +
+        '            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 6px; display: flex; padding: 2px;">\n' +
+        '                <button onclick="switchLanguage(\'en\')" id="lang-en" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">English</button>\n' +
+        '                <button onclick="switchLanguage(\'hn\')" id="lang-hn" style="background: transparent; color: #94a3b8; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">हिंदी</button>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
         '        <div class="timer-box" id="timer">Time Left: 00:00:00</div>\n' +
         '    </header>\n' +
         '\n' +
@@ -238,7 +245,10 @@
         '                    <div id="q-number" style="font-family: \'Orbitron\'; color: #38bdf8; font-weight: bold;">Question 1</div>\n' +
         '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
         '                </div>\n' +
-        '                <h3 id="q-text" style="line-height: 1.6;">Loading...</h3>\n' +
+        '                <div id="q-text-container" style="line-height: 1.6; margin-bottom: 15px;">\n' +
+        '                    <h3 id="q-text-en" style="margin: 0 0 8px 0;"></h3>\n' +
+        '                    <h3 id="q-text-hn" style="margin: 0; color: #cbd5e1; font-weight: 500;"></h3>\n' +
+        '                </div>\n' +
         '                <div id="options-box"></div>\n' +
         '                <div id="solution-box" class="solution-box">\n' +
         '                    <div id="correct-ans-display" class="correct-ans-label"></div>\n' +
@@ -301,6 +311,7 @@
         '        var currentIndex = 0;\n' +
         '        var userResponses = {};\n' +
         '        var markedStatus = {};\n' +
+        '        var currentLang = "en";\n' +
         '        document.getElementById("total-q-count").innerText = questions.length;\n' +
         '\n' +
         '        // Timer logic\n' +
@@ -321,6 +332,15 @@
         '            var btn = document.querySelector(".toggle-sidebar-btn");\n' +
         '            sidebar.classList.toggle("collapsed");\n' +
         '            btn.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";\n' +
+        '        }\n' +
+        '\n' +
+        '        function switchLanguage(lang) {\n' +
+        '            currentLang = lang;\n' +
+        '            document.getElementById("lang-en").style.background = lang === "en" ? "#2563eb" : "transparent";\n' +
+        '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
+        '            document.getElementById("lang-hn").style.background = lang === "hn" ? "#2563eb" : "transparent";\n' +
+        '            document.getElementById("lang-hn").style.color = lang === "hn" ? "#fff" : "#94a3b8";\n' +
+        '            loadQuestion();\n' +
         '        }\n' +
         '\n' +
         '        function decodeHtml(html) {\n' +
@@ -350,52 +370,56 @@
         '            document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
         '            document.getElementById("pos-m").innerText = "+" + config.posMarks;\n' +
         '            document.getElementById("neg-m").innerText = "-" + config.negMarks;\n' +
-        '            document.getElementById("q-text").innerHTML = decodeHtml(q.en && q.en.value ? q.en.value : "");\n' +
+        '\n' +
+        '            // Dual Language Headers\n' +
+        '            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : "";\n' +
+        '            var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
+        '            \n' +
+        '            document.getElementById("q-text-en").innerHTML = qEn;\n' +
+        '            document.getElementById("q-text-hn").innerHTML = qHn ? "(" + qHn + ")" : "";\n' +
         '\n' +
         '            var optionsBox = document.getElementById("options-box");\n' +
         '            optionsBox.innerHTML = "";\n' +
-        '            var options = (q.en && q.en.options) ? q.en.options : [];\n' +
-        '            var meta = analysisData[q._id] || {};\n' +
         '            \n' +
+        '            var optionsEn = (q.en && q.en.options) ? q.en.options : [];\n' +
+        '            var optionsHn = (q.hn && q.hn.options) ? q.hn.options : [];\n' +
+        '            \n' +
+        '            var meta = analysisData[q._id] || {};\n' +
         '            var correctOpt = meta.correctOption || q.correctOption;\n' +
+        '\n' +
         '            var solText = "";\n' +
-        '            if (meta.sol && meta.sol.en && meta.sol.en.value) {\n' +
-        '                solText = meta.sol.en.value;\n' +
-        '            } else if (q.sol && q.sol.en && q.sol.en.value) {\n' +
-        '                solText = q.sol.en.value;\n' +
-        '            }\n' +
+        '            var activeSol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value :\n' +
+        '                            (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value :\n' +
+        '                            (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : "";\n' +
+        '            solText = decodeHtml(activeSol);\n' +
         '\n' +
         '            var solBox = document.getElementById("solution-box");\n' +
         '            if (userResponses[currentIndex] !== undefined) {\n' +
         '                solBox.style.display = "block";\n' +
-        '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Answer : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
+        '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Option : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
         '            } else {\n' +
         '                solBox.style.display = "none";\n' +
         '            }\n' +
-        '            document.getElementById("solution-text").innerHTML = decodeHtml(solText);\n' +
+        '            document.getElementById("solution-text").innerHTML = solText;\n' +
         '\n' +
-        '            options.forEach(function(opt, idx) {\n' +
+        '            optionsEn.forEach(function(optEn, idx) {\n' +
+        '                var optHn = optionsHn[idx] || {};\n' +
         '                var btn = document.createElement("button");\n' +
         '                btn.className = "option-btn";\n' +
-        '                btn.innerHTML = "<b>" + opt.prompt + ".</b> " + decodeHtml(opt.value);\n' +
+        '                \n' +
+        '                var displayVal = currentLang === "hn" && optHn.value ? decodeHtml(optHn.value) : decodeHtml(optEn.value);\n' +
+        '                btn.innerHTML = "<b>" + optEn.prompt + ".</b> " + display;\n' +
+        '                // Fix display content formatting\n' +
+        '                btn.innerHTML = "<b>" + optEn.prompt + ".</b> " + displayVal + (currentLang === "en" && optHn.value ? \'<div style="font-size:13px; color:#94a3b8; margin-top:2px;">(\' + decodeHtml(optHn.value) + \')</div>\' : \'\');\n' +
         '\n' +
-        '                // Keep options clickable / selectable without disappearing\n' +
-        '                if (userResponses[currentIndex] !== undefined && userResponses[currentIndex] === idx) {\n' +
-        '                    if (correctOpt && opt.prompt.toString() === correctOpt.toString()) {\n' +
+        '                if (userResponses[currentIndex] !== undefined) {\n' +
+        '                    if (correctOpt && optEn.prompt.toString() === correctOpt.toString()) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
         '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
-        '                    } else if (correctOpt) {\n' +
+        '                    } else if (userResponses[currentIndex] === idx) {\n' +
         '                        btn.style.borderColor = "#ef4444";\n' +
         '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
-        '                    } else {\n' +
-        '                        btn.style.borderColor = "#06b6d4";\n' +
-        '                        btn.style.background = "rgba(6, 182, 212, 0.15)";\n' +
         '                    }\n' +
-        '                }\n' +
-        '                // Highlight correct answer if evaluated\n' +
-        '                if (correctOpt && opt.prompt.toString() === correctOpt.toString() && userResponses[currentIndex] !== undefined) {\n' +
-        '                    btn.style.borderColor = "#10b981";\n' +
-        '                    btn.style.background = "rgba(16, 185, 129, 0.15)";\n' +
         '                }\n' +
         '\n' +
         '                btn.onclick = function() {\n' +
@@ -409,13 +433,6 @@
         '        function nextQuestion() {\n' +
         '            if (currentIndex < questions.length - 1) {\n' +
         '                currentIndex++;\n' +
-        '                loadQuestion();\n' +
-        '            }\n' +
-        '        }\n' +
-        '\n' +
-        '        function prevQuestion() {\n' +
-        '            if (currentIndex > 0) {\n' +
-        '                currentIndex--;\n' +
         '                loadQuestion();\n' +
         '            }\n' +
         '        }\n' +
@@ -459,9 +476,9 @@
         '            document.getElementById("st-skipped").innerText = skipped;\n' +
         '\n' +
         '            var pct = (correct / questions.length) * 100;\n' +
-        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :\n' +
+        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :\n' +
         '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
-        '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
+        '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
         '            document.getElementById("remark-box").innerHTML = remark;\n' +
         '        }\n' +
         '\n' +
@@ -473,7 +490,7 @@
         '        }\n' +
         '\n' +
         '        loadQuestion();\n' +
-        '    <' + '/script>\n' +
+        '    </script>\n' +
         '</body>\n' +
         '</html>';
 
