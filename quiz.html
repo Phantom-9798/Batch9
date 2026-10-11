@@ -302,10 +302,18 @@
         var analysisData = {};
         var config = { posMarks: 0.83, negMarks: 0.27, testDuration: 7200 };
         try {
-            questions = quizData.data.sections[0].questions;
-            analysisData = quizData.data;
+            if (quizData.data && quizData.data.sections && quizData.data.sections[0].questions) {
+                questions = quizData.data.sections[0].questions;
+            } else if (quizData.data && quizData.data.questions) {
+                questions = quizData.data.questions;
+            } else if (Array.isArray(quizData)) {
+                questions = quizData;
+            } else {
+                questions = Object.values(quizData.data || quizData).filter(item => typeof item === 'object' && item.correctOption);
+            }
+            analysisData = quizData.data || quizData;
             if (quizData.phantomConfig) config = quizData.phantomConfig;
-        } catch(err) { console.error("Error loading structure"); }
+        } catch(err) { console.error("Error loading structure", err); }
 
         var currentIndex = 0;
         var userResponses = {};
@@ -364,12 +372,18 @@
 
         function loadQuestion() {
             buildPalette();
+            if (!questions || questions.length === 0) {
+                document.getElementById("q-number").innerText = "No Questions Found";
+                document.getElementById("q-text-en").innerHTML = "Error: Invalid JSON structure or no questions parsed.";
+                return;
+            }
+
             var q = questions[currentIndex];
             document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;
             document.getElementById("pos-m").innerText = "+" + config.posMarks;
             document.getElementById("neg-m").innerText = "-" + config.negMarks;
 
-            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : "";
+            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "");
             var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";
             
             document.getElementById("q-text-en").innerHTML = qEn;
@@ -378,10 +392,11 @@
             var optionsBox = document.getElementById("options-box");
             optionsBox.innerHTML = "";
             
-            var optionsEn = (q.en && q.en.options) ? q.en.options : [];
+            var optionsEn = (q.en && q.en.options) ? q.en.options : (q.options ? q.options : []);
             var optionsHn = (q.hn && q.hn.options) ? q.hn.options : [];
             
-            var meta = analysisData[q._id] || {};
+            var qId = q._id || q.id || currentIndex;
+            var meta = analysisData[qId] || analysisData[currentIndex] || q;
             var correctOpt = meta.correctOption || q.correctOption;
 
             var solText = "";
@@ -405,13 +420,14 @@
                 var btn = document.createElement("button");
                 btn.className = "option-btn";
 
-                var valEn = decodeHtml(optEn.value);
+                var valEn = decodeHtml(optEn.value || optEn);
                 var valHn = optHn.value ? decodeHtml(optHn.value) : "";
+                var promptLabel = optEn.prompt || (idx + 1);
 
-                btn.innerHTML = "<b>" + optEn.prompt + ".</b> " + valEn + (valHn ? '<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(' + valHn + ')</div>' : '');
+                btn.innerHTML = "<b>" + promptLabel + ".</b> " + valEn + (valHn ? '<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(' + valHn + ')</div>' : '');
 
                 if (userResponses[currentIndex] !== undefined) {
-                    if (correctOpt && optEn.prompt.toString() === correctOpt.toString()) {
+                    if (correctOpt && promptLabel.toString() === correctOpt.toString()) {
                         btn.style.borderColor = "#10b981";
                         btn.style.background = "rgba(16, 185, 129, 0.2)";
                     } else if (userResponses[currentIndex] === idx) {
@@ -462,10 +478,11 @@
             questions.forEach(function(q, i) {
                 if (userResponses[i] !== undefined) {
                     attempted++;
-                    var meta = analysisData[q._id] || {};
+                    var qId = q._id || q.id || i;
+                    var meta = analysisData[qId] || analysisData[i] || q;
                     var correctOpt = meta.correctOption || q.correctOption;
-                    var options = (q.en && q.en.options) ? q.en.options : [];
-                    var userPrompt = options[userResponses[i]] ? options[userResponses[i]].prompt : "";
+                    var options = (q.en && q.en.options) ? q.en.options : (q.options ? q.options : []);
+                    var userPrompt = options[userResponses[i]] ? (options[userResponses[i]].prompt || (userResponses[i] + 1)) : "";
                     if (correctOpt && userPrompt.toString() === correctOpt.toString()) correct++;
                     else if (correctOpt) incorrect++;
                 }
@@ -497,4 +514,4 @@
         loadQuestion();
     </script>
 </body>
-</html>`;
+</html>
