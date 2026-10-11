@@ -191,7 +191,7 @@
         .toggle-sidebar-btn { position: absolute; left: -35px; top: 15px; width: 35px; height: 35px; background: #1e293b; border: 1px solid #334155; border-right: none; color: #facc15; font-size: 16px; cursor: pointer; border-top-left-radius: 6px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 100; }
         .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
         .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
-        .palette-btn { width: 40px; height: 40px; background: #334155; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .palette-btn { width: 40px; height: 40px; background: #ef4444; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .palette-btn.attempted { background: #10b981; color: #000; }
         .palette-btn.marked { background: #9333ea; color: #fff; }
         .palette-btn.current { border: 2px solid #facc15; }
@@ -228,7 +228,7 @@
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="font-family: 'Orbitron'; font-size: 14px; color: #38bdf8;">${quizTitle}</div>
+            <div style="font-family: 'Orbitron'; font-size: 14px; color: #38bdf8;" id="header-quiz-title">${quizTitle}</div>
             <div style="background: #0f172a; border: 1px solid #334155; border-radius: 6px; display: flex; padding: 2px;">
                 <button onclick="switchLanguage('en')" id="lang-en" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">English</button>
                 <button onclick="switchLanguage('hn')" id="lang-hn" style="background: transparent; color: #94a3b8; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">हिंदी</button>
@@ -320,6 +320,9 @@
         var markedStatus = {};
         var currentLang = "en";
         document.getElementById("total-q-count").innerText = questions.length;
+        if (quizData.data && quizData.data.title) {
+            document.getElementById("header-quiz-title").innerText = quizData.data.title;
+        }
 
         var totalSeconds = config.testDuration;
         setInterval(function() {
@@ -360,10 +363,13 @@
             grid.innerHTML = "";
             questions.forEach(function(q, i) {
                 var btn = document.createElement("button");
+                // Default unattempted color is Red (#ef4444)
                 btn.className = "palette-btn";
                 btn.innerText = i + 1;
                 if (i === currentIndex) btn.classList.add("current");
-                if (userResponses[i] !== undefined) btn.classList.add("attempted");
+                if (userResponses[i] !== undefined) {
+                    btn.classList.add("attempted"); // Green (#10b981)
+                }
                 if (markedStatus[i]) btn.classList.add("marked");
                 btn.onclick = function() { currentIndex = i; loadQuestion(); };
                 grid.appendChild(btn);
@@ -514,4 +520,4 @@
         loadQuestion();
     </script>
 </body>
-</html>
+</html>`;
