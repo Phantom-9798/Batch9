@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM PHANTOM | PRACTICE HUB</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    // ================= TIGHT SECURITY GATE =================
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Rajdhani', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Top Navbar */
+    .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }
+    .brand-area { display: flex; align-items: center; gap: 12px; }
+    .brand-area img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover; }
+    .brand-text h2 { margin: 0; font-size: 18px; font-family: 'Black Ops One', cursive; color: #facc15; letter-spacing: 1px; }
+    .brand-text p { margin: 2px 0 0 0; font-size: 11px; font-family: 'Orbitron', sans-serif; color: #34d399; letter-spacing: 2px; font-weight: bold; }
+    
+    .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 14px; color: #facc15; }
+    
+    /* Main Layout */
+    .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; position: relative; }
+    .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
+    
+    .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.3s; position: relative; }
+    .sidebar-panel.collapsed { margin-right: -300px; }
+    
+    .toggle-sidebar-btn { position: absolute; left: -35px; top: 15px; width: 35px; height: 35px; background: #1e293b; border: 1px solid #334155; border-right: none; color: #facc15; font-size: 16px; cursor: pointer; border-top-left-radius: 6px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 100; }
+    
+    .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
+    
+    .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
+    .palette-btn { width: 40px; height: 40px; background: #ef4444; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+    .palette-btn.attempted { background: #10b981; color: #000; }
+    .palette-btn.marked { background: #9333ea; color: #fff; }
+    .palette-btn.current { border: 2px solid #facc15; }
+
+    /* Question Area */
+    .q-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; }
+    .marks-tag { font-size: 13px; font-family: 'Orbitron', sans-serif; }
+    .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }
+    .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }
+
+    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .option-btn:hover { background: #1f2937; border-color: #06b6d4; }
+
+    /* Footer Buttons */
+    .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }
+    .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }
+    .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: 'Orbitron', sans-serif; transition: 0.2s; }
+    .btn-review { background: #d97706; color: #000; }
+    .btn-clear { background: #475569; color: #fff; }
+    .btn-next { background: #2563eb; color: #fff; }
+    .btn-submit { background: #10b981; color: #000; }
+
+    /* Solution Box */
+    .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }
+    .solution-box h4 { color: #34d399; margin-top: 0; font-family: 'Orbitron', sans-serif; }
+    .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 14px; }
+
+    /* Scorecard */
+    .scorecard { padding: 30px; text-align: center; display: none; max-width: 650px; margin: 20px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+    .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }
+
+    /* Generator Console */
+    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
+    .hidden { display: none !important; }
+    table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }
+    table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
+  <main id="makerConsole">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
+      <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
+      <div>
+        <h2 style="font-family: 'Black Ops One'; color: #facc15; margin: 0; font-size: 18px;">TEAM PHANTOM</h2>
+        <p style="font-family: 'Orbitron'; color: #34d399; margin: 2px 0 0 0; font-size: 11px;">PRACTICE HUB CONVERTER</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+      <div>
+        <label>TEST TIME (MINUTES)</label>
+        <input id="testTimeInput" type="number" value="120">
+      </div>
+      <div>
+        <label>POSITIVE MARKS</label>
+        <input id="posMarksInput" type="number" step="0.01" value="0.83">
+      </div>
+      <div>
+        <label>NEGATIVE MARKS</label>
+        <input id="negMarksInput" type="number" step="0.01" value="0.27">
+      </div>
+    </div>
+    
+    <label>PASTE TESTBOOK RAW JSON DATA</label>
+    <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
+    
+    <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
+  </main>
+
+  <!-- ================= SCRIPT LOGIC ================= -->
+  <script>
+    window.generateQuiz = function() {
+      var rawText = document.getElementById('jsonInput').value.trim();
+      var testMins = Math.max(1, parseInt(document.getElementById('testTimeInput').value, 10) || 120);
+      var posInput = parseFloat(document.getElementById('posMarksInput').value);
+      var negInput = parseFloat(document.getElementById('negMarksInput').value);
+      var posM = Number.isFinite(posInput) && posInput >= 0 ? posInput : 0.83;
+      var negM = Number.isFinite(negInput) && negInput >= 0 ? negInput : 0.27;
+
+      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
+
+      var quizData;
+      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
+
+      var quizTitle = String((quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz");
+      var safeFilename = (quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 100) || "Testbook_Quiz") + ".html";
+      var escapedQuizTitle = quizTitle.replace(/[&<>"']/g, function(ch) { return ch === '&' ? '&amp;' : ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '"' ? '&quot;' : '&#39;'; });
+      quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
+
+      var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
+
+      var htmlTemplate = '<!DOCTYPE html>\n' +
+        '<html lang="hi">\n' +
+        '<head>\n' +
+        '    <meta charset="UTF-8">\n' +
+        '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+        '    <title>' + escapedQuizTitle + '</title>\n' +
+        '    <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+        '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+        '    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">\n' +
+        '    <style>\n' +
+        '        * { box-sizing: border-box; }\n' +
+        '        body { font-family: "Rajdhani", sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }\n' +
+        '        .cbt-header { background: #1e293b; border-bottom: 2px solid #334155; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
+        '        .brand-area { display: flex; align-items: center; gap: 12px; }\n' +
+        '        .brand-area img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover; }\n' +
+        '        .brand-text h2 { margin: 0; font-size: 18px; font-family: "Black Ops One", cursive; color: #facc15; letter-spacing: 1px; }\n' +
+        '        .brand-text p { margin: 2px 0 0 0; font-size: 11px; font-family: "Orbitron", sans-serif; color: #34d399; letter-spacing: 2px; font-weight: bold; }\n' +
+        '        .timer-box { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-family: "Orbitron", sans-serif; font-size: 14px; color: #facc15; }\n' +
+        '        .cbt-body { display: flex; flex: 1; height: calc(100vh - 130px); overflow: hidden; position: relative; }\n' +
+        '        .question-panel { flex: 1; padding: 25px; overflow-y: auto; background: #090d16; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }\n' +
+        '        .sidebar-panel { width: 300px; background: #1e293b; border-left: 1px solid #334155; display: flex; flex-direction: column; transition: 0.3s; position: relative; }\n' +
+        '        .sidebar-panel.collapsed { margin-right: -300px; }\n' +
+        '        .toggle-sidebar-btn { position: absolute; left: -35px; top: 15px; width: 35px; height: 35px; background: #1e293b; border: 1px solid #334155; border-right: none; color: #facc15; font-size: 16px; cursor: pointer; border-top-left-radius: 6px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 100; }\n' +
+        '        .user-profile { padding: 15px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }\n' +
+        '        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }\n' +
+        '        .palette-btn { width: 40px; height: 40px; background: #ef4444; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }\n' +
+        '        .palette-btn.attempted { background: #10b981; color: #000; }\n' +
+        '        .palette-btn.marked { background: #9333ea; color: #fff; }\n' +
+        '        .palette-btn.current { border: 2px solid #facc15; }\n' +
+        '        .q-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 15px; }\n' +
+        '        .marks-tag { font-size: 13px; font-family: "Orbitron", sans-serif; }\n' +
+        '        .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }\n' +
+        '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
+        '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
+        '        .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }\n' +
+        '        .btn-action { padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; border: none; font-family: "Orbitron", sans-serif; transition: 0.2s; }\n' +
+        '        .btn-review { background: #d97706; color: #000; }\n' +
+        '        .btn-clear { background: #475569; color: #fff; }\n' +
+        '        .btn-next { background: #2563eb; color: #fff; }\n' +
+        '        .btn-submit { background: #10b981; color: #000; }\n' +
+        '        .solution-box { margin-top: 20px; padding: 20px; background: #111827; border: 1px solid #10b981; border-radius: 8px; display: none; }\n' +
+        '        .solution-box h4 { color: #34d399; margin-top: 0; font-family: "Orbitron", sans-serif; }\n' +
+        '        .correct-ans-label { color: #facc15; font-weight: bold; margin-bottom: 8px; font-family: "Orbitron", sans-serif; font-size: 14px; }\n' +
+        '        .scorecard { padding: 30px; text-align: center; display: none; max-width: 650px; margin: 20px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
+        '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }\n' +
+        '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }\n' +
+        '        .review-heading { margin: 28px 0 8px; color: #38bdf8; font-family: "Orbitron", sans-serif; text-align: left; }\n' +
+        '        .review-intro { color: #94a3b8; text-align: left; margin: 0 0 14px; }\n' +
+        '        .review-item { background: #0f172a; border: 1px solid #334155; border-radius: 10px; margin: 12px 0; text-align: left; overflow: hidden; }\n' +
+        '        .review-item summary { cursor: pointer; padding: 14px; font-weight: 700; color: #e2e8f0; }\n' +
+        '        .review-content { padding: 0 14px 16px; line-height: 1.6; }\n' +
+        '        .review-status { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 8px; }\n' +
+
+        '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
+        '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
+        '    </style>\n' +
+        '</head>\n' +
+        '<body>\n' +
+        '    <header class="cbt-header">\n' +
+        '        <div class="brand-area">\n' +
+        '            <img src="logo.jpeg" alt="Logo">\n' +
+        '            <div class="brand-text">\n' +
+        '                <h2>TEAM PHANTOM</h2>\n' +
+        '                <p>PRACTICE HUB</p>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '        <div style="display: flex; align-items: center; gap: 15px;">\n' +
+        '            <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;" id="header-quiz-title">' + escapedQuizTitle + '</div>\n' +
+        '            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 6px; display: flex; padding: 2px;">\n' +
+        '                <button onclick="switchLanguage(\'en\')" id="lang-en" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">English</button>\n' +
+        '                <button onclick="switchLanguage(\'hn\')" id="lang-hn" style="background: transparent; color: #94a3b8; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">हिंदी</button>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '        <div class="timer-box" id="timer">Time Left: 00:00:00</div>\n' +
+        '    </header>\n' +
+        '\n' +
+        '    <div class="cbt-body">\n' +
+        '        <div class="question-panel">\n' +
+        '            <div id="quiz-main-area">\n' +
+        '                <div class="q-header-bar">\n' +
+        '                    <div id="q-number" style="font-family: \'Orbitron\'; color: #38bdf8; font-weight: bold;">Question 1</div>\n' +
+        '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
+        '                </div>\n' +
+        '                <div style="margin-bottom: 15px;">\n' +
+        '                    <div id="q-text-en" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px;"></div>\n' +
+        '                    <div id="q-text-hn" style="font-size: 16px; color: #94a3b8; line-height: 1.6;"></div>\n' +
+        '                </div>\n' +
+        '                <div id="options-box"></div>\n' +
+        '                <div id="solution-box" class="solution-box">\n' +
+        '                    <div id="correct-ans-display" class="correct-ans-label"></div>\n' +
+        '                    <h4>DETAILED EXPLANATION:</h4>\n' +
+        '                    <div id="solution-text"></div>\n' +
+        '                </div>\n' +
+        '            </div>\n' +
+        '\n' +
+        '            <div id="scorecard-box" class="scorecard">\n' +
+        '                <h2 style="font-family: \'Orbitron\'; color: #facc15; margin-top:0;">MISSION REPORT CARD</h2>\n' +
+        '                <button onclick="backToQuiz()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: \'Orbitron\'; margin-bottom: 15px;">⬅ Back to Test / Review</button>\n' +
+        '                <p id="final-score-title" style="font-size: 20px; color: #34d399; font-weight: bold;"></p>\n' +
+        '                <div class="stat-grid">\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">TOTAL ATTEMPTED</h4><p id="st-attempted" style="margin:5px 0 0; font-size:24px;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">CORRECT ANSWERS</h4><p id="st-correct" style="margin:5px 0 0; font-size:24px; color:#10b981;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">INCORRECT ANSWERS</h4><p id="st-incorrect" style="margin:5px 0 0; font-size:24px; color:#ef4444;">0</p></div>\n' +
+        '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">SKIPPED</h4><p id="st-skipped" style="margin:5px 0 0; font-size:24px; color:#facc15;">0</p></div>\n' +
+        '                </div>\n' +
+        '                <div id="remark-box" style="background: #0f172a; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
+        '                <h3 class="review-heading">ANSWER KEY &amp; DETAILED SOLUTIONS</h3>\n' +
+        '                <p class="review-intro">Test submit karne ke baad yahan har question ka aapka answer, correct answer aur explanation milega. Kisi question ko kholne ke liye tap karein.</p>\n' +
+        '                <div id="solutions-review-list"></div>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '\n' +
+        '        <div class="sidebar-panel" id="sidebarPanel">\n' +
+        '            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>\n' +
+        '            <div class="user-profile">\n' +
+        '                <div style="width:35px; height:35px; border-radius:50%; background:#10b981; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#000;">TP</div>\n' +
+        '                <div>\n' +
+        '                    <div style="font-weight:bold; font-size:14px;">Cadet Officer</div>\n' +
+        '                    <div style="font-size:11px; color:#10b981;">● Online</div>\n' +
+        '                </div>\n' +
+        '            </div>\n' +
+        '            <div style="padding: 10px 15px; font-size: 12px; font-family: \'Orbitron\'; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155;">QUESTION PALETTE (<span id="total-q-count">0</span>)</div>\n' +
+        '            <div class="palette-grid" id="paletteGrid"></div>\n' +
+        '        </div>\n' +
+        '    </div>\n' +
+        '\n' +
+        '    <footer class="cbt-footer" id="cbtFooter">\n' +
+        '        <div class="footer-left-btns">\n' +
+        '            <button class="btn-action btn-review" onclick="markForReview()">Mark for Review & Next</button>\n' +
+        '            <button class="btn-action btn-clear" onclick="clearResponse()">Clear Response</button>\n' +
+        '        </div>\n' +
+        '        <div class="footer-right-btns">\n' +
+        '            <button class="btn-action btn-next" onclick="nextQuestion()">Save & Next</button>\n' +
+        '            <button class="btn-action btn-submit" onclick="showScorecard()">Submit Test</button>\n' +
+        '        </div>\n' +
+        '    </footer>\n' +
+        '\n' +
+        '    <script>\n' +
+        '        var base64Data = "' + encodedJson + '";\n' +
+        '        var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
+        '        var questions = [];\n' +
+        '        var analysisData = {};\n' +
+        '        var config = { posMarks: 0.83, negMarks: 0.27, testDuration: 7200 };\n' +
+        '        try {\n' +
+        '            if (quizData.data && Array.isArray(quizData.data.sections)) {\n' +
+        '                questions = quizData.data.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);\n' +
+        '            } else if (quizData.data && Array.isArray(quizData.data.questions)) {\n' +
+        '                questions = quizData.data.questions;\n' +
+        '            } else if (Array.isArray(quizData)) {\n' +
+        '                questions = quizData;\n' +
+        '            } else {\n' +
+        '                questions = Object.values(quizData.data || quizData).filter(item => item && typeof item === \'object\' && (item.correctOption !== undefined || item.options || item.en));\n' +
+        '            }\n' +
+        '            analysisData = quizData.data || quizData;\n' +
+        '            if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
+        '        } catch(err) { console.error("Error loading structure", err); }\n' +
+        '\n' +
+        '        var currentIndex = 0;\n' +
+        '        var userResponses = {};\n' +
+        '        var markedStatus = {};\n' +
+        '        var currentLang = "en";\n' +
+        '        document.getElementById("total-q-count").innerText = questions.length;\n' +
+        '        if (quizData.data && quizData.data.title) {\n' +
+        '            document.getElementById("header-quiz-title").innerText = quizData.data.title;\n' +
+        '        }\n' +
+        '\n' +
+        '        var totalSeconds = config.testDuration;\n' +
+        '        var testSubmitted = false;\n' +
+        '        function updateTimerDisplay() {\n' +
+        '            var hrs = Math.floor(totalSeconds / 3600);\n' +
+        '            var mins = Math.floor((totalSeconds % 3600) / 60);\n' +
+        '            var secs = totalSeconds % 60;\n' +
+        '            document.getElementById("timer").innerText = "Time Left: " + (hrs < 10 ? "0" + hrs : hrs) + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);\n' +
+        '        }\n' +
+        '        updateTimerDisplay();\n' +
+        '        var timerInterval = setInterval(function() {\n' +
+        '            if (totalSeconds > 0) totalSeconds--;\n' +
+        '            updateTimerDisplay();\n' +
+        '            if (totalSeconds <= 0 && !testSubmitted) { clearInterval(timerInterval); showScorecard(true); }\n' +
+        '        }, 1000);\n' +
+        '\n' +
+        '        function toggleSidebar() {\n' +
+        '            var sidebar = document.getElementById("sidebarPanel");\n' +
+        '            var btn = document.querySelector(".toggle-sidebar-btn");\n' +
+        '            sidebar.classList.toggle("collapsed");\n' +
+        '            btn.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";\n' +
+        '        }\n' +
+        '\n' +
+        '        function switchLanguage(lang) {\n' +
+        '            currentLang = lang;\n' +
+        '            document.getElementById("lang-en").style.background = lang === "en" ? "#2563eb" : "transparent";\n' +
+        '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
+        '            document.getElementById("lang-hn").style.background = lang === "hn" ? "#2563eb" : "transparent";\n' +
+        '            document.getElementById("lang-hn").style.color = lang === "hn" ? "#fff" : "#94a3b8";\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        function decodeHtml(html) {\n' +
+        '            var txt = document.createElement("textarea");\n' +
+        '            txt.innerHTML = html == null ? "" : String(html);\n' +
+        '            return txt.value;\n' +
+        '        }\n' +
+        '        function safeHtml(html) {\n' +
+        '            var template = document.createElement("template");\n' +
+        '            template.innerHTML = html == null ? "" : String(html);\n' +
+        '            template.content.querySelectorAll("script,iframe,object,embed,form,base,meta,link").forEach(function(node) { node.remove(); });\n' +
+        '            template.content.querySelectorAll("*").forEach(function(node) { Array.from(node.attributes).forEach(function(attr) { var name = attr.name.toLowerCase(), value = attr.value.trim().toLowerCase(); if (name.startsWith("on") || ((name === "href" || name === "src" || name === "xlink:href") && value.startsWith("javascript:"))) node.removeAttribute(attr.name); }); });\n' +
+        '            return template.innerHTML;\n' +
+        '        }\n' +
+        '        function normalizeChoice(value) { return String(value == null ? "" : value).trim().toUpperCase(); }\n' +
+        '        function isCorrectChoice(options, selectedIndex, correctOpt) {\n' +
+        '            if (correctOpt === undefined || correctOpt === null || correctOpt === "") return false;\n' +
+        '            var selected = options[selectedIndex] || {};\n' +
+        '            var selectedPrompt = selected.prompt !== undefined ? selected.prompt : selectedIndex + 1;\n' +
+        '            var key = normalizeChoice(correctOpt);\n' +
+        '            if (normalizeChoice(selectedPrompt) === key) return true;\n' +
+        '            var letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];\n' +
+        '            if (letters[selectedIndex] && key === letters[selectedIndex]) return true;\n' +
+        '            if (/^\\\\d+$/.test(key)) { var number = Number(key); if (number === selectedIndex || number === selectedIndex + 1) return true; }\n' +
+        '            return false;\n' +
+        '        }\n' +
+        '\n' +
+        '        function buildPalette() {\n' +
+        '            var grid = document.getElementById("paletteGrid");\n' +
+        '            grid.innerHTML = "";\n' +
+        '            questions.forEach(function(q, i) {\n' +
+        '                var btn = document.createElement("button");\n' +
+        '                btn.className = "palette-btn";\n' +
+        '                btn.innerText = i + 1;\n' +
+        '                if (i === currentIndex) btn.classList.add("current");\n' +
+        '                if (userResponses[i] !== undefined) {\n' +
+        '                    btn.classList.add("attempted");\n' +
+        '                }\n' +
+        '                if (markedStatus[i]) btn.classList.add("marked");\n' +
+        '                btn.onclick = function() { currentIndex = i; loadQuestion(); };\n' +
+        '                grid.appendChild(btn);\n' +
+        '            });\n' +
+        '        }\n' +
+        '\n' +
+        '        function loadQuestion() {\n' +
+        '            buildPalette();\n' +
+        '            if (!questions || questions.length === 0) {\n' +
+        '                document.getElementById("q-number").innerText = "No Questions Found";\n' +
+        '                document.getElementById("q-text-en").innerHTML = "Error: Invalid JSON structure or no questions parsed.";\n' +
+        '                return;\n' +
+        '            }\n' +
+        '\n' +
+        '            var q = questions[currentIndex];\n' +
+        '            document.getElementById("q-number").innerText = "Question " + (currentIndex + 1) + " of " + questions.length;\n' +
+        '            document.getElementById("pos-m").innerText = "+" + config.posMarks;\n' +
+        '            document.getElementById("neg-m").innerText = "-" + config.negMarks;\n' +
+        '\n' +
+        '            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "");\n' +
+        '            var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
+        '            \n' +
+        '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn);\n' +
+        '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn);\n' +
+        '\n' +
+        '            var optionsBox = document.getElementById("options-box");\n' +
+        '            optionsBox.innerHTML = "";\n' +
+        '            \n' +
+        '            var optionsEn = (q.en && q.en.options) ? q.en.options : (q.options ? q.options : []);\n' +
+        '            var optionsHn = (q.hn && q.hn.options) ? q.hn.options : [];\n' +
+        '            \n' +
+        '            var qId = q._id || q.id || currentIndex;\n' +
+        '            var meta = analysisData[qId] || analysisData[currentIndex] || q;\n' +
+        '            var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
+        '\n' +
+        '            var solText = "";\n' +
+        '            var activeSol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value :\n' +
+        '                            (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value :\n' +
+        '                            (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value :\n' +
+        '                            (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
+        '            solText = decodeHtml(activeSol);\n' +
+        '\n' +
+        '            var solBox = document.getElementById("solution-box");\n' +
+        '            if (userResponses[currentIndex] !== undefined) {\n' +
+        '                solBox.style.display = "block";\n' +
+        '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Option : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
+        '            } else {\n' +
+        '                solBox.style.display = "none";\n' +
+        '            }\n' +
+        '            document.getElementById("solution-text").innerHTML = safeHtml(solText);\n' +
+        '\n' +
+        '            optionsEn.forEach(function(optEn, idx) {\n' +
+        '                var optHn = optionsHn[idx] || {};\n' +
+        '                var btn = document.createElement("button");\n' +
+        '                btn.className = "option-btn";\n' +
+        '\n' +
+        '                var valEn = decodeHtml(optEn.value || optEn);\n' +
+        '                var valHn = optHn.value ? decodeHtml(optHn.value) : "";\n' +
+        '                var promptLabel = optEn.prompt || (idx + 1);\n' +
+        '\n' +
+        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(valEn) + (valHn ? \'<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(\' + safeHtml(valHn) + \')</div>\' : \'\');\n' +
+        '\n' +
+        '                if (userResponses[currentIndex] !== undefined) {\n' +
+        '                    if (isCorrectChoice(optionsEn, idx, correctOpt)) {\n' +
+        '                        btn.style.borderColor = "#10b981";\n' +
+        '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
+        '                    } else if (userResponses[currentIndex] === idx) {\n' +
+        '                        btn.style.borderColor = "#ef4444";\n' +
+        '                        btn.style.background = "rgba(239, 68, 68, 0.2)";\n' +
+        '                    }\n' +
+        '                }\n' +
+        '\n' +
+        '                btn.onclick = function() {\n' +
+        '                    userResponses[currentIndex] = idx;\n' +
+        '                    loadQuestion();\n' +
+        '                };\n' +
+        '                optionsBox.appendChild(btn);\n' +
+        '            });\n' +
+        '        }\n' +
+        '\n' +
+        '        function nextQuestion() {\n' +
+        '            if (currentIndex < questions.length - 1) {\n' +
+        '                currentIndex++;\n' +
+        '                loadQuestion();\n' +
+        '            }\n' +
+        '        }\n' +
+        '\n' +
+        '        function prevQuestion() {\n' +
+        '            if (currentIndex > 0) {\n' +
+        '                currentIndex--;\n' +
+        '                loadQuestion();\n' +
+        '            }\n' +
+        '        }\n' +
+        '\n' +
+        '        function markForReview() {\n' +
+        '            markedStatus[currentIndex] = true;\n' +
+        '            nextQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        function clearResponse() {\n' +
+        '            delete userResponses[currentIndex];\n' +
+        '            delete markedStatus[currentIndex];\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        function showScorecard(autoSubmitted) {\n' +
+        '            if (testSubmitted) return;\n' +
+        '            testSubmitted = true;\n' +
+        '            if (typeof timerInterval !== "undefined") clearInterval(timerInterval);\n' +
+        '            document.getElementById("quiz-main-area").style.display = "none";\n' +
+        '            document.getElementById("cbtFooter").style.display = "none";\n' +
+        '            document.getElementById("scorecard-box").style.display = "block";\n' +
+        '\n' +
+        '            var correct = 0, incorrect = 0, attempted = 0;\n' +
+        '            questions.forEach(function(q, i) {\n' +
+        '                if (userResponses[i] !== undefined) {\n' +
+        '                    attempted++;\n' +
+        '                    var qId = q._id || q.id || i;\n' +
+        '                    var meta = analysisData[qId] || analysisData[i] || q;\n' +
+        '                    var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
+        '                    var options = (q.en && q.en.options) ? q.en.options : (q.options ? q.options : []);\n' +
+        '                    var userPrompt = options[userResponses[i]] ? (options[userResponses[i]].prompt || (userResponses[i] + 1)) : "";\n' +
+        '                    if (isCorrectChoice(options, userResponses[i], correctOpt)) correct++;\n' +
+        '                    else if (correctOpt !== undefined && correctOpt !== null && correctOpt !== "") incorrect++;\n' +
+        '                }\n' +
+        '            });\n' +
+        '            var skipped = questions.length - attempted;\n' +
+        '            var finalScore = (correct * Number(config.posMarks || 0)) - (incorrect * Number(config.negMarks || 0));\n' +
+        '\n' +
+        '            document.getElementById("final-score-title").innerText = "FINAL SCORE: " + finalScore.toFixed(2) + " Marks";\n' +
+        '            document.getElementById("st-attempted").innerText = attempted;\n' +
+        '            document.getElementById("st-correct").innerText = correct;\n' +
+        '            document.getElementById("st-incorrect").innerText = incorrect;\n' +
+        '            document.getElementById("st-skipped").innerText = skipped;\n' +
+        '\n' +
+        '            var pct = questions.length ? (correct / questions.length) * 100 : 0;\n' +
+        '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :\n' +
+        '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
+        '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
+        '            document.getElementById("remark-box").innerHTML = remark;\n' +
+        '            renderSolutionsReview();\n' +
+        '        }\n' +
+        '\n' +
+        '        function renderSolutionsReview() {\\n' +
+        '            var list = document.getElementById("solutions-review-list");\\n' +
+        '            if (!list) return; list.innerHTML = "";\\n' +
+        '            questions.forEach(function(q, i) {\\n' +
+        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\\n' +
+        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\\n' +
+        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\\n' +
+        '                var userIdx = userResponses[i], correctIdx = -1;\\n' +
+        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\\n' +
+        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\\n' +
+        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\\n' +
+        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\\n' +
+        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\\n' +
+        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\\n' +
+        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\\n' +
+        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\\n' +
+        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\\n' +
+        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\\n' +
+        '            });\\n' +
+        '        }\\n' +
+        '\\n' +
+        '        function backToQuiz() {\n' +
+        '            testSubmitted = false;\n' +
+        '            totalSeconds = Math.max(0, totalSeconds);\n' +
+        '            document.getElementById("quiz-main-area").style.display = "block";\n' +
+        '            document.getElementById("cbtFooter").style.display = "flex";\n' +
+        '            document.getElementById("scorecard-box").style.display = "none";\n' +
+        '            loadQuestion();\n' +
+        '        }\n' +
+        '\n' +
+        '        loadQuestion();\n' +
+        '    <\/script>\n' +
+        '</body>\n' +
+        '</html>';
+
+      var blob = new Blob([htmlTemplate], { type: 'text/html;charset=utf-8' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = safeFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("सफलता! CBT क्विज़ पोर्टल '" + safeFilename + "' सफलतापूर्वक डाउनलोड हो चुका है।");
+    };
+  </script>
+</body>
+</html>
