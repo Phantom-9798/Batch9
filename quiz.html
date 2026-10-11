@@ -63,7 +63,10 @@
     .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }
     .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }
 
-    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #ffffff; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .question-text, .option-btn, .solution-box, .review-content { color: #ffffff; }
+    .question-text * , .option-btn * , .solution-box * , .review-content * { color: #ffffff !important; }
+    .question-text[hidden] { display: none !important; }
     .option-btn:hover { background: #1f2937; border-color: #06b6d4; }
 
     /* Footer Buttons */
@@ -91,6 +94,36 @@
     .hidden { display: none !important; }
     table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }
     table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }
+    @media (max-width: 760px) {
+      body { height: 100dvh; min-height: 100dvh; overflow: auto; }
+      #makerConsole { width: calc(100% - 20px); margin: 10px auto; padding: 16px; }
+      #makerConsole > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; gap: 8px !important; }
+      .cbt-header { height: auto; min-height: 65px; padding: 10px; gap: 8px; flex-wrap: wrap; }
+      .brand-text h2 { font-size: 15px; }
+      .brand-text p { font-size: 9px; }
+      .timer-box { font-size: 11px; padding: 6px 8px; }
+      .cbt-body { height: auto; min-height: calc(100dvh - 130px); overflow: visible; flex-direction: column; }
+      .question-panel { min-height: 55dvh; padding: 14px; overflow: visible; }
+      .sidebar-panel { width: 100%; min-height: 170px; border-left: 0; border-top: 1px solid #334155; }
+      .sidebar-panel.collapsed { margin-right: 0; display: none; }
+      .toggle-sidebar-btn { left: auto; right: 10px; top: -38px; border: 1px solid #334155; border-radius: 6px; }
+      .palette-grid { grid-template-columns: repeat(7, minmax(30px, 1fr)); padding: 10px; gap: 6px; }
+      .palette-btn { width: 100%; height: 36px; }
+      .q-header-bar { gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+      .marks-tag { font-size: 11px; }
+      .option-btn { font-size: 15px; padding: 12px; }
+      .cbt-footer { height: auto; min-height: 65px; padding: 10px; flex-wrap: wrap; gap: 8px; }
+      .footer-left-btns, .footer-right-btns { flex: 1 1 100%; display: flex; flex-wrap: wrap; }
+      .btn-action { flex: 1 1 auto; min-height: 42px; font-size: 11px; padding: 9px; }
+      .scorecard { margin: 10px; padding: 16px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .review-content { overflow-wrap: anywhere; }
+    }
+    @media (min-width: 761px) and (max-width: 1024px) {
+      .sidebar-panel { width: 245px; }
+      .question-panel { padding: 18px; }
+      .palette-grid { grid-template-columns: repeat(4, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -205,7 +238,10 @@
         '        .marks-tag { font-size: 13px; font-family: "Orbitron", sans-serif; }\n' +
         '        .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }\n' +
         '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
-        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #ffffff; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
+        '        .question-text, .option-btn, .solution-box, .review-content { color: #ffffff; }\n' +
+        '        .question-text *, .option-btn *, .solution-box *, .review-content * { color: #ffffff !important; }\n' +
+        '        .question-text[hidden] { display: none !important; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
         '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
         '        .footer-left-btns, .footer-right-btns { display: flex; gap: 10px; }\n' +
@@ -228,6 +264,7 @@
         '        .review-status { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 8px; }\n' +
 
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
+        '        @media (max-width: 760px) { body { height: 100dvh; min-height: 100dvh; overflow: auto; } .cbt-header { height: auto; min-height: 65px; padding: 10px; gap: 8px; flex-wrap: wrap; } .brand-text h2 { font-size: 15px; } .timer-box { font-size: 11px; padding: 6px 8px; } .cbt-body { height: auto; min-height: calc(100dvh - 130px); overflow: visible; flex-direction: column; } .question-panel { min-height: 55dvh; padding: 14px; overflow: visible; } .sidebar-panel { width: 100%; min-height: 170px; border-left: 0; border-top: 1px solid #334155; } .sidebar-panel.collapsed { margin-right: 0; display: none; } .toggle-sidebar-btn { left: auto; right: 10px; top: -38px; border: 1px solid #334155; border-radius: 6px; } .palette-grid { grid-template-columns: repeat(7, minmax(30px,1fr)); padding: 10px; gap: 6px; } .palette-btn { width: 100%; height: 36px; } .q-header-bar { gap: 8px; flex-wrap: wrap; } .cbt-footer { height: auto; min-height: 65px; padding: 10px; flex-wrap: wrap; gap: 8px; } .footer-left-btns, .footer-right-btns { flex: 1 1 100%; display: flex; flex-wrap: wrap; } .btn-action { flex: 1 1 auto; min-height: 42px; font-size: 11px; padding: 9px; } .scorecard { margin: 10px; padding: 16px; } .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; } }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
         '    </style>\n' +
         '</head>\n' +
@@ -258,8 +295,8 @@
         '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
         '                </div>\n' +
         '                <div style="margin-bottom: 15px;">\n' +
-        '                    <div id="q-text-en" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px;"></div>\n' +
-        '                    <div id="q-text-hn" style="font-size: 16px; color: #94a3b8; line-height: 1.6;"></div>\n' +
+        '                    <div id="q-text-en" class="question-text" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px; color:#ffffff;"></div>\n' +
+        '                    <div id="q-text-hn" class="question-text" style="font-size: 16px; color: #ffffff; line-height: 1.6;" hidden></div>\n' +
         '                </div>\n' +
         '                <div id="options-box"></div>\n' +
         '                <div id="solution-box" class="solution-box">\n' +
@@ -368,6 +405,8 @@
         '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
         '            document.getElementById("lang-hn").style.background = lang === "hn" ? "#2563eb" : "transparent";\n' +
         '            document.getElementById("lang-hn").style.color = lang === "hn" ? "#fff" : "#94a3b8";\n' +
+        '            document.getElementById("q-text-en").hidden = lang !== "en";\n' +
+        '            document.getElementById("q-text-hn").hidden = lang !== "hn";\n' +
         '            loadQuestion();\n' +
         '        }\n' +
         '\n' +
@@ -431,6 +470,8 @@
         '            \n' +
         '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn);\n' +
         '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn);\n' +
+        '            document.getElementById("q-text-en").hidden = currentLang !== "en";\n' +
+        '            document.getElementById("q-text-hn").hidden = currentLang !== "hn";\n' +
         '\n' +
         '            var optionsBox = document.getElementById("options-box");\n' +
         '            optionsBox.innerHTML = "";\n' +
@@ -450,13 +491,14 @@
         '            solText = decodeHtml(activeSol);\n' +
         '\n' +
         '            var solBox = document.getElementById("solution-box");\n' +
-        '            if (userResponses[currentIndex] !== undefined) {\n' +
+        '            if (testSubmitted && userResponses[currentIndex] !== undefined) {\n' +
         '                solBox.style.display = "block";\n' +
         '                document.getElementById("correct-ans-display").innerText = correctOpt ? ("Correct Option : Option (" + correctOpt + ")") : "Correct Answer : Updating...";\n' +
         '            } else {\n' +
         '                solBox.style.display = "none";\n' +
         '            }\n' +
         '            document.getElementById("solution-text").innerHTML = safeHtml(solText);\n' +
+        '            document.getElementById("solution-text").style.color = "#ffffff";\n' +
         '\n' +
         '            optionsEn.forEach(function(optEn, idx) {\n' +
         '                var optHn = optionsHn[idx] || {};\n' +
@@ -467,9 +509,10 @@
         '                var valHn = optHn.value ? decodeHtml(optHn.value) : "";\n' +
         '                var promptLabel = optEn.prompt || (idx + 1);\n' +
         '\n' +
-        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(valEn) + (valHn ? \'<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(\' + safeHtml(valHn) + \')</div>\' : \'\');\n' +
+        '                var displayOption = currentLang === "hn" ? (valHn || valEn) : valEn;\n' +
+        '                btn.innerHTML = "<b>" + safeHtml(promptLabel) + ".</b> " + safeHtml(displayOption);\n' +
         '\n' +
-        '                if (userResponses[currentIndex] !== undefined) {\n' +
+        '                if (testSubmitted && userResponses[currentIndex] !== undefined) {\n' +
         '                    if (isCorrectChoice(optionsEn, idx, correctOpt)) {\n' +
         '                        btn.style.borderColor = "#10b981";\n' +
         '                        btn.style.background = "rgba(16, 185, 129, 0.2)";\n' +
@@ -479,7 +522,16 @@
         '                    }\n' +
         '                }\n' +
         '\n' +
+        '                if (userResponses[currentIndex] !== undefined) {\n' +
+        '                    if (userResponses[currentIndex] === idx) {\n' +
+        '                        btn.style.borderColor = "#38bdf8";\n' +
+        '                        btn.style.background = "rgba(56, 189, 248, 0.22)";\n' +
+        '                        btn.style.boxShadow = "0 0 0 1px #38bdf8 inset";\n' +
+        '                    } else if (!testSubmitted) { btn.style.opacity = "0.65"; }\n' +
+        '                    if (!testSubmitted) btn.title = "Selected answer — click another option to change";\n' +
+        '                }\n' +
         '                btn.onclick = function() {\n' +
+        '                    if (testSubmitted) return;\n' +
         '                    userResponses[currentIndex] = idx;\n' +
         '                    loadQuestion();\n' +
         '                };\n' +
@@ -507,6 +559,7 @@
         '        }\n' +
         '\n' +
         '        function clearResponse() {\n' +
+        '            if (testSubmitted) { alert("Test submit ho chuka hai. Answer ab change nahi ho sakta."); return; }\n' +
         '            delete userResponses[currentIndex];\n' +
         '            delete markedStatus[currentIndex];\n' +
         '            loadQuestion();\n' +
