@@ -86,9 +86,8 @@
     .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }
 
     /* Generator Console */
-    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; display: none; }
     input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -102,7 +101,7 @@
   </div>
 
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
-  <main id="makerConsole" class="hidden">
+  <main id="makerConsole">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
       <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
       <div>
@@ -137,9 +136,10 @@
     const TERMINAL_KEY = "Hima Phantom 74";
 
     function unlockQuizTerminal() {
-      if (document.getElementById("quizPass").value.trim() === TERMINAL_KEY) {
-        document.getElementById("authGate").classList.add("hidden");
-        document.getElementById("makerConsole").classList.remove("hidden");
+      var enteredPass = document.getElementById("quizPass").value.trim();
+      if (enteredPass === TERMINAL_KEY) {
+        document.getElementById("authGate").style.display = "none";
+        document.getElementById("makerConsole").style.display = "block";
       } else {
         alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
       }
