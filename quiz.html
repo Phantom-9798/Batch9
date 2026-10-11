@@ -120,8 +120,13 @@
       </div>
     </div>
     
-    <label>PASTE TESTBOOK RAW JSON DATA</label>
-    <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
+    <label for="questionsJsonInput">QUESTIONS JSON</label>
+    <p style="font-size:13px;color:#94a3b8;margin:4px 0 8px">Question statements, options, Hindi/English text, match-the-following data — paste the complete questions JSON here.</p>
+    <textarea id="questionsJsonInput" rows="9" spellcheck="false" placeholder="Paste Questions JSON here..."></textarea>
+
+    <label for="solutionsJsonInput">SOLUTIONS / ANSWER KEY JSON</label>
+    <p style="font-size:13px;color:#94a3b8;margin:4px 0 8px">Correct option aur explanation wali JSON yahan separately paste karo.</p>
+    <textarea id="solutionsJsonInput" rows="9" spellcheck="false" placeholder="Paste Solutions JSON here..."></textarea>
     
     <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
@@ -129,17 +134,36 @@
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
     window.generateQuiz = function() {
-      var rawText = document.getElementById('jsonInput').value.trim();
+      var questionText = document.getElementById('questionsJsonInput').value.trim();
+      var solutionText = document.getElementById('solutionsJsonInput').value.trim();
       var testMins = Math.max(1, parseInt(document.getElementById('testTimeInput').value, 10) || 120);
       var posInput = parseFloat(document.getElementById('posMarksInput').value);
       var negInput = parseFloat(document.getElementById('negMarksInput').value);
       var posM = Number.isFinite(posInput) && posInput >= 0 ? posInput : 0.83;
       var negM = Number.isFinite(negInput) && negInput >= 0 ? negInput : 0.27;
 
-      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
+      if (!questionText) { alert("भाई, Questions JSON वाले box में data paste करो!"); return; }
+      if (!solutionText) { alert("भाई, Solutions / Answer Key JSON वाले box में data paste करो!"); return; }
 
       var quizData;
-      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
+      try {
+        var questionJson = JSON.parse(questionText);
+        var solutionJson = JSON.parse(solutionText);
+        quizData = questionJson;
+        // Support common Testbook payloads: {success, data:{sections:[{questions:[]}]}},
+        // {data:{questions:[]}}, direct arrays, and answer-key maps in {data:{questionId:{correctOption,sol}}}.
+        var solutionRoot = (solutionJson && solutionJson.data !== undefined) ? solutionJson.data : solutionJson;
+        quizData.phantomSolutions = solutionRoot;
+      } catch (e) { alert("JSON Error: " + e.message + "\nPlease make sure both boxes contain complete, valid JSON."); return; }
+
+      var foundQuestions = [];
+      var qRoot = quizData && quizData.data !== undefined ? quizData.data : quizData;
+      if (Array.isArray(qRoot)) foundQuestions = qRoot;
+      else if (qRoot && Array.isArray(qRoot.sections)) foundQuestions = qRoot.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);
+      else if (qRoot && Array.isArray(qRoot.questions)) foundQuestions = qRoot.questions;
+      else if (qRoot && qRoot.data && Array.isArray(qRoot.data.sections)) foundQuestions = qRoot.data.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);
+      else if (qRoot && qRoot.data && Array.isArray(qRoot.data.questions)) foundQuestions = qRoot.data.questions;
+      if (!foundQuestions.length) { alert("Questions JSON mein question list nahi mili. Testbook ka complete question payload paste karo."); return; }
 
       var quizTitle = String((quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz");
       var safeFilename = (quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 100) || "Testbook_Quiz") + ".html";
@@ -303,7 +327,7 @@
         '            } else {\n' +
         '                questions = Object.values(quizData.data || quizData).filter(item => item && typeof item === \'object\' && (item.correctOption !== undefined || item.options || item.en));\n' +
         '            }\n' +
-        '            analysisData = quizData.data || quizData;\n' +
+        '            analysisData = quizData.phantomSolutions || quizData.data || quizData;\n' +
         '            if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
         '        } catch(err) { console.error("Error loading structure", err); }\n' +
         '\n' +
