@@ -97,7 +97,7 @@
     <h2 style="font-family: 'Orbitron'; color: #facc15; margin-top: 0;">SECURE QUIZ GATE</h2>
     <p style="font-size: 12px; color: #94a3b8;">ENTER CLEARANCE KEY TO PROCEED</p>
     <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;">
-    <button onclick="unlockQuizTerminal()" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
+    <button id="verifyBtn" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
   </div>
 
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
@@ -128,42 +128,62 @@
     <label>PASTE TESTBOOK RAW JSON DATA</label>
     <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
     
-    <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
+    <button id="generateBtn" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
   <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
   <script>
     const TERMINAL_KEY = "Hima Phantom 74";
 
-    function unlockQuizTerminal() {
-      if (document.getElementById("quizPass").value.trim() === TERMINAL_KEY) {
-        document.getElementById("authGate").classList.add("hidden");
-        document.getElementById("makerConsole").classList.remove("hidden");
-      } else {
-        alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
-      }
-    }
+    function unlockQuizTerminal() {
+      var passInput = document.getElementById("quizPass");
+      if (!passInput) return;
+      var enteredPass = passInput.value.trim();
+      if (enteredPass === TERMINAL_KEY) {
+        document.getElementById("authGate").style.display = "none";
+        document.getElementById("makerConsole").style.display = "block";
+      } else {
+        alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
+      }
+    }
 
-    document.getElementById("quizPass").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") unlockQuizTerminal();
-    });
+    document.addEventListener("DOMContentLoaded", function() {
+      var verifyBtn = document.getElementById("verifyBtn");
+      if (verifyBtn) {
+        verifyBtn.onclick = unlockQuizTerminal;
+      }
 
-    window.generateQuiz = function() {
-      var rawText = document.getElementById('jsonInput').value.trim();
-      var testMins = parseInt(document.getElementById('testTimeInput').value) || 120;
-      var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
-      var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
+      var quizPass = document.getElementById("quizPass");
+      if (quizPass) {
+        quizPass.onkeypress = function(e) {
+          if (e.key === "Enter") {
+            unlockQuizTerminal();
+          }
+        };
+      }
 
-      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
+      var generateBtn = document.getElementById("generateBtn");
+      if (generateBtn) {
+        generateBtn.onclick = generateQuiz;
+      }
+    });
 
-      var quizData;
-      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
+    function generateQuiz() {
+      var rawText = document.getElementById('jsonInput').value.trim();
+      var testMins = parseInt(document.getElementById('testTimeInput').value) || 120;
+      var posM = parseFloat(document.getElementById('posMarksInput').value) || 1;
+      var negM = parseFloat(document.getElementById('negMarksInput').value) || 0;
 
-      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
-      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
-      quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
+      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
 
-      var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
+      var quizData;
+      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
+
+      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
+      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
+      quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
+
+      var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
 
       var htmlTemplate = `<!DOCTYPE html>
 <html lang="hi">
@@ -518,4 +538,4 @@
         loadQuestion();
     </script>
 </body>
-</html>
+</html>`;
