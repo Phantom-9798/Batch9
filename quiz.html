@@ -133,21 +133,23 @@
 
   <!-- ================= EMBEDDED CBT PLAYER TEMPLATE GENERATOR ================= -->
   <script>
+       // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
-    function unlockQuizTerminal() {
-      var enteredPass = document.getElementById("quizPass").value.trim();
-      if (enteredPass === TERMINAL_KEY) {
-        document.getElementById("authGate").style.display = "none";
-        document.getElementById("makerConsole").style.display = "block";
+    window.unlockTerminal = () => {
+      const entered = document.getElementById("adminPass").value.trim();
+      if (entered === TERMINAL_KEY) {
+        document.getElementById("authGate").classList.add("hidden");
+        document.getElementById("adminConsole").classList.remove("hidden");
       } else {
         alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
       }
-    }
+    };
 
-    document.getElementById("quizPass").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") unlockQuizTerminal();
-    });
+    document.getElementById("adminPass").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        window.unlockTerminal();
+      }
 
     window.generateQuiz = function() {
       var rawText = document.getElementById('jsonInput').value.trim();
