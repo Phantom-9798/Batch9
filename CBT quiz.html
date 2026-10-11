@@ -84,21 +84,13 @@
     .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }
 
     /* Generator Console */
-    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; display: none; }
+    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; display: block; }
     input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
   </style>
 </head>
 <body>
 
-  <!-- ================= AUTH GATE ================= -->
-  <div id="authGate" style="max-width: 400px; margin: 100px auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #10b981; text-align: center;">
-    <h2 style="font-family: 'Orbitron'; color: #facc15; margin-top: 0;">SECURE QUIZ GATE</h2>
-    <p style="font-size: 12px; color: #94a3b8;">ENTER CLEARANCE KEY TO PROCEED</p>
-    <input id="quizPass" type="password" placeholder="Enter Password" style="text-align: center; letter-spacing: 3px; font-size: 16px;" onkeypress="checkEnter(event)">
-    <button onclick="unlockQuizTerminal()" style="width: 100%; padding: 12px; background: #10b981; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">VERIFY IDENTITY</button>
-  </div>
-
-  <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
+  <!-- ================= DIRECT QUIZ GENERATOR CONSOLE ================= -->
   <main id="makerConsole">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
       <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
@@ -131,27 +123,6 @@
 
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
-    const TERMINAL_KEY = "Hima Phantom 74";
-
-    function unlockQuizTerminal() {
-      var passInput = document.getElementById("quizPass");
-      if (!passInput) return;
-      var enteredPass = passInput.value.trim();
-      
-      if (enteredPass === TERMINAL_KEY) {
-        document.getElementById("authGate").style.display = "none";
-        document.getElementById("makerConsole").style.display = "block";
-      } else {
-        alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
-      }
-    }
-
-    function checkEnter(e) {
-      if (e.key === "Enter") {
-        unlockQuizTerminal();
-      }
-    }
-
     function generateQuiz() {
       var rawText = document.getElementById('jsonInput').value.trim();
       var testMins = parseInt(document.getElementById('testTimeInput').value) || 120;
@@ -164,6 +135,7 @@
       try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
 
       var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
+      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
       quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
 
       var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
