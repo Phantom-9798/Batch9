@@ -123,6 +123,33 @@
       letter-spacing: 1px;
     }
   </style>
+
+  <script>
+    // ================= TIGHT SECURITY & TAMPER BLOCK =================
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+      setInterval(() => {
+        const start = performance.now();
+        debugger;
+        const end = performance.now();
+        if (end - start > 100) {
+          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        }
+      }, 1000);
+      setInterval(() => { console.clear(); }, 1500);
+    })();
+  </script>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
@@ -285,10 +312,10 @@
         <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> TEST DASHBOARD
+              <span>&#9733;</span> PRACTICE HUB
             </div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">CHOOSE YOUR EXAM</h2>
-            <p class="text-xs text-neutral-400 font-body mt-1">Select your target defense examination to enter the test section and access free mock papers.</p>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST DASHBOARD</h2>
+            <p class="text-xs text-neutral-400 font-body mt-1">Select your target defense examination below to enter the test section and access free mock papers.</p>
           </div>
           <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
             100% FREE ACCESS
@@ -299,29 +326,29 @@
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">CDS EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Combined Defence Services Examination</p>
-            <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
+            <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">NDA EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">National Defence Academy Examination</p>
-            <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
+            <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">AFCAT EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Air Force Common Admission Test</p>
-            <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
+            <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">CAPF EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Central Armed Police Forces</p>
-            <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
+            <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
         </div>
       </div>
 
       <!-- 2. TEST SECTION (FULL MOCK, PYQ, SECTIONAL, CHAPTER-WISE) -->
       <div id="testSectionView" class="hidden">
-        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Dashboard</button>
+        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Dashboard</button>
         <h2 id="selectedExamTitle" class="font-stencil text-2xl text-white tracking-wide mb-6 border-b border-neutral-800 pb-3">TEST SECTION</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
