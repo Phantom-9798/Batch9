@@ -99,7 +99,9 @@
     .tab-btn.active-single { color: #34d399; border-bottom-color: #34d399; }
     .tab-btn.active-bulk { color: #fbbf24; border-bottom-color: #fbbf24; }
     .tab-btn.active-extractor { color: #c084fc; border-bottom-color: #c084fc; }
+    .tab-btn.active-uploader { color: #60a5fa; border-bottom-color: #60a5fa; }
     .tab-btn.active-manager { color: #f87171; border-bottom-color: #f87171; }
+    
     .action-btn {
       width: 100%;
       padding: 12px;
@@ -124,7 +126,7 @@
 
   <!-- ================= AUTH GATE ================= -->
   <div id="authGate" class="terminal-panel" style="max-width: 400px; text-align: center; margin: auto;">
-    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin: 0 auto 12px; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></div>
+    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin: 0 auto 12px; box-shadow: 0 0 10px #10b981;"></div>
     <h2 class="font-stencil" style="font-size: 24px; color: #facc15; margin-bottom: 4px;">
       COMMAND ACCESS GATE
     </h2>
@@ -153,12 +155,13 @@
         </div>
       </div>
 
-      <!-- Tab Switcher -->
+      <!-- Tab Switcher (Includes Test Uploader Tab) -->
       <div style="display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 24px; gap: 8px; flex-wrap: wrap;">
         <button id="singleTabBtn" onclick="switchMode('single')" class="tab-btn active-single">[1] SINGLE LECTURE</button>
-        <button id="bulkTabBtn" onclick="switchMode('bulk')" class="tab-btn">[2] BULK TSV UPLOAD</button>
-        <button id="extractorTabBtn" onclick="switchMode('extractor')" class="tab-btn">[3] NEXIELD EXTRACTOR</button>
-        <button id="managerTabBtn" onclick="switchMode('manager')" class="tab-btn">[4] PURGE / DATA MANAGER</button>
+        <button id="bulkTabBtn" onclick="switchMode('bulk')" class="tab-btn">[2] BULK TSV</button>
+        <button id="extractorTabBtn" onclick="switchMode('extractor')" class="tab-btn">[3] EXTRACTOR</button>
+        <button id="uploaderTabBtn" onclick="switchMode('uploader')" class="tab-btn">[4] TEST UPLOADER</button>
+        <button id="managerTabBtn" onclick="switchMode('manager')" class="tab-btn">[5] PURGE MANAGER</button>
       </div>
 
       <!-- ================= MODE 1: SINGLE LECTURE ================= -->
@@ -276,109 +279,54 @@
           <textarea id="extractorOutput" rows="6" placeholder="Generated TSV output yahan aayega..." style="font-family: monospace; color: #34d399; font-size: 12px;"></textarea>
         </div>
       </div>
+
       <!-- ================= MODE 4: TEST UPLOADER ADMIN PANEL SECTION ================= -->
-<div class="armor-panel rounded-2xl p-6 mb-8 border border-blue-500/40 bg-[#0a0f1e]/95">
-  <div class="flex items-center gap-3 mb-6">
-    <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold text-lg">
-      📤
-    </div>
-    <div>
-      <h3 class="font-stencil text-xl text-white tracking-wide">TEST UPLOADER COMMAND</h3>
-      <p class="text-xs text-neutral-400 font-body">Publish new mock tests, PYQs, and chapter practice links directly to cadet database.</p>
-    </div>
-  </div>
+      <div id="uploaderSection" class="hidden">
+        <div style="background: rgba(30, 58, 138, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
+          <h3 class="font-orbitron" style="font-size: 14px; color: #60a5fa; margin: 0 0 4px 0;">📤 TEST UPLOADER COMMAND</h3>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Publish new mock tests, PYQs, and chapter practice links directly to cadet test database.</p>
+        </div>
 
-  <form id="testUploadForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-    
-    <!-- Select Target Exam -->
-    <div>
-      <label class="block font-orbitron text-xs text-blue-400 font-bold uppercase mb-2">Select Target Exam</label>
-      <select id="uploadExam" required class="w-full bg-black/80 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-neutral-200 font-body focus:border-blue-500 outline-none">
-        <option value="" disabled selected>-- Choose Defense Exam --</option>
-        <option value="CDS">CDS EXAM</option>
-        <option value="NDA">NDA EXAM</option>
-        <option value="AFCAT">AFCAT EXAM</option>
-        <option value="CAPF">CAPF EXAM</option>
-      </select>
-    </div>
+        <form id="testUploadForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label>SELECT TARGET EXAM</label>
+            <select id="uploadExam" required style="color: #60a5fa;">
+              <option value="" disabled selected>-- Choose Defense Exam --</option>
+              <option value="CDS">CDS EXAM</option>
+              <option value="NDA">NDA EXAM</option>
+              <option value="AFCAT">AFCAT EXAM</option>
+              <option value="CAPF">CAPF EXAM</option>
+            </select>
+          </div>
 
-    <!-- Select Test Section -->
-    <div>
-      <label class="block font-orbitron text-xs text-blue-400 font-bold uppercase mb-2">Select Test Section</label>
-      <select id="uploadSection" required class="w-full bg-black/80 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-neutral-200 font-body focus:border-blue-500 outline-none">
-        <option value="" disabled selected>-- Choose Section Type --</option>
-        <option value="Full Mock">Full Mock Tests</option>
-        <option value="Previous Year Papers">Previous Year Papers (PYQ)</option>
-        <option value="Sectional Mocks">Sectional Mocks</option>
-        <option value="Chapter-wise Practice">Chapter-wise Practice</option>
-      </select>
-    </div>
+          <div>
+            <label>SELECT TEST SECTION</label>
+            <select id="uploadSection" required style="color: #60a5fa;">
+              <option value="" disabled selected>-- Choose Section Type --</option>
+              <option value="Full Mock">Full Mock Tests</option>
+              <option value="Previous Year Papers">Previous Year Papers (PYQ)</option>
+              <option value="Sectional Mocks">Sectional Mocks</option>
+              <option value="Chapter-wise Practice">Chapter-wise Practice</option>
+            </select>
+          </div>
 
-    <!-- Test Title / Name -->
-    <div>
-      <label class="block font-orbitron text-xs text-blue-400 font-bold uppercase mb-2">Test Title</label>
-      <input type="text" id="uploadTitle" placeholder="e.g. CDS Maths Full Mock Test 01" required class="w-full bg-black/80 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-neutral-200 font-body focus:border-blue-500 outline-none">
-    </div>
+          <div>
+            <label>TEST TITLE</label>
+            <input type="text" id="uploadTitle" placeholder="e.g. CDS Maths Full Mock Test 01" required>
+          </div>
 
-    <!-- Test HTML / Direct Link -->
-    <div>
-      <label class="block font-orbitron text-xs text-blue-400 font-bold uppercase mb-2">Test File Link (.html URL)</label>
-      <input type="url" id="uploadLink" placeholder="https://teamphantom.github.io/test-file.html" required class="w-full bg-black/80 border border-neutral-700 rounded-lg px-4 py-3 text-sm text-neutral-200 font-body focus:border-blue-500 outline-none">
-    </div>
+          <div>
+            <label>TEST FILE LINK (.HTML URL)</label>
+            <input type="url" id="uploadLink" placeholder="https://teamphantom.github.io/test-file.html" required style="font-family: monospace;">
+          </div>
 
-    <!-- Submit Button -->
-    <div class="md:col-span-2 mt-2">
-      <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-lg cursor-pointer">
-        🚀 UPLOAD TEST TO FIREBASE & LIVE HUB
-      </button>
-    </div>
-
-  </form>
-</div>
-
-<!-- Firebase Integration Script for Uploader -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  const app = initializeApp({
-    apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-    authDomain: "team-phantom-enrollment.firebaseapp.com",
-    projectId: "team-phantom-enrollment",
-    storageBucket: "team-phantom-enrollment.firebasestorage.app",
-    messagingSenderId: "658049687096",
-    appId: "1:658049687096:web:8464788a43126a6bced0cd"
-  });
-  const db = getFirestore(app);
-
-  const form = document.getElementById('testUploadForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const exam = document.getElementById('uploadExam').value;
-      const section = document.getElementById('uploadSection').value;
-      const title = document.getElementById('uploadTitle').value;
-      const link = document.getElementById('uploadLink').value;
-
-      try {
-        await addDoc(collection(db, "phantom_tests"), {
-          exam: exam,
-          section: section,
-          title: title,
-          link: link,
-          createdAt: serverTimestamp()
-        });
-
-        alert("✅ SUCCESS: Test uploaded successfully and synchronized with Firebase database!");
-        form.reset();
-      } catch (error) {
-        console.error("Error uploading test: ", error);
-        alert("❌ Error uploading test. Check console for details.");
-      }
-    });
-  }
-</script>
+          <div class="md:col-span-2 mt-2">
+            <button type="submit" class="action-btn" style="background: #2563eb; color: #fff;">
+              🚀 UPLOAD TEST TO FIREBASE & LIVE HUB
+            </button>
+          </div>
+        </form>
+      </div>
 
       <!-- ================= MODE 5: PURGE MANAGER ================= -->
       <div id="managerSection" class="hidden">
@@ -468,21 +416,25 @@
       const singleSec = document.getElementById("singleSection");
       const bulkSec = document.getElementById("bulkSection");
       const extractorSec = document.getElementById("extractorSection");
+      const uploaderSec = document.getElementById("uploaderSection");
       const managerSec = document.getElementById("managerSection");
       
       const sBtn = document.getElementById("singleTabBtn");
       const bBtn = document.getElementById("bulkTabBtn");
       const eBtn = document.getElementById("extractorTabBtn");
+      const uBtn = document.getElementById("uploaderTabBtn");
       const mBtn = document.getElementById("managerTabBtn");
 
       singleSec.classList.add("hidden");
       bulkSec.classList.add("hidden");
       extractorSec.classList.add("hidden");
+      uploaderSec.classList.add("hidden");
       managerSec.classList.add("hidden");
       
       sBtn.className = "tab-btn";
       bBtn.className = "tab-btn";
       eBtn.className = "tab-btn";
+      uBtn.className = "tab-btn";
       mBtn.className = "tab-btn";
 
       if (mode === 'single') {
@@ -494,6 +446,9 @@
       } else if (mode === 'extractor') {
         extractorSec.classList.remove("hidden");
         eBtn.className = "tab-btn active-extractor";
+      } else if (mode === 'uploader') {
+        uploaderSec.classList.remove("hidden");
+        uBtn.className = "tab-btn active-uploader";
       } else if (mode === 'manager') {
         managerSec.classList.remove("hidden");
         mBtn.className = "tab-btn active-manager";
@@ -508,6 +463,28 @@
       box.innerHTML = msg;
       box.classList.remove("hidden");
       setTimeout(() => box.classList.add("hidden"), 6000);
+    }
+
+    // Test Uploader Form Handler
+    const testUploadForm = document.getElementById('testUploadForm');
+    if (testUploadForm) {
+      testUploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const exam = document.getElementById('uploadExam').value;
+        const section = document.getElementById('uploadSection').value;
+        const title = document.getElementById('uploadTitle').value.trim();
+        const link = document.getElementById('uploadLink').value.trim();
+
+        try {
+          await addDoc(collection(db, "phantom_tests"), {
+            exam, section, title, link, createdAt: serverTimestamp()
+          });
+          showStatus(`[TEST DISPATCHED] "${title}" uploaded successfully.`, true);
+          testUploadForm.reset();
+        } catch (error) {
+          showStatus(`[FAILURE] Test Upload Error: ${error.message}`, false);
+        }
+      });
     }
 
     // Lecture Dispatch Logic
