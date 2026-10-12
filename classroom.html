@@ -361,7 +361,18 @@
       <!-- 2. TEST SECTION -->
       <div id="testSectionView" class="hidden">
         <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Dashboard</button>
-        <h2 id="selectedExamTitle" class="font-stencil text-2xl text-white tracking-wide mb-6 border-b border-neutral-800 pb-3">TEST SECTION</h2>
+        <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
+              <span>&#9733;</span> PRACTICE HUB
+            </div>
+            <h2 id="selectedExamTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST SECTION</h2>
+            <p class="text-xs text-neutral-400 font-body mt-1">Choose a section below to access full mocks, previous year papers, and chapter-wise tests.</p>
+          </div>
+          <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
+            100% FREE ACCESS
+          </div>
+        </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
@@ -397,14 +408,19 @@
 
       <!-- 3. MOCK LIST VIEW -->
       <div id="mockListView" class="hidden">
-        <button onclick="backToTestSection()" class="mb-4 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Section</button>
-
-        <!-- TEST SECTION LABEL: shown directly below the back button -->
-        <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide mb-6 border-b border-blue-500/40 pb-3">
-          TEST SECTION
-        </h2>
-
-        <h2 id="selectedSectionTitle" class="font-stencil text-2xl text-blue-400 tracking-wide mb-6 border-b border-neutral-800 pb-3">AVAILABLE TESTS</h2>
+        <button onclick="backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Section</button>
+        <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
+              <span>&#9733;</span> TEST SECTION
+            </div>
+            <h2 id="selectedSectionTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AVAILABLE TESTS</h2>
+            <p class="text-xs text-neutral-400 font-body mt-1">Check out available practice tests and exam simulations below.</p>
+          </div>
+          <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
+            100% FREE ACCESS
+          </div>
+        </div>
         
         <div id="mockItemsContainer" class="space-y-4">
           <!-- Dynamic Mock Rows -->
@@ -474,7 +490,7 @@
 
     function openMockList(sectionName) {
       currentSection = sectionName;
-      document.getElementById("selectedSectionTitle").innerText = currentExam + " - " + sectionName + " AVAILABLE TESTS";
+      document.getElementById("selectedSectionTitle").innerText = currentExam + " - " + sectionName;
       document.getElementById("testSectionView").classList.add("hidden");
       document.getElementById("mockListView").classList.remove("hidden");
 
