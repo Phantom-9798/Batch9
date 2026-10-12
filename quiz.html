@@ -86,7 +86,8 @@
     .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }
 
     /* Generator Console */
-    #makerConsole { padding: 30px; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    #makerConsole { padding: 30px; width: min(800px, calc(100% - 24px)); margin: 24px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }
+    @media (max-width: 650px) { #makerConsole { padding: 16px; margin: 12px auto; } #makerConsole > div[style*='grid-template-columns'] { grid-template-columns: 1fr !important; gap: 8px !important; } body { height: auto; min-height: 100vh; overflow-y: auto; } }
     input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; margin-bottom: 15px; font-family: monospace; }
     .hidden { display: none !important; }
     table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }
@@ -95,17 +96,8 @@
 </head>
 <body>
 
-  <!-- ================= COMMAND CENTER ACCESS GATE ================= -->
-  <section id="commandGate" style="padding:30px;max-width:460px;margin:70px auto;background:#1e293b;border:1px solid #10b981;border-radius:12px;">
-    <h2 style="font-family:Orbitron;color:#facc15;margin-top:0">TEAM PHANTOM</h2>
-    <p style="color:#cbd5e1">Command Center Login — authorized access only</p>
-    <label for="commandPassword">PASSWORD</label>
-    <input id="commandPassword" type="password" autocomplete="current-password" placeholder="Enter Command Center password" />
-    <button id="commandLogin" type="button" style="width:100%;padding:12px;background:#2563eb;color:#fff;border:0;border-radius:6px;font-weight:bold;cursor:pointer">UNLOCK COMMAND CENTER</button>
-    <p id="commandLoginError" style="color:#f87171;display:none">Incorrect password. Try again.</p>
-  </section>
   <!-- ================= QUIZ GENERATOR CONSOLE ================= -->
-  <main id="makerConsole" style="display:none">
+  <main id="makerConsole">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
       <img src="logo.jpeg" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #facc15; object-fit: cover;">
       <div>
@@ -129,70 +121,55 @@
       </div>
     </div>
     
-    <label for="questionsJsonInput">QUESTIONS JSON</label>
-    <p style="font-size:13px;color:#94a3b8;margin:4px 0 8px">Question statements, options, Hindi/English text, match-the-following data — paste the complete questions JSON here.</p>
-    <textarea id="questionsJsonInput" rows="9" spellcheck="false" placeholder="Paste Questions JSON here..."></textarea>
-
-    <label for="solutionsJsonInput">SOLUTIONS / ANSWER KEY JSON</label>
-    <p style="font-size:13px;color:#94a3b8;margin:4px 0 8px">Correct option aur explanation wali JSON yahan separately paste karo.</p>
-    <textarea id="solutionsJsonInput" rows="9" spellcheck="false" placeholder="Paste Solutions JSON here..."></textarea>
+    <label>PASTE TESTBOOK RAW JSON DATA</label>
+    <textarea id="jsonInput" rows="8" placeholder='{ "success": true, "data": { ... } }'></textarea>
     
     <button onclick="generateQuiz()" style="width: 100%; padding: 14px; background: #06b6d4; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-family: 'Orbitron';">GENERATE & DOWNLOAD CBT QUIZ (.HTML)</button>
   </main>
 
   <!-- ================= SCRIPT LOGIC ================= -->
   <script>
-    (function(){
-      var gate = document.getElementById("commandGate");
-      var consolePanel = document.getElementById("makerConsole");
-      var passInput = document.getElementById("commandPassword");
-      function unlockCommandCenter(){
-        if (passInput.value === "Hima Phantom 74") {
-          gate.style.display = "none";
-          consolePanel.style.display = "block";
-        } else {
-          document.getElementById("commandLoginError").style.display = "block";
-          passInput.focus();
-        }
-      }
-      document.getElementById("commandLogin").addEventListener("click", unlockCommandCenter);
-      passInput.addEventListener("keydown", function(e){ if(e.key === "Enter") unlockCommandCenter(); });
-    })();
     window.generateQuiz = function() {
-      var questionText = document.getElementById('questionsJsonInput').value.trim();
-      var solutionText = document.getElementById('solutionsJsonInput').value.trim();
-      var testMins = Math.max(1, parseInt(document.getElementById('testTimeInput').value, 10) || 120);
-      var posInput = parseFloat(document.getElementById('posMarksInput').value);
-      var negInput = parseFloat(document.getElementById('negMarksInput').value);
-      var posM = Number.isFinite(posInput) && posInput >= 0 ? posInput : 0.83;
-      var negM = Number.isFinite(negInput) && negInput >= 0 ? negInput : 0.27;
-
-      if (!questionText) { alert("भाई, Questions JSON वाले box में data paste करो!"); return; }
-      if (!solutionText) { alert("भाई, Solutions / Answer Key JSON वाले box में data paste करो!"); return; }
+      var rawText = document.getElementById('jsonInput').value.trim();
+      if (!rawText) { alert("भाई, पहले JSON डेटा पेस्ट करो!"); return; }
 
       var quizData;
-      try {
-        var questionJson = JSON.parse(questionText);
-        var solutionJson = JSON.parse(solutionText);
-        quizData = questionJson;
-        // Support common Testbook payloads: {success, data:{sections:[{questions:[]}]}},
-        // {data:{questions:[]}}, direct arrays, and answer-key maps in {data:{questionId:{correctOption,sol}}}.
-        var solutionRoot = (solutionJson && solutionJson.data !== undefined) ? solutionJson.data : solutionJson;
-        quizData.phantomSolutions = solutionRoot;
-      } catch (e) { alert("JSON Error: " + e.message + "\nPlease make sure both boxes contain complete, valid JSON."); return; }
+      try { quizData = JSON.parse(rawText); } catch (e) { alert("JSON Error: " + e.message); return; }
 
-      var foundQuestions = [];
-      var qRoot = quizData && quizData.data !== undefined ? quizData.data : quizData;
-      if (Array.isArray(qRoot)) foundQuestions = qRoot;
-      else if (qRoot && Array.isArray(qRoot.sections)) foundQuestions = qRoot.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);
-      else if (qRoot && Array.isArray(qRoot.questions)) foundQuestions = qRoot.questions;
-      else if (qRoot && qRoot.data && Array.isArray(qRoot.data.sections)) foundQuestions = qRoot.data.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);
-      else if (qRoot && qRoot.data && Array.isArray(qRoot.data.questions)) foundQuestions = qRoot.data.questions;
-      if (!foundQuestions.length) { alert("Questions JSON mein question list nahi mili. Testbook ka complete question payload paste karo."); return; }
+      // Auto-detect exam settings from the supplied raw response. Manual values remain usable.
+      function findNumericDeep(root, keys) {
+        var seen = new Set();
+        function walk(obj, depth) {
+          if (!obj || typeof obj !== "object" || depth > 8 || seen.has(obj)) return null;
+          seen.add(obj);
+          for (var k of Object.keys(obj)) {
+            if (keys.includes(k.toLowerCase()) && obj[k] !== "" && obj[k] !== null && isFinite(Number(obj[k]))) {
+              var n = Number(obj[k]); if (n > 0) return n;
+            }
+          }
+          for (var k of Object.keys(obj)) {
+            var found = walk(obj[k], depth + 1); if (found !== null) return found;
+          }
+          return null;
+        }
+        return walk(root, 0);
+      }
+      var detectedPos = findNumericDeep(quizData, ["posmarks", "positivemarks", "correctmarks", "rightmarks", "marksperquestion"]);
+      var detectedNeg = findNumericDeep(quizData, ["negmarks", "negativemarks", "wrongmarks", "incorrectmarks"]);
+      var detectedTime = findNumericDeep(quizData, ["testdurationminutes", "durationminutes", "timeminutes", "duration", "testduration", "time"]);
+      // Many CBT APIs express duration in seconds; normalize likely seconds to minutes.
+      if (detectedTime && detectedTime > 600) detectedTime = detectedTime / 60;
+      var timeField = document.getElementById('testTimeInput');
+      var posField = document.getElementById('posMarksInput');
+      var negField = document.getElementById('negMarksInput');
+      var testMins = Math.max(1, parseInt(timeField.value, 10) || detectedTime || 120);
+      var posM = parseFloat(posField.value);
+      var negM = parseFloat(negField.value);
+      if (!Number.isFinite(posM) || posM <= 0) posM = detectedPos || 0.83;
+      if (!Number.isFinite(negM) || negM < 0) negM = detectedNeg !== null ? detectedNeg : 0.27;
 
-      var quizTitle = String((quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz");
-      var safeFilename = (quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 100) || "Testbook_Quiz") + ".html";
-      var escapedQuizTitle = quizTitle.replace(/[&<>"']/g, function(ch) { return ch === '&' ? '&amp;' : ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '"' ? '&quot;' : '&#39;'; });
+      var quizTitle = (quizData.data && quizData.data.title) ? quizData.data.title : "Testbook_Quiz";
+      var safeFilename = quizTitle.replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
       quizData.phantomConfig = { posMarks: posM, negMarks: negM, testDuration: testMins * 60 };
 
       var encodedJson = btoa(unescape(encodeURIComponent(JSON.stringify(quizData))));
@@ -202,7 +179,7 @@
         '<head>\n' +
         '    <meta charset="UTF-8">\n' +
         '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-        '    <title>' + escapedQuizTitle + '</title>\n' +
+        '    <title>' + quizTitle + '</title>\n' +
         '    <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
         '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
         '    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">\n' +
@@ -230,6 +207,41 @@
         '        .marks-tag { font-size: 13px; font-family: "Orbitron", sans-serif; }\n' +
         '        .pos-badge { background: rgba(16,185,129,0.2); color: #10b981; padding: 3px 8px; border-radius: 4px; border: 1px solid #10b981; }\n' +
         '        .neg-badge { background: rgba(239,68,68,0.2); color: #ef4444; padding: 3px 8px; border-radius: 4px; border: 1px solid #ef4444; margin-left: 5px; }\n' +
+        '        /* Mobile-first CBT layout: keep laptop/PC layout unchanged */\n' +
+        '        @media (max-width: 760px) {\n' +
+        '          body { height: 100dvh; min-height: 100dvh; overflow: hidden; }\n' +
+        '          .cbt-header { height: auto; min-height: 58px; padding: 8px 10px; gap: 8px; flex-wrap: wrap; }\n' +
+        '          .brand-area { gap: 7px; min-width: 0; }\n' +
+        '          .brand-area img { width: 34px; height: 34px; }\n' +
+        '          .brand-text h2 { font-size: 13px; letter-spacing: .4px; }\n' +
+        '          .brand-text p { font-size: 8px; letter-spacing: 1px; }\n' +
+        '          .timer-box { font-size: 10px; padding: 6px 8px; white-space: nowrap; }\n' +
+        '          #header-quiz-title { order: 3; width: 100%; text-align: center; font-size: 12px; }\n' +
+        '          .cbt-body { height: auto; min-height: 0; flex: 1; overflow: hidden; }\n' +
+        '          .question-panel { padding: 14px 12px 18px; min-width: 0; overflow-y: auto; justify-content: flex-start; }\n' +
+        '          .q-header-bar { gap: 8px; align-items: flex-start; flex-wrap: wrap; }\n' +
+        '          .marks-tag { font-size: 10px; }\n' +
+        '          .option-btn { font-size: 15px; padding: 12px; margin: 9px 0; line-height: 1.4; }\n' +
+        '          .sidebar-panel { position: fixed; z-index: 50; top: 58px; right: 0; bottom: 58px; width: min(78vw, 290px); box-shadow: -10px 0 25px rgba(0,0,0,.35); }\n' +
+        '          .sidebar-panel.collapsed { margin-right: calc(-1 * min(78vw, 290px)); }\n' +
+        '          .toggle-sidebar-btn { left: -32px; width: 32px; height: 38px; }\n' +
+        '          .user-profile { padding: 10px; }\n' +
+        '          .palette-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; padding: 10px; }\n' +
+        '          .palette-btn { width: 100%; height: 36px; }\n' +
+        '          .cbt-footer { height: auto; min-height: 58px; padding: 8px; gap: 6px; flex-wrap: wrap; }\n' +
+        '          .footer-left-btns, .footer-right-btns { gap: 6px; flex: 1; }\n' +
+        '          .footer-left-btns { justify-content: flex-start; }\n' +
+        '          .footer-right-btns { justify-content: flex-end; }\n' +
+        '          .btn-action { font-size: 10px; padding: 10px 8px; white-space: normal; flex: 1; }\n' +
+        '          .solution-box { padding: 12px; }\n' +
+        '          .scorecard { margin: 10px; padding: 18px 12px; max-height: calc(100dvh - 20px); overflow-y: auto; }\n' +
+        '          .stat-grid { gap: 8px; }\n' +
+        '        }\n' +
+        '        @media (max-width: 380px) {\n' +
+        '          .timer-box { font-size: 9px; }\n' +
+        '          .btn-action { font-size: 9px; padding: 9px 5px; }\n' +
+        '          .palette-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }\n' +
+        '        }\n' +
         '        .option-btn { display: block; width: 100%; padding: 14px 16px; margin: 12px 0; background: #111827; border: 2px solid #334155; color: #e5e7eb; border-radius: 8px; text-align: left; cursor: pointer; font-size: 16px; transition: 0.2s; }\n' +
         '        .option-btn:hover { background: #1f2937; border-color: #06b6d4; }\n' +
         '        .cbt-footer { background: #1e293b; border-top: 2px solid #334155; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 65px; }\n' +
@@ -245,20 +257,8 @@
         '        .scorecard { padding: 30px; text-align: center; display: none; max-width: 650px; margin: 20px auto; background: #1e293b; border-radius: 12px; border: 1px solid #10b981; }\n' +
         '        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }\n' +
         '        .stat-card { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; }\n' +
-        '        .review-heading { margin: 28px 0 8px; color: #38bdf8; font-family: "Orbitron", sans-serif; text-align: left; }\n' +
-        '        .review-intro { color: #94a3b8; text-align: left; margin: 0 0 14px; }\n' +
-        '        .review-item { background: #0f172a; border: 1px solid #334155; border-radius: 10px; margin: 12px 0; text-align: left; overflow: hidden; }\n' +
-        '        .review-item summary { cursor: pointer; padding: 14px; font-weight: 700; color: #e2e8f0; }\n' +
-        '        .review-content { padding: 0 14px 16px; line-height: 1.6; }\n' +
-        '        .review-status { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-left: 8px; }\n' +
-        '        .result-tabs { display:flex; gap:8px; margin:18px 0; flex-wrap:wrap; }\n' +
-        '        .result-tab { padding:10px 16px; border:1px solid #334155; border-radius:7px; background:#0f172a; color:#e2e8f0; cursor:pointer; font-weight:700; }\n' +
-        '        .result-tab.active { background:#2563eb; border-color:#38bdf8; color:#fff; }\n' +
-        '        .language-hidden { display:none !important; }\n' +
-
         '        table { border-collapse: collapse; max-width: 100%; margin: 15px 0; background: #000; }\n' +
         '        table, th, td { border: 1px solid #334155; padding: 8px 12px; text-align: left; color: #e5e7eb; }\n' +
-        '        @media(max-width:760px){.cbt-header{height:auto;min-height:65px;padding:8px;gap:8px;flex-wrap:wrap}.cbt-body{height:calc(100vh - 130px)}.sidebar-panel{width:115px}.sidebar-panel.collapsed{margin-right:-115px}.palette-grid{grid-template-columns:repeat(2,1fr);padding:8px;gap:6px}.palette-btn{width:38px;height:38px}.question-panel{padding:12px}.cbt-footer{height:auto;min-height:65px;padding:8px;gap:8px;flex-wrap:wrap}.btn-action{font-size:10px;padding:8px}.footer-left-btns,.footer-right-btns{gap:5px}.timer-box{font-size:11px}}\n' +
         '    </style>\n' +
         '</head>\n' +
         '<body>\n' +
@@ -271,7 +271,7 @@
         '            </div>\n' +
         '        </div>\n' +
         '        <div style="display: flex; align-items: center; gap: 15px;">\n' +
-        '            <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;" id="header-quiz-title">' + escapedQuizTitle + '</div>\n' +
+        '            <div style="font-family: \'Orbitron\'; font-size: 14px; color: #38bdf8;" id="header-quiz-title">' + quizTitle + '</div>\n' +
         '            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 6px; display: flex; padding: 2px;">\n' +
         '                <button onclick="switchLanguage(\'en\')" id="lang-en" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">English</button>\n' +
         '                <button onclick="switchLanguage(\'hn\')" id="lang-hn" style="background: transparent; color: #94a3b8; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">हिंदी</button>\n' +
@@ -287,7 +287,6 @@
         '                    <div id="q-number" style="font-family: \'Orbitron\'; color: #38bdf8; font-weight: bold;">Question 1</div>\n' +
         '                    <div class="marks-tag">Marks: <span class="pos-badge" id="pos-m">+0.83</span><span class="neg-badge" id="neg-m">-0.27</span></div>\n' +
         '                </div>\n' +
-        '                <div id="passage-box" style="display:none;margin:0 0 18px;padding:16px;background:#111827;border:1px solid #38bdf8;border-left:4px solid #38bdf8;border-radius:8px;line-height:1.7;white-space:normal;"><div style="font-family:Orbitron;color:#38bdf8;font-size:13px;margin-bottom:8px;">COMPREHENSION PASSAGE</div><div id="passage-text"></div></div>\n' +
         '                <div style="margin-bottom: 15px;">\n' +
         '                    <div id="q-text-en" style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 8px;"></div>\n' +
         '                    <div id="q-text-hn" style="font-size: 16px; color: #94a3b8; line-height: 1.6;"></div>\n' +
@@ -311,9 +310,6 @@
         '                    <div class="stat-card"><h4 style="margin:0; color:#94a3b8;">SKIPPED</h4><p id="st-skipped" style="margin:5px 0 0; font-size:24px; color:#facc15;">0</p></div>\n' +
         '                </div>\n' +
         '                <div id="remark-box" style="background: #0f172a; border: 1px solid #10b981; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5;"></div>\n' +
-        '                <div class="result-tabs"><button id="score-tab" class="result-tab active" onclick="showResultTab(\'score\')">Scoreboard</button><button id="solutions-tab" class="result-tab" onclick="showResultTab(\'solutions\')">Solutions</button></div>\n' +
-        '                <div id="score-panel"><p class="review-intro">Your test summary is shown above. Open Solutions to review any question.</p></div>\n' +
-        '                <div id="solutions-panel" style="display:none"><h3 class="review-heading">QUESTION-WISE SOLUTIONS</h3><p class="review-intro">Choose a question number to see your answer, correct option, and detailed explanation.</p><div id="solutions-review-list"></div></div>\n' +
         '            </div>\n' +
         '        </div>\n' +
         '\n' +
@@ -347,18 +343,18 @@
         '        var quizData = JSON.parse(decodeURIComponent(escape(atob(base64Data))));\n' +
         '        var questions = [];\n' +
         '        var analysisData = {};\n' +
-        '        var config = { posMarks: 0.83, negMarks: 0.27, testDuration: 7200 };\n' +
+        '        var config = quizData.phantomConfig || { posMarks: 0.83, negMarks: 0.27, testDuration: 7200 };\n' +
         '        try {\n' +
-        '            if (quizData.data && Array.isArray(quizData.data.sections)) {\n' +
-        '                questions = quizData.data.sections.reduce(function(all, section) { return all.concat(Array.isArray(section.questions) ? section.questions : []); }, []);\n' +
-        '            } else if (quizData.data && Array.isArray(quizData.data.questions)) {\n' +
+        '            if (quizData.data && quizData.data.sections && quizData.data.sections[0].questions) {\n' +
+        '                questions = quizData.data.sections[0].questions;\n' +
+        '            } else if (quizData.data && quizData.data.questions) {\n' +
         '                questions = quizData.data.questions;\n' +
         '            } else if (Array.isArray(quizData)) {\n' +
         '                questions = quizData;\n' +
         '            } else {\n' +
-        '                questions = Object.values(quizData.data || quizData).filter(item => item && typeof item === \'object\' && (item.correctOption !== undefined || item.options || item.en));\n' +
+        '                questions = Object.values(quizData.data || quizData).filter(item => typeof item === \'object\' && item.correctOption);\n' +
         '            }\n' +
-        '            analysisData = quizData.phantomSolutions || quizData.data || quizData;\n' +
+        '            analysisData = quizData.data || quizData;\n' +
         '            if (quizData.phantomConfig) config = quizData.phantomConfig;\n' +
         '        } catch(err) { console.error("Error loading structure", err); }\n' +
         '\n' +
@@ -366,24 +362,21 @@
         '        var userResponses = {};\n' +
         '        var markedStatus = {};\n' +
         '        var currentLang = "en";\n' +
-        '        document.getElementById(\"total-q-count\").innerText = questions.length;\n' +
+        '        document.getElementById("total-q-count").innerText = questions.length;\n' +
         '        if (quizData.data && quizData.data.title) {\n' +
         '            document.getElementById("header-quiz-title").innerText = quizData.data.title;\n' +
         '        }\n' +
         '\n' +
         '        var totalSeconds = config.testDuration;\n' +
-        '        var testSubmitted = false;\n' +
-        '        function updateTimerDisplay() {\n' +
+        '        setInterval(function() {\n' +
+        '            if (totalSeconds > 0) totalSeconds--;\n' +
         '            var hrs = Math.floor(totalSeconds / 3600);\n' +
         '            var mins = Math.floor((totalSeconds % 3600) / 60);\n' +
         '            var secs = totalSeconds % 60;\n' +
-        '            document.getElementById("timer").innerText = "Time Left: " + (hrs < 10 ? "0" + hrs : hrs) + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);\n' +
-        '        }\n' +
-        '        updateTimerDisplay();\n' +
-        '        var timerInterval = setInterval(function() {\n' +
-        '            if (totalSeconds > 0) totalSeconds--;\n' +
-        '            updateTimerDisplay();\n' +
-        '            if (totalSeconds <= 0 && !testSubmitted) { clearInterval(timerInterval); showScorecard(true); }\n' +
+        '            document.getElementById("timer").innerText = "Time Left: " + \n' +
+        '                (hrs < 10 ? "0" + hrs : hrs) + ":" + \n' +
+        '                (mins < 10 ? "0" + mins : mins) + ":" + \n' +
+        '                (secs < 10 ? "0" + secs : secs);\n' +
         '        }, 1000);\n' +
         '\n' +
         '        function toggleSidebar() {\n' +
@@ -393,12 +386,7 @@
         '            btn.innerText = sidebar.classList.contains("collapsed") ? "▶" : "◀";\n' +
         '        }\n' +
         '\n' +
-        '        var subjectName = String((quizData.data && (quizData.data.subjectLang || quizData.data.subject || quizData.data.subjectName)) || quizData.subjectLang || quizData.subject || \"\").toLowerCase();\n' +
-        '        var isEnglishSubject = subjectName === \"english\" || subjectName.includes(\"english language\");\n' +
-        '        if (isEnglishSubject) { document.getElementById(\"lang-en\").style.display = \"none\"; document.getElementById(\"lang-hn\").style.display = \"none\"; currentLang = \"en\"; }\n' +
-        '        function showResultTab(which) { var score = document.getElementById(\"score-panel\"), sol = document.getElementById(\"solutions-panel\"); score.style.display = which === \"score\" ? \"block\" : \"none\"; sol.style.display = which === \"solutions\" ? \"block\" : \"none\"; document.getElementById(\"score-tab\").classList.toggle(\"active\", which === \"score\"); document.getElementById(\"solutions-tab\").classList.toggle(\"active\", which === \"solutions\"); }\n' +
         '        function switchLanguage(lang) {\n' +
-        '            if (isEnglishSubject) lang = \"en\";\n' +
         '            currentLang = lang;\n' +
         '            document.getElementById("lang-en").style.background = lang === "en" ? "#2563eb" : "transparent";\n' +
         '            document.getElementById("lang-en").style.color = lang === "en" ? "#fff" : "#94a3b8";\n' +
@@ -409,27 +397,8 @@
         '\n' +
         '        function decodeHtml(html) {\n' +
         '            var txt = document.createElement("textarea");\n' +
-        '            txt.innerHTML = html == null ? "" : String(html);\n' +
+        '            txt.innerHTML = html;\n' +
         '            return txt.value;\n' +
-        '        }\n' +
-        '        function safeHtml(html) {\n' +
-        '            var template = document.createElement("template");\n' +
-        '            template.innerHTML = html == null ? "" : String(html);\n' +
-        '            template.content.querySelectorAll("script,iframe,object,embed,form,base,meta,link").forEach(function(node) { node.remove(); });\n' +
-        '            template.content.querySelectorAll("*").forEach(function(node) { Array.from(node.attributes).forEach(function(attr) { var name = attr.name.toLowerCase(), value = attr.value.trim().toLowerCase(); if (name.startsWith("on") || ((name === "href" || name === "src" || name === "xlink:href") && value.startsWith("javascript:"))) node.removeAttribute(attr.name); }); });\n' +
-        '            return template.innerHTML;\n' +
-        '        }\n' +
-        '        function normalizeChoice(value) { return String(value == null ? "" : value).trim().toUpperCase(); }\n' +
-        '        function isCorrectChoice(options, selectedIndex, correctOpt) {\n' +
-        '            if (correctOpt === undefined || correctOpt === null || correctOpt === "") return false;\n' +
-        '            var selected = options[selectedIndex] || {};\n' +
-        '            var selectedPrompt = selected.prompt !== undefined ? selected.prompt : selectedIndex + 1;\n' +
-        '            var key = normalizeChoice(correctOpt);\n' +
-        '            if (normalizeChoice(selectedPrompt) === key) return true;\n' +
-        '            var letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];\n' +
-        '            if (letters[selectedIndex] && key === letters[selectedIndex]) return true;\n' +
-        '            if (/^\\\\d+$/.test(key)) { var number = Number(key); if (number === selectedIndex || number === selectedIndex + 1) return true; }\n' +
-        '            return false;\n' +
         '        }\n' +
         '\n' +
         '        function buildPalette() {\n' +
@@ -465,12 +434,8 @@
         '            var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "");\n' +
         '            var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
         '            \n' +
-        '            document.getElementById("q-text-en").innerHTML = safeHtml(qEn); document.getElementById("q-text-en").style.display = (isEnglishSubject || currentLang === \"en\") ? \"block\" : \"none\";\n' +
-        '            document.getElementById("q-text-hn").innerHTML = safeHtml(qHn); document.getElementById("q-text-hn").style.display = (!isEnglishSubject && currentLang === \"hn\") ? \"block\" : \"none\";\n' +
-        '            var passageRaw = (q.en && q.en.comp) ? q.en.comp : ((q.hn && q.hn.comp) ? q.hn.comp : (q.comp || q.comprehension || ""));\n' +
-        '            var passageBox = document.getElementById("passage-box");\n' +
-        '            var passageText = document.getElementById("passage-text");\n' +
-        '            if (passageRaw && String(passageRaw).trim()) { passageBox.style.display = "block"; passageText.innerHTML = safeHtml(decodeHtml(passageRaw)); } else { passageBox.style.display = "none"; passageText.innerHTML = ""; }\n' +
+        '            document.getElementById("q-text-en").innerHTML = qEn;\n' +
+        '            document.getElementById("q-text-hn").innerHTML = qHn;\n' +
         '\n' +
         '            var optionsBox = document.getElementById("options-box");\n' +
         '            optionsBox.innerHTML = "";\n' +
@@ -480,7 +445,7 @@
         '            \n' +
         '            var qId = q._id || q.id || currentIndex;\n' +
         '            var meta = analysisData[qId] || analysisData[currentIndex] || q;\n' +
-        '            var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
+        '            var correctOpt = meta.correctOption || q.correctOption;\n' +
         '\n' +
         '            var solText = "";\n' +
         '            var activeSol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value :\n' +
@@ -489,8 +454,11 @@
         '                            (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
         '            solText = decodeHtml(activeSol);\n' +
         '\n' +
-        '            var solBox = document.getElementById(\"solution-box\"); solBox.style.display = \"none\";\n' +
-
+        '            var solBox = document.getElementById("solution-box");\n' +
+        '            solBox.style.display = "none";\n' +
+        '            document.getElementById("correct-ans-display").innerText = "";\n' +
+        '            document.getElementById("solution-text").innerHTML = "";\n' +
+        '\n' +
         '            optionsEn.forEach(function(optEn, idx) {\n' +
         '                var optHn = optionsHn[idx] || {};\n' +
         '                var btn = document.createElement("button");\n' +
@@ -500,12 +468,14 @@
         '                var valHn = optHn.value ? decodeHtml(optHn.value) : "";\n' +
         '                var promptLabel = optEn.prompt || (idx + 1);\n' +
         '\n' +
-        '                var displayVal = (!isEnglishSubject && currentLang === \"hn\" && valHn) ? valHn : valEn; btn.innerHTML = \"<b>\" + safeHtml(promptLabel) + \".</b> \" + safeHtml(displayVal);\n' +
+        '                btn.innerHTML = "<b>" + promptLabel + ".</b> " + valEn + (valHn ? \'<div style="font-size:14px; color:#94a3b8; margin-top:3px;">(\' + valHn + \')</div>\' : \'\');\n' +
         '\n' +
-        '                if (userResponses[currentIndex] === idx) { btn.style.borderColor = \"#38bdf8\"; btn.style.background = \"rgba(56,189,248,.16)\"; }\n' +
+        '                if (userResponses[currentIndex] === idx) {\n' +
+        '                    btn.style.borderColor = "#06b6d4";\n' +
+        '                    btn.style.background = "rgba(6, 182, 212, 0.18)";\n' +
+        '                }\n' +
         '\n' +
         '                btn.onclick = function() {\n' +
-        '                    if (testSubmitted) return;\n' +
         '                    userResponses[currentIndex] = idx;\n' +
         '                    loadQuestion();\n' +
         '                };\n' +
@@ -514,7 +484,6 @@
         '        }\n' +
         '\n' +
         '        function nextQuestion() {\n' +
-        '            if (testSubmitted) return;\n' +
         '            if (currentIndex < questions.length - 1) {\n' +
         '                currentIndex++;\n' +
         '                loadQuestion();\n' +
@@ -529,22 +498,17 @@
         '        }\n' +
         '\n' +
         '        function markForReview() {\n' +
-        '            if (testSubmitted) return;\n' +
         '            markedStatus[currentIndex] = true;\n' +
         '            nextQuestion();\n' +
         '        }\n' +
         '\n' +
         '        function clearResponse() {\n' +
-        '            if (testSubmitted) return;\n' +
         '            delete userResponses[currentIndex];\n' +
         '            delete markedStatus[currentIndex];\n' +
         '            loadQuestion();\n' +
         '        }\n' +
         '\n' +
-        '        function showScorecard(autoSubmitted) {\n' +
-        '            if (testSubmitted) return;\n' +
-        '            testSubmitted = true;\n' +
-        '            if (typeof timerInterval !== "undefined") clearInterval(timerInterval);\n' +
+        '        function showScorecard() {\n' +
         '            document.getElementById("quiz-main-area").style.display = "none";\n' +
         '            document.getElementById("cbtFooter").style.display = "none";\n' +
         '            document.getElementById("scorecard-box").style.display = "block";\n' +
@@ -555,15 +519,16 @@
         '                    attempted++;\n' +
         '                    var qId = q._id || q.id || i;\n' +
         '                    var meta = analysisData[qId] || analysisData[i] || q;\n' +
-        '                    var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
+        '                    var correctOpt = meta.correctOption || q.correctOption;\n' +
         '                    var options = (q.en && q.en.options) ? q.en.options : (q.options ? q.options : []);\n' +
         '                    var userPrompt = options[userResponses[i]] ? (options[userResponses[i]].prompt || (userResponses[i] + 1)) : "";\n' +
-        '                    if (isCorrectChoice(options, userResponses[i], correctOpt)) correct++;\n' +
-        '                    else if (correctOpt !== undefined && correctOpt !== null && correctOpt !== "") incorrect++;\n' +
+        '                    if (correctOpt && userPrompt.toString() === correctOpt.toString()) correct++;\n' +
+        '                    else if (correctOpt) incorrect++;\n' +
         '                }\n' +
         '            });\n' +
         '            var skipped = questions.length - attempted;\n' +
-        '            var finalScore = (correct * Number(config.posMarks || 0)) - (incorrect * Number(config.negMarks || 0));\n' +
+        '            var finalScore = (correct * config.posMarks) - (incorrect * config.negMarks);\n' +
+        '            if (finalScore < 0) finalScore = 0;\n' +
         '\n' +
         '            document.getElementById("final-score-title").innerText = "FINAL SCORE: " + finalScore.toFixed(2) + " Marks";\n' +
         '            document.getElementById("st-attempted").innerText = attempted;\n' +
@@ -571,46 +536,22 @@
         '            document.getElementById("st-incorrect").innerText = incorrect;\n' +
         '            document.getElementById("st-skipped").innerText = skipped;\n' +
         '\n' +
-        '            var pct = questions.length ? (correct / questions.length) * 100 : 0;\n' +
+        '            var pct = (correct / questions.length) * 100;\n' +
         '            var remark = pct >= 80 ? "🌟 <b>अति उत्तम!</b> आपकी तैयारी गजब की है, एग्जाम में फोड़ दोगे!" :\n' +
         '                         pct >= 50 ? "⚡ <b>संतोषजनक!</b> प्रदर्शन अच्छा है, लेकिन कुछ और सुधार की गुंजाइश है।" :\n' +
         '                         "⚠️ <b>कड़ी मेहनत की जरूरत है!</b> कॉन्सेप्ट्स को दोबारा रिवाइज करें और प्रैक्टिस बढ़ाएं!";\n' +
         '            document.getElementById("remark-box").innerHTML = remark;\n' +
-        '            renderSolutionsReview(); showResultTab(\"score\");\n' +
-        '        }\n' +
-        '\n' +
-        '        function renderSolutionsReview() {\n' +
-        '            var list = document.getElementById("solutions-review-list");\n' +
-        '            if (!list) return; list.innerHTML = "";\n' +
-        '            questions.forEach(function(q, i) {\n' +
-        '                var qId = q._id || q.id || i; var meta = analysisData[qId] || analysisData[i] || q;\n' +
-        '                var correctOpt = meta.correctOption !== undefined ? meta.correctOption : q.correctOption;\n' +
-        '                var opts = (q.en && q.en.options) ? q.en.options : (q.options || []); var optsHn = (q.hn && q.hn.options) ? q.hn.options : [];\n' +
-        '                var userIdx = userResponses[i], correctIdx = -1;\n' +
-        '                opts.forEach(function(opt, idx) { if (isCorrectChoice(opts, idx, correctOpt)) correctIdx = idx; });\n' +
-        '                var isRight = userIdx !== undefined && isCorrectChoice(opts, userIdx, correctOpt);\n' +
-        '                var statusText = userIdx === undefined ? "SKIPPED" : (isRight ? "CORRECT" : "INCORRECT"); var statusColor = userIdx === undefined ? "#facc15" : (isRight ? "#10b981" : "#ef4444");\n' +
-        '                var qEn = (q.en && q.en.value) ? decodeHtml(q.en.value) : (q.value ? decodeHtml(q.value) : "Question text unavailable"); var qHn = (q.hn && q.hn.value) ? decodeHtml(q.hn.value) : "";\n' +
-        '                var sol = (meta.sol && meta.sol[currentLang] && meta.sol[currentLang].value) ? meta.sol[currentLang].value : (q.sol && q.sol[currentLang] && q.sol[currentLang].value) ? q.sol[currentLang].value : (meta.sol && meta.sol.en && meta.sol.en.value) ? meta.sol.en.value : (q.sol && q.sol.en && q.sol.en.value) ? q.sol.en.value : "";\n' +
-        '                var card = document.createElement("details"); card.className = "review-item"; var summary = document.createElement("summary");\n' +
-        '                summary.innerHTML = "Question " + (i + 1) + " <span class=\\"review-status\\" style=\\"background:" + statusColor + "22;color:" + statusColor + ";border:1px solid " + statusColor + "\\">" + statusText + "</span>"; card.appendChild(summary);\n' +
-        '                var body = document.createElement("div"); body.className = "review-content"; body.innerHTML = "<div style=\\"font-weight:700;margin:4px 0 8px;\\">" + safeHtml(qEn) + "</div>" + (qHn ? "<div style=\\"color:#94a3b8;margin-bottom:12px;\\">" + safeHtml(qHn) + "</div>" : "");\n' +
-        '                opts.forEach(function(opt, idx) { var label = opt.prompt || (idx + 1); var textEn = decodeHtml(opt.value || opt); var textHn = optsHn[idx] && optsHn[idx].value ? decodeHtml(optsHn[idx].value) : ""; var shownOpt = (!isEnglishSubject && currentLang === "hn" && textHn) ? textHn : textEn; var line = document.createElement("div"); line.style.cssText = "padding:9px 10px;margin:6px 0;border-radius:6px;border:1px solid #334155;background:#111827;"; if (idx === correctIdx) line.style.cssText += "border-color:#10b981;background:rgba(16,185,129,.12);"; if (idx === userIdx && idx !== correctIdx) line.style.cssText += "border-color:#ef4444;background:rgba(239,68,68,.12);"; line.innerHTML = "<b>" + safeHtml(label) + ".</b> " + safeHtml(textEn) + (textHn ? "<div style=\\"color:#94a3b8;font-size:13px;\\">" + safeHtml(textHn) + "</div>" : "") + (idx === userIdx ? " <b style=\\"color:" + (idx === correctIdx ? "#10b981" : "#ef4444") + "\\">← Your answer</b>" : "") + (idx === correctIdx ? " <b style=\\"color:#10b981\\">✓ Correct answer</b>" : ""); body.appendChild(line); });\n' +
-        '                var explain = document.createElement("div"); explain.style.cssText = "margin-top:14px;padding:13px;background:#111827;border-left:3px solid #38bdf8;border-radius:6px;"; explain.innerHTML = "<b style=\\"color:#38bdf8\\">DETAILED EXPLANATION</b><div style=\\"margin-top:8px;\\">" + (sol ? safeHtml(decodeHtml(sol)) : "Explanation is not available in the supplied data.") + "</div>"; body.appendChild(explain); card.appendChild(body); list.appendChild(card);\n' +
-        '            });\n' +
         '        }\n' +
         '\n' +
         '        function backToQuiz() {\n' +
-        '            testSubmitted = false;\n' +
-        '            totalSeconds = Math.max(0, totalSeconds);\n' +
         '            document.getElementById("quiz-main-area").style.display = "block";\n' +
-        '            document.getElementById("cbtFooter").style.display = testSubmitted ? "none" : "flex";\n' +
+        '            document.getElementById("cbtFooter").style.display = "flex";\n' +
         '            document.getElementById("scorecard-box").style.display = "none";\n' +
         '            loadQuestion();\n' +
         '        }\n' +
         '\n' +
         '        loadQuestion();\n' +
-        '    <\/script>\n' +
+        '    </script>\n' +
         '</body>\n' +
         '</html>';
 
