@@ -61,6 +61,10 @@
       background: rgba(10, 15, 30, 0.95) !important;
       border: 1px solid rgba(59, 130, 246, 0.4) !important;
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
     }
 
     /* Mode Switcher Tabs Styling */
@@ -307,7 +311,7 @@
     <!-- ================= TEST MODE VIEW (BLUE THEME) ================= -->
     <div id="testModeMainView" class="hidden">
       
-      <!-- 1. TEST DASHBOARD (CHOOSE YOUR EXAM) -->
+      <!-- 1. TEST DASHBOARD -->
       <div id="testDashboardView">
         <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
@@ -324,52 +328,68 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-xl text-blue-400 mb-2">CDS EXAM</h3>
-            <p class="text-xs text-neutral-400 mb-6">Combined Defence Services Examination</p>
+            <div>
+              <h3 class="font-stencil text-xl text-blue-400 mb-2">CDS EXAM</h3>
+              <p class="text-xs text-neutral-400 mb-6">Combined Defence Services Examination</p>
+            </div>
             <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-xl text-blue-400 mb-2">NDA EXAM</h3>
-            <p class="text-xs text-neutral-400 mb-6">National Defence Academy Examination</p>
+            <div>
+              <h3 class="font-stencil text-xl text-blue-400 mb-2">NDA EXAM</h3>
+              <p class="text-xs text-neutral-400 mb-6">National Defence Academy Examination</p>
+            </div>
             <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-xl text-blue-400 mb-2">AFCAT EXAM</h3>
-            <p class="text-xs text-neutral-400 mb-6">Air Force Common Admission Test</p>
+            <div>
+              <h3 class="font-stencil text-xl text-blue-400 mb-2">AFCAT EXAM</h3>
+              <p class="text-xs text-neutral-400 mb-6">Air Force Common Admission Test</p>
+            </div>
             <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-xl text-blue-400 mb-2">CAPF EXAM</h3>
-            <p class="text-xs text-neutral-400 mb-6">Central Armed Police Forces</p>
+            <div>
+              <h3 class="font-stencil text-xl text-blue-400 mb-2">CAPF EXAM</h3>
+              <p class="text-xs text-neutral-400 mb-6">Central Armed Police Forces</p>
+            </div>
             <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
           </div>
         </div>
       </div>
 
-      <!-- 2. TEST SECTION (FULL MOCK, PYQ, SECTIONAL, CHAPTER-WISE) -->
+      <!-- 2. TEST SECTION -->
       <div id="testSectionView" class="hidden">
         <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Dashboard</button>
         <h2 id="selectedExamTitle" class="font-stencil text-2xl text-white tracking-wide mb-6 border-b border-neutral-800 pb-3">TEST SECTION</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-lg text-blue-400 mb-2">Full Mock Tests</h3>
-            <p class="text-xs text-neutral-400 mb-6">Complete CBT simulation based on latest exam patterns.</p>
+            <div>
+              <h3 class="font-stencil text-lg text-blue-400 mb-2">Full Mock Tests</h3>
+              <p class="text-xs text-neutral-400 mb-6">Complete CBT simulation based on latest exam patterns.</p>
+            </div>
             <button onclick="openMockList('Full Mock')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Mocks</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-lg text-blue-400 mb-2">Previous Year Papers</h3>
-            <p class="text-xs text-neutral-400 mb-6">Real exam questions from previous years with solutions.</p>
+            <div>
+              <h3 class="font-stencil text-lg text-blue-400 mb-2">Previous Year Papers</h3>
+              <p class="text-xs text-neutral-400 mb-6">Real exam questions from previous years with solutions.</p>
+            </div>
             <button onclick="openMockList('Previous Year Papers')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Papers</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-lg text-blue-400 mb-2">Sectional Mocks</h3>
-            <p class="text-xs text-neutral-400 mb-6">Subject and topic-wise practice sets.</p>
+            <div>
+              <h3 class="font-stencil text-lg text-blue-400 mb-2">Sectional Mocks</h3>
+              <p class="text-xs text-neutral-400 mb-6">Subject and topic-wise practice sets.</p>
+            </div>
             <button onclick="openMockList('Sectional Mocks')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Mocks</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
-            <h3 class="font-stencil text-lg text-blue-400 mb-2">Chapter-wise Practice</h3>
-            <p class="text-xs text-neutral-400 mb-6">Master individual chapters step by step.</p>
+            <div>
+              <h3 class="font-stencil text-lg text-blue-400 mb-2">Chapter-wise Practice</h3>
+              <p class="text-xs text-neutral-400 mb-6">Master individual chapters step by step.</p>
+            </div>
             <button onclick="openMockList('Chapter-wise Practice')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Practice</button>
           </div>
         </div>
