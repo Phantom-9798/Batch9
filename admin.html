@@ -155,7 +155,7 @@
         </div>
       </div>
 
-      <!-- Tab Switcher (Includes Test Uploader Tab) -->
+      <!-- Tab Switcher -->
       <div style="display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 24px; gap: 8px; flex-wrap: wrap;">
         <button id="singleTabBtn" onclick="switchMode('single')" class="tab-btn active-single">[1] SINGLE LECTURE</button>
         <button id="bulkTabBtn" onclick="switchMode('bulk')" class="tab-btn">[2] BULK TSV</button>
@@ -280,11 +280,11 @@
         </div>
       </div>
 
-      <!-- ================= MODE 4: TEST UPLOADER ADMIN PANEL SECTION ================= -->
+      <!-- ================= MODE 4: TEST UPLOADER (AUTO-TITLE FETCH FROM URL) ================= -->
       <div id="uploaderSection" class="hidden">
         <div style="background: rgba(30, 58, 138, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
-          <h3 class="font-orbitron" style="font-size: 14px; color: #60a5fa; margin: 0 0 4px 0;">📤 TEST UPLOADER COMMAND</h3>
-          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Publish new mock tests, PYQs, and chapter practice links directly to cadet test database.</p>
+          <h3 class="font-orbitron" style="font-size: 14px; color: #60a5fa; margin: 0 0 4px 0;">📤 TEST UPLOADER COMMAND (AUTO-FETCH TITLE)</h3>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Paste test file URL below. Title will be automatically fetched from filename.</p>
         </div>
 
         <form id="testUploadForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -311,13 +311,13 @@
           </div>
 
           <div>
-            <label>TEST TITLE</label>
-            <input type="text" id="uploadTitle" placeholder="e.g. CDS Maths Full Mock Test 01" required>
+            <label>TEST FILE LINK (.HTML URL)</label>
+            <input type="url" id="uploadLink" placeholder="https://teamphantom.github.io/CDS_Maths_Test.html" required style="font-family: monospace;" oninput="autoFetchTestTitle()">
           </div>
 
           <div>
-            <label>TEST FILE LINK (.HTML URL)</label>
-            <input type="url" id="uploadLink" placeholder="https://teamphantom.github.io/test-file.html" required style="font-family: monospace;">
+            <label>TEST TITLE (Auto-fetched from URL)</label>
+            <input type="text" id="uploadTitle" placeholder="Auto-populated from filename..." required style="color: #34d399; font-weight: bold;">
           </div>
 
           <div class="md:col-span-2 mt-2">
@@ -455,6 +455,33 @@
       }
     };
 
+    // Auto-fetch Title from URL filename
+    window.autoFetchTestTitle = () => {
+      const urlInput = document.getElementById('uploadLink').value.trim();
+      const titleInput = document.getElementById('uploadTitle');
+      if (!urlInput) {
+        titleInput.value = "";
+        return;
+      }
+      try {
+        const urlObj = new URL(urlInput);
+        const pathname = urlObj.pathname;
+        let filename = pathname.substring(pathname.lastIndexOf('/') + 1);
+        if (filename.includes('.')) {
+          filename = filename.substring(0, filename.lastIndexOf('.'));
+        }
+        // Replace underscores with spaces for clean title
+        const cleanTitle = filename.replace(/_/g, ' ');
+        titleInput.value = cleanTitle;
+      } catch (e) {
+        // Fallback if URL is incomplete
+        let parts = urlInput.split('/');
+        let lastPart = parts[parts.length - 1] || urlInput;
+        if (lastPart.includes('.')) lastPart = lastPart.substring(0, lastPart.lastIndexOf('.'));
+        titleInput.value = lastPart.replace(/_/g, ' ');
+      }
+    };
+
     function showStatus(msg, isSuccess) {
       const box = document.getElementById("statusMessage");
       box.style.background = isSuccess ? 'rgba(6, 78, 59, 0.8)' : 'rgba(127, 29, 29, 0.8)';
@@ -479,7 +506,7 @@
           await addDoc(collection(db, "phantom_tests"), {
             exam, section, title, link, createdAt: serverTimestamp()
           });
-          showStatus(`[TEST DISPATCHED] "${title}" uploaded successfully.`, true);
+          showStatus(`[TEST DISPATCHED] "${title}" uploaded to Firebase successfully!`, true);
           testUploadForm.reset();
         } catch (error) {
           showStatus(`[FAILURE] Test Upload Error: ${error.message}`, false);
