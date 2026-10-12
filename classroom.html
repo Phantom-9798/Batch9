@@ -557,7 +557,19 @@
         }
       } catch (e) {
         console.error("Error fetching tests: ", e);
-        container.innerHTML = `<div style="color:red; text-align:center;" class="font-orbitron">Error loading tests.</div>`;
+        let row = document.createElement("div");
+        row.className = "test-row";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${currentExam} ${currentSection} - Series 01</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
+          </div>
+          <div>
+            <span class="px-4 py-2 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-400 font-orbitron font-bold text-xs uppercase tracking-wider">It will be uploaded soon</span>
+          </div>
+        `;
+        container.innerHTML = "";
+        container.appendChild(row);
       }
     }
 
