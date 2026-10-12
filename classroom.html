@@ -55,12 +55,6 @@
       border: 1px solid rgba(245, 158, 11, 0.25);
       box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
     }
-    
-    .armor-card {
-      background: rgba(10, 15, 20, 0.98);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
-    }
 
     /* Test Mode Blue Theme Panels */
     .test-mode-panel {
@@ -129,33 +123,6 @@
       letter-spacing: 1px;
     }
   </style>
-
-  <script>
-    // ================= TIGHT SECURITY & TAMPER BLOCK =================
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-      setInterval(() => {
-        const start = performance.now();
-        debugger;
-        const end = performance.now();
-        if (end - start > 100) {
-          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        }
-      }, 1000);
-      setInterval(() => { console.clear(); }, 1500);
-    })();
-  </script>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
@@ -244,122 +211,84 @@
 
       <!-- BATCH CARDS GRID -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <!-- 1. CDS MATHEMATICS -->
         <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="math-ima.jpeg" alt="Indian Military Academy Dehradun" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80';"/>
+              <img src="math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-              <div class="absolute top-3 left-3">
-                <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span>
-              </div>
+              <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-math"></div>
-              <div class="absolute bottom-2 left-3">
-                <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">IMA &bull; INA &bull; AFA</span>
-              </div>
             </div>
             <div class="p-4">
               <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS MATHEMATICS</h3>
               <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Specialist Arithmetic & Advanced</p>
-              <p class="text-[11px] text-neutral-400 font-body leading-relaxed mb-4">Comprehensive coverage of Arithmetic, Geometry, Trigonometry, and Mensuration tactical modules.</p>
             </div>
           </div>
-          <div class="p-4 pt-0">
-            <button id="btn-cds-math" class="w-full"></button>
-          </div>
+          <div class="p-4 pt-0"><button id="btn-cds-math" class="w-full"></button></div>
         </div>
 
-        <!-- 2. CDS OTA -->
         <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="ota-chennai.jpeg" alt="Officers Training Academy Chennai" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80';"/>
+              <img src="ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-              <div class="absolute top-3 left-3">
-                <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span>
-              </div>
+              <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
-              <div class="absolute bottom-2 left-3">
-                <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">OTA CHENNAI</span>
-              </div>
             </div>
             <div class="p-4">
               <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS OTA</h3>
               <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Complete Integrated Curriculum</p>
-              <p class="text-[11px] text-neutral-400 font-body leading-relaxed mb-4">Full tactical roadmap incorporating English mastery, General Studies intensive, and strategic practice drills.</p>
             </div>
           </div>
-          <div class="p-4 pt-0">
-            <button id="btn-cds-kilo" class="w-full"></button>
-          </div>
+          <div class="p-4 pt-0"><button id="btn-cds-kilo" class="w-full"></button></div>
         </div>
 
-        <!-- 3. AFCAT -->
         <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="afcat-afa.jpeg" alt="Air Force Academy Dundigal" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1519074069444-1ba4ea16e6f5?auto=format&fit=crop&w=800&q=80';"/>
+              <img src="afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-              <div class="absolute top-3 left-3">
-                <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span>
-              </div>
+              <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span></div>
               <div class="absolute top-3 right-3" id="badge-afcat"></div>
-              <div class="absolute bottom-2 left-3">
-                <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40">AFA DUNDIGAL</span>
-              </div>
             </div>
             <div class="p-4">
               <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">AFCAT</h3>
               <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Air Force Speed & Accuracy</p>
-              <p class="text-[11px] text-neutral-400 font-body leading-relaxed mb-4">Speed mathematics, non-verbal & spatial reasoning, general awareness, and military aptitude masterclasses.</p>
             </div>
           </div>
-          <div class="p-4 pt-0">
-            <button id="btn-afcat" class="w-full"></button>
-          </div>
+          <div class="p-4 pt-0"><button id="btn-afcat" class="w-full"></button></div>
         </div>
 
-        <!-- 4. CAPF -->
         <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
-              <img src="capf-forces.jpeg" alt="Central Armed Police Forces Insignias" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80';"/>
+              <img src="capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
-              <div class="absolute top-3 left-3">
-                <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span>
-              </div>
+              <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span></div>
               <div class="absolute top-3 right-3" id="badge-capf"></div>
-              <div class="absolute bottom-2 left-3">
-                <span class="text-[9px] font-orbitron font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">CRPF &bull; BSF &bull; CISF &bull; ITBP &bull; SSB</span>
-              </div>
             </div>
             <div class="p-4">
               <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CAPF</h3>
               <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Assistant Commandant Focus</p>
-              <p class="text-[11px] text-neutral-400 font-body leading-relaxed mb-4">Paper 1 General Mental Ability and Paper 2 Descriptive Essay, Report, Arguments, and Précis writing.</p>
             </div>
           </div>
-          <div class="p-4 pt-0">
-            <button id="btn-capf" class="w-full"></button>
-          </div>
+          <div class="p-4 pt-0"><button id="btn-capf" class="w-full"></button></div>
         </div>
-
       </div>
     </div>
 
-    <!-- ================= TEST MODE VIEW (PRACTICE HUB DASHBOARD - BLUE THEME) ================= -->
+    <!-- ================= TEST MODE VIEW (BLUE THEME) ================= -->
     <div id="testModeMainView" class="hidden">
       
-      <!-- 1. EXAM DASHBOARD (HOME) -->
+      <!-- 1. TEST DASHBOARD (CHOOSE YOUR EXAM) -->
       <div id="testDashboardView">
         <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> PRACTICE HUB
+              <span>&#9733;</span> TEST DASHBOARD
             </div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST SECTION | SELECT EXAM</h2>
-            <p class="text-xs text-neutral-400 font-body mt-1">Select your target defense examination below to explore available test papers and practice sections.</p>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">CHOOSE YOUR EXAM</h2>
+            <p class="text-xs text-neutral-400 font-body mt-1">Select your target defense examination to enter the test section and access free mock papers.</p>
           </div>
           <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
             100% FREE ACCESS
@@ -370,30 +299,30 @@
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">CDS EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Combined Defence Services Examination</p>
-            <button onclick="openExamSections('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
+            <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">NDA EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">National Defence Academy Examination</p>
-            <button onclick="openExamSections('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
+            <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">AFCAT EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Air Force Common Admission Test</p>
-            <button onclick="openExamSections('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
+            <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-xl text-blue-400 mb-2">CAPF EXAM</h3>
             <p class="text-xs text-neutral-400 mb-6">Central Armed Police Forces</p>
-            <button onclick="openExamSections('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Explore Tests</button>
+            <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">Choose Exam</button>
           </div>
         </div>
       </div>
 
-      <!-- 2. SECTIONS VIEW (PYQ, Full Mock, etc.) -->
-      <div id="sectionsView" class="hidden">
-        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Exams</button>
-        <h2 id="selectedExamTitle" class="font-stencil text-2xl text-white tracking-wide mb-6 border-b border-neutral-800 pb-3">EXAM SECTIONS</h2>
+      <!-- 2. TEST SECTION (FULL MOCK, PYQ, SECTIONAL, CHAPTER-WISE) -->
+      <div id="testSectionView" class="hidden">
+        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Dashboard</button>
+        <h2 id="selectedExamTitle" class="font-stencil text-2xl text-white tracking-wide mb-6 border-b border-neutral-800 pb-3">TEST SECTION</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
@@ -404,24 +333,24 @@
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-lg text-blue-400 mb-2">Previous Year Papers</h3>
             <p class="text-xs text-neutral-400 mb-6">Real exam questions from previous years with solutions.</p>
-            <button onclick="openMockList('PYQ')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Papers</button>
+            <button onclick="openMockList('Previous Year Papers')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Papers</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-lg text-blue-400 mb-2">Sectional Mocks</h3>
             <p class="text-xs text-neutral-400 mb-6">Subject and topic-wise practice sets.</p>
-            <button onclick="openMockList('Sectional Mock')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Mocks</button>
+            <button onclick="openMockList('Sectional Mocks')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Mocks</button>
           </div>
           <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-500/70 transition">
             <h3 class="font-stencil text-lg text-blue-400 mb-2">Chapter-wise Practice</h3>
             <p class="text-xs text-neutral-400 mb-6">Master individual chapters step by step.</p>
-            <button onclick="openMockList('Chapter Wise')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Practice</button>
+            <button onclick="openMockList('Chapter-wise Practice')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md">View Practice</button>
           </div>
         </div>
       </div>
 
       <!-- 3. MOCK LIST VIEW -->
       <div id="mockListView" class="hidden">
-        <button onclick="backToSections()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Sections</button>
+        <button onclick="backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2">⬅ Back to Test Section</button>
         <h2 id="selectedSectionTitle" class="font-stencil text-2xl text-blue-400 tracking-wide mb-6 border-b border-neutral-800 pb-3">AVAILABLE TESTS</h2>
         
         <div id="mockItemsContainer" class="space-y-4">
@@ -473,27 +402,27 @@
       }
     }
 
-    function openExamSections(examName) {
+    function openTestSection(examName) {
       currentExam = examName;
-      document.getElementById("selectedExamTitle").innerText = examName + " | SELECT SECTION";
+      document.getElementById("selectedExamTitle").innerText = examName + " | TEST SECTION";
       document.getElementById("testDashboardView").classList.add("hidden");
-      document.getElementById("sectionsView").classList.remove("hidden");
+      document.getElementById("testSectionView").classList.remove("hidden");
     }
 
     function backToTestDashboard() {
-      document.getElementById("sectionsView").classList.add("hidden");
+      document.getElementById("testSectionView").classList.add("hidden");
       document.getElementById("testDashboardView").classList.remove("hidden");
     }
 
-    function backToSections() {
+    function backToTestSection() {
       document.getElementById("mockListView").classList.add("hidden");
-      document.getElementById("sectionsView").classList.remove("hidden");
+      document.getElementById("testSectionView").classList.remove("hidden");
     }
 
     function openMockList(sectionName) {
       currentSection = sectionName;
       document.getElementById("selectedSectionTitle").innerText = currentExam + " - " + sectionName + " AVAILABLE TESTS";
-      document.getElementById("sectionsView").classList.add("hidden");
+      document.getElementById("testSectionView").classList.add("hidden");
       document.getElementById("mockListView").classList.remove("hidden");
 
       let container = document.getElementById("mockItemsContainer");
