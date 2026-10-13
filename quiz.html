@@ -182,7 +182,8 @@
       try {
         questionJson = JSON.parse(questionText);
         solutionJson = JSON.parse(solutionText);
-        quizData = questionJson;
+        // Wrap a top-level question array so attached solution/config properties survive JSON.stringify.
+        quizData = Array.isArray(questionJson) ? { data: questionJson } : questionJson;
         // Support common Testbook payloads: {success, data:{sections:[{questions:[]}]}},
         // {data:{questions:[]}}, direct arrays, and answer-key maps in {data:{questionId:{correctOption,sol}}}.
         var solutionRoot = (solutionJson && solutionJson.data !== undefined) ? solutionJson.data : solutionJson;
@@ -432,11 +433,16 @@
         '            document.getElementById("timer").innerText = "Time Left: " + (hrs < 10 ? "0" + hrs : hrs) + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);\n' +
         '        }\n' +
         '        updateTimerDisplay();\n' +
-        '        var timerInterval = setInterval(function() {\n' +
-        '            if (totalSeconds > 0) totalSeconds--;\n' +
-        '            updateTimerDisplay();\n' +
-        '            if (totalSeconds <= 0 && !testSubmitted) { clearInterval(timerInterval); showScorecard(true); }\n' +
-        '        }, 1000);\n' +
+        '        var timerInterval = null;\n' +
+        '        function startTimer() {\n' +
+        '            if (timerInterval !== null || testSubmitted || totalSeconds <= 0) return;\n' +
+        '            timerInterval = setInterval(function() {\n' +
+        '                if (totalSeconds > 0) totalSeconds--;\n' +
+        '                updateTimerDisplay();\n' +
+        '                if (totalSeconds <= 0 && !testSubmitted) { clearInterval(timerInterval); timerInterval = null; showScorecard(true); }\n' +
+        '            }, 1000);\n' +
+        '        }\n' +
+        '        startTimer();\n' +
         '\n' +
         '        function toggleSidebar() {\n' +
         '            var sidebar = document.getElementById("sidebarPanel");\n' +
@@ -480,7 +486,8 @@
         '            if (normalizeChoice(selectedPrompt) === key) return true;\n' +
         '            var letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];\n' +
         '            if (letters[selectedIndex] && key === letters[selectedIndex]) return true;\n' +
-        '            if (/^\\\\d+$/.test(key)) { var number = Number(key); if (number === selectedIndex || number === selectedIndex + 1) return true; }\n' +
+        '            // Numeric answer keys are treated as 1-based option numbers.\n' +
+        '            if (/^\\\\d+$/.test(key) && Number(key) === selectedIndex + 1) return true;\n' +
         '            return false;\n' +
         '        }\n' +
         '\n' +
@@ -596,7 +603,7 @@
         '        function showScorecard(autoSubmitted) {\n' +
         '            if (testSubmitted) return;\n' +
         '            testSubmitted = true;\n' +
-        '            if (typeof timerInterval !== "undefined") clearInterval(timerInterval);\n' +
+        '            if (timerInterval !== null) { clearInterval(timerInterval); timerInterval = null; }\n' +
         '            document.getElementById("quiz-main-area").style.display = "none";\n' +
         '            document.getElementById("cbtFooter").style.display = "none";\n' +
         '            document.getElementById("scorecard-box").style.display = "block";\n' +
@@ -659,6 +666,7 @@
         '            document.getElementById("cbtFooter").style.display = testSubmitted ? "none" : "flex";\n' +
         '            document.getElementById("scorecard-box").style.display = "none";\n' +
         '            loadQuestion();\n' +
+        '            if (totalSeconds > 0) startTimer();\n' +
         '        }\n' +
         '\n' +
         '        loadQuestion();\n' +
