@@ -126,6 +126,45 @@
       font-weight: bold;
       letter-spacing: 1px;
     }
+
+    /* WHATSAPP WELCOME POPUP MODAL */
+    .phantom-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      animation: fadeInModal 0.3s ease;
+    }
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .phantom-modal-card {
+      background: #0b1120;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 158, 11, 0.2);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 420px;
+      padding: 35px 25px;
+      text-align: center;
+      position: relative;
+    }
+    .phantom-modal-icon {
+      font-size: 42px;
+      margin-bottom: 15px;
+      display: inline-block;
+      animation: bounceSlow 2s infinite;
+    }
+    @keyframes bounceSlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
   </style>
 
   <script>
@@ -158,14 +197,46 @@
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
 
-  <!-- Top Corner Live Time Tracker Widget (Visible only in Batch Mode) -->
+  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
+  <div id="phantomWhatsAppModal" class="phantom-modal-overlay">
+    <div class="phantom-modal-card">
+      <div class="phantom-modal-icon">🛡️</div>
+      <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
+      <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
+        Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
+      </p>
+      
+      <!-- Visual Audio / Radar Wave Graphic -->
+      <div class="flex items-center justify-center gap-1 mb-7">
+        <span class="w-1 h-5 bg-amber-500 rounded-full animate-pulse"></span>
+        <span class="w-1 h-8 bg-amber-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span>
+        <span class="w-1 h-12 bg-amber-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span>
+        <span class="w-1 h-8 bg-amber-400 rounded-full animate-pulse" style="animation-delay: 0.6s;"></span>
+        <span class="w-1 h-5 bg-amber-500 rounded-full animate-pulse" style="animation-delay: 0.8s;"></span>
+      </div>
+
+      <div class="space-y-3">
+        <!-- TOP BUTTON: CLICK HERE TO JOIN UPDATE CHANNEL -->
+        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(245,158,11,0.4)] transform hover:scale-[1.02]">
+          📱 JOIN UPDATES CHANNEL
+        </a>
+        
+        <!-- BOTTOM BUTTON: CLICK HERE TO CONTINUE TO SITE -->
+        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-500/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition">
+          🚀 CONTINUE TO SITE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Corner Live Time Tracker Widget -->
   <div id="phantomStudyTimerWidget">
     <div class="pulse-dot"></div>
     <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
     <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
   </div>
 
-  <!-- Bottom Floating Status Dock (Visible only in Batch Mode) -->
+  <!-- Bottom Floating Status Dock -->
   <div id="phantomFocusDock">
     <span>🛡 MISSION MODE: ACTIVE</span>
     <span>|</span>
@@ -185,7 +256,7 @@
       <!-- BRANDING & LOGO -->
       <div class="flex items-center gap-4">
         <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center overflow-hidden">
-          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
+          <img src="https://phantom-9798.github.io/Test/logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
         </div>
         <div>
           <h1 class="font-stencil text-2xl sm:text-3xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-yellow-300">
@@ -218,7 +289,7 @@
     </div>
   </header>
 
-  <!-- DYNAMIC SECURE TELEGRAM NOTIFICATION CONTAINER (Visible only in Batch Mode) -->
+  <!-- DYNAMIC SECURE TELEGRAM NOTIFICATION CONTAINER -->
   <div id="telegramNotificationContainer" class="w-full mt-6"></div>
 
   <!-- MAIN CONTAINER VIEW -->
@@ -245,7 +316,7 @@
         <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-math"></div>
@@ -261,7 +332,7 @@
         <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
@@ -277,7 +348,7 @@
         <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span></div>
               <div class="absolute top-3 right-3" id="badge-afcat"></div>
@@ -293,7 +364,7 @@
         <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
-              <img src="capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span></div>
               <div class="absolute top-3 right-3" id="badge-capf"></div>
@@ -459,6 +530,13 @@
 
     let currentExam = "";
     let currentSection = "";
+
+    window.closePhantomModal = function() {
+      const modal = document.getElementById("phantomWhatsAppModal");
+      if (modal) {
+        modal.style.display = "none";
+      }
+    };
 
     window.switchAppMode = function(mode) {
       const batchBtn = document.getElementById("batchModeToggleBtn");
