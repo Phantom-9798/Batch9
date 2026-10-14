@@ -200,14 +200,22 @@
         Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
       </p>
       
-      <!-- Visual Audio / Radar Wave Graphic -->
-      <div class="flex items-center justify-center gap-1 mb-7">
-        <span class="w-1 h-5 bg-amber-500 rounded-full animate-pulse"></span>
-        <span class="w-1 h-8 bg-amber-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span>
-        <span class="w-1 h-12 bg-amber-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span>
-        <span class="w-1 h-8 bg-amber-400 rounded-full animate-pulse" style="animation-delay: 0.6s;"></span>
-        <span class="w-1 h-5 bg-amber-500 rounded-full animate-pulse" style="animation-delay: 0.8s;"></span>
-      </div>
+      <!-- Tactical Bullet Firing Animation Container -->
+<div class="flex flex-col items-center justify-center my-6">
+  <div class="relative flex items-center justify-center gap-1.5 px-4 py-2 bg-black/40 border border-amber-500/30 rounded-xl backdrop-blur-sm shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+    <!-- Tactical Bullet tracers moving/pulsing -->
+    <span class="text-amber-500 font-bold text-xs tracking-widest font-orbitron">💥 </span>
+    <div class="flex items-center gap-1">
+      <span class="w-1.5 h-4 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_#facc15]"></span>
+      <span class="w-2.5 h-5 bg-amber-500 rounded-full animate-ping" style="animation-duration: 1s;"></span>
+      <span class="w-3.5 h-6 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_#ef4444]" style="animation-delay: 0.2s;"></span>
+      <span class="w-2.5 h-5 bg-amber-500 rounded-full animate-ping" style="animation-duration: 1.2s;"></span>
+      <span class="w-1.5 h-4 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_#facc15]" style="animation-delay: 0.4s;"></span>
+    </div>
+    <span class="text-amber-500 font-bold text-xs tracking-widest font-orbitron"> 🎯</span>
+  </div>
+  <span class="text-[10px] text-amber-400/80 font-orbitron tracking-widest uppercase mt-2">TARGET LOCKED • FIRE_READY</span>
+</div>
 
       <div class="space-y-3">
         <!-- TOP BUTTON: CLICK HERE TO JOIN UPDATE CHANNEL -->
