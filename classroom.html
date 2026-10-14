@@ -200,29 +200,19 @@
         Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
       </p>
       
-      <!-- Tactical Radar Sweep Animation Container -->
+     <!-- Military Officer Rank Stars Animation Container -->
 <div class="flex flex-col items-center justify-center my-6">
-  <div class="relative w-28 h-28 flex items-center justify-center bg-black/60 border-2 border-amber-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.3)] backdrop-blur-sm">
-    <!-- Radar Circle -->
-    <div class="absolute w-24 h-24 rounded-full border border-amber-500/50"></div>
-    <div class="absolute w-16 h-16 rounded-full border border-amber-500/30"></div>
-    <div class="absolute w-8 h-8 rounded-full border border-amber-500/20"></div>
+  <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-500 rounded-2xl shadow-[0_0_35px_rgba(245,158,11,0.4)] backdrop-blur-lg">
     
-    <!-- Radar Crosshairs -->
-    <div class="absolute w-full h-[1px] bg-amber-500/40"></div>
-    <div class="absolute w-[1px] h-full bg-amber-500/40"></div>
-    
-    <!-- Radar Sweep Line (Rotating) -->
-    <div class="absolute top-1/2 left-1/2 w-1/2 h-[2px] bg-amber-400 origin-left rounded-full animate-spin" style="animation-duration: 4s; animation-timing-function: linear;">
-      <!-- Glowing tip of sweep line -->
-      <div class="absolute -right-1 -top-[3px] w-2 h-2 bg-amber-300 rounded-full shadow-[0_0_10px_#fbbf24]"></div>
-    </div>
-    
-    <!-- Central Dot -->
-    <div class="absolute w-3 h-3 bg-amber-500 rounded-full animate-ping" style="animation-duration: 2s;"></div>
-    <div class="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full"></div>
+    <!-- Glowing Rank Stars (Animating) -->
+    <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
+    <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
+    <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
+
+    <!-- Subtle background glow behind stars -->
+    <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
   </div>
-  <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">MISSION_STATUS • RADAR_ONLINE</span>
+  <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(245,158,11,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
 </div>
 
       <div class="space-y-3">
