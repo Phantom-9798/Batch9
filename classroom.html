@@ -200,25 +200,29 @@
         Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
       </p>
       
-      <!-- Tactical Weapon & Bullet Firing Animation Container -->
+      <!-- Tactical Radar Sweep Animation Container -->
 <div class="flex flex-col items-center justify-center my-6">
-  <div class="relative flex items-center justify-center gap-2 px-5 py-3 bg-black/60 border border-amber-500/40 rounded-2xl backdrop-blur-md shadow-[0_0_25px_rgba(245,158,11,0.25)]">
-    <!-- Sniper Scope / Target Icon -->
-    <span class="text-xl animate-pulse">🎯</span>
+  <div class="relative w-28 h-28 flex items-center justify-center bg-black/60 border-2 border-amber-500 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.3)] backdrop-blur-sm">
+    <!-- Radar Circle -->
+    <div class="absolute w-24 h-24 rounded-full border border-amber-500/50"></div>
+    <div class="absolute w-16 h-16 rounded-full border border-amber-500/30"></div>
+    <div class="absolute w-8 h-8 rounded-full border border-amber-500/20"></div>
     
-    <!-- Firing Laser Bullets Sequence -->
-    <div class="flex items-center gap-1.5">
-      <span class="w-1 h-3 bg-yellow-400 rounded-full animate-ping" style="animation-duration: 0.8s;"></span>
-      <span class="w-2 h-5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></span>
-      <span class="w-3.5 h-6 bg-red-500 rounded-full animate-ping shadow-[0_0_15px_#ef4444]" style="animation-duration: 0.6s;"></span>
-      <span class="w-2 h-5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></span>
-      <span class="w-1 h-3 bg-yellow-400 rounded-full animate-ping" style="animation-duration: 0.8s; animation-delay: 0.3s;"></span>
+    <!-- Radar Crosshairs -->
+    <div class="absolute w-full h-[1px] bg-amber-500/40"></div>
+    <div class="absolute w-[1px] h-full bg-amber-500/40"></div>
+    
+    <!-- Radar Sweep Line (Rotating) -->
+    <div class="absolute top-1/2 left-1/2 w-1/2 h-[2px] bg-amber-400 origin-left rounded-full animate-spin" style="animation-duration: 4s; animation-timing-function: linear;">
+      <!-- Glowing tip of sweep line -->
+      <div class="absolute -right-1 -top-[3px] w-2 h-2 bg-amber-300 rounded-full shadow-[0_0_10px_#fbbf24]"></div>
     </div>
-
-    <!-- Assault Rifle / Weapon Icon -->
-    <span class="text-xl animate-bounce">⚡</span>
+    
+    <!-- Central Dot -->
+    <div class="absolute w-3 h-3 bg-amber-500 rounded-full animate-ping" style="animation-duration: 2s;"></div>
+    <div class="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full"></div>
   </div>
-  <span class="text-[10px] text-amber-400 font-orbitron tracking-widest uppercase mt-2.5 font-bold">TACTICAL_COMBAT • WEAPON_SYSTEM_ACTIVE</span>
+  <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]">MISSION_STATUS • RADAR_ONLINE</span>
 </div>
 
       <div class="space-y-3">
