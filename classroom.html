@@ -155,16 +155,6 @@
       text-align: center;
       position: relative;
     }
-    .phantom-modal-icon {
-      font-size: 42px;
-      margin-bottom: 15px;
-      display: inline-block;
-      animation: bounceSlow 2s infinite;
-    }
-    @keyframes bounceSlow {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
   </style>
 
   <script>
@@ -200,7 +190,11 @@
   <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
   <div id="phantomWhatsAppModal" class="phantom-modal-overlay">
     <div class="phantom-modal-card">
-      <div class="phantom-modal-icon">🛡️</div>
+      <!-- Team Phantom Logo instead of Shield Icon -->
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-500 p-1 shadow-[0_0_20px_rgba(245,158,11,0.4)] overflow-hidden flex items-center justify-center">
+        <img src="https://phantom-9798.github.io/Test/logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=TP';">
+      </div>
+      
       <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
       <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
         Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
@@ -222,7 +216,7 @@
         </a>
         
         <!-- BOTTOM BUTTON: CLICK HERE TO CONTINUE TO SITE -->
-        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-500/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition">
+        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-500/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer">
           🚀 CONTINUE TO SITE
         </button>
       </div>
@@ -316,7 +310,7 @@
         <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="https://phantom-9798.github.io/Test/math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/f59e0b?text=CDS+Math';"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-math"></div>
@@ -332,7 +326,7 @@
         <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="https://phantom-9798.github.io/Test/ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/f59e0b?text=CDS+OTA';"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
               <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
@@ -348,7 +342,7 @@
         <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
-              <img src="https://phantom-9798.github.io/Test/afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/f59e0b?text=AFCAT';"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span></div>
               <div class="absolute top-3 right-3" id="badge-afcat"></div>
@@ -364,7 +358,7 @@
         <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-500/70 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
-              <img src="https://phantom-9798.github.io/Test/capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>
+              <img src="https://phantom-9798.github.io/Test/capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/f59e0b?text=CAPF';"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span></div>
               <div class="absolute top-3 right-3" id="badge-capf"></div>
