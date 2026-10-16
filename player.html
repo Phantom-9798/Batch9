@@ -181,6 +181,51 @@
       setInterval(() => { console.clear(); }, 1500);
     })();
   </script>
+
+  <!-- ================= ADVANCED ANTI-SNIFFER & 1DM BLOCKER GUARD ================= -->
+  <script>
+    // ब्लॉक नेटवर्क स्नेफर और एक्सटेंशन इंजेक्शन
+    (() => {
+      // 1. राइट क्लिक और वीडियो डाउनलोड मेनू पूरी तरह ब्लॉक
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('dragstart', e => e.preventDefault());
+      
+      // 2. शॉर्टकट की ब्लॉक (Save As, View Source, DevTools)
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'K'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P', 'O', 'A'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+
+      // 3. 1DM / IDM एक्सटेंशन या एलिमेंट्स को DOM से तुरंत हटाना
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              const html = node.innerHTML || '';
+              const id = node.id || '';
+              const className = node.className || '';
+              if (
+                id.includes('1dm') || className.includes('1dm') ||
+                id.includes('idm') || className.includes('idm') ||
+                html.includes('1DM_') || html.includes('idm_download')
+              ) {
+                node.remove();
+              }
+            }
+          });
+        });
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    })();
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Tactical Video Console</title>
@@ -481,6 +526,7 @@
           <span class="text-[9px] font-mono text-neutral-500 tracking-tighter" id="wmTimestamp">
             ENCRYPTED SESSION ACTIVE
           </span>
+
         </div>
 
         <!-- PERMANENT TOP-RIGHT HUD (SPEED + FULLSCREEN FIXED) -->
