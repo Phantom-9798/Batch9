@@ -76,7 +76,7 @@
     window.generatedOtp = null;
     window.pendingCadetData = null;
 
-    // Helper function to send email via Vercel Serverless Function (No IP Block)
+    // Helper function to send email via Vercel Serverless Function with Detailed Error Catching
     async function sendBrevoOtpEmail(recipientEmail, otpCode, cadetName) {
       try {
         const response = await fetch('/api/send-otp', {
@@ -90,10 +90,18 @@
           })
         });
         const data = await response.json();
-        return response.ok && data.success;
+        
+        if (response.ok && data.success) {
+          return true;
+        } else {
+          // Display the exact server/Brevo error on screen via alert/status
+          const errorMsg = data.error || "Failed to dispatch OTP via serverless gateway.";
+          console.error("Gateway Error Details:", errorMsg);
+          throw new Error(errorMsg);
+        }
       } catch (err) {
         console.error("Serverless OTP dispatch error:", err);
-        return false;
+        throw err;
       }
     }
 
@@ -181,11 +189,7 @@
           window.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
           
           submitBtn.innerText = "DISPATCHING OTP...";
-          const emailSent = await sendBrevoOtpEmail(email, window.generatedOtp, cadetDocData.name);
-
-          if (!emailSent) {
-            throw new Error("Failed to dispatch OTP via serverless gateway. Please check email address or configuration.");
-          }
+          await sendBrevoOtpEmail(email, window.generatedOtp, cadetDocData.name);
 
           // Show OTP Input & Resend Option
           otpSection.classList.remove('hidden');
@@ -215,14 +219,13 @@
       statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/80 border border-amber-500/60 text-amber-200 block text-left leading-relaxed";
       statusAlert.innerHTML = `<b>Resending OTP...</b> Dispatching a fresh verification code to <b>${window.pendingCadetData.email}</b>.`;
 
-      const emailSent = await sendBrevoOtpEmail(window.pendingCadetData.email, window.generatedOtp, window.pendingCadetData.name);
-      
-      if (emailSent) {
+      try {
+        await sendBrevoOtpEmail(window.pendingCadetData.email, window.generatedOtp, window.pendingCadetData.name);
         statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-left leading-relaxed";
         statusAlert.innerHTML = `<b>Fresh OTP Dispatched:</b> A new 6-digit verification code has been sent to your email.`;
-      } else {
+      } catch (error) {
         statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
-        statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> Failed to resend OTP. Please try again.`;
+        statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> ${error.message}`;
       }
     };
 
