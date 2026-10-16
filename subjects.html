@@ -193,7 +193,6 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Team Phantom Official Firebase Configuration
@@ -207,7 +206,6 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
     // Master CDS OTA Subjects (Live & Recorded)
@@ -486,51 +484,47 @@
     let currentBatchParam = "cds-kilo";
     let currentModeParam = "live";
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        if (unsubscribeSnapshot) unsubscribeSnapshot();
-        window.location.href = "index.html";
-        return;
-      }
+    // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
+    const localUid = localStorage.getItem("phantom_uid");
+    const localToken = localStorage.getItem("phantom_session_token");
 
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", user.uid), (docSnap) => {
+    if (!localUid || !localToken) {
+      window.location.href = "index.html";
+    } else {
+      onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          signOut(auth).then(() => window.location.href = "index.html");
+          window.location.href = "index.html";
           return;
         }
 
         const data = docSnap.data();
-        const localToken = localStorage.getItem("phantom_session_token");
 
         if (data.status !== "active") {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active or pending verification.");
-          signOut(auth).then(() => window.location.href = "index.html");
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
         if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          signOut(auth).then(() => {
-            localStorage.removeItem("phantom_session_token");
-            localStorage.removeItem("phantom_uid");
-            window.location.href = "index.html";
-          });
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
         renderBatchCurriculum(data.allowedBatches || []);
       });
-    });
+    }
 
     function renderBatchCurriculum(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
       currentBatchParam = urlParams.get('batch') || 'cds-kilo';
       currentModeParam = (urlParams.get('mode') === 'recorded') ? 'recorded' : 'live';
 
-      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all');
+      const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
       if (!isCombo && !allowedBatches.includes(currentBatchParam)) {
         alert("ACCESS DENIED: You are not authorized for this specific squadron.");
         window.location.href = "classroom.html";
@@ -558,7 +552,6 @@
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-500/60 transition cursor-pointer group shadow-lg";
         
-        // CHANGED HERE: Direct navigation to lectures.html instead of chapters.html
         card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
 
         card.innerHTML = `
@@ -605,18 +598,14 @@
       });
     }
 
-    // UPDATED FUNCTION: Direct redirect to lectures.html
     function openSubjectModule(batch, subjectName, mode) {
       window.location.href = `lectures.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
     }
 
     window.terminateCadetSession = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      signOut(auth).then(() => {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
-        window.location.href = "index.html";
-      });
+      localStorage.removeItem("phantom_session_token");
+      localStorage.removeItem("phantom_uid");
+      window.location.href = "index.html";
     };
   </script>
 
