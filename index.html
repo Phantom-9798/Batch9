@@ -77,46 +77,14 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Generate robust Device Hardware/Browser Fingerprint
-    function generateDeviceFingerprint() {
-      const nav = window.navigator;
-      const screen = window.screen;
-      const rawString = [
-        nav.userAgent,
-        nav.language,
-        screen.colorDepth,
-        screen.width + 'x' + screen.height,
-        new Date().getTimezoneOffset(),
-        nav.hardwareConcurrency || 'unknown'
-      ].join('||');
-      
-      let hash = 0;
-      for (let i = 0; i < rawString.length; i++) {
-        const char = rawString.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash |= 0;
-      }
-      return "dev_" + Math.abs(hash) + "_" + Math.random().toString(36).substring(2, 8);
-    }
-
     // Auto-redirect if cadet already holds an active verified session
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
           const cadetSnap = await getDoc(doc(db, "cadets", user.uid));
           if (cadetSnap.exists() && cadetSnap.data().status === "active") {
-            const cadetEmail = cadetSnap.data().email || user.email;
-            const isWhitelisted = cadetEmail.toLowerCase() === "collaboration9602@gmail.com";
-
-            if (isWhitelisted) {
-              window.location.href = "classroom.html";
-              return;
-            }
-
-            const savedDeviceToken = localStorage.getItem("phantom_device_fingerprint");
-            const dbActiveSession = cadetSnap.data().activeSession;
-
-            if (savedDeviceToken && dbActiveSession && savedDeviceToken === dbActiveSession) {
+            const savedToken = localStorage.getItem("phantom_session_token");
+            if (savedToken && savedToken === cadetSnap.data().activeSession) {
               window.location.href = "classroom.html";
             }
           }
@@ -182,7 +150,7 @@
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
 
-          const currentDeviceToken = generateDeviceFingerprint();
+          const initialSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
 
           let finalAllowed = [...chosenBatches];
           if (chosenBatches.includes("combo")) {
@@ -195,7 +163,7 @@
             targetBatch: chosenBatches.join(", "),
             status: "pending",
             allowedBatches: finalAllowed,
-            activeSession: currentDeviceToken,
+            activeSession: initialSessionToken,
             createdAt: new Date().toISOString()
           });
 
@@ -239,50 +207,17 @@
             return;
           }
 
-          // Exception Check for Master Whitelisted Email
-          const isWhitelisted = email.toLowerCase() === "collaboration9602@gmail.com";
-          const currentDeviceToken = generateDeviceFingerprint();
-
-          if (!isWhitelisted) {
-            let registeredDeviceToken = cadetData.activeSession;
-
-            // If activeSession is empty/old string, register this current device as the primary lock
-            if (!registeredDeviceToken || !registeredDeviceToken.startsWith("dev_")) {
-              await updateDoc(cadetDocRef, {
-                activeSession: currentDeviceToken,
-                lastLoginAt: new Date().toISOString()
-              });
-              registeredDeviceToken = currentDeviceToken;
-            }
-
-            const localStoredToken = localStorage.getItem("phantom_device_fingerprint");
-
-            // Strict Device Lock Check
-            if (registeredDeviceToken !== currentDeviceToken && registeredDeviceToken !== localStoredToken) {
-              await signOut(auth);
-              statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed shadow-lg";
-              statusAlert.innerHTML = `
-                <div class="flex items-center gap-2 font-orbitron font-bold text-red-400 mb-1 text-sm tracking-wide">
-                  <span>&#10006;</span> HARDWARE LOCK ENGAGED
-                </div>
-                Active session locked to another device terminal. Single-device protocol strictly enforced. Access Denied.
-              `;
-              submitBtn.disabled = false;
-              submitBtn.innerText = "AUTHENTICATE & ENTER";
-              return;
-            }
-          }
-
-          // Save token locally and grant access
-          localStorage.setItem("phantom_device_fingerprint", currentDeviceToken);
+          const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem("phantom_session_token", newSessionToken);
           localStorage.setItem("phantom_uid", user.uid);
 
           await updateDoc(cadetDocRef, {
+            activeSession: newSessionToken,
             lastLoginAt: new Date().toISOString()
           });
 
           statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-center font-orbitron font-bold tracking-wider";
-          statusAlert.innerText = "DEVICE IDENTITY CONFIRMED. ACCESS GRANTED...";
+          statusAlert.innerText = "IDENTITY CONFIRMED. ACCESS GRANTED...";
 
           setTimeout(() => {
             window.location.href = "classroom.html";
@@ -306,7 +241,6 @@
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-body { font-family: 'Inter', sans-serif; }
 
-    /* Tri-Service Military Stealth Atmosphere */
     .tactical-bg {
       background: 
         radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.22) 0%, transparent 55%),
@@ -319,7 +253,6 @@
       background-attachment: fixed;
     }
 
-    /* Precision Military HUD Grid Overlay */
     .hud-grid {
       background-image: 
         linear-gradient(rgba(245, 158, 11, 0.05) 1px, transparent 1px),
@@ -327,46 +260,12 @@
       background-size: 32px 32px;
     }
 
-    /* Heavy Armor Card Styling */
     .armor-card {
       background: rgba(10, 15, 20, 0.94);
       border: 1px solid rgba(245, 158, 11, 0.4);
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 0, 0, 0.8);
     }
   </style>
-
-  <script>
-    // केवल Google Chrome और Google App को अनुमति देने वाला अल्टीमेट गार्ड
-    function enforceGoogleAndChromeOnly() {
-        const ua = navigator.userAgent.toLowerCase();
-        
-        const isForbiddenBrowser = ua.includes('1dm') || ua.includes('idm') || ua.includes('download') || ua.includes('adm') || ua.includes('ucbrowser') || ua.includes('firefox') || ua.includes('fxios') || ua.includes('opera') || ua.includes('safari') && !ua.includes('chrome');
-        const isChrome = ua.includes('chrome') || ua.includes('crios');
-        const isGoogleApp = ua.includes('gsa') || (ua.includes('android') && ua.includes('version/'));
-
-        if (isForbiddenBrowser || (!isChrome && !isGoogleApp)) {
-            document.documentElement.innerHTML = `
-                <html lang="en" style="background: #04070b; color: white; font-family: sans-serif; text-align: center; padding-top: 15vh;">
-                <head><title>Access Denied - Restricted Browser</title></head>
-                <body style="background: #04070b; color: #ff4444; padding: 20px;">
-                    <div style="max-width: 450px; margin: auto; background: #0a0f16; border: 1px solid #ff4444; padding: 30px; border-radius: 15px; box-shadow: 0 0 30px rgba(255,68,68,0.4);">
-                        <h2 style="font-family: monospace; margin-bottom: 15px; color: #f59e0b;">🚨 ACCESS RESTRICTED</h2>
-                        <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-                            सुरक्षा कारणों से यह प्लेटफॉर्म सिर्फ और सिर्फ ऑफिशियल <b>Google Chrome</b> या <b>Google App</b> पर ही चल सकता है।
-                        </p>
-                        <p style="font-size: 13px; color: #38bdf8; margin-top: 15px; background: rgba(56,189,248,0.1); padding: 10px; border-radius: 8px;">
-                            कृपया इस लिंक को कॉपी करें और अपने डिवाइस के असली Google Chrome ब्राउज़र में खोलें।
-                        </p>
-                    </div>
-                </body>
-                </html>
-            `;
-            throw new Error("Access restricted: Only Google & Chrome permitted.");
-        }
-    }
-
-    enforceGoogleAndChromeOnly();
-</script>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
@@ -375,7 +274,7 @@
   <header class="w-full pt-10 pb-4 px-4">
     <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8">
       
-      <!-- LOGO BADGE (Using logo.jpeg) -->
+      <!-- LOGO BADGE -->
       <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-black/90 border-2 border-amber-500/80 p-1.5 shadow-[0_0_35px_rgba(245,158,11,0.35)] shrink-0 flex items-center justify-center">
         <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
         <div class="absolute -bottom-2.5 bg-amber-500 text-black font-orbitron font-extrabold text-[9px] px-2 py-0.5 rounded tracking-widest uppercase shadow">
@@ -406,7 +305,6 @@
 
       <div class="armor-card rounded-2xl p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden">
         
-        <!-- Tactical Corner Marks -->
         <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-amber-500"></div>
         <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-amber-500"></div>
         <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-amber-500"></div>
@@ -425,7 +323,6 @@
         <!-- CREDENTIAL FORM -->
         <form id="authForm" onsubmit="window.authAction(event)" class="space-y-4 font-body">
           
-          <!-- CADET FULL NAME (Signup Only) -->
           <div id="nameField" class="hidden">
             <label class="block text-xs uppercase tracking-wider text-neutral-300 font-bold mb-1.5 font-rajdhani text-sm">
               Cadet Full Name
@@ -433,7 +330,6 @@
             <input type="text" id="cadetName" placeholder="e.g. Vikram Sharma" class="w-full bg-neutral-900/95 border border-neutral-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
           </div>
 
-          <!-- EMAIL INPUT -->
           <div>
             <label class="block text-xs uppercase tracking-wider text-neutral-300 font-bold mb-1.5 font-rajdhani text-sm">
               Registered Email Address
@@ -441,13 +337,11 @@
             <input type="email" id="cadetEmail" required placeholder="cadet@example.com" class="w-full bg-neutral-900/95 border border-neutral-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
           </div>
 
-          <!-- PASSWORD INPUT -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label class="block text-xs uppercase tracking-wider text-neutral-300 font-bold font-rajdhani text-sm">
                 Security Password
               </label>
-              <!-- FORGOT PASSWORD BUTTON (LOGIN ONLY) -->
               <button type="button" id="forgotBtn" onclick="window.handleForgotPassword()" class="text-[11px] font-orbitron text-amber-400 hover:text-amber-300 uppercase tracking-wider focus:outline-none">
                 FORGOT PASSWORD?
               </button>
@@ -460,7 +354,6 @@
             </div>
           </div>
 
-          <!-- MULTIPLE BATCH SELECTOR (Signup Only) -->
           <div id="batchField" class="hidden">
             <label class="block text-xs uppercase tracking-wider text-neutral-300 font-bold mb-1.5 font-rajdhani text-sm flex items-center justify-between">
               <span>Target Training Batch (Select 1 or more)</span>
@@ -494,13 +387,11 @@
             </div>
           </div>
 
-          <!-- SUBMIT ACTION BUTTON -->
           <button type="submit" id="submitBtn" class="w-full py-3 mt-3 rounded-lg bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-orbitron font-extrabold tracking-wider uppercase text-sm shadow-[0_0_25px_rgba(245,158,11,0.3)] transition transform active:scale-[0.98]">
             AUTHENTICATE & ENTER
           </button>
         </form>
 
-        <!-- STATUS FEEDBACK ALERT BOX -->
         <div id="statusAlert" class="mt-4 p-3 rounded-lg text-xs hidden border"></div>
 
       </div>
@@ -508,7 +399,6 @@
     </div>
   </main>
 
-  <!-- BOTTOM FOOTER -->
   <footer class="bg-black/95 border-t border-neutral-900 py-4 text-center text-xs font-rajdhani tracking-widest text-neutral-500">
     TEAM PHANTOM &bull; SECURE SINGLE-DEVICE PROTOCOL &bull; &copy; 2026
   </footer>
