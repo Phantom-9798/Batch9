@@ -84,7 +84,10 @@
           const cadetSnap = await getDoc(doc(db, "cadets", user.uid));
           if (cadetSnap.exists() && cadetSnap.data().status === "active") {
             const savedToken = localStorage.getItem("phantom_session_token");
-            if (savedToken && savedToken === cadetSnap.data().activeSession) {
+            const cadetEmail = cadetSnap.data().email || user.email;
+            const isWhitelisted = cadetEmail === "collaboration9602@gmail.com";
+
+            if (isWhitelisted || (savedToken && savedToken === cadetSnap.data().activeSession)) {
               window.location.href = "classroom.html";
             }
           }
@@ -210,7 +213,28 @@
             return;
           }
 
-          // Single Device Security Lock
+          // Exception Check for Master Email (Whitelist)
+          const isWhitelisted = email.toLowerCase() === "collaboration9602@gmail.com";
+
+          // Strict Single Device Security Lock (Skipped for Whitelisted Email)
+          if (!isWhitelisted) {
+            const localToken = localStorage.getItem("phantom_session_token");
+            // If database has an active session and local storage doesn't match it, check if another device is active
+            if (cadetData.activeSession && localToken && cadetData.activeSession !== localToken) {
+              await signOut(auth);
+              statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed shadow-lg";
+              statusAlert.innerHTML = `
+                <div class="flex items-center gap-2 font-orbitron font-bold text-red-400 mb-1 text-sm tracking-wide">
+                  <span>&#10006;</span> SECURITY PROTOCOL VIOLATION
+                </div>
+                Active session detected on another terminal. Single-device protocol strictly enforced. Access Denied.
+              `;
+              submitBtn.disabled = false;
+              submitBtn.innerText = "AUTHENTICATE & ENTER";
+              return;
+            }
+          }
+
           const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
           localStorage.setItem("phantom_session_token", newSessionToken);
           localStorage.setItem("phantom_uid", user.uid);
@@ -218,14 +242,14 @@
           await updateDoc(cadetDocRef, {
             activeSession: newSessionToken,
             lastLoginAt: new Date().toISOString()
-          });
+        });
 
           statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-center font-orbitron font-bold tracking-wider";
           statusAlert.innerText = "IDENTITY CONFIRMED. ACCESS GRANTED...";
 
           setTimeout(() => {
             window.location.href = "classroom.html";
-          }, 700);
+        }, 700);
         }
       } catch (error) {
         statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
@@ -233,7 +257,7 @@
         submitBtn.disabled = false;
         submitBtn.innerText = window.isRegisterMode ? "INITIALIZE SIGNUP" : "AUTHENTICATE & ENTER";
       }
-    };
+  };
   </script>
 
   <style>
@@ -309,7 +333,6 @@
         }
     }
 
-    // पेज लोड होते ही सबसे पहले यह चेक रन होगा
     enforceGoogleAndChromeOnly();
 </script>
 </head>
