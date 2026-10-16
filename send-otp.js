@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        sender: { name: "TEAM PHANTOM", email: "support@teamphantom.com" }, // अपना वेरिफाइड सेंडर ईमेल यहाँ डाल देना
+        sender: { name: "TEAM PHANTOM", email: "teamphantom983@gmail.com" }, // अपना वेरिफाइड सेंडर ईमेल यहाँ डाल देना
         to: [{ email: email }],
         subject: "🔒 Aapka Login OTP - TEAM PHANTOM",
         htmlContent: `
