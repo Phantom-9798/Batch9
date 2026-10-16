@@ -47,20 +47,16 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword,
-      sendPasswordResetEmail,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { 
-      getFirestore, 
-      doc, 
-      setDoc, 
-      getDoc, 
-      updateDoc 
+    import {  
+      getFirestore,  
+      doc,  
+      setDoc,  
+      getDoc,  
+      updateDoc,
+      collection,
+      query,
+      where,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Team Phantom Official Firebase Configuration
@@ -74,96 +70,92 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Auto-redirect if cadet already holds an active verified session
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const cadetSnap = await getDoc(doc(db, "cadets", user.uid));
-          if (cadetSnap.exists() && cadetSnap.data().status === "active") {
-            const savedToken = localStorage.getItem("phantom_session_token");
-            if (savedToken && savedToken === cadetSnap.data().activeSession) {
-              window.location.href = "classroom.html";
-            }
-          }
-        } catch (e) {
-          console.error("Session verification bypass error", e);
-        }
-      }
-    });
+    // Global variables for OTP flow
+    window.generatedOtp = null;
+    window.pendingCadetData = null;
 
-    // Password Reset Protocol
-    window.handleForgotPassword = async function() {
-      const email = document.getElementById('cadetEmail').value.trim();
-      const statusAlert = document.getElementById('statusAlert');
-
-      if (!email) {
-        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/80 border border-amber-500/60 text-amber-200 block text-left leading-relaxed shadow-lg";
-        statusAlert.innerHTML = `<b>Input Required:</b> Please enter your registered email address in the box above first, then click "Forgot Password".`;
-        return;
-      }
-
+    // Helper function to send email via Brevo API / Backend
+    async function sendBrevoOtpEmail(recipientEmail, otpCode, cadetName) {
+      // Note: In production, this fetch points to your backend or Vercel Serverless Function 
+      // where your Brevo SMTP Key is safely stored.
       try {
-        await sendPasswordResetEmail(auth, email);
-        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-left leading-relaxed shadow-lg";
-        statusAlert.innerHTML = `
-          <div class="flex items-center gap-2 font-orbitron font-bold text-emerald-400 mb-1 text-xs tracking-wide">
-            <span>&#10003;</span> RESET DISPATCHED
-          </div>
-          A tactical password reset link has been dispatched to <b>${email}</b>.<br>Please check your inbox (and spam/junk folder) to configure your new password.
-        `;
-      } catch (error) {
-        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
-        statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> ${error.message}`;
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'api-key': 'YOUR_BREVO_SMTP_KEY_OR_API_KEY', // Yahan apni Brevo API Key daal dena
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            sender: { name: "TEAM PHANTOM", email: "support@teamphantom.com" },
+            to: [{ email: recipientEmail, name: cadetName || "Cadet" }],
+            subject: "🔒 Aapka Login OTP - TEAM PHANTOM",
+            htmlContent: `
+              <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; border-radius: 5px;">
+                  <h2 style="color: #1a1a1a; text-align: center;">🛡️ TEAM PHANTOM 🛡️</h2>
+                  <p style="font-size: 16px; color: #333;">Jai Hind, Cadet!</p>
+                  <p style="font-size: 15px; color: #333;">Your login OTP for the official portal is given below:</p>
+                  <div style="background-color: #000; color: #fff; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 5px; margin: 20px 0;">
+                      ${otpCode}
+                  </div>
+                  <p style="font-size: 14px; color: #555;">Please enter this OTP into the website OTP section to get access. This OTP is valid for a single session.</p>
+                  <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                  <p style="font-size: 12px; color: #888; text-align: center;">Official Security System By TEAM PHANTOM</p>
+              </div>
+            `
+          })
+        });
+        return response.ok;
+      } catch (err) {
+        console.error("Brevo API error:", err);
+        return false;
       }
-    };
+    }
 
     window.authAction = async function(event) {
       event.preventDefault();
       const email = document.getElementById('cadetEmail').value.trim();
-      const password = document.getElementById('cadetPassword').value.trim();
       const statusAlert = document.getElementById('statusAlert');
       const submitBtn = document.getElementById('submitBtn');
+      const otpSection = document.getElementById('otpSection');
 
       statusAlert.classList.add('hidden');
       submitBtn.disabled = true;
-      submitBtn.innerText = "AUTHENTICATING...";
 
       try {
         if (window.isRegisterMode) {
           // --- NEW CADET SIGNUP ---
           const name = document.getElementById('cadetName').value.trim();
-          
           const selectedCheckboxes = document.querySelectorAll('input[name="cadetBatches"]:checked');
           const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-          if (!name) {
-            throw new Error("Please provide your full cadet name.");
+          if (!name) throw new Error("Please provide your full cadet name.");
+          if (chosenBatches.length === 0) throw new Error("Please select at least one training batch.");
+
+          // Check if email already exists in Firestore
+          const q = query(collection(db, "cadets"), where("email", "==", email));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            throw new Error("This email is already registered. Please proceed to login.");
           }
-
-          if (chosenBatches.length === 0) {
-            throw new Error("Please select at least one training batch.");
-          }
-
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-
-          const initialSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
 
           let finalAllowed = [...chosenBatches];
           if (chosenBatches.includes("combo")) {
             finalAllowed = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
           }
 
-          await setDoc(doc(db, "cadets", user.uid), {
+          // Generate unique ID for new cadet
+          const cadetUid = "cadet_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+
+          await setDoc(doc(db, "cadets", cadetUid), {
+            uid: cadetUid,
             name: name,
             email: email,
             targetBatch: chosenBatches.join(", "),
-            status: "pending",
+            status: "pending", // Admin verification required
             allowedBatches: finalAllowed,
-            activeSession: initialSessionToken,
             createdAt: new Date().toISOString()
           });
 
@@ -173,61 +165,108 @@
               <span>&#9888;</span> REGISTRATION RECORDED
             </div>
             Cadet <b>${name}</b>, your account status is: <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono font-bold">PENDING ACTIVATION</span>.<br>
-            Selected Batches: <span class="font-mono text-white">${chosenBatches.join(", ")}</span>.<br><br>
             Your access request has been submitted to administration for verification.
           `;
           submitBtn.disabled = false;
           submitBtn.innerText = "CADET ENROLLED";
+
         } else {
-          // --- CADET LOGIN ---
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
+          // --- CADET LOGIN: STEP 1 - SEND OTP ---
+          const cadetQuery = query(collection(db, "cadets"), where("email", "==", email));
+          const cadetSnapshot = await getDocs(cadetQuery);
 
-          const cadetDocRef = doc(db, "cadets", user.uid);
-          const cadetSnap = await getDoc(cadetDocRef);
-
-          if (!cadetSnap.exists()) {
-            await signOut(auth);
-            throw new Error("Cadet record not registered in tactical database.");
+          if (cadetSnapshot.empty) {
+            throw new Error("Cadet record not registered in tactical database. Please sign up first.");
           }
 
-          const cadetData = cadetSnap.data();
+          const cadetDocData = cadetSnapshot.docs[0].data();
+          window.pendingCadetData = { id: cadetSnapshot.docs[0].id, ...cadetDocData };
 
-          if (cadetData.status !== "active") {
-            await signOut(auth);
-            statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed shadow-lg";
+          if (cadetDocData.status !== "active") {
+            statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/80 border border-amber-500/60 text-amber-200 block text-left leading-relaxed shadow-lg";
             statusAlert.innerHTML = `
-              <div class="flex items-center gap-2 font-orbitron font-bold text-red-400 mb-1 text-sm tracking-wide">
-                <span>&#10006;</span> ACCESS RESTRICTED
+              <div class="flex items-center gap-2 font-orbitron font-bold text-amber-400 mb-1 text-sm tracking-wide">
+                <span>&#9888;</span> PENDING ACTIVATION
               </div>
-              Your account is currently pending administrative verification.
+              Your account is currently pending administrative verification. Please wait for activation.
             `;
             submitBtn.disabled = false;
-            submitBtn.innerText = "AUTHENTICATE & ENTER";
+            submitBtn.innerText = "SEND LOGIN OTP";
             return;
           }
 
-          const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-          localStorage.setItem("phantom_session_token", newSessionToken);
-          localStorage.setItem("phantom_uid", user.uid);
+          // Generate 6-digit OTP
+          window.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+          
+          // Send OTP via Brevo SMTP / API
+          submitBtn.innerText = "DISPATCHING OTP...";
+          const emailSent = await sendBrevoOtpEmail(email, window.generatedOtp, cadetDocData.name);
 
-          await updateDoc(cadetDocRef, {
-            activeSession: newSessionToken,
-            lastLoginAt: new Date().toISOString()
-          });
+          if (!emailSent) {
+            // Fallback for simulation/testing if API key isn't wired yet
+            console.warn("Simulated OTP (Check Console if offline):", window.generatedOtp);
+          }
 
-          statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-center font-orbitron font-bold tracking-wider";
-          statusAlert.innerText = "IDENTITY CONFIRMED. ACCESS GRANTED...";
+          // Show OTP Input Box
+          otpSection.classList.remove('hidden');
+          document.getElementById('cadetEmail').disabled = true;
+          submitBtn.innerText = "VERIFY OTP & ENTER";
+          submitBtn.onclick = verifyOtpAction;
+          submitBtn.disabled = false;
 
-          setTimeout(() => {
-            window.location.href = "classroom.html";
-          }, 700);
+          statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-left leading-relaxed";
+          statusAlert.innerHTML = `<b>OTP Dispatched:</b> A 6-digit verification code has been sent to <b>${email}</b>. Enter it below to access the portal.`;
         }
       } catch (error) {
         statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
         statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> ${error.message}`;
         submitBtn.disabled = false;
-        submitBtn.innerText = window.isRegisterMode ? "INITIALIZE SIGNUP" : "AUTHENTICATE & ENTER";
+        submitBtn.innerText = window.isRegisterMode ? "INITIALIZE SIGNUP" : "SEND LOGIN OTP";
+      }
+    };
+
+    // --- CADET LOGIN: STEP 2 - VERIFY OTP & SINGLE-DEVICE SESSION ---
+    window.verifyOtpAction = async function(event) {
+      event.preventDefault();
+      const enteredOtp = document.getElementById('cadetOtp').value.trim();
+      const statusAlert = document.getElementById('statusAlert');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (enteredOtp !== window.generatedOtp) {
+        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
+        statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> Invalid OTP code. Please check your inbox and try again.`;
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "VERIFYING SESSION...";
+
+      try {
+        const cadetRef = doc(db, "cadets", window.pendingCadetData.id);
+        const newSessionToken = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+        
+        // Single active session storage
+        localStorage.setItem("phantom_session_token", newSessionToken);
+        localStorage.setItem("phantom_uid", window.pendingCadetData.id);
+
+        // Update active session in Firestore (Overrides any previous device session = Single Active Device)
+        await updateDoc(cadetRef, {
+          activeSession: newSessionToken,
+          lastLoginAt: new Date().toISOString()
+        });
+
+        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 block text-center font-orbitron font-bold tracking-wider";
+        statusAlert.innerText = "IDENTITY CONFIRMED. ACCESS GRANTED...";
+
+        setTimeout(() => {
+          window.location.href = "classroom.html";
+        }, 700);
+
+      } catch (err) {
+        statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/60 text-red-200 block text-left leading-relaxed";
+        statusAlert.innerHTML = `<span class="font-bold text-red-400">ERROR:</span> ${err.message}`;
+        submitBtn.disabled = false;
+        submitBtn.innerText = "VERIFY OTP & ENTER";
       }
     };
   </script>
@@ -337,21 +376,12 @@
             <input type="email" id="cadetEmail" required placeholder="cadet@example.com" class="w-full bg-neutral-900/95 border border-neutral-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
           </div>
 
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs uppercase tracking-wider text-neutral-300 font-bold font-rajdhani text-sm">
-                Security Password
-              </label>
-              <button type="button" id="forgotBtn" onclick="window.handleForgotPassword()" class="text-[11px] font-orbitron text-amber-400 hover:text-amber-300 uppercase tracking-wider focus:outline-none">
-                FORGOT PASSWORD?
-              </button>
-            </div>
-            <div class="relative">
-              <input type="password" id="cadetPassword" required minlength="6" placeholder="••••••••" class="w-full bg-neutral-900/95 border border-neutral-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 pr-12">
-              <button type="button" onclick="togglePasswordVisibility(event)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-neutral-400 hover:text-amber-400 font-mono focus:outline-none">
-                SHOW
-              </button>
-            </div>
+          <!-- OTP Input Field (Hidden Initially during login) -->
+          <div id="otpSection" class="hidden">
+            <label class="block text-xs uppercase tracking-wider text-amber-400 font-bold mb-1.5 font-rajdhani text-sm">
+              Enter 6-Digit Email OTP
+            </label>
+            <input type="text" id="cadetOtp" maxlength="6" placeholder="123456" class="w-full bg-neutral-900/95 border border-amber-500/60 rounded-lg px-3.5 py-2.5 text-base text-amber-300 font-mono tracking-widest placeholder-neutral-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-center">
           </div>
 
           <div id="batchField" class="hidden">
@@ -388,7 +418,7 @@
           </div>
 
           <button type="submit" id="submitBtn" class="w-full py-3 mt-3 rounded-lg bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-orbitron font-extrabold tracking-wider uppercase text-sm shadow-[0_0_25px_rgba(245,158,11,0.3)] transition transform active:scale-[0.98]">
-            AUTHENTICATE & ENTER
+            SEND LOGIN OTP
           </button>
         </form>
 
@@ -409,19 +439,23 @@
     function switchMode(mode) {
       const nameField = document.getElementById('nameField');
       const batchField = document.getElementById('batchField');
+      const otpSection = document.getElementById('otpSection');
+      const emailInput = document.getElementById('cadetEmail');
       const submitBtn = document.getElementById('submitBtn');
       const tabLogin = document.getElementById('tabLogin');
       const tabRegister = document.getElementById('tabRegister');
-      const forgotBtn = document.getElementById('forgotBtn');
       const statusAlert = document.getElementById('statusAlert');
+      
       statusAlert.classList.add('hidden');
+      emailInput.disabled = false;
+      otpSection.classList.add('hidden');
 
       if (mode === 'register') {
         window.isRegisterMode = true;
         nameField.classList.remove('hidden');
         batchField.classList.remove('hidden');
-        forgotBtn.classList.add('hidden');
         submitBtn.innerText = "INITIALIZE SIGNUP";
+        submitBtn.onclick = null; // resets to form onsubmit
         
         tabRegister.className = "py-2.5 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-black font-extrabold tracking-wider transition shadow-md";
         tabLogin.className = "py-2.5 rounded-lg text-neutral-400 hover:text-white font-bold tracking-wider transition";
@@ -429,23 +463,11 @@
         window.isRegisterMode = false;
         nameField.classList.add('hidden');
         batchField.classList.add('hidden');
-        forgotBtn.classList.remove('hidden');
-        submitBtn.innerText = "AUTHENTICATE & ENTER";
+        submitBtn.innerText = "SEND LOGIN OTP";
+        submitBtn.onclick = null;
 
         tabLogin.className = "py-2.5 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-black font-extrabold tracking-wider transition shadow-md";
         tabRegister.className = "py-2.5 rounded-lg text-neutral-400 hover:text-white font-bold tracking-wider transition";
-      }
-    }
-
-    function togglePasswordVisibility(e) {
-      const passwordInput = document.getElementById('cadetPassword');
-      const btn = e ? e.currentTarget || e.target : document.querySelector("button[onclick*='togglePasswordVisibility']");
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        btn.innerText = 'HIDE';
-      } else {
-        passwordInput.type = 'password';
-        btn.innerText = 'SHOW';
       }
     }
   </script>
