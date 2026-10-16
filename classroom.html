@@ -513,7 +513,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -687,7 +687,7 @@
           applyBatchAccess(batchId, hasAccess);
         });
 
-        renderTelegramNotification(allowed, isCombo, user.uid);
+        renderTelegramNotification(allowed, isCombo, user.uid, data.clickedGroups || []);
       });
     });
 
@@ -730,7 +730,7 @@
       "capf": "https://t.me/+JmGvA3F25WY1YjA9"
     };
 
-    window.renderTelegramNotification = function(allowed, isCombo, userId) {
+    window.renderTelegramNotification = function(allowed, isCombo, userId, clickedGroups) {
       const container = document.getElementById("telegramNotificationContainer");
       if (!container) return;
 
@@ -746,9 +746,6 @@
         container.innerHTML = "";
         return;
       }
-
-      let clickedStorageKey = "phantom_clicked_groups_" + userId;
-      let clickedGroups = JSON.parse(localStorage.getItem(clickedStorageKey) || "[]");
 
       const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
       if (allClicked) {
@@ -811,16 +808,17 @@
       if (dropdown) dropdown.classList.toggle("hidden");
     }
 
-    window.secureRedirect = function(groupId, userId) {
-      let storageKey = "phantom_clicked_groups_" + userId;
-      let clickedGroups = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      if (!clickedGroups.includes(groupId)) {
-        clickedGroups.push(groupId);
-        localStorage.setItem(storageKey, JSON.stringify(clickedGroups));
+    window.secureRedirect = async function(groupId, userId) {
+      try {
+        const cadetRef = doc(db, "cadets", userId);
+        await updateDoc(cadetRef, {
+          clickedGroups: arrayUnion(groupId)
+        });
+      } catch (e) {
+        console.error("Error updating clicked group in Firestore:", e);
       }
       const targetUrl = secureTgRegistry[groupId];
       if (targetUrl) window.open(targetUrl, '_blank');
-      setTimeout(() => { location.reload(); }, 300);
     }
 
     window.openBatchLectures = function(batchId) {
