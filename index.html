@@ -273,91 +273,72 @@
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 0, 0, 0.8);
     }
   </style>
-  <!-- Heavy Armor Card Styling -->
-    .armor-card {
-      background: rgba(10, 15, 20, 0.94);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 0, 0, 0.8);
+
+  <!-- ========================================== -->
+  <!-- 🛑 1DM & DOWNLOAD EXTENSION SECURITY GUARD -->
+  <!-- ========================================== -->
+  <script type="module">
+    import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const authCheck = getAuth();
+    const dbCheck = getFirestore();
+
+    function isDownloadToolActive() {
+      const ua = navigator.userAgent.toLowerCase();
+      if (ua.includes('1dm') || ua.includes('idm') || ua.includes('download') || ua.includes('ucbrowser') || ua.includes('fxios') || ua.includes('adm') || ua.includes('turbodownload')) {
+        return true;
+      }
+      if (window.outerWidth === 0 || window.outerHeight === 0 || window.innerWidth < 200) {
+        return true;
+      }
+      if (window.navigator.webdriver) {
+        return true;
+      }
+      return false;
     }
-  </style>
 
-  <!-- 👇 1DM और एक्सटेंशन से बचाने वाला ब्रह्मास्त्र कोड यहाँ पेस्ट कर दे 👇 -->
-  <script>
-    const db = firebase.firestore();
+    async function forceSuspendUser(userId, reason) {
+      try {
+        await updateDoc(doc(dbCheck, "cadets", userId), {
+          status: "pending",
+          blockReason: reason,
+          blockedAt: new Date().toISOString()
+        });
 
-    // 1DM, IDM और खतरनाक डाउनलोडर एक्सटेंशन को पहचानने का फंक्शन
-    function detectUnauthorizedTools() {
-        const ua = navigator.userAgent.toLowerCase();
-        if (ua.includes('1dm') || ua.includes('idm') || ua.includes('download') || ua.includes('ucbrowser') || ua.includes('fxios') || ua.includes('adm')) {
-            return true;
-        }
-        if (window.outerWidth === 0 || window.outerHeight === 0) {
-            return true;
-        }
-        return false;
+        alert("🚨 सुरक्षा अलर्ट: अनधिकृत डाउनलोडर या एक्सटेंशन डिटेक्ट किया गया! आपका अकाउंट ब्लॉक कर दिया गया है।");
+        
+        await signOut(authCheck);
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("Suspension error:", err);
+      }
     }
 
-    // चोर का अकाउंट तुरंत 'pending' करने और भगाने का फंक्शन
-    async function blockAndPendingUser(userId, reason) {
+    onAuthStateChanged(authCheck, async (user) => {
+      if (user) {
         try {
-            await db.collection("cadets").doc(userId).update({
-                status: "pending",
-                blockReason: reason,
-                blockedAt: new Date().toISOString()
-            });
-
-            alert("🚨 सुरक्षा चेतावनी: अनधिकृत डाउनलोड टूल या एक्सटेंशन डिटेक्ट हुआ! आपका अकाउंट सस्पेंड कर दिया गया है।");
-            
-            await firebase.auth().signOut();
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "index.html";
-        } catch (error) {
-            console.error("Error updating status: ", error);
-        }
-    }
-
-    // निरंतर पहरा (Background Security Guard)
-    firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-            const uid = user.uid;
-            try {
-                const docRef = db.collection("cadets").doc(uid);
-                const doc = await docRef.get();
-
-                if (doc.exists) {
-                    const userData = doc.data();
-                    if (userData.status !== "active") {
-                        alert("⚠️ आपका अकाउंट पेंडिंग या सस्पेंड है। कृपया एडमिन से संपर्क करें।");
-                        await firebase.auth().signOut();
-                        window.location.href = "index.html";
-                        return;
-                    }
-
-                    if (detectUnauthorizedTools()) {
-                        await blockAndPendingUser(uid, "Attempted access via 1DM / Download Extension");
-                        return;
-                    }
-                } else {
-                    await firebase.auth().signOut();
-                    window.location.href = "index.html";
-                }
-            } catch (err) {
-                console.error("Security check error: ", err);
+          const cadetSnap = await getDoc(doc(dbCheck, "cadets", user.uid));
+          if (cadetSnap.exists()) {
+            if (isDownloadToolActive()) {
+              await forceSuspendUser(user.uid, "1DM / Download App Environment Detected");
             }
+          }
+        } catch (e) {
+          console.error("Security check error:", e);
         }
+      }
     });
 
-    // हर 3 सेकंड पर लाइव पेज पर भी स्कैन करना
     setInterval(() => {
-        const user = firebase.auth().currentUser;
-        if (user && detectUnauthorizedTools()) {
-            blockAndPendingUser(user.uid, "Detected 1DM / Download tool during active session");
-        }
-    }, 3000);
+      const user = authCheck.currentUser;
+      if (user && isDownloadToolActive()) {
+        forceSuspendUser(user.uid, "Active Session Download Tool Interference");
+      }
+    }, 2000);
   </script>
-</head>
-<body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between"> <!-- लाइन 278 -->
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
