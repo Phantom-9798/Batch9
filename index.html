@@ -274,71 +274,44 @@
     }
   </style>
 
-  <!-- ========================================== -->
-  <!-- 🛑 1DM & DOWNLOAD EXTENSION SECURITY GUARD -->
-  <!-- ========================================== -->
-  <script type="module">
-    import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    const authCheck = getAuth();
-    const dbCheck = getFirestore();
-
-    function isDownloadToolActive() {
-      const ua = navigator.userAgent.toLowerCase();
-      if (ua.includes('1dm') || ua.includes('idm') || ua.includes('download') || ua.includes('ucbrowser') || ua.includes('fxios') || ua.includes('adm') || ua.includes('turbodownload')) {
-        return true;
-      }
-      if (window.outerWidth === 0 || window.outerHeight === 0 || window.innerWidth < 200) {
-        return true;
-      }
-      if (window.navigator.webdriver) {
-        return true;
-      }
-      return false;
-    }
-
-    async function forceSuspendUser(userId, reason) {
-      try {
-        await updateDoc(doc(dbCheck, "cadets", userId), {
-          status: "pending",
-          blockReason: reason,
-          blockedAt: new Date().toISOString()
-        });
-
-        alert("🚨 सुरक्षा अलर्ट: अनधिकृत डाउनलोडर या एक्सटेंशन डिटेक्ट किया गया! आपका अकाउंट ब्लॉक कर दिया गया है।");
+ <script>
+    // केवल Google Chrome और Google App को अनुमति देने वाला अल्टीमेट गार्ड
+    function enforceGoogleAndChromeOnly() {
+        const ua = navigator.userAgent.toLowerCase();
         
-        await signOut(authCheck);
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Suspension error:", err);
-      }
+        // 1. किसी भी दूसरे ब्राउज़र या डाउनलोडर ऐप की पहचान (इन्हें तुरंत भगाना है)
+        const isForbiddenBrowser = ua.includes('1dm') || ua.includes('idm') || ua.includes('download') || ua.includes('adm') || ua.includes('ucbrowser') || ua.includes('firefox') || ua.includes('fxios') || ua.includes('opera') || ua.includes('safari') && !ua.includes('chrome');
+
+        // 2. क्या यह असली Google Chrome या Google App है?
+        const isChrome = ua.includes('chrome') || ua.includes('crios');
+        const isGoogleApp = ua.includes('gsa') || (ua.includes('android') && ua.includes('version/'));
+
+        // यदि यह forbidden ब्राउज़र है, या फिर Google/Chrome नहीं है
+        if (isForbiddenBrowser || (!isChrome && !isGoogleApp)) {
+            // तुरंत पूरा पेज और लेआउट गायब करके सख्त चेतावनी दिखा दो
+            document.documentElement.innerHTML = `
+                <html lang="en" style="background: #04070b; color: white; font-family: sans-serif; text-align: center; padding-top: 15vh;">
+                <head><title>Access Denied - Restricted Browser</title></head>
+                <body style="background: #04070b; color: #ff4444; padding: 20px;">
+                    <div style="max-width: 450px; margin: auto; background: #0a0f16; border: 1px solid #ff4444; padding: 30px; border-radius: 15px; box-shadow: 0 0 30px rgba(255,68,68,0.4);">
+                        <h2 style="font-family: monospace; margin-bottom: 15px; color: #f59e0b;">🚨 ACCESS RESTRICTED</h2>
+                        <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+                            सुरक्षा कारणों से यह प्लेटफॉर्म सिर्फ और सिर्फ ऑफिशियल <b>Google Chrome</b> या <b>Google App</b> पर ही चल सकता है।
+                        </p>
+                        <p style="font-size: 13px; color: #38bdf8; margin-top: 15px; background: rgba(56,189,248,0.1); padding: 10px; border-radius: 8px;">
+                            कृपया इस लिंक को कॉपी करें और अपने डिवाइस के असली Google Chrome ब्राउज़र में खोलें।
+                        </p>
+                    </div>
+                </body>
+                </html>
+            `;
+            throw new Error("Access restricted: Only Google & Chrome permitted.");
+        }
     }
 
-    onAuthStateChanged(authCheck, async (user) => {
-      if (user) {
-        try {
-          const cadetSnap = await getDoc(doc(dbCheck, "cadets", user.uid));
-          if (cadetSnap.exists()) {
-            if (isDownloadToolActive()) {
-              await forceSuspendUser(user.uid, "1DM / Download App Environment Detected");
-            }
-          }
-        } catch (e) {
-          console.error("Security check error:", e);
-        }
-      }
-    });
-
-    setInterval(() => {
-      const user = authCheck.currentUser;
-      if (user && isDownloadToolActive()) {
-        forceSuspendUser(user.uid, "Active Session Download Tool Interference");
-      }
-    }, 2000);
-  </script>
+    // पेज लोड होते ही सबसे पहले यह चेक रन होगा
+    enforceGoogleAndChromeOnly();
+</script>
 </head>
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
