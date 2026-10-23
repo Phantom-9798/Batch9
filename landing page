@@ -386,11 +386,20 @@
             }, 500);
         });
 
-        // Automatically redirects to index.html after intro completes
+        // Intro complete hone ke baad session check karke redirect karega
         setTimeout(() => {
             document.getElementById('introBody').style.opacity = '0';
             setTimeout(() => {
-                window.location.href = 'index.html';
+                const sessionToken = localStorage.getItem("phantom_session_token");
+                const cadetUid = localStorage.getItem("phantom_uid");
+
+                if (sessionToken && cadetUid) {
+                    // Agar pehle se logged in hai -> Seedha classroom.html (WhatsApp popup ke sath)
+                    window.location.href = 'classroom.html';
+                } else {
+                    // Agar logged in nahi hai -> index.html (Login Gateway)
+                    window.location.href = 'index.html';
+                }
             }, 800);
         }, 10200);
     </script>
