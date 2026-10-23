@@ -33,6 +33,17 @@
             transition: opacity 0.8s ease-in-out;
         }
 
+        /* Mixed Golden Stars & Bubbles Canvas Background */
+        #starBubbleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 2;
+        }
+
         /* Real Theatre Stage Split Golden Curtains */
         .curtain-left, .curtain-right {
             position: absolute;
@@ -175,7 +186,7 @@
 
         .letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
         .letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
-        .letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffcc00; border: 2px solid #ffcc00; text-shadow: 0 0 12px #ffcc00; }
+        .letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffd700; border: 2px solid #ffd700; text-shadow: 0 0 12px #ffd700; }
         .letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
         .letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
         .letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
@@ -265,10 +276,14 @@
             font-size: 11px;
             color: #4b5563;
             letter-spacing: 2px;
+            z-index: 10;
         }
     </style>
 </head>
 <body id="introBody">
+
+    <!-- Background Canvas for Mixed Golden Stars & Bubbles Animation -->
+    <canvas id="starBubbleCanvas"></canvas>
 
     <div class="curtain-left" id="curtainLeft"></div>
     <div class="curtain-right" id="curtainRight"></div>
@@ -315,17 +330,67 @@
     </div>
 
     <script>
+        // Mixed Falling Golden Stars & Transparent Bubbles Canvas Particle Engine
+        const canvas = document.getElementById("starBubbleCanvas");
+        const ctx = canvas.getContext("2d");
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        for (let i = 0; i < 90; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 3 + 1,
+                speedY: Math.random() * 0.5 + 0.25,
+                speedX: (Math.random() - 0.5) * 0.25,
+                opacity: Math.random() * 0.8 + 0.2,
+                isBubble: Math.random() > 0.5
+            });
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                if (p.y > canvas.height) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+                ctx.beginPath();
+                if (p.isBubble) {
+                    ctx.arc(p.x, p.y, p.radius * 1.3, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(14, 165, 233, ${p.opacity * 0.5})`;
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                } else {
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ffd700';
+                    ctx.fill();
+                }
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.body.classList.add('open-curtains');
             }, 500);
         });
 
-        // Redirects to login.html after intro completes
+        // Automatically redirects to index.html after intro completes
         setTimeout(() => {
             document.getElementById('introBody').style.opacity = '0';
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }, 800);
         }, 10200);
     </script>
