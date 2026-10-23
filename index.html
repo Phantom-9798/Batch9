@@ -386,7 +386,7 @@
             }, 500);
         });
 
-        // Intro complete hone ke baad session check karke redirect karega
+        // Intro complete hone ke baad check karega ki user logged-in hai ya nahi
         setTimeout(() => {
             document.getElementById('introBody').style.opacity = '0';
             setTimeout(() => {
@@ -394,11 +394,11 @@
                 const cadetUid = localStorage.getItem("phantom_uid");
 
                 if (sessionToken && cadetUid) {
-                    // Agar pehle se logged in hai -> Seedha classroom.html (WhatsApp popup ke sath)
+                    // Agar pehle se logged in hai -> Seedha classroom.html par jao
                     window.location.href = 'classroom.html';
                 } else {
-                    // Agar logged in nahi hai -> index.html (Login Gateway)
-                    window.location.href = 'index.html';
+                    // Agar logged in nahi hai -> login.html par jao (apne login page ka naam login.html rakh lena)
+                    window.location.href = 'login.html';
                 }
             }, 800);
         }, 10200);
