@@ -1,185 +1,39 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-<style>
-  /* 1. Corner Live Time Tracker Widget */
-  #phantomStudyTimerWidget {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    z-index: 99999;
-    background: rgba(4, 7, 13, 0.95);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-family: 'Orbitron', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(8px);
-  }
-  #phantomStudyTimerWidget .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #f59e0b;
-    border-radius: 50%;
-    animation: phantomPulse 1.5s infinite;
-  }
-  @keyframes phantomPulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #f59e0b; }
-    100% { transform: scale(0.95); opacity: 0.8; }
-  }
+  <script>
+  (() => {
+    // 1. Right Click Disable
+    document.addEventListener('contextmenu', e => e.preventDefault());
 
-  /* 2. Floating Focus Status Dock (Bottom Center) */
-  #phantomFocusDock {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 99998;
-    background: rgba(10, 15, 22, 0.96);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-    padding: 8px 18px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-family: 'Orbitron', sans-serif;
-    backdrop-filter: blur(10px);
-    font-size: 11px;
-    color: #f59e0b;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-</style>
-
-<!-- Top Corner Live Time Tracker (Auto-running continuously) -->
-<div id="phantomStudyTimerWidget">
-  <div class="pulse-dot"></div>
-  <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
-  <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
-</div>
-
-<!-- Bottom Floating Status Dock -->
-<div id="phantomFocusDock">
-  <span>🛡️ MISSION MODE: ACTIVE</span>
-  <span>|</span>
-  <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
-  <span>|</span>
-  <span>🎵 AUDIO: ON</span>
-</div>
-
-<!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
-<audio id="ambientAudio" autoplay loop>
-  <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
-</audio>
-
-<script>
-  // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
-  (function() {
-    const todayStr = new Date().toDateString();
-    const lastDate = localStorage.getItem("phantom_study_date");
-    
-    if (lastDate !== todayStr) {
-      localStorage.setItem("phantom_study_date", todayStr);
-      localStorage.setItem("phantom_daily_seconds", "0");
-    }
-
-    let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-    let sessionSeconds = 0; // Infinite counting session timer
-
-    // Continuous infinite tracking as long as cadet is on website
-    setInterval(() => {
-      totalSeconds++;
-      sessionSeconds++;
-      localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
-
-      // Update Top Corner Daily Total Timer
-      const hrs = Math.floor(totalSeconds / 3600);
-      const mins = Math.floor((totalSeconds % 3600) / 60);
-      const secs = totalSeconds % 60;
-      const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-      const displayEl = document.getElementById("phantomTimerDisplay");
-      if (displayEl) {
-        displayEl.innerText = displayStr;
+    // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+        (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
       }
+    });
 
-      // Update Bottom Floating Dock Session Timer (Counts up infinitely without stopping)
-      const pHrs = Math.floor(sessionSeconds / 3600);
-      const pMins = Math.floor((sessionSeconds % 3600) / 60);
-      const pSecs = sessionSeconds % 60;
-      const pDisplayStr = pHrs > 0 
-        ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-        : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
-      
-      const autoPomoEl = document.getElementById("autoPomoDisplay");
-      if (autoPomoEl) {
-        autoPomoEl.innerText = pDisplayStr;
+    // 3. DevTools Freezing Trap
+    setInterval(() => {
+      const start = performance.now();
+      debugger;
+      const end = performance.now();
+      if (end - start > 100) {
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
       }
     }, 1000);
+
+    // 4. Console Auto Clear
+    setInterval(() => {
+      console.clear();
+    }, 1500);
   })();
-
-  // 2. Automatic Daily Mission Briefing on Entry (No clicks required)
-  window.addEventListener('DOMContentLoaded', () => {
-    const lastBriefDate = localStorage.getItem("phantom_brief_date");
-    const todayStr = new Date().toDateString();
-
-    if (lastBriefDate !== todayStr) {
-      localStorage.setItem("phantom_brief_date", todayStr);
-      setTimeout(() => {
-        const quotes = [
-          "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-          "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-          "\"Discipline is choosing between what you want now and what you want most.\""
-        ];
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
-      }, 800);
-    }
-  });
-
-  // 3. Auto-play Ambient Audio safely on load/interaction
-  window.addEventListener('load', () => {
-    const audio = document.getElementById("ambientAudio");
-    if (audio) {
-      audio.volume = 0.4;
-      audio.play().catch(() => {
-        // Fallback to play on first user interaction if browser blocks autoplay
-        document.addEventListener('click', () => {
-          audio.play().catch(() => {});
-        }, { once: true });
-      });
-    }
-  });
-</script>
- <script>
-    // ================= TIGHT SECURITY & TAMPER BLOCK =================
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-      setInterval(() => {
-        const start = performance.now();
-        debugger;
-        const end = performance.now();
-        if (end - start > 100) {
-          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        }
-      }, 1000);
-      setInterval(() => { console.clear(); }, 1500);
-    })();
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -209,7 +63,7 @@
     let currentBatch = "capf";
     let currentSubject = "Mentor Session";
 
-    // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
+    // --- SECURE SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
 
@@ -302,15 +156,15 @@
 
       if (lectures.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-500/30">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 mb-4 text-2xl">
+          <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-400/40">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 mb-4 text-2xl">
               ⏳
             </div>
             <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2 uppercase">
               IT WILL BE UPLOADED VERY SOON
             </h3>
-            <p class="text-xs text-neutral-400 font-body max-w-md mx-auto">
-              ${mode === 'recorded' ? 'Recorded syllabus dossiers for this module are currently under synchronization.' : `Live lectures for "\${subjectName}" are scheduled.`}
+            <p class="text-xs text-neutral-300 font-body max-w-md mx-auto">
+              ${mode === 'recorded' ? 'Recorded syllabus dossiers for this module are currently under synchronization.' : `Live lectures for "${subjectName}" are scheduled.`}
             </p>
           </div>
         `;
@@ -319,7 +173,7 @@
 
       lectures.forEach((lec) => {
         const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition group shadow-lg";
+        card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-400 transition group shadow-lg";
 
         let embedSrc = lec.videoId;
         if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
@@ -329,7 +183,7 @@
           }
         }
 
-        const durationHtml = lec.duration ? `<span class="text-[11px] font-mono text-neutral-400 flex items-center gap-1">⏱ ${lec.duration}</span>` : '';
+        const durationHtml = lec.duration ? `<span class="text-[11px] font-mono text-neutral-300 flex items-center gap-1">⏱ ${lec.duration}</span>` : '';
 
         card.innerHTML = `
           <div>
@@ -341,14 +195,14 @@
             </div>
             <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-3">
               ${lec.title}
-          </h3>
+            </h3>
           </div>
 
           <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-            <button onclick="window.playLectureVideo('${embedSrc}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer">
+            <button onclick="window.playLectureVideo('${embedSrc}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-400 hover:to-sky-300 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
               WATCH LECTURE
             </button>
-            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer">
+            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
               NOTES (PDF)
             </button>
           </div>
@@ -392,45 +246,157 @@
   </script>
 
   <style>
-    body { font-family: 'Rajdhani', sans-serif; background-color: #04070b; }
-    .font-stencil { font-family: 'Black Ops One', cursive; }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; }
-    .font-body { font-family: 'Inter', sans-serif; }
-
-    .tactical-bg {
-      background: 
-        radial-gradient(circle at 50% 10%, rgba(239, 68, 68, 0.18) 0%, transparent 60%),
-        radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
-        radial-gradient(circle at 85% 60%, rgba(234, 179, 8, 0.14) 0%, transparent 50%),
-        linear-gradient(180deg, rgba(4, 7, 13, 0.95) 0%, rgba(2, 4, 7, 0.99) 100%),
-        url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=2000&q=80');
-      background-size: cover; background-position: center; background-attachment: fixed;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
     }
 
-    .hud-grid {
-      background-image: 
-        linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
+    /* Force Full Solid Rich Navy Blue Background */
+    html, body {
+      background-color: #020617 !important;
+      background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
+      color: #f8fafc !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Falling Stars & Medium Bubbles Canvas Background */
+    #starBubbleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
+    .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
+
+    /* Moving Glowing Hover Light Effect on All Buttons */
+    .phantom-btn {
+      transition: all 0.3s ease-in-out;
+      position: relative;
+    }
+    .phantom-btn:hover {
+      background-color: #0ea5e9 !important;
+      color: #ffffff !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .phantom-btn:active { transform: scale(0.96); }
+
+    /* 1. Corner Live Time Tracker Widget */
+    #phantomStudyTimerWidget {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      z-index: 99999;
+      background: rgba(4, 7, 13, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+    }
+    #phantomStudyTimerWidget .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ffd700;
+      border-radius: 50%;
+      animation: phantomPulse 1.5s infinite;
+    }
+    @keyframes phantomPulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #ffd700; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* 2. Floating Focus Status Dock (Bottom Center) */
+    #phantomFocusDock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99998;
+      background: rgba(6, 12, 30, 0.96);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Orbitron', sans-serif;
+      backdrop-filter: blur(10px);
+      font-size: 11px;
+      color: #ffd700;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
     .armor-panel {
-      background: rgba(10, 15, 22, 0.92);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+      background: rgba(6, 12, 30, 0.96);
+      border: 2px solid rgba(255, 215, 0, 0.7);
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
+      position: relative;
+      z-index: 10;
     }
+
+    header, main, footer { position: relative; z-index: 10; }
   </style>
 </head>
 
-<body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
-  <header class="w-full pt-6 pb-4 px-4 border-b border-neutral-800/80 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+<body class="text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Background Canvas for Falling Stars & Medium Bubbles -->
+  <canvas id="starBubbleCanvas"></canvas>
+
+  <div id="phantomStudyTimerWidget">
+    <div class="pulse-dot"></div>
+    <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
+    <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
+  </div>
+
+  <div id="phantomFocusDock">
+    <span>🛡️ MISSION MODE: ACTIVE</span>
+    <span>|</span>
+    <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
+    <span>|</span>
+    <span>🎵 AUDIO: ON</span>
+  </div>
+
+  <audio id="ambientAudio" autoplay loop>
+    <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
+  </audio>
+
+  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-500/80 p-1 shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 flex items-center justify-center">
-          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/f59e0b?text=PHANTOM';">
+        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.3)] shrink-0 flex items-center justify-center">
+          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/020617/ffd700?text=PHANTOM';">
         </div>
         <div>
-          <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-yellow-300">
+          <!-- TEAM PHANTOM Heading with Gradient Color -->
+          <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">
             TEAM PHANTOM
           </h1>
           <p class="font-orbitron text-[10px] sm:text-xs text-neutral-400 tracking-widest uppercase">
@@ -440,10 +406,10 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="window.navigateBackToSubjects()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
+        <button onclick="window.navigateBackToSubjects()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; BACK TO SUBJECTS
         </button>
-        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
+        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           LOGOUT
         </button>
       </div>
@@ -453,13 +419,13 @@
   <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
     <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
           BRIEFING ARCHIVE
         </div>
         <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="chapterHeading">
           LOADING SUBJECT...
         </h2>
-        <p class="text-xs text-neutral-400 font-body mt-1">
+        <p class="text-xs text-neutral-300 font-body mt-1">
           Access high-definition tactical classes, concept walkthroughs, and official dossier notes below.
         </p>
       </div>
@@ -469,13 +435,117 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="lecturesContainer"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-6" id="lecturesContainer"></div>
   </main>
 
-  <footer class="w-full bg-black/95 border-t border-neutral-900 py-3.5 px-4 text-center">
-    <p class="text-[11px] font-body text-neutral-500 tracking-wider">
+  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3.5 px-4 text-center">
+    <p class="text-[11px] font-body text-neutral-400 tracking-wider">
       &copy; 2026 TEAM PHANTOM. MILITARY PRECISION PROTOCOL.
     </p>
   </footer>
+
+  <script>
+    // --- CANVAS PARTICLES ANIMATION ---
+    const canvas = document.getElementById("starBubbleCanvas");
+    const ctx = canvas.getContext("2d");
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const particles = [];
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 4 + 2.5,
+        starRadius: Math.random() * 4 + 3,
+        speedY: Math.random() * 0.9 + 0.3,
+        speedX: (Math.random() - 0.5) * 0.4,
+        opacity: Math.random() * 0.9 + 0.4,
+        isBubble: Math.random() > 0.45
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+        if (p.y > canvas.height) {
+          p.y = -20;
+          p.x = Math.random() * canvas.width;
+        }
+        ctx.beginPath();
+        if (p.isBubble) {
+          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+        } else {
+          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
+          ctx.shadowBlur = 25;
+          ctx.shadowColor = '#ffd700';
+          ctx.fill();
+        }
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+  </script>
+
+  <script>
+    // --- CONTINUOUS STUDY TIMER & AUDIO ---
+    (function() {
+      const todayStr = new Date().toDateString();
+      const lastDate = localStorage.getItem("phantom_study_date");
+      
+      if (lastDate !== todayStr) {
+        localStorage.setItem("phantom_study_date", todayStr);
+        localStorage.setItem("phantom_daily_seconds", "0");
+      }
+
+      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      let sessionSeconds = 0;
+
+      setInterval(() => {
+        totalSeconds++;
+        sessionSeconds++;
+        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+        const displayEl = document.getElementById("phantomTimerDisplay");
+        if (displayEl) displayEl.innerText = displayStr;
+
+        const pHrs = Math.floor(sessionSeconds / 3600);
+        const pMins = Math.floor((sessionSeconds % 3600) / 60);
+        const pSecs = sessionSeconds % 60;
+        const pDisplayStr = pHrs > 0 
+          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
+          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+        
+        const autoPomoEl = document.getElementById("autoPomoDisplay");
+        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
+      }, 1000);
+    })();
+
+    window.addEventListener('load', () => {
+      const audio = document.getElementById("ambientAudio");
+      if (audio) {
+        audio.volume = 0.4;
+        audio.play().catch(() => {
+          document.addEventListener('click', () => {
+            audio.play().catch(() => {});
+          }, { once: true });
+        });
+      }
+    });
+  </script>
 </body>
 </html>
