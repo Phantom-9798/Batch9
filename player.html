@@ -1,186 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-<style>
-  /* 1. Corner Live Time Tracker Widget */
-  #phantomStudyTimerWidget {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    z-index: 99999;
-    background: rgba(4, 7, 13, 0.95);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-family: 'Orbitron', sans-serif;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(8px);
-  }
-  #phantomStudyTimerWidget .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #f59e0b;
-    border-radius: 50%;
-    animation: phantomPulse 1.5s infinite;
-  }
-  @keyframes phantomPulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #f59e0b; }
-    100% { transform: scale(0.95); opacity: 0.8; }
-  }
-
-  /* 2. Floating Focus Status Dock (Bottom Center) */
-  #phantomFocusDock {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 99998;
-    background: rgba(10, 15, 22, 0.96);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-    padding: 8px 18px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-family: 'Orbitron', sans-serif;
-    backdrop-filter: blur(10px);
-    font-size: 11px;
-    color: #f59e0b;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-</style>
-
-<!-- Top Corner Live Time Tracker (Auto-running continuously) -->
-<div id="phantomStudyTimerWidget">
-  <div class="pulse-dot"></div>
-  <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
-  <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #f59e0b;">00h 00m 00s</div>
-</div>
-
-<!-- Bottom Floating Status Dock -->
-<div id="phantomFocusDock">
-  <span>🛡️ MISSION MODE: ACTIVE</span>
-  <span>|</span>
-  <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
-  <span>|</span>
-  <span>🎵 AUDIO: ON</span>
-</div>
-
-<!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
-<audio id="ambientAudio" autoplay loop>
-  <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
-</audio>
-
-<script>
-  // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
-  (function() {
-    const todayStr = new Date().toDateString();
-    const lastDate = localStorage.getItem("phantom_study_date");
-    
-    if (lastDate !== todayStr) {
-      localStorage.setItem("phantom_study_date", todayStr);
-      localStorage.setItem("phantom_daily_seconds", "0");
-    }
-
-    let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-    let sessionSeconds = 0; // Infinite counting session timer
-
-    // Continuous infinite tracking as long as cadet is on website
-    setInterval(() => {
-      totalSeconds++;
-      sessionSeconds++;
-      localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
-
-      // Update Top Corner Daily Total Timer
-      const hrs = Math.floor(totalSeconds / 3600);
-      const mins = Math.floor((totalSeconds % 3600) / 60);
-      const secs = totalSeconds % 60;
-      const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-      const displayEl = document.getElementById("phantomTimerDisplay");
-      if (displayEl) {
-        displayEl.innerText = displayStr;
-      }
-
-      // Update Bottom Floating Dock Session Timer (Counts up infinitely without stopping)
-      const pHrs = Math.floor(sessionSeconds / 3600);
-      const pMins = Math.floor((sessionSeconds % 3600) / 60);
-      const pSecs = sessionSeconds % 60;
-      const pDisplayStr = pHrs > 0 
-        ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-        : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
-      
-      const autoPomoEl = document.getElementById("autoPomoDisplay");
-      if (autoPomoEl) {
-        autoPomoEl.innerText = pDisplayStr;
-      }
-    }, 1000);
-  })();
-
-  // 2. Automatic Daily Mission Briefing on Entry (No clicks required)
-  window.addEventListener('DOMContentLoaded', () => {
-    const lastBriefDate = localStorage.getItem("phantom_brief_date");
-    const todayStr = new Date().toDateString();
-
-    if (lastBriefDate !== todayStr) {
-      localStorage.setItem("phantom_brief_date", todayStr);
-      setTimeout(() => {
-        const quotes = [
-          "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-          "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-          "\"Discipline is choosing between what you want now and what you want most.\""
-        ];
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
-      }, 800);
-    }
-  });
-
-  // 3. Auto-play Ambient Audio safely on load/interaction
-  window.addEventListener('load', () => {
-    const audio = document.getElementById("ambientAudio");
-    if (audio) {
-      audio.volume = 0.4;
-      audio.play().catch(() => {
-        // Fallback to play on first user interaction if browser blocks autoplay
-        document.addEventListener('click', () => {
-          audio.play().catch(() => {});
-        }, { once: true });
-      });
-    }
-  });
-</script>
-<script>
-    // ================= TIGHT SECURITY & TAMPER BLOCK =================
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-      setInterval(() => {
-        const start = performance.now();
-        debugger;
-        const end = performance.now();
-        if (end - start > 100) {
-          document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        }
-      }, 1000);
-      setInterval(() => { console.clear(); }, 1500);
-    })();
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Tactical Video Console</title>
@@ -233,7 +53,7 @@
       border-radius: 0.75rem;
     }
 
-    /* FULLSCREEN STRETCH FIX FOR ALL ELEMENTS */
+    /* FULLSCREEN STRETCH FIX */
     #phantomConsoleScreen:fullscreen,
     #phantomConsoleScreen:-webkit-full-screen,
     #phantomConsoleScreen:-ms-fullscreen {
@@ -260,7 +80,89 @@
       object-fit: fill !important;
     }
 
-    /* TOP-RIGHT PERMANENT HUD BAR (SPEED + FULLSCREEN) */
+    /* SECURITY OVERLAY STYLING */
+    .security-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0,0,0,0.88), rgba(20,0,0,0.95)), url('logo.jpeg');
+      background-size: cover;
+      background-blend-mode: overlay;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .security-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .brand-title {
+      color: #ff2222;
+      font-family: 'Black Ops One', cursive;
+      font-size: 26px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px rgba(255, 0, 0, 0.85), 0 0 5px rgba(255, 255, 255, 0.5);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .lecture-subtitle {
+      color: #ffbb00;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(255, 187, 0, 0.5);
+    }
+
+    .trusted-text {
+      color: #ffffff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      opacity: 0.95;
+      margin-bottom: 22px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .big-play-btn {
+      width: 72px;
+      height: 72px;
+      background-color: #ff0000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.95);
+      transition: transform 0.2s;
+    }
+
+    .big-play-btn:hover {
+      transform: scale(1.12);
+    }
+
+    .big-play-btn::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 20px solid #ffffff;
+      margin-left: 4px;
+    }
+
+    /* TOP-RIGHT PERMANENT HUD BAR */
     .tactical-permanent-hud {
       position: absolute;
       top: 12px;
@@ -291,6 +193,22 @@
     }
     .fs-hud-btn:hover {
       background: #10b981;
+      transform: scale(1.04);
+    }
+
+    .download-hud-btn {
+      background: rgba(245, 158, 11, 0.9);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 5px;
+      letter-spacing: 0.05em;
+      transition: background 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+    .download-hud-btn:hover {
+      background: #f59e0b;
       transform: scale(1.04);
     }
 
@@ -430,7 +348,7 @@
       transition: width 0.15s linear;
     }
 
-    /* ANTI-PIRACY FLOATING WATERMARK STYLES */
+    /* WATERMARK STYLES */
     .phantom-watermark-layer {
       position: absolute;
       top: 30%;
@@ -450,20 +368,20 @@
 
 <body class="tactical-bg hud-grid text-neutral-100 min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- TOP HEADER -->
-  <header class="w-full pt-6 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+  <!-- TOP HEADER WITH LOGO -->
+  <header class="w-full pt-4 pb-4 px-4 border-b border-emerald-950/60 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+        <img src="logo.jpeg" alt="Logo" class="h-10 w-10 object-cover rounded-lg border border-emerald-500 shadow-md">
         <div>
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-emerald-400 uppercase" id="playerTitle">
-            TACTICAL STREAMING CONSOLE
+            TEAM PHANTOM CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">SECURE AIRSPACE TRANSMISSION</p>
+          <p class="text-[10px] text-neutral-400 font-mono">teamphantom.vercel.app &bull; SECURE</p>
         </div>
       </div>
       <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-emerald-600/40 text-emerald-400 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer">
-        &larr; BACK TO LECTURES
+        &larr; BACK
       </button>
     </div>
   </header>
@@ -473,7 +391,15 @@
     <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
       <div id="phantomConsoleScreen">
         
-        <!-- ================= TACTICAL ANTI-PIRACY HUD OVERLAY ================= -->
+        <!-- SECURITY OVERLAY WITH LOGO & BRANDING -->
+        <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
+          <div class="brand-title">TEAM PHANTOM</div>
+          <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
+          <div class="trusted-text">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
+          <div class="big-play-btn"></div>
+        </div>
+
+        <!-- WATERMARK LAYER -->
         <div id="securityWatermark" class="phantom-watermark-layer">
           <span class="font-mono text-[11px] font-bold text-neutral-400 tracking-widest uppercase">
             SECURE ACCESS: <span id="traceUid">TP-2026-CADET</span>
@@ -481,10 +407,9 @@
           <span class="text-[9px] font-mono text-neutral-500 tracking-tighter" id="wmTimestamp">
             ENCRYPTED SESSION ACTIVE
           </span>
-
         </div>
 
-        <!-- PERMANENT TOP-RIGHT HUD (SPEED + FULLSCREEN FIXED) -->
+        <!-- TOP-RIGHT PERMANENT HUD (SPEED + DOWNLOAD + FULLSCREEN) -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
           <div class="flex items-center gap-1.5">
             <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
@@ -499,7 +424,14 @@
 
           <div class="h-4 w-[1px] bg-neutral-700"></div>
 
-          <!-- PERMANENT FULLSCREEN TRIGGER -->
+          <!-- DOWNLOAD BUTTON -->
+          <button id="permanentDownloadBtn" onclick="downloadVideoStorage()" class="download-hud-btn font-orbitron">
+            [📥 DOWNLOAD]
+          </button>
+
+          <div class="h-4 w-[1px] bg-neutral-700"></div>
+
+          <!-- FULLSCREEN TRIGGER -->
           <button id="permanentFsBtn" onclick="toggleTacticalFullscreen()" class="fs-hud-btn font-orbitron">
             [⛶ FULLSCREEN]
           </button>
@@ -515,7 +447,7 @@
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-neutral-900 py-3 px-4 text-center">
     <p class="text-[11px] font-mono text-emerald-500/80 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; ANTI-LEAK STREAM TERMINAL
+      &copy; 2026 TEAM PHANTOM &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
     </p>
   </footer>
 
@@ -528,14 +460,14 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream");
+      const urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link");
       const urlTitle = urlParams.get("title");
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
       let finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TACTICAL SQUADRON CLASS";
+      const finalTitle = urlTitle || storedTitle || "TEAM PHANTOM TACTICAL CONSOLE";
 
       if (finalVideo) {
         try {
@@ -547,19 +479,11 @@
         document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
       }
 
-      if (!finalVideo) {
-        alert("Session error: Video target not found.");
-        return;
-      }
-
       const playerRoot = document.getElementById("playerRoot");
 
-      // =========================================================================
-      // CASE 1: NEXIELD
-      // =========================================================================
+      // CASE 1: NEXIELD EMBED
       if (finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.endsWith(".mp4")) {
         isNexield = true;
-
         playerRoot.innerHTML = `
           <div class="nexield-box">
             <div class="nexield-top-mask"></div>
@@ -572,9 +496,7 @@
           </div>
         `;
       } 
-      // =========================================================================
-      // CASE 2: ZOOM / DIRECT VIDEO LINK (Auto-fit Screen Fix)
-      // =========================================================================
+      // CASE 2: ZOOM / DIRECT VIDEO LINK
       else if (finalVideo.includes("zoom") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com")) {
         isNexield = false;
         playerRoot.innerHTML = `
@@ -583,12 +505,9 @@
           </div>
         `;
       }
-      // =========================================================================
       // CASE 3: YOUTUBE ENGINE
-      // =========================================================================
       else {
         isNexield = false;
-
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
@@ -608,7 +527,8 @@
 
               <div class="flex items-center justify-between text-xs font-mono pt-1">
                 <div class="flex items-center gap-2">
-                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-emerald-400 font-bold text-xs uppercase px-2.5 py-1 bg-black/70 rounded border border-emerald-600/40 hover:bg-emerald-950 transition cursor-pointer">
+                  <!-- YELLOW PLAY/PAUSE BUTTON -->
+                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-xs uppercase px-3 py-1 bg-amber-500 hover:bg-amber-600 rounded transition cursor-pointer">
                     ▶ PLAY
                   </button>
 
@@ -644,7 +564,7 @@
           ytInstance = new YT.Player('ytPlayerFrame', {
             videoId: finalVideo,
             playerVars: {
-              autoplay: 1,
+              autoplay: 0,
               controls: 0,
               disablekb: 0,
               fs: 0,
@@ -655,7 +575,6 @@
             },
             events: {
               onReady: (e) => {
-                e.target.playVideo();
                 startTimerSync();
                 resetAutoHideTimer();
               },
@@ -664,6 +583,7 @@
                 if (e.data === YT.PlayerState.PLAYING) {
                   isPlaying = true;
                   if (btn) btn.innerText = "⏸ PAUSE";
+                  document.getElementById('securityOverlay').classList.add('hidden');
                   resetAutoHideTimer();
                 } else {
                   isPlaying = false;
@@ -688,6 +608,13 @@
         resetAutoHideTimer();
       }
     });
+
+    function activateStream() {
+      document.getElementById('securityOverlay').classList.add('hidden');
+      if (ytInstance && ytInstance.playVideo) {
+        ytInstance.playVideo();
+      }
+    }
 
     function showControls() {
       const ytBar = document.getElementById("ytCustomBar");
@@ -721,7 +648,42 @@
       }
     }
 
-    // ENHANCED TACTICAL FULLSCREEN
+    async function downloadVideoStorage() {
+      const btn = document.getElementById('permanentDownloadBtn');
+      if (btn) btn.textContent = '[⏳ SAVING...]';
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        let videoUrl = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link");
+        if (!videoUrl) videoUrl = sessionStorage.getItem("phantom_current_video");
+        if (!videoUrl) throw new Error("URL not found");
+        videoUrl = decodeURIComponent(videoUrl);
+
+        if (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be")) {
+          alert("YouTube streams cannot be directly downloaded due to platform restrictions.");
+          if (btn) btn.textContent = '[📥 DOWNLOAD]';
+          return;
+        }
+
+        if (!('caches' in window)) {
+          alert('Browser storage is not supported.');
+          if (btn) btn.textContent = '[📥 DOWNLOAD]';
+          return;
+        }
+
+        const response = await fetch(videoUrl);
+        if (!response.ok) throw new Error('Fetch failed');
+        const cache = await caches.open('team-phantom-offline-v1');
+        await cache.put(videoUrl, response);
+        if (btn) btn.textContent = '[✅ SAVED]';
+      } catch (err) {
+        if (btn) btn.textContent = '[❌ BLOCKED]';
+        alert('Offline caching/download is supported for direct video files or servers that permit CORS.');
+      }
+      setTimeout(() => {
+        if (btn) btn.textContent = '[📥 DOWNLOAD]';
+      }, 3000);
+    }
+
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
@@ -849,13 +811,7 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) || (e.ctrlKey && e.key === "U")) {
-        e.preventDefault();
-      }
-    });
-
-    // WATERMARK POSITION JITTER ENGINE
+    // WATERMARK JITTER ENGINE
     (() => {
       const wm = document.getElementById('securityWatermark');
       const timeStampEl = document.getElementById('wmTimestamp');
