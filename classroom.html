@@ -545,6 +545,46 @@
     </p>
   </footer>
 
+  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
+  <div id="phantomWhatsAppModal" class="fixed inset-0 bg-black/85 z-[999999] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
+      
+      <!-- Team Phantom Logo -->
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
+        <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=TP';">
+      </div>
+
+      <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
+      <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
+        Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
+      </p>
+
+      <!-- Military Officer Rank Stars Animation Container -->
+      <div class="flex flex-col items-center justify-center my-6">
+        <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-400 rounded-2xl shadow-[0_0_35px_rgba(255,215,0,0.4)] backdrop-blur-lg">
+          <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
+          <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
+          <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
+          <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
+        </div>
+        <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
+      </div>
+
+      <div class="space-y-3">
+        <!-- TOP BUTTON: JOIN UPDATE CHANNEL -->
+        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-500 hover:to-sky-400 text-black hover:text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] transform hover:scale-[1.02] phantom-btn">
+          📱 JOIN UPDATES CHANNEL
+        </a>
+        
+        <!-- BOTTOM BUTTON: CONTINUE TO SITE -->
+        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+          🚀 CONTINUE TO SITE
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -615,6 +655,17 @@
     }
     animateParticles();
 
+    // Close Modal Function
+    window.closeWatchHoursModal = function() {
+      const modal = document.getElementById("watchHoursModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    window.closePhantomModal = function() {
+      const modal = document.getElementById("phantomWhatsAppModal");
+      if (modal) modal.style.display = "none";
+    };
+
     // Sidebar Drawer Toggle
     window.toggleSidebar = function() {
       const drawer = document.getElementById('sidebarDrawer');
@@ -653,11 +704,6 @@
       const secs = totalSecs % 60;
       if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
       if (modal) modal.classList.remove("hidden");
-    }
-
-    window.closeWatchHoursModal = function() {
-      const modal = document.getElementById("watchHoursModal");
-      if (modal) modal.classList.add("hidden");
     }
 
     window.openTestSection = function(examName) {
@@ -711,7 +757,7 @@
           container.appendChild(row);
         } else {
           querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
+            const data = docSnap.doc.data();
             let row = document.createElement("div");
             row.className = "test-row";
             row.innerHTML = `
@@ -981,6 +1027,5 @@
       }
     });
   </script>
-<ElicitationsGroup></ElicitationsGroup>
 </body>
 </html>
