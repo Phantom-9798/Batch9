@@ -51,6 +51,7 @@
       getAuth,  
       signInWithEmailAndPassword,  
       createUserWithEmailAndPassword,  
+      signOut,
       sendPasswordResetEmail  
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {  
@@ -112,28 +113,30 @@
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const cadetUid = userCredential.user.uid;
 
+          // Save account with status "pending" so admin review is required
           await setDoc(doc(db, "cadets", cadetUid), {
             uid: cadetUid,
             name: name,
             email: email,
             targetBatch: chosenBatches.join(", "),
-            status: "active",
+            status: "pending",
             allowedBatches: finalAllowed,
             createdAt: new Date().toISOString()
           });
 
-          statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 block text-left leading-relaxed shadow-lg font-body font-bold";
+          // Sign out immediately so new signups cannot enter without admin approval
+          await signOut(auth);
+
+          statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed shadow-lg font-body font-bold";
           statusAlert.innerHTML = `
-            <div class="flex items-center gap-2 font-orbitron font-extrabold text-emerald-300 mb-1 text-sm tracking-wide">
-              <span>&#10003;</span> REGISTRATION SUCCESSFUL
+            <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 mb-1 text-sm tracking-wide">
+              <span>&#9888;</span> REGISTRATION PENDING APPROVAL
             </div>
-            Cadet <b>${name}</b>, your account has been created. Initializing secure session...
+            Cadet <b>${name}</b>, your account has been registered successfully! Your account is currently <b>pending administrative approval</b>. You will be able to log in once your enrollment is verified.
           `;
           statusAlert.classList.remove('hidden');
-
-          setTimeout(() => {
-            establishSessionAndEnter(cadetUid);
-          }, 800);
+          submitBtn.disabled = false;
+          submitBtn.innerText = "INITIALIZE SIGNUP";
 
         } else {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
