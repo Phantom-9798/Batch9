@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEAM PHANTOM | Royal Cinematic Intro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background-color: #04070b;
+            background-image: radial-gradient(circle at center, #0a1628 0%, #04070b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        /* Real Theatre Stage Split Golden Curtains */
+        .curtain-left, .curtain-right {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #996515 0%, #d4af37 20%, #ffd700 50%, #d4af37 80%, #996515 100%);
+            background-size: 80px 100%;
+            z-index: 100;
+            transition: transform 2.8s cubic-bezier(0.77, 0, 0.175, 1);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.9);
+            border-bottom: 8px solid #5c4033;
+        }
+        .curtain-left { 
+            left: 0; 
+            transform-origin: left; 
+            border-right: 4px solid #4a3319; 
+        }
+        .curtain-right { 
+            right: 0; 
+            transform-origin: right; 
+            border-left: 4px solid #4a3319; 
+        }
+        
+        body.open-curtains .curtain-left { transform: translateX(-100%); }
+        body.open-curtains .curtain-right { transform: translateX(100%); }
+
+        .intro-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Rocket & Logo Animation Wrapper */
+        .rocket-logo-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            height: 90px;
+            width: 100%;
+        }
+
+        .logo-box-container {
+            position: absolute;
+            opacity: 0;
+            transform: scale(0.2);
+            animation: dropLogoCenter 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-delay: 3.2s;
+        }
+
+        .intro-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+        }
+
+        /* Slow & Smooth Rocket Flight */
+        .rocket-ship {
+            position: absolute;
+            font-size: 34px;
+            transform: rotate(45deg);
+            z-index: 20;
+            animation: flyRocketVerySlow 5.0s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes flyRocketVerySlow {
+            0% {
+                left: -180px;
+                top: 25px;
+                opacity: 0;
+                transform: scale(0.6) rotate(55deg);
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1.1) rotate(45deg);
+            }
+            50% {
+                left: calc(50% - 15px);
+                top: -5px;
+                transform: scale(1.2) rotate(40deg);
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                left: 110vw;
+                top: -60px;
+                opacity: 0;
+                transform: scale(0.8) rotate(30deg);
+            }
+        }
+
+        @keyframes dropLogoCenter {
+            0% { opacity: 0; transform: scale(0.3) translateY(-30px); }
+            70% { opacity: 1; transform: scale(1.1) translateY(5px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Falling Multi-colored Letters */
+        .title-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .word-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .letter-box {
+            width: 46px;
+            height: 56px;
+            background: rgba(10, 18, 30, 0.95);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Black Ops One', cursive;
+            font-size: 26px;
+            opacity: 0;
+            transform: translateY(-350px) rotate(-20deg);
+            animation: dropBounce 0.8s cubic-bezier(0.25, 1, 0.5, 1.25) forwards;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
+        .letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
+        .letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffcc00; border: 2px solid #ffcc00; text-shadow: 0 0 12px #ffcc00; }
+        .letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
+        .letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
+        .letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
+        .letter-box:nth-child(7)  { animation-delay: 4.85s; color: #ff9933; border: 2px solid #ff9933; text-shadow: 0 0 12px #ff9933; }
+        .letter-box:nth-child(8)  { animation-delay: 4.95s; color: #9933ff; border: 2px solid #9933ff; text-shadow: 0 0 12px #9933ff; }
+        .letter-box:nth-child(9)  { animation-delay: 5.05s; color: #ffff33; border: 2px solid #ffff33; text-shadow: 0 0 12px #ffff33; }
+        .letter-box:nth-child(10) { animation-delay: 5.15s; color: #33ff33; border: 2px solid #33ff33; text-shadow: 0 0 12px #33ff33; }
+        .letter-box:nth-child(11) { animation-delay: 5.25s; color: #ff3333; border: 2px solid #ff3333; text-shadow: 0 0 12px #ff3333; }
+
+        @keyframes dropBounce {
+            0% { transform: translateY(-350px) rotate(-25deg); opacity: 0; }
+            60% { transform: translateY(15px) rotate(6deg); opacity: 1; }
+            80% { transform: translateY(-8px) rotate(-3deg); }
+            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        }
+
+        .subtitle {
+            font-family: 'Black Ops One', cursive;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #ffd700;
+            text-shadow: 0 0 18px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transform: translateX(-150px);
+            animation: swipeInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 6.0s;
+            margin-bottom: 15px;
+        }
+
+        @keyframes swipeInRight {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .secure-loader-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInSecure 0.6s ease forwards;
+            animation-delay: 6.6s;
+            width: 280px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 7px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            box-shadow: 0 0 15px #00f2fe;
+            animation: fillProgress 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 6.8s;
+        }
+
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .secure-status-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #00f2fe;
+            text-shadow: 0 0 12px rgba(0, 242, 254, 0.7);
+        }
+
+        @keyframes fadeInSecure {
+            to { opacity: 1; }
+        }
+
+        .footer-tag {
+            position: absolute;
+            bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #4b5563;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body id="introBody">
+
+    <div class="curtain-left" id="curtainLeft"></div>
+    <div class="curtain-right" id="curtainRight"></div>
+
+    <div class="intro-container">
+        <div class="rocket-logo-wrapper">
+            <div class="rocket-ship">🚀</div>
+            <div class="logo-box-container">
+                <img src="logo.jpeg" alt="Logo" class="intro-logo">
+            </div>
+        </div>
+
+        <div class="title-wrapper">
+            <div class="word-group">
+                <div class="letter-box">T</div>
+                <div class="letter-box">E</div>
+                <div class="letter-box">A</div>
+                <div class="letter-box">M</div>
+            </div>
+            <div style="width: 14px;"></div>
+            <div class="word-group">
+                <div class="letter-box">P</div>
+                <div class="letter-box">H</div>
+                <div class="letter-box">A</div>
+                <div class="letter-box">N</div>
+                <div class="letter-box">T</div>
+                <div class="letter-box">O</div>
+                <div class="letter-box">M</div>
+            </div>
+        </div>
+
+        <div class="subtitle">⚡ ALWAYS WITH YOU WITH FULL SUPPORT ⚡</div>
+
+        <div class="secure-loader-wrapper">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill"></div>
+            </div>
+            <div class="secure-status-text">INITIALIZING SECURE ACCESS</div>
+        </div>
+    </div>
+
+    <div class="footer-tag">
+        &copy; 2026 TEAM PHANTOM &bull; SECURE TERMINAL
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.body.classList.add('open-curtains');
+            }, 500);
+        });
+
+        // Redirects to login.html after intro completes
+        setTimeout(() => {
+            document.getElementById('introBody').style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 800);
+        }, 10200);
+    </script>
+</body>
+</html>
