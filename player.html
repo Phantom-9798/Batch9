@@ -40,17 +40,6 @@
       user-select: none;
     }
 
-    /* Falling Stars & Medium Bubbles Canvas Background */
-    #starBubbleCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-    }
-
     .font-stencil { font-family: 'Black Ops One', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
     .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
@@ -236,9 +225,6 @@
 
 <body class="text-white min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
 
-  <!-- Background Canvas for Falling Stars & Medium Bubbles -->
-  <canvas id="starBubbleCanvas"></canvas>
-
   <div id="phantomStudyTimerWidget">
     <div class="pulse-dot"></div>
     <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
@@ -334,57 +320,6 @@
     let timerSync = null;
     let hideControlsTimeout = null;
     let isNexield = false;
-
-    // --- CANVAS PARTICLES ANIMATION ---
-    const canvas = document.getElementById("starBubbleCanvas");
-    const ctx = canvas.getContext("2d");
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const particles = [];
-    for (let i = 0; i < 90; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2.5,
-        starRadius: Math.random() * 4 + 3,
-        speedY: Math.random() * 0.9 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.9 + 0.4,
-        isBubble: Math.random() > 0.45
-      });
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        if (p.y > canvas.height) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
-        }
-        ctx.beginPath();
-        if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
-          ctx.lineWidth = 1.6;
-          ctx.stroke();
-        } else {
-          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 25;
-          ctx.shadowColor = '#ffd700';
-          ctx.fill();
-        }
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
