@@ -422,9 +422,18 @@
 
       activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 transition cursor-pointer group shadow-lg";
         
-        card.onclick = () => openSubjectModule(currentBatchParam, subj.name, currentModeParam);
+        // Subject Lock & Class Management
+        const cardClass = subj.locked ? 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg locked' : 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 transition cursor-pointer group shadow-lg';
+        card.className = cardClass;
+        
+        card.onclick = () => {
+          if (subj.locked) {
+            alert("यह सब्जेक्ट अभी लॉक है (Coming Soon)! जल्द ही लॉन्च होगा।");
+            return;
+          }
+          openSubjectModule(currentBatchParam, subj.name, currentModeParam);
+        };
 
         card.innerHTML = `
           <!-- CARD TOP IMAGE -->
@@ -596,6 +605,32 @@
       box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
       position: relative;
       z-index: 10;
+    }
+
+    /* Locked Subject Styling & Not Started Badge */
+    .armor-panel.locked {
+      opacity: 0.55;
+      filter: grayscale(70%);
+      border-color: rgba(255, 215, 0, 0.3) !important;
+      cursor: not-allowed;
+    }
+    .armor-panel.locked::after {
+      content: "🔒 NOT STARTED";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #04070b;
+      color: #ffd700;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      border: 2px solid #ffd700;
+      border-radius: 6px;
+      z-index: 50;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+      letter-spacing: 1px;
     }
 
     header, main, footer { position: relative; z-index: 10; }
