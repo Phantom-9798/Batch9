@@ -446,17 +446,21 @@
       activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
         
-        // Subject Lock & Class Management
-        const cardClass = subj.locked ? 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg locked' : 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 transition cursor-pointer group shadow-lg';
-        card.className = cardClass;
-        
-        card.onclick = () => {
-          if (subj.locked) {
-            alert("यह सब्जेक्ट अभी लॉक है (Coming Soon)! जल्द ही लॉन्च होगा।");
-            return;
-          }
-          openSubjectModule(currentBatchParam, subj.name, currentModeParam);
-        };
+       const isActuallyLocked = !isRecorded && subj.locked;
+
+const cardClass = isActuallyLocked 
+    ? 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg locked' 
+    : 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 transition cursor-pointer group shadow-lg';
+  
+card.className = cardClass; //
+
+card.onclick = () => {
+  if (isActuallyLocked) {
+    alert("यह सब्जेक्ट अभी लाइव शुरू नहीं हुआ है (Coming Soon)!");
+    return;
+  }
+  openSubjectModule(currentBatchParam, subj.name, currentModeParam);
+};
 
         card.innerHTML = `
           <!-- CARD TOP IMAGE -->
