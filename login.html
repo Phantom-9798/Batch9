@@ -107,7 +107,7 @@
 
           let finalAllowed = [...chosenBatches];
           if (chosenBatches.includes("combo")) {
-            finalAllowed = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
+            finalAllowed = ["cds-math", "cds-ota", "afcat", "capf", "combo"];
           }
 
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -397,7 +397,7 @@
                 <span class="text-white font-serif-bold text-sm">CDS Mathematics Specialist</span>
               </label>
               <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="cds-kilo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
+                <input type="checkbox" name="cadetBatches" value="cds-ota" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
                 <span class="text-white font-serif-bold text-sm">CDS OTA Batch</span>
               </label>
               <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
