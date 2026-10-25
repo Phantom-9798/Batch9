@@ -373,20 +373,20 @@
           <div class="p-4 pt-0"><button id="btn-cds-math" class="w-full phantom-btn"></button></div>
         </div>
 
-        <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+        <div id="card-cds-ota" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
           <div>
             <div class="relative w-full h-48 overflow-hidden bg-black">
               <img src="ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CDS+OTA';"/>
               <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
               <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
-              <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
+              <div class="absolute top-3 right-3" id="badge-cds-ota"></div>
             </div>
             <div class="p-4">
               <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS OTA</h3>
               <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Complete Integrated Curriculum</p>
             </div>
           </div>
-          <div class="p-4 pt-0"><button id="btn-cds-kilo" class="w-full phantom-btn"></button></div>
+          <div class="p-4 pt-0"><button id="btn-cds-ota" class="w-full phantom-btn"></button></div>
         </div>
 
         <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
@@ -1139,7 +1139,7 @@
         const allowed = data.allowedBatches || [];
         const isCombo = allowed.includes("combo") || allowed.length >= 4;
 
-        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+        const batchesList = ["cds-math", "cds-ota", "afcat", "capf"];
         batchesList.forEach(batchId => {
           const hasAccess = isCombo || allowed.includes(batchId);
           applyBatchAccess(batchId, hasAccess);
@@ -1184,7 +1184,7 @@
     const secureTgRegistry = {
       "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
       "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
-      "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
+      "cds-ota": "https://t.me/+fbkHtdwcNF04OTll",
       "capf": "https://t.me/+JmGvA3F25WY1YjA9"
     };
 
@@ -1195,7 +1195,7 @@
       const allGroups = [
         { id: "afcat", name: "AFCAT SQUADRON GROUP" },
         { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
-        { id: "cds-kilo", name: "CDS OTA SQUADRON" },
+        { id: "cds-ota", name: "CDS OTA SQUADRON" },
         { id: "capf", name: "CAPF SQUADRON" }
       ];
 
