@@ -1139,7 +1139,7 @@
         const allowed = data.allowedBatches || [];
         const isCombo = allowed.includes("combo") || allowed.length >= 4;
 
-        const batchesList = ["cds-math", "cds-ota", "afcat", "capf"];
+        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
         batchesList.forEach(batchId => {
           const hasAccess = isCombo || allowed.includes(batchId);
           applyBatchAccess(batchId, hasAccess);
