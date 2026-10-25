@@ -232,7 +232,7 @@
 
     window.navigateBackToSubjects = function() {
       const urlParams = new URLSearchParams(window.location.search);
-      const batch = urlParams.get('batch') || 'cds-ota';
+      const batch = urlParams.get('batch') || 'cds-kilo';
       const mode = urlParams.get('mode') || 'live';
       window.location.href = `subjects.html?batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
     };
