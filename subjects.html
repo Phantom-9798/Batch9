@@ -186,7 +186,7 @@
           }
         ]
       },
-      "cds-ota": {
+      "cds-kilo": {
         title: "CDS OTA Squadron",
         subjects: cdsOtaFullSubjects
       },
@@ -374,7 +374,7 @@
     };
 
     let unsubscribeSnapshot = null;
-    let currentBatchParam = "cds-ota";
+    let currentBatchParam = "cds-kilo";
     let currentModeParam = "live";
 
     // --- SECURE SESSION VALIDATION ---
@@ -416,7 +416,7 @@
 
     function renderBatchCurriculum(allowedBatches) {
       const urlParams = new URLSearchParams(window.location.search);
-      currentBatchParam = urlParams.get('batch') || 'cds-ota';
+      currentBatchParam = urlParams.get('batch') || 'cds-kilo';
       currentModeParam = (urlParams.get('mode') === 'recorded') ? 'recorded' : 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
@@ -426,7 +426,7 @@
         return;
       }
 
-      const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-ota"];
+      const currentCurriculum = curriculumData[currentBatchParam] || curriculumData["cds-kilo"];
       const isRecorded = currentModeParam === 'recorded';
       const modeLabel = isRecorded ? 'RECORDED VAULT' : 'LIVE SQUADRON';
 
@@ -441,7 +441,7 @@
       const container = document.getElementById('subjectsContainer');
       container.innerHTML = "";
 
-      const activeSubjectsList = (currentBatchParam === "cds-ota") ? cdsOtaFullSubjects : currentCurriculum.subjects;
+      const activeSubjectsList = (currentBatchParam === "cds-kilo") ? cdsOtaFullSubjects : currentCurriculum.subjects;
 
       activeSubjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
