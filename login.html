@@ -110,14 +110,14 @@
             finalAllowed = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
           }
 
-          // Check if user selected Free Batch
-          const isFreeRegistration = chosenBatches.includes("free-batch");
-          const accountStatus = isFreeRegistration ? "active" : "pending";
+          // STRICT CHECK: Auto-activate ONLY if the user selected ONLY the Free Batch and nothing else
+          const isOnlyFreeRegistration = (chosenBatches.length === 1 && chosenBatches.includes("free-batch"));
+          const accountStatus = isOnlyFreeRegistration ? "active" : "pending";
 
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const cadetUid = userCredential.user.uid;
 
-          // Save account with status "active" if free, otherwise "pending"
+          // Save account with status "active" if exclusively free, otherwise "pending"
           await setDoc(doc(db, "cadets", cadetUid), {
             uid: cadetUid,
             name: name,
@@ -128,11 +128,11 @@
             createdAt: new Date().toISOString()
           });
 
-          if (isFreeRegistration) {
-            // Instant session setup and entry for Free Batch users
+          if (isOnlyFreeRegistration) {
+            // Instant session setup and entry ONLY for exclusive Free Batch users
             await establishSessionAndEnter(cadetUid);
           } else {
-            // Sign out for paid signups so they wait for admin approval
+            // Sign out for paid / mixed signups so they wait for admin approval
             await signOut(auth);
 
             statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed shadow-lg font-body font-bold";
@@ -402,7 +402,7 @@
             </label>
             <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani">
               
-              <!-- FREE BATCH OPTION (INSTANT AUTO-APPROVAL) -->
+              <!-- FREE BATCH OPTION (INSTANT AUTO-APPROVAL ONLY IF CHOSEN ALONE) -->
               <label class="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-950/80 border border-emerald-500/80 hover:border-emerald-400 cursor-pointer transition shadow-sm">
                 <input type="checkbox" name="cadetBatches" value="free-batch" class="w-4 h-4 accent-emerald-400 rounded cursor-pointer">
                 <span class="text-emerald-300 font-serif-bold text-sm">⭐ Free Batch (Instant Access)</span>
