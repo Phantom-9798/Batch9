@@ -350,21 +350,26 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
         </div>
 
-        <!-- View 4: Free Lectures View ("It will be uploaded very soon" - No lectures added yet) -->
+        <!-- View 4: Free Lectures View (Shows list of chapters/lectures with "Watch Lecture" / "Watch Now" button) -->
         <div id="freeLecturesView" class="hidden">
           <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO SUBJECTS
           </button>
 
-          <div class="armor-panel rounded-2xl p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-amber-400 tracking-wide uppercase mb-2" id="selectedFreeSubjectTitle">LECTURES DOSSIER</h2>
-            <p class="text-sm text-neutral-300 font-body mb-6">High-yield tactical study materials and video lectures for this module.</p>
-            
-            <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 max-w-lg mx-auto shadow-[0_0_25px_rgba(255,215,0,0.15)]">
-              <div class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</div>
-              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
+          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">LECTURES DOSSIER</div>
+              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="selectedFreeSubjectTitle">CHAPTER LECTURES</h2>
+              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Lecture to start streaming.</p>
             </div>
+            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> READY TO STREAM
+            </div>
+          </div>
+
+          <!-- Lectures Tiles Container -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeLecturesListContainer">
+            <!-- Dynamically populated or default fallback "It will be uploaded very soon" card if empty -->
           </div>
         </div>
 
@@ -679,8 +684,8 @@
   </div>
   <!-- ================= END OF CINEMATIC INTRO POPUP ================= -->
 
-  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
-  <div id="phantomWhatsAppModal" class="fixed inset-0 bg-black/85 z-[999999] flex items-center justify-center p-4 backdrop-blur-md">
+  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL (FIXED OVERLAY & Z-INDEX) -->
+  <div id="phantomWhatsAppModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999998; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;">
     <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
       
       <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
@@ -1012,6 +1017,43 @@
       document.getElementById("batchModeMainView").classList.add("hidden");
       document.getElementById("testSeriesContainer").classList.remove("hidden");
     }
+
+    // STUDY FOCUS TIMER (FIXED / RUNNING LIVE SECONDS)
+    (function() {
+      const todayStr = new Date().toDateString();
+      const lastDate = localStorage.getItem("phantom_study_date");
+      
+      if (lastDate !== todayStr) {
+        localStorage.setItem("phantom_study_date", todayStr);
+        localStorage.setItem("phantom_daily_seconds", "0");
+      }
+
+      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      let sessionSeconds = 0;
+
+      setInterval(() => {
+        totalSeconds++;
+        sessionSeconds++;
+        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+        const displayEl = document.getElementById("phantomTimerDisplay");
+        if (displayEl) displayEl.innerText = displayStr;
+
+        const pHrs = Math.floor(sessionSeconds / 3600);
+        const pMins = Math.floor((sessionSeconds % 3600) / 60);
+        const pSecs = sessionSeconds % 60;
+        const pDisplayStr = pHrs > 0 
+          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
+          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+        
+        const autoPomoEl = document.getElementById("autoPomoDisplay");
+        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
+      }, 1000);
+    })();
 
     let unsubscribeSnapshot = null;
     const localUid = localStorage.getItem("phantom_uid");
