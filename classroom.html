@@ -1,1161 +1,1119 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: {} }
-    }
-  </script>
-  
-  <!-- Military & Tactical Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} }
+    }
+  </script>
+  
+  <!-- Military & Tactical Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-    }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+    }
 
-    /* Force Full Solid Deep Navy Blue Background */
-    html, body {
-      background-color: #020617 !important;
-      background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
-      color: #f8fafc !important;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      overflow-x: hidden;
-      position: relative;
-      -webkit-user-select: none;
-      user-select: none;
-    }
+    /* Force Full Solid Deep Navy Blue Background */
+    html, body {
+      background-color: #020617 !important;
+      background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
+      color: #f8fafc !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+    }
 
-    /* Falling Stars & Bubbles Canvas Background */
-    #starBubbleCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-    }
+    /* Falling Stars & Bubbles Canvas Background */
+    #starBubbleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-    .font-stencil { font-family: 'Black Ops One', cursive; }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
-    .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
+    .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
 
-    img { max-width: 100%; height: auto; }
+    img { max-width: 100%; height: auto; }
 
-    .hud-grid {
-      background-image: 
-        linear-gradient(rgba(255, 215, 0, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 215, 0, 0.05) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
+    .hud-grid {
+      background-image: 
+        linear-gradient(rgba(255, 215, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 215, 0, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
 
-    .armor-panel {
-      background: rgba(6, 12, 30, 0.96);
-      border: 2px solid rgba(255, 215, 0, 0.7);
-      box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
-      position: relative;
-      z-index: 10;
-    }
+    .armor-panel {
+      background: rgba(6, 12, 30, 0.96);
+      border: 2px solid rgba(255, 215, 0, 0.7);
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
+      position: relative;
+      z-index: 10;
+    }
 
-    @keyframes fadeInScale {
-      from { opacity: 0; transform: scale(0.98) translateY(6px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .page-transition {
-      animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.98) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .page-transition {
+      animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 
-    /* Moving Glowing Hover Light Effect on All Buttons & Subject Cards */
-    .phantom-btn {
-      transition: all 0.3s ease-in-out;
-      position: relative;
-    }
-    .phantom-btn:hover {
-      background-color: #0ea5e9 !important;
-      color: #ffffff !important;
-      border-color: #38bdf8 !important;
-      box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
-      transform: translateY(-2px);
-    }
-    .phantom-btn:active { transform: scale(0.96); }
+    /* Moving Glowing Hover Light Effect on All Buttons & Subject Cards */
+    .phantom-btn {
+      transition: all 0.3s ease-in-out;
+      position: relative;
+    }
+    .phantom-btn:hover {
+      background-color: #0ea5e9 !important;
+      color: #ffffff !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .phantom-btn:active { transform: scale(0.96); }
 
-    #phantomStudyTimerWidget {
-      position: fixed;
-      top: 15px;
-      right: 20px;
-      z-index: 99999;
-      background: rgba(4, 7, 13, 0.95);
-      border: 1px solid rgba(255, 215, 0, 0.5);
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-family: 'Orbitron', sans-serif;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      backdrop-filter: blur(8px);
-    }
-    #phantomStudyTimerWidget .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ffd700;
-      border-radius: 50%;
-      animation: phantomPulse 1.5s infinite;
-    }
-    @keyframes phantomPulse {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #ffd700; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
+    #phantomStudyTimerWidget {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      z-index: 99999;
+      background: rgba(4, 7, 13, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+    }
+    #phantomStudyTimerWidget .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ffd700;
+      border-radius: 50%;
+      animation: phantomPulse 1.5s infinite;
+    }
+    @keyframes phantomPulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #ffd700; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
 
-    #phantomFocusDock {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 99998;
-      background: rgba(6, 12, 30, 0.96);
-      border: 1px solid rgba(255, 215, 0, 0.5);
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-      padding: 8px 18px;
-      border-radius: 9999px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-family: 'Orbitron', sans-serif;
-      backdrop-filter: blur(10px);
-      font-size: 11px;
-      color: #ffd700;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
+    #phantomFocusDock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99998;
+      background: rgba(6, 12, 30, 0.96);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Orbitron', sans-serif;
+      backdrop-filter: blur(10px);
+      font-size: 11px;
+      color: #ffd700;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
 
-    header, main, footer { position: relative; z-index: 10; }
-  </style>
+    header, main, footer { position: relative; z-index: 10; }
+  </style>
 
-  <script>
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-    })();
-  </script>
+  <script>
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+    })();
+  </script>
 </head>
 
 <body class="hud-grid text-neutral-100 min-h-screen flex flex-col justify-between">
 
-  <!-- Background Canvas for Falling Stars & Bubbles Animation -->
-  <canvas id="starBubbleCanvas"></canvas>
-
-  <!-- ================= SIDEBAR NAVIGATION DRAWER ================= -->
-  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity"></div>
-  <aside id="sidebarDrawer" class="fixed top-0 left-[-300px] w-72 sm:w-80 h-full bg-neutral-950 border-r-2 border-amber-400/50 z-50 transition-all duration-300 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.9)]">
-    <div>
-      <div class="p-5 bg-neutral-900 border-b border-neutral-800 flex items-center gap-3.5 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-amber-400"></div>
-        <div class="w-12 h-12 rounded-xl bg-amber-400/20 border border-amber-400 flex items-center justify-center shrink-0 font-stencil text-amber-300 text-lg shadow">TP</div>
-        <div class="overflow-hidden">
-          <h3 id="sidebarProfileName" class="font-orbitron font-bold text-sm text-white truncate">Loading Cadet...</h3>
-          <p id="sidebarProfileEmail" class="text-xs text-neutral-400 font-mono truncate">cadet@teamphantom.in</p>
-          <span class="inline-flex items-center gap-1 mt-1 text-[9px] font-orbitron bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-amber-400/30">VERIFIED CADET</span>
-        </div>
-      </div>
-      <nav class="p-3 space-y-1.5 font-orbitron text-xs">
-        <button onclick="showHomeView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 font-bold tracking-wider transition text-left cursor-pointer phantom-btn">
-          <span>&#127968;</span> HOME
-        </button>
-        <button onclick="showWatchHoursModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
-          <span>&#9201;</span> MY WATCH HOURS
-        </button>
-        <button onclick="showTestSeriesView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
-          <span>&#128221;</span> TEST SERIES
-        </button>
-        
-        <div class="pt-2 pb-1 border-t border-neutral-900 my-2"></div>
-
-        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:bg-emerald-950/35 transition text-left font-bold tracking-wider phantom-btn">
-          <span>&#128227;</span> WHATSAPP CHANNEL
-        </a>
-        <a href="https://t.me/teamPhantom98" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sky-400 hover:bg-sky-950/35 transition text-left font-bold tracking-wider phantom-btn">
-          <span>&#9888;</span> REPORT PROBLEM
-        </a>
-      </nav>
-    </div>
-    
-    <!-- Footer Logout & Developer Tag -->
-    <div class="p-4 border-t border-neutral-900 bg-neutral-950 space-y-2">
-      <div class="text-center font-orbitron text-[10px] text-amber-400/80 tracking-widest uppercase">
-        DEV BY TEAM PHANTOM
-      </div>
-      <button onclick="window.logoutCadet()" class="w-full py-3 rounded-xl bg-red-950/60 border border-red-500/50 hover:bg-red-900/60 text-red-300 font-orbitron font-bold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer phantom-btn">
-        <span>&#128274;</span> LOG OUT
-      </button>
-    </div>
-  </aside>
-
-  <!-- Watch Hours Modal -->
-  <div id="watchHoursModal" class="fixed inset-0 bg-black/85 z-50 hidden backdrop-blur-md flex items-center justify-center p-4">
-    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition">
-      <h3 class="font-stencil text-2xl text-amber-400 mb-2">MY WATCH HOURS</h3>
-      <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 mb-6">
-        <div class="text-xs font-orbitron text-neutral-400 uppercase tracking-widest mb-1">TOTAL LOGGED TIME</div>
-        <div class="font-stencil text-4xl text-emerald-400 tracking-wider" id="modalWatchTimeDisplay">00h 00m 00s</div>
-      </div>
-      <button onclick="closeWatchHoursModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">CLOSE ANALYTICS</button>
-    </div>
-  </div>
-
-  <div id="phantomStudyTimerWidget">
-    <div class="pulse-dot"></div>
-    <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
-    <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
-  </div>
-
-  <div id="phantomFocusDock">
-    <span>🛡️ MISSION MODE: ACTIVE</span>
-    <span>|</span>
-    <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
-    <span>|</span>
-    <span>🎵 AUDIO: ON</span>
-  </div>
-
-  <audio id="ambientAudio" autoplay loop>
-    <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
-  </audio>
-
-  <!-- TOP HEADER -->
-  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">&#9776;</button>
-        <div class="relative w-12 h-12 rounded-xl bg-black border border-amber-400/80 p-1 flex items-center justify-center overflow-hidden">
-          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=PHANTOM';">
-        </div>
-        <div>
-          <h1 class="font-stencil text-xl sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">TEAM PHANTOM</h1>
-          <p class="font-orbitron text-[10px] text-neutral-400 tracking-widest uppercase">OPERATIONAL CADET DASHBOARD</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="text-right hidden sm:block">
-          <div class="font-orbitron font-bold text-xs text-amber-400" id="cadetNameDisplay">Cadet</div>
-          <div class="font-mono text-[11px] text-neutral-400" id="cadetEmailDisplay">Verifying...</div>
-        </div>
-        <button onclick="window.logoutCadet()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition shadow-md cursor-pointer phantom-btn">TERMINATE</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- TELEGRAM GROUP NOTIFICATION CONTAINER (VISIBLE ONLY FOR PAID CADETS) -->
-  <div id="telegramNotificationContainer" class="w-full max-w-6xl mx-auto px-4 mt-6 hidden"></div>
-
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full page-transition">
-    
-    <!-- HOME / DASHBOARD VIEW -->
-    <div id="batchModeMainView">
-
-      <!-- ================= FREE TACTICAL VAULT SECTION (SINGLE PAGE FLOW) ================= -->
-      <div class="w-full mb-12">
-        
-        <!-- View 1: Exam Tabs & Tiles -->
-        <div id="freeExamDashboardView">
-          
-          <!-- Large, prominent Exam Tabs (CDS, AFCAT, CAPF) -->
-          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-8">
-            <button onclick="window.switchFreeExamTab('CDS')" id="free-tab-CDS" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
-              🛡️ CDS
-            </button>
-            <button onclick="window.switchFreeExamTab('AFCAT')" id="free-tab-AFCAT" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
-              ✈️ AFCAT
-            </button>
-            <button onclick="window.switchFreeExamTab('CAPF')" id="free-tab-CAPF" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
-              ⭐ CAPF
-            </button>
-          </div>
-
-          <!-- Free Tiles Container -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeExamTilesContainer"></div>
-        </div>
-
-        <!-- View 2: Live Mode Only -->
-        <div id="freeModeSelectionView" class="hidden">
-          <button onclick="window.backToFreeDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
-            &larr; BACK TO FREE VAULT
-          </button>
-          
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-2" id="freeModeBatchBadge">OPERATIONAL BRIEFING</div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wider uppercase mb-1">SELECT FREE DEPLOYMENT MODE</h2>
-          </div>
-
-          <div class="max-w-md mx-auto">
-            <div onclick="window.selectFreeModeAction('live')" class="armor-panel rounded-2xl p-6 hover:border-amber-400 transition cursor-pointer group flex flex-col justify-between">
-              <div>
-                <div class="flex items-center justify-between mb-4">
-                  <div class="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-2xl text-amber-400">⚡</div>
-                  <span class="px-2.5 py-1 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">LIVE VAULT</span>
-                </div>
-                <h3 class="font-orbitron text-xl font-bold text-white group-hover:text-amber-400 transition mb-2">LIVE MODE</h3>
-                <p class="text-xs text-neutral-300 font-body mb-6">Access weekend live streaming sessions and special modules.</p>
-              </div>
-              <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">ENTER LIVE VAULT &rarr;</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- View 3: Subjects Grid (Squadron-wise correct subjects) -->
-        <div id="freeSubjectsGridView" class="hidden">
-          <button onclick="window.backToFreeModeSelection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
-            &larr; BACK TO MODE SELECTION
-          </button>
-
-          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="freeSubjectBatchBadge">FREE CURRICULUM</div>
-              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="freeSubjectHeading">FREE SUBJECTS</h2>
-              <p class="text-xs text-neutral-300 font-body mt-1">Select a subject module below to access lectures.</p>
-            </div>
-            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FREE ACCESS ACTIVE
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
-        </div>
-
-        <!-- View 4: Free Lectures View (Shows list of chapters/lectures with "Watch Lecture" / "Watch Now" button) -->
-        <div id="freeLecturesView" class="hidden">
-          <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
-            &larr; BACK TO SUBJECTS
-          </button>
-
-          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">LECTURES DOSSIER</div>
-              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="selectedFreeSubjectTitle">CHAPTER LECTURES</h2>
-              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Lecture to start streaming.</p>
-            </div>
-            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> READY TO STREAM
-            </div>
-          </div>
-
-          <!-- Lectures Tiles Container -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeLecturesListContainer">
-            <!-- Dynamically populated or default fallback "It will be uploaded very soon" card if empty -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ================= PAID AUTHORIZED SQUADRONS SECTION (ONLY FOR PAID CADETS) ================= -->
-      <div id="paidSquadronsSection" class="hidden w-full mt-12 pt-8 border-t-2 border-amber-500/30">
-        <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1"><span>&#9733;</span> TACTICAL FLIGHT CONTROL</div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AUTHORIZED PAID SQUADRONS</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Your enrolled premium batch curriculum and regular live classes.</p>
-          </div>
-          <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> PREMIUM ENROLLED ACCESS
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-black">
-                <img src="math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CDS+Math';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span></div>
-                <div class="absolute top-3 right-3" id="badge-cds-math"></div>
-              </div>
-              <div class="p-4">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS MATHEMATICS</h3>
-                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Specialist Arithmetic & Advanced</p>
-              </div>
-            </div>
-            <div class="p-4 pt-0"><button id="btn-cds-math" class="w-full phantom-btn"></button></div>
-          </div>
-
-          <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-black">
-                <img src="ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CDS+OTA';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
-                <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
-              </div>
-              <div class="p-4">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS OTA</h3>
-                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Complete Integrated Curriculum</p>
-              </div>
-            </div>
-            <div class="p-4 pt-0"><button id="btn-cds-kilo" class="w-full phantom-btn"></button></div>
-          </div>
-
-          <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-black">
-                <img src="afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=AFCAT';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span></div>
-                <div class="absolute top-3 right-3" id="badge-afcat"></div>
-              </div>
-              <div class="p-4">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">AFCAT</h3>
-                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Air Force Speed & Accuracy</p>
-              </div>
-            </div>
-            <div class="p-4 pt-0"><button id="btn-afcat" class="w-full phantom-btn"></button></div>
-          </div>
-
-          <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
-                <img src="capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CAPF';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
-                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span></div>
-                <div class="absolute top-3 right-3" id="badge-capf"></div>
-              </div>
-              <div class="p-4">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CAPF</h3>
-                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Assistant Commandant Focus</p>
-              </div>
-            </div>
-            <div class="p-4 pt-0"><button id="btn-capf" class="w-full phantom-btn"></button></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TEST SERIES VIEW (BUILT-IN SINGLE PAGE) -->
-    <div id="testSeriesContainer" class="hidden w-full page-transition">
-      <div class="armor-panel rounded-2xl p-6 sm:p-8 mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>🎯</span> TACTICAL ASSESSMENT CONSOLE
-            </div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">ALL-INDIA DEFENCE TEST SERIES</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Timed full-length mock exams and sectional drills for CDS, AFCAT & CAPF.</p>
-          </div>
-          <button onclick="showHomeView()" class="px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
-            &larr; BACK TO HOME
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
-            <div>
-              <span class="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #01</span>
-              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CDS FULL MOCK TEST</h3>
-              <p class="text-xs text-neutral-300 font-body mb-6">Complete bilingual timed test paper following latest UPSC pattern.</p>
-            </div>
-            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
-              START TEST &rarr;
-            </button>
-          </div>
-
-          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
-            <div>
-              <span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #02</span>
-              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">AFCAT SPEED DRILL</h3>
-              <p class="text-xs text-neutral-300 font-body mb-6">100 questions high-speed numerical and reasoning test set.</p>
-            </div>
-            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
-              START TEST &rarr;
-            </button>
-          </div>
-
-          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
-            <div>
-              <span class="px-2 py-0.5 rounded bg-purple-950 border border-emerald-500/50 text-purple-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #03</span>
-              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CAPF PAPER-2 DESCRIPTIVE</h3>
-              <p class="text-xs text-neutral-300 font-body mb-6">Essay, précis and analytical writing evaluation format.</p>
-            </div>
-            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
-              START TEST &rarr;
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3.5 px-4 text-center">
-    <p class="text-[11px] font-body text-neutral-400 tracking-wider">&copy; 2026 TEAM PHANTOM. ALL RIGHTS RESERVED.</p>
-  </footer>
-
-  <!-- ================= TEAM PHANTOM CINEMATIC INTRO POPUP OVERLAY ================= -->
-  <div id="classroomCinematicPopup" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background-color: #04070b; background-image: radial-gradient(circle at center, #0a1628 0%, #04070b 100%); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.8s ease-in-out; -webkit-user-select: none; user-select: none;">
-    <style>
-        #classroomCinematicPopup * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
-        #ccStarBubbleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; }
-        .cc-curtain-left, .cc-curtain-right {
-            position: absolute; top: 0; width: 50%; height: 100%;
-            background: linear-gradient(90deg, #996515 0%, #d4af37 20%, #ffd700 50%, #d4af37 80%, #996515 100%);
-            background-size: 80px 100%; z-index: 100;
-            transition: transform 2.8s cubic-bezier(0.77, 0, 0.175, 1);
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.9);
-            border-bottom: 8px solid #5c4033;
-        }
-        .cc-curtain-left { left: 0; transform-origin: left; border-right: 4px solid #4a3319; }
-        .cc-curtain-right { right: 0; transform-origin: right; border-left: 4px solid #4a3319; }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-left { transform: translateX(-100%); }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-right { transform: translateX(100%); }
-
-        .cc-intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; position: relative; z-index: 10; }
-        .cc-rocket-logo-wrapper { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; height: 90px; width: 100%; }
-        .cc-logo-box-container { position: absolute; opacity: 0; transform: scale(0.2); animation: ccDropLogoCenter 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; animation-delay: 3.2s; }
-        .cc-intro-logo { width: 70px; height: 70px; object-fit: cover; border-radius: 14px; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
-        .cc-rocket-ship { position: absolute; font-size: 34px; transform: rotate(45deg); z-index: 20; animation: ccFlyRocketVerySlow 5.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 0.8s; }
-        @keyframes ccFlyRocketVerySlow {
-            0% { left: -180px; top: 25px; opacity: 0; transform: scale(0.6) rotate(55deg); }
-            20% { opacity: 1; transform: scale(1.1) rotate(45deg); }
-            50% { left: calc(50% - 15px); top: -5px; transform: scale(1.2) rotate(40deg); }
-            80% { opacity: 1; }
-            100% { left: 110vw; top: -60px; opacity: 0; transform: scale(0.8) rotate(30deg); }
-        }
-        @keyframes ccDropLogoCenter {
-            0% { opacity: 0; transform: scale(0.3) translateY(-30px); }
-            70% { opacity: 1; transform: scale(1.1) translateY(5px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .cc-title-wrapper { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .cc-word-group { display: flex; gap: 8px; }
-        .cc-letter-box {
-            width: 46px; height: 56px; background: rgba(10, 18, 30, 0.95); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-family: 'Black Ops One', cursive; font-size: 26px;
-            opacity: 0; transform: translateY(-350px) rotate(-20deg); animation: ccDropBounce 0.8s cubic-bezier(0.25, 1, 0.5, 1.25) forwards;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-        }
-        .cc-letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
-        .cc-letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
-        .cc-letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffd700; border: 2px solid #ffd700; text-shadow: 0 0 12px #ffd700; }
-        .cc-letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
-        .cc-letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
-        .cc-letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
-        .cc-letter-box:nth-child(7)  { animation-delay: 4.85s; color: #ff9933; border: 2px solid #ff9933; text-shadow: 0 0 12px #ff9933; }
-        .cc-letter-box:nth-child(8)  { animation-delay: 4.95s; color: #9933ff; border: 2px solid #9933ff; text-shadow: 0 0 12px #9933ff; }
-        .cc-letter-box:nth-child(9)  { animation-delay: 5.05s; color: #ffff33; border: 2px solid #ffff33; text-shadow: 0 0 12px #ffff33; }
-        .cc-letter-box:nth-child(10) { animation-delay: 5.15s; color: #33ff33; border: 2px solid #33ff33; text-shadow: 0 0 12px #33ff33; }
-        .cc-letter-box:nth-child(11) { animation-delay: 5.25s; color: #ff3333; border: 2px solid #ff3333; text-shadow: 0 0 12px #ff3333; }
-        @keyframes ccDropBounce {
-            0% { transform: translateY(-350px) rotate(-25deg); opacity: 0; }
-            60% { transform: translateY(15px) rotate(6deg); opacity: 1; }
-            80% { transform: translateY(-8px) rotate(-3deg); }
-            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        }
-        .cc-subtitle {
-            font-family: 'Black Ops One', cursive; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #ffd700;
-            text-shadow: 0 0 18px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
-            opacity: 0; transform: translateX(-150px); animation: ccSwipeInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            animation-delay: 6.0s; margin-bottom: 15px;
-        }
-        @keyframes ccSwipeInRight { to { opacity: 1; transform: translateX(0); } }
-        .cc-secure-loader-wrapper { display: flex; flex-direction: column; align-items: center; opacity: 0; animation: ccFadeInSecure 0.6s ease forwards; animation-delay: 6.6s; width: 280px; }
-        .cc-progress-bar-container { width: 100%; height: 7px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 242, 254, 0.5); border-radius: 4px; overflow: hidden; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); margin-bottom: 8px; }
-        .cc-progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe); box-shadow: 0 0 15px #00f2fe; animation: ccFillProgress 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 6.8s; }
-        @keyframes ccFillProgress { 0% { width: 0%; } 100% { width: 100%; } }
-        .cc-secure-status-text { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 12px rgba(0, 242, 254, 0.7); }
-        @keyframes ccFadeInSecure { to { opacity: 1; } }
-        .cc-footer-tag { position: absolute; bottom: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #4b5563; letter-spacing: 2px; z-index: 10; }
-    </style>
-
-    <canvas id="ccStarBubbleCanvas"></canvas>
-    <div class="cc-curtain-left"></div>
-    <div class="cc-curtain-right"></div>
-
-    <div class="cc-intro-container">
-        <div class="cc-rocket-logo-wrapper">
-            <div class="cc-rocket-ship">🚀</div>
-            <div class="cc-logo-box-container">
-                <img src="logo.jpeg" alt="Logo" class="cc-intro-logo">
-            </div>
-        </div>
-
-        <div class="cc-title-wrapper">
-            <div class="cc-word-group">
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">E</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-            <div style="width: 14px;"></div>
-            <div class="cc-word-group">
-                <div class="cc-letter-box">P</div>
-                <div class="cc-letter-box">H</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">N</div>
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">O</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-        </div>
-
-        <div class="cc-subtitle">⚡ ALWAYS WITH YOU WITH FULL SUPPORT ⚡</div>
-
-        <div class="cc-secure-loader-wrapper">
-            <div class="cc-progress-bar-container"><div class="cc-progress-bar-fill"></div></div>
-            <div class="cc-secure-status-text">INITIALIZING SECURE ACCESS</div>
-        </div>
-    </div>
-
-    <div class="cc-footer-tag">&copy; 2026 TEAM PHANTOM &bull; SECURE TERMINAL</div>
-
-    <script>
-        (function() {
-            const canvas = document.getElementById("ccStarBubbleCanvas");
-            const ctx = canvas.getContext("2d");
-            function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-            window.addEventListener("resize", resizeCanvas);
-            resizeCanvas();
-
-            const particles = [];
-            for (let i = 0; i < 90; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                    radius: Math.random() * 3 + 1, speedY: Math.random() * 0.5 + 0.25,
-                    speedX: (Math.random() - 0.5) * 0.25, opacity: Math.random() * 0.8 + 0.2, isBubble: Math.random() > 0.5
-                });
-            }
-
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
-                    p.y += p.speedY; p.x += p.speedX;
-                    if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
-                    ctx.beginPath();
-                    if (p.isBubble) {
-                        ctx.arc(p.x, p.y, p.radius * 1.3, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(14, 165, 233, ${p.opacity * 0.5})`; ctx.lineWidth = 1.2; ctx.stroke();
-                    } else {
-                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`; ctx.shadowBlur = 10; ctx.shadowColor = '#ffd700'; ctx.fill();
-                    }
-                });
-                requestAnimationFrame(animateParticles);
-            }
-            animateParticles();
-
-            window.addEventListener('load', () => {
-                setTimeout(() => { document.getElementById('classroomCinematicPopup').classList.add('open-cc-curtains'); }, 500);
-            });
-
-            setTimeout(() => {
-                const popup = document.getElementById('classroomCinematicPopup');
-                if (popup) {
-                    popup.style.opacity = '0';
-                    setTimeout(() => { popup.style.display = 'none'; }, 800);
-                }
-            }, 10200);
-        })();
-    </script>
-  </div>
-  <!-- ================= END OF CINEMATIC INTRO POPUP ================= -->
-
-  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL (FIXED OVERLAY & Z-INDEX) -->
-  <div id="phantomWhatsAppModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999998; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px;">
-    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
-      
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
-        <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=TP';">
-      </div>
-
-      <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
-      <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
-        Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
-      </p>
-
-      <div class="flex flex-col items-center justify-center my-6">
-        <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-400 rounded-2xl shadow-[0_0_35px_rgba(255,215,0,0.4)] backdrop-blur-lg">
-          <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
-          <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
-          <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
-          <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
-        </div>
-        <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
-      </div>
-
-      <div class="space-y-3">
-        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-500 hover:to-sky-400 text-black hover:text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] transform hover:scale-[1.02] phantom-btn">
-          📱 JOIN UPDATES CHANNEL
-        </a>
-        
-        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
-          🚀 CONTINUE TO SITE
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-      authDomain: "team-phantom-enrollment.firebaseapp.com",
-      projectId: "team-phantom-enrollment",
-      storageBucket: "team-phantom-enrollment.firebasestorage.app",
-      messagingSenderId: "658049687096",
-      appId: "1:658049687096:web:8464788a43126a6bced0cd"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let activeFreeExamTab = "";
-    let selectedFreeBatch = "";
-    let selectedFreeMode = "live";
-
-    // Canvas Background Animation
-    const canvas = document.getElementById("starBubbleCanvas");
-    const ctx = canvas.getContext("2d");
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const particles = [];
-    for (let i = 0; i < 90; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2.5,
-        starRadius: Math.random() * 4 + 3,
-        speedY: Math.random() * 0.9 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.9 + 0.4,
-        isBubble: Math.random() > 0.45
-      });
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        if (p.y > canvas.height) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
-        }
-        ctx.beginPath();
-        if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
-          ctx.lineWidth = 1.6;
-          ctx.stroke();
-        } else {
-          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 25;
-          ctx.shadowColor = '#ffd700';
-          ctx.fill();
-        }
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
-
-    // Master list of subjects for each squadron/exam
-    const squadronSubjectsMaster = {
-      "cds-math": [
-        { name: "Lectures", desc: "Comprehensive Theory, Core Concepts & Conceptual Proofs.", image: "math-ima.jpeg" },
-        { name: "Mock", desc: "Timed Tactical Test Papers, Sectional Drills & Video Solutions.", image: "math-ima.jpeg" }
-      ],
-      "cds-kilo": [
-        { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems, Climatology & Oceanography.", image: "ota-chennai.jpeg" },
-        { name: "Indian Geography", desc: "Physiography, Drainage Networks, Climate Systems & Natural Resources.", image: "ota-chennai.jpeg" },
-        { name: "Modern History", desc: "Freedom Struggle, British Era, National Movement & Constitutional Evolution.", image: "ota-chennai.jpeg" },
-        { name: "Medieval History", desc: "Delhi Sultanate, Mughal Administration, Architecture & Regional Dynasties.", image: "ota-chennai.jpeg" },
-        { name: "Ancient History", desc: "Indus Valley Civilization, Vedic Period, Mauryan & Gupta Empires.", image: "ota-chennai.jpeg" },
-        { name: "English Grammar", desc: "Rules of Grammar, Parts of Speech, Sentence Correction & Syntax Rules.", image: "ota-chennai.jpeg" },
-        { name: "Vocabulary", desc: "Synonyms, Antonyms, Idioms, Phrasal Verbs & Contextual Word Mastery.", image: "ota-chennai.jpeg" },
-        { name: "Polity", desc: "Indian Constitution, Preamble, Fundamental Rights, Parliament & Judiciary.", image: "ota-chennai.jpeg" }
-      ],
-      "afcat": [
-        { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery.", image: "afcat-afa.jpeg" },
-        { name: "Reasoning", desc: "Verbal, Non-Verbal & Spatial Tactical Reasoning Drills.", image: "afcat-afa.jpeg" },
-        { name: "English Grammar", desc: "Core Rules, Syntax, Sentence Corrections & Error Detection.", image: "afcat-afa.jpeg" },
-        { name: "English Vocabulary", desc: "High-Yield Synonyms, Antonyms, Idioms & One-Word Substitutions.", image: "afcat-afa.jpeg" },
-        { name: "General Awareness", desc: "Static GK, Defense Systems, History, Polity & Geography Essentials.", image: "afcat-afa.jpeg" }
-      ],
-      "capf": [
-        { name: "Math", desc: "Quantitative Aptitude & Problem Solving Drills.", image: "capf-forces.jpeg" },
-        { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports.", image: "capf-forces.jpeg" },
-        { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems, Climatology & Oceanography.", image: "capf-forces.jpeg" },
-        { name: "Modern History", desc: "Freedom Struggle, British Era & Constitutional Evolution.", image: "capf-forces.jpeg" },
-        { name: "Polity", desc: "Indian Constitution, Rights, Parliament & Judicial Framework.", image: "capf-forces.jpeg" }
-      ]
-    };
-
-    const freeVaultData = {
-      "CDS": [
-        { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules (Weekend Updates).", image: "math-ima.jpeg", batchId: "cds-math" },
-        { title: "CDS OTA", desc: "Complete Integrated English & General Studies Curriculum.", image: "ota-chennai.jpeg", batchId: "cds-kilo" }
-      ],
-      "AFCAT": [
-        { title: "AFCAT SQUADRON", desc: "Speed Mathematics, Reasoning & General Awareness Sessions.", image: "afcat-afa.jpeg", batchId: "afcat" }
-      ],
-      "CAPF": [
-        { title: "CAPF ASSISTANT COMMANDANT", desc: "Paper-1 & Paper-2 Special Guidance & Practice Modules.", image: "capf-forces.jpeg", batchId: "capf" }
-      ]
-    };
-
-    // Tab Toggle feature
-    window.switchFreeExamTab = function(examName) {
-      if (activeFreeExamTab === examName) {
-        activeFreeExamTab = "";
-        ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
-          const btn = document.getElementById('free-tab-' + tab);
-          if (btn) btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
-        });
-        document.getElementById("freeExamTilesContainer").innerHTML = "";
-        return;
-      }
-
-      activeFreeExamTab = examName;
-      ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
-        const btn = document.getElementById('free-tab-' + tab);
-        if (btn) {
-          if (tab === examName) {
-            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition shadow-lg phantom-btn cursor-pointer border border-amber-300";
-          } else {
-            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
-          }
-        }
-      });
-      renderFreeExamTiles();
-    }
-
-    function renderFreeExamTiles() {
-      const container = document.getElementById("freeExamTilesContainer");
-      if (!container) return;
-
-      const tiles = freeVaultData[activeFreeExamTab] || [];
-      let html = "";
-
-      tiles.forEach(tile => {
-        html += `
-          <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-black">
-                <img src="${tile.image}" alt="${tile.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=PHANTOM+FREE';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-                <div class="absolute top-3 left-3"><span class="px-2.5 py-0.5 rounded bg-black/85 border border-amber-500/50 text-amber-400 font-orbitron text-[10px] tracking-widest font-bold uppercase shadow">FREE ACCESS</span></div>
-              </div>
-              <div class="p-5">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">${tile.title}</h3>
-                <p class="text-xs text-neutral-300 font-body mb-4">${tile.desc}</p>
-              </div>
-            </div>
-            <div class="p-5 pt-0">
-              <button onclick="window.openFreeModeSelection('${tile.batchId}', '${tile.title}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
-                FREE ACCESS &rarr;
-              </button>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    window.openFreeModeSelection = function(batchId, batchTitle) {
-      selectedFreeBatch = batchId;
-      document.getElementById("freeModeBatchBadge").innerText = batchTitle + " &bull; FREE VAULT";
-      document.getElementById("freeExamDashboardView").classList.add("hidden");
-      document.getElementById("freeModeSelectionView").classList.remove("hidden");
-    }
-
-    window.backToFreeDashboard = function() {
-      document.getElementById("freeModeSelectionView").classList.add("hidden");
-      document.getElementById("freeExamDashboardView").classList.remove("hidden");
-    }
-
-    window.selectFreeModeAction = function(mode) {
-      selectedFreeMode = mode;
-      document.getElementById("freeSubjectBatchBadge").innerText = selectedFreeBatch.toUpperCase() + " &bull; LIVE SQUADRON";
-      document.getElementById("freeSubjectHeading").innerText = selectedFreeBatch.toUpperCase() + " FREE SUBJECTS";
-
-      document.getElementById("freeModeSelectionView").classList.add("hidden");
-      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
-
-      renderFreeSubjectsGrid();
-    }
-
-    window.backToFreeModeSelection = function() {
-      document.getElementById("freeSubjectsGridView").classList.add("hidden");
-      document.getElementById("freeModeSelectionView").classList.remove("hidden");
-    }
-
-    function renderFreeSubjectsGrid() {
-      const container = document.getElementById("freeSubjectsContainer");
-      if (!container) return;
-
-      container.innerHTML = "";
-      const subjectsList = squadronSubjectsMaster[selectedFreeBatch] || squadronSubjectsMaster["cds-kilo"];
-
-      subjectsList.forEach((subj, index) => {
-        const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
-        
-        // Clicking a subject opens the lectures page where "It will be uploaded very soon" is displayed
-        card.onclick = () => {
-          document.getElementById("selectedFreeSubjectTitle").innerText = subj.name.toUpperCase() + " | LECTURES";
-          document.getElementById("freeSubjectsGridView").classList.add("hidden");
-          document.getElementById("freeLecturesView").classList.remove("hidden");
-        };
-
-        card.innerHTML = `
-          <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
-            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" loading="lazy" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            <div class="absolute top-2.5 left-2.5">
-              <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-wider text-amber-400 font-bold uppercase">
-                MODULE #${(index + 1).toString().padStart(2, '0')}
-              </span>
-            </div>
-            <div class="absolute top-2.5 right-2.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
-            </div>
-          </div>
-          <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
-            <div>
-              <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1">${subj.name}</h3>
-              <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">${subj.desc}</p>
-            </div>
-            <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              <span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>
-              <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    window.backToFreeSubjectsGrid = function() {
-      document.getElementById("freeLecturesView").classList.add("hidden");
-      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
-    }
-
-    window.closeWatchHoursModal = function() {
-      const modal = document.getElementById("watchHoursModal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    window.closePhantomModal = function() {
-      const modal = document.getElementById("phantomWhatsAppModal");
-      if (modal) modal.style.display = "none";
-    };
-
-    window.toggleSidebar = function() {
-      const drawer = document.getElementById('sidebarDrawer');
-      const overlay = document.getElementById('sidebarOverlay');
-      if (!drawer || !overlay) return;
-      const isOpen = drawer.style.left === '0px';
-      if (isOpen) {
-        drawer.style.left = '-300px';
-        overlay.classList.add('hidden');
-      } else {
-        drawer.style.left = '0px';
-        overlay.classList.remove('hidden');
-      }
-    };
-
-    window.showHomeView = function() {
-      document.getElementById("batchModeMainView").classList.remove("hidden");
-      document.getElementById("testSeriesContainer").classList.add("hidden");
-    }
-
-    window.showWatchHoursModal = function() {
-      const modal = document.getElementById("watchHoursModal");
-      const disp = document.getElementById("modalWatchTimeDisplay");
-      const totalSecs = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-      const hrs = Math.floor(totalSecs / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-      if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
-      if (modal) modal.classList.remove("hidden");
-    }
-
-    window.showTestSeriesView = function() {
-      document.getElementById("batchModeMainView").classList.add("hidden");
-      document.getElementById("testSeriesContainer").classList.remove("hidden");
-    }
-
-    // STUDY FOCUS TIMER (FIXED / RUNNING LIVE SECONDS)
-    (function() {
-      const todayStr = new Date().toDateString();
-      const lastDate = localStorage.getItem("phantom_study_date");
-      
-      if (lastDate !== todayStr) {
-        localStorage.setItem("phantom_study_date", todayStr);
-        localStorage.setItem("phantom_daily_seconds", "0");
-      }
-
-      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-      let sessionSeconds = 0;
-
-      setInterval(() => {
-        totalSeconds++;
-        sessionSeconds++;
-        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
-
-        const hrs = Math.floor(totalSeconds / 3600);
-        const mins = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
-        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-        const displayEl = document.getElementById("phantomTimerDisplay");
-        if (displayEl) displayEl.innerText = displayStr;
-
-        const pHrs = Math.floor(sessionSeconds / 3600);
-        const pMins = Math.floor((sessionSeconds % 3600) / 60);
-        const pSecs = sessionSeconds % 60;
-        const pDisplayStr = pHrs > 0 
-          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
-        
-        const autoPomoEl = document.getElementById("autoPomoDisplay");
-        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
-      }, 1000);
-    })();
-
-    let unsubscribeSnapshot = null;
-    const localUid = localStorage.getItem("phantom_uid");
-    const localToken = localStorage.getItem("phantom_session_token");
-
-    if (!localUid || !localToken) {
-      window.location.href = "index.html";
-    } else {
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
-        if (!docSnap.exists()) {
-          window.location.href = "index.html";
-          return;
-        }
-
-        const data = docSnap.data();
-
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
-          return;
-        }
-
-        document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileEmail').innerText = data.email || "";
-
-        const allowed = data.allowedBatches || [];
-        const isCombo = allowed.includes("combo") || allowed.length >= 4;
-
-        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
-        let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
-
-        const paidSection = document.getElementById("paidSquadronsSection");
-        const telegramContainer = document.getElementById("telegramNotificationContainer");
-
-        if (hasPaidAccessAny) {
-          if (paidSection) {
-            paidSection.classList.remove("hidden");
-            paidSection.style.display = "block";
-          }
-          if (telegramContainer) {
-            telegramContainer.classList.remove("hidden");
-          }
-          batchesList.forEach(batchId => {
-            const hasAccess = isCombo || allowed.includes(batchId);
-            applyPaidBatchAccess(batchId, hasAccess);
-          });
-        } else {
-          if (paidSection) {
-            paidSection.classList.add("hidden");
-            paidSection.style.display = "none";
-          }
-          if (telegramContainer) {
-            telegramContainer.classList.add("hidden");
-          }
-        }
-      });
-    }
-
-    function applyPaidBatchAccess(batchId, isUnlocked) {
-      const card = document.getElementById("card-" + batchId);
-      const statusBadge = document.getElementById("badge-" + batchId);
-      const actionBtn = document.getElementById("btn-" + batchId);
-
-      if (!card) return;
-
-      if (isUnlocked) {
-        card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.add("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
-
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98] phantom-btn";
-        actionBtn.innerText = "ACCESS CLASSROOM";
-        actionBtn.disabled = false;
-        actionBtn.onclick = () => window.openBatchLectures(batchId);
-      } else {
-        card.classList.add("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.remove("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span>&#128274;</span> LOCKED`;
-
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
-        actionBtn.innerText = "NOT ENROLLED";
-        actionBtn.disabled = true;
-        actionBtn.onclick = null;
-      }
-    }
-
-    window.openBatchLectures = function(batchId) {
-      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
-    }
-
-    window.logoutCadet = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      localStorage.removeItem("phantom_session_token");
-      localStorage.removeItem("phantom_uid");
-      window.location.href = "index.html";
-    };
-  </script>
+  <!-- Background Canvas for Falling Stars & Bubbles Animation -->
+  <canvas id="starBubbleCanvas"></canvas>
+
+  <!-- ================= SIDEBAR NAVIGATION DRAWER ================= -->
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+  <aside id="sidebarDrawer" class="fixed top-0 left-[-300px] w-72 sm:w-80 h-full bg-neutral-950 border-r-2 border-amber-400/50 z-50 transition-all duration-300 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.9)]">
+    <div>
+      <div class="p-5 bg-neutral-900 border-b border-neutral-800 flex items-center gap-3.5 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-amber-400"></div>
+        <div class="w-12 h-12 rounded-xl bg-amber-400/20 border border-amber-400 flex items-center justify-center shrink-0 font-stencil text-amber-300 text-lg shadow">TP</div>
+        <div class="overflow-hidden">
+          <h3 id="sidebarProfileName" class="font-orbitron font-bold text-sm text-white truncate">Loading Cadet...</h3>
+          <p id="sidebarProfileEmail" class="text-xs text-neutral-400 font-mono truncate">cadet@teamphantom.in</p>
+          <span class="inline-flex items-center gap-1 mt-1 text-[9px] font-orbitron bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-amber-400/30">VERIFIED CADET</span>
+        </div>
+      </div>
+      <nav class="p-3 space-y-1.5 font-orbitron text-xs">
+        <button onclick="showHomeView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 font-bold tracking-wider transition text-left cursor-pointer phantom-btn">
+          <span>&#127968;</span> HOME
+        </button>
+        <button onclick="showWatchHoursModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
+          <span>&#9201;</span> MY WATCH HOURS
+        </button>
+        <button onclick="showTestSeriesView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
+          <span>&#128221;</span> TEST SERIES
+        </button>
+        
+        <div class="pt-2 pb-1 border-t border-neutral-900 my-2"></div>
+
+        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:bg-emerald-950/35 transition text-left font-bold tracking-wider phantom-btn">
+          <span>&#128227;</span> WHATSAPP CHANNEL
+        </a>
+        <a href="https://t.me/teamPhantom98" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sky-400 hover:bg-sky-950/35 transition text-left font-bold tracking-wider phantom-btn">
+          <span>&#9888;</span> REPORT PROBLEM
+        </a>
+      </nav>
+    </div>
+    
+    <!-- Footer Logout & Developer Tag -->
+    <div class="p-4 border-t border-neutral-900 bg-neutral-950 space-y-2">
+      <div class="text-center font-orbitron text-[10px] text-amber-400/80 tracking-widest uppercase">
+        DEV BY TEAM PHANTOM
+      </div>
+      <button onclick="window.logoutCadet()" class="w-full py-3 rounded-xl bg-red-950/60 border border-red-500/50 hover:bg-red-900/60 text-red-300 font-orbitron font-bold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer phantom-btn">
+        <span>&#128274;</span> LOG OUT
+      </button>
+    </div>
+  </aside>
+
+  <!-- Watch Hours Modal -->
+  <div id="watchHoursModal" class="fixed inset-0 bg-black/85 z-50 hidden backdrop-blur-md flex items-center justify-center p-4">
+    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition">
+      <h3 class="font-stencil text-2xl text-amber-400 mb-2">MY WATCH HOURS</h3>
+      <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 mb-6">
+        <div class="text-xs font-orbitron text-neutral-400 uppercase tracking-widest mb-1">TOTAL LOGGED TIME</div>
+        <div class="font-stencil text-4xl text-emerald-400 tracking-wider" id="modalWatchTimeDisplay">00h 00m 00s</div>
+      </div>
+      <button onclick="closeWatchHoursModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">CLOSE ANALYTICS</button>
+    </div>
+  </div>
+
+  <div id="phantomStudyTimerWidget">
+    <div class="pulse-dot"></div>
+    <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
+    <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
+  </div>
+
+  <div id="phantomFocusDock">
+    <span>🛡️ MISSION MODE: ACTIVE</span>
+    <span>|</span>
+    <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
+    <span>|</span>
+    <span>🎵 AUDIO: ON</span>
+  </div>
+
+  <audio id="ambientAudio" autoplay loop>
+    <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
+  </audio>
+
+  <!-- TOP HEADER -->
+  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">&#9776;</button>
+        <div class="relative w-12 h-12 rounded-xl bg-black border border-amber-400/80 p-1 flex items-center justify-center overflow-hidden">
+          <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=PHANTOM';">
+        </div>
+        <div>
+          <h1 class="font-stencil text-xl sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">TEAM PHANTOM</h1>
+          <p class="font-orbitron text-[10px] text-neutral-400 tracking-widest uppercase">OPERATIONAL CADET DASHBOARD</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <div class="font-orbitron font-bold text-xs text-amber-400" id="cadetNameDisplay">Cadet</div>
+          <div class="font-mono text-[11px] text-neutral-400" id="cadetEmailDisplay">Verifying...</div>
+        </div>
+        <button onclick="window.logoutCadet()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition shadow-md cursor-pointer phantom-btn">TERMINATE</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TELEGRAM GROUP NOTIFICATION CONTAINER (VISIBLE ONLY FOR PAID CADETS) -->
+  <div id="telegramNotificationContainer" class="w-full max-w-6xl mx-auto px-4 mt-6 hidden"></div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full page-transition">
+    
+    <!-- HOME / DASHBOARD VIEW -->
+    <div id="batchModeMainView">
+
+      <!-- ================= FREE TACTICAL VAULT SECTION (SINGLE PAGE FLOW) ================= -->
+      <div class="w-full mb-12">
+        
+        <!-- View 1: Exam Tabs & Tiles -->
+        <div id="freeExamDashboardView">
+          
+          <!-- Large, prominent Exam Tabs (CDS, AFCAT, CAPF) -->
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-8">
+            <button onclick="window.switchFreeExamTab('CDS')" id="free-tab-CDS" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
+              🛡️ CDS
+            </button>
+            <button onclick="window.switchFreeExamTab('AFCAT')" id="free-tab-AFCAT" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
+              ✈️ AFCAT
+            </button>
+            <button onclick="window.switchFreeExamTab('CAPF')" id="free-tab-CAPF" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
+              ⭐ CAPF
+            </button>
+          </div>
+
+          <!-- Free Tiles Container -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeExamTilesContainer"></div>
+        </div>
+
+        <!-- View 2: Live Mode Only -->
+        <div id="freeModeSelectionView" class="hidden">
+          <button onclick="window.backToFreeDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
+            &larr; BACK TO FREE VAULT
+          </button>
+          
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-2" id="freeModeBatchBadge">OPERATIONAL BRIEFING</div>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wider uppercase mb-1">SELECT FREE DEPLOYMENT MODE</h2>
+          </div>
+
+          <div class="max-w-md mx-auto">
+            <div onclick="window.selectFreeModeAction('live')" class="armor-panel rounded-2xl p-6 hover:border-amber-400 transition cursor-pointer group flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div class="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-2xl text-amber-400">⚡</div>
+                  <span class="px-2.5 py-1 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">LIVE VAULT</span>
+                </div>
+                <h3 class="font-orbitron text-xl font-bold text-white group-hover:text-amber-400 transition mb-2">LIVE MODE</h3>
+                <p class="text-xs text-neutral-300 font-body mb-6">Access weekend live streaming sessions and special modules.</p>
+              </div>
+              <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">ENTER LIVE VAULT &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 3: Subjects Grid (Squadron-wise correct subjects) -->
+        <div id="freeSubjectsGridView" class="hidden">
+          <button onclick="window.backToFreeModeSelection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
+            &larr; BACK TO MODE SELECTION
+          </button>
+
+          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="freeSubjectBatchBadge">FREE CURRICULUM</div>
+              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="freeSubjectHeading">FREE SUBJECTS</h2>
+              <p class="text-xs text-neutral-300 font-body mt-1">Select a subject module below to access lectures.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FREE ACCESS ACTIVE
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
+        </div>
+
+        <!-- View 4: Free Lectures View ("It will be uploaded very soon" - No lectures added yet) -->
+        <div id="freeLecturesView" class="hidden">
+          <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
+            &larr; BACK TO SUBJECTS
+          </button>
+
+          <div class="armor-panel rounded-2xl p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-amber-400 tracking-wide uppercase mb-2" id="selectedFreeSubjectTitle">LECTURES DOSSIER</h2>
+            <p class="text-sm text-neutral-300 font-body mb-6">High-yield tactical study materials and video lectures for this module.</p>
+            
+            <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 max-w-lg mx-auto shadow-[0_0_25px_rgba(255,215,0,0.15)]">
+              <div class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</div>
+              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= PAID AUTHORIZED SQUADRONS SECTION (ONLY FOR PAID CADETS) ================= -->
+      <div id="paidSquadronsSection" class="hidden w-full mt-12 pt-8 border-t-2 border-amber-500/30">
+        <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1"><span>&#9733;</span> TACTICAL FLIGHT CONTROL</div>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AUTHORIZED PAID SQUADRONS</h2>
+            <p class="text-xs text-neutral-300 font-body mt-1">Your enrolled premium batch curriculum and regular live classes.</p>
+          </div>
+          <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> PREMIUM ENROLLED ACCESS
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-black">
+                <img src="math-ima.jpeg" alt="IMA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CDS+Math';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #01</span></div>
+                <div class="absolute top-3 right-3" id="badge-cds-math"></div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS MATHEMATICS</h3>
+                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Specialist Arithmetic & Advanced</p>
+              </div>
+            </div>
+            <div class="p-4 pt-0"><button id="btn-cds-math" class="w-full phantom-btn"></button></div>
+          </div>
+
+          <div id="card-cds-kilo" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-black">
+                <img src="ota-chennai.jpeg" alt="OTA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CDS+OTA';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #02</span></div>
+                <div class="absolute top-3 right-3" id="badge-cds-kilo"></div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CDS OTA</h3>
+                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Complete Integrated Curriculum</p>
+              </div>
+            </div>
+            <div class="p-4 pt-0"><button id="btn-cds-kilo" class="w-full phantom-btn"></button></div>
+          </div>
+
+          <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-black">
+                <img src="afcat-afa.jpeg" alt="AFA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=AFCAT';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #03</span></div>
+                <div class="absolute top-3 right-3" id="badge-afcat"></div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">AFCAT</h3>
+                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Air Force Speed & Accuracy</p>
+              </div>
+            </div>
+            <div class="p-4 pt-0"><button id="btn-afcat" class="w-full phantom-btn"></button></div>
+          </div>
+
+          <div id="card-capf" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-neutral-900 flex items-center justify-center p-2">
+                <img src="capf-forces.jpeg" alt="CAPF" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=CAPF';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-transparent"></div>
+                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #04</span></div>
+                <div class="absolute top-3 right-3" id="badge-capf"></div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">CAPF</h3>
+                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">Assistant Commandant Focus</p>
+              </div>
+            </div>
+            <div class="p-4 pt-0"><button id="btn-capf" class="w-full phantom-btn"></button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TEST SERIES VIEW (BUILT-IN SINGLE PAGE) -->
+    <div id="testSeriesContainer" class="hidden w-full page-transition">
+      <div class="armor-panel rounded-2xl p-6 sm:p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
+              <span>🎯</span> TACTICAL ASSESSMENT CONSOLE
+            </div>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">ALL-INDIA DEFENCE TEST SERIES</h2>
+            <p class="text-xs text-neutral-300 font-body mt-1">Timed full-length mock exams and sectional drills for CDS, AFCAT & CAPF.</p>
+          </div>
+          <button onclick="showHomeView()" class="px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+            &larr; BACK TO HOME
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #01</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CDS FULL MOCK TEST</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">Complete bilingual timed test paper following latest UPSC pattern.</p>
+            </div>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
+          </div>
+
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #02</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">AFCAT SPEED DRILL</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">100 questions high-speed numerical and reasoning test set.</p>
+            </div>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
+          </div>
+
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-purple-950 border border-emerald-500/50 text-purple-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #03</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CAPF PAPER-2 DESCRIPTIVE</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">Essay, précis and analytical writing evaluation format.</p>
+            </div>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3.5 px-4 text-center">
+    <p class="text-[11px] font-body text-neutral-400 tracking-wider">&copy; 2026 TEAM PHANTOM. ALL RIGHTS RESERVED.</p>
+  </footer>
+
+  <!-- ================= TEAM PHANTOM CINEMATIC INTRO POPUP OVERLAY ================= -->
+  <div id="classroomCinematicPopup" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background-color: #04070b; background-image: radial-gradient(circle at center, #0a1628 0%, #04070b 100%); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.8s ease-in-out; -webkit-user-select: none; user-select: none;">
+    <style>
+        #classroomCinematicPopup * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        #ccStarBubbleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; }
+        .cc-curtain-left, .cc-curtain-right {
+            position: absolute; top: 0; width: 50%; height: 100%;
+            background: linear-gradient(90deg, #996515 0%, #d4af37 20%, #ffd700 50%, #d4af37 80%, #996515 100%);
+            background-size: 80px 100%; z-index: 100;
+            transition: transform 2.8s cubic-bezier(0.77, 0, 0.175, 1);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.9);
+            border-bottom: 8px solid #5c4033;
+        }
+        .cc-curtain-left { left: 0; transform-origin: left; border-right: 4px solid #4a3319; }
+        .cc-curtain-right { right: 0; transform-origin: right; border-left: 4px solid #4a3319; }
+        #classroomCinematicPopup.open-cc-curtains .cc-curtain-left { transform: translateX(-100%); }
+        #classroomCinematicPopup.open-cc-curtains .cc-curtain-right { transform: translateX(100%); }
+
+        .cc-intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; position: relative; z-index: 10; }
+        .cc-rocket-logo-wrapper { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; height: 90px; width: 100%; }
+        .cc-logo-box-container { position: absolute; opacity: 0; transform: scale(0.2); animation: ccDropLogoCenter 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; animation-delay: 3.2s; }
+        .cc-intro-logo { width: 70px; height: 70px; object-fit: cover; border-radius: 14px; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
+        .cc-rocket-ship { position: absolute; font-size: 34px; transform: rotate(45deg); z-index: 20; animation: ccFlyRocketVerySlow 5.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 0.8s; }
+        @keyframes ccFlyRocketVerySlow {
+            0% { left: -180px; top: 25px; opacity: 0; transform: scale(0.6) rotate(55deg); }
+            20% { opacity: 1; transform: scale(1.1) rotate(45deg); }
+            50% { left: calc(50% - 15px); top: -5px; transform: scale(1.2) rotate(40deg); }
+            80% { opacity: 1; }
+            100% { left: 110vw; top: -60px; opacity: 0; transform: scale(0.8) rotate(30deg); }
+        }
+        @keyframes ccDropLogoCenter {
+            0% { opacity: 0; transform: scale(0.3) translateY(-30px); }
+            70% { opacity: 1; transform: scale(1.1) translateY(5px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .cc-title-wrapper { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .cc-word-group { display: flex; gap: 8px; }
+        .cc-letter-box {
+            width: 46px; height: 56px; background: rgba(10, 18, 30, 0.95); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-family: 'Black Ops One', cursive; font-size: 26px;
+            opacity: 0; transform: translateY(-350px) rotate(-20deg); animation: ccDropBounce 0.8s cubic-bezier(0.25, 1, 0.5, 1.25) forwards;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
+        .cc-letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
+        .cc-letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
+        .cc-letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffd700; border: 2px solid #ffd700; text-shadow: 0 0 12px #ffd700; }
+        .cc-letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
+        .cc-letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
+        .cc-letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
+        .cc-letter-box:nth-child(7)  { animation-delay: 4.85s; color: #ff9933; border: 2px solid #ff9933; text-shadow: 0 0 12px #ff9933; }
+        .cc-letter-box:nth-child(8)  { animation-delay: 4.95s; color: #9933ff; border: 2px solid #9933ff; text-shadow: 0 0 12px #9933ff; }
+        .cc-letter-box:nth-child(9)  { animation-delay: 5.05s; color: #ffff33; border: 2px solid #ffff33; text-shadow: 0 0 12px #ffff33; }
+        .cc-letter-box:nth-child(10) { animation-delay: 5.15s; color: #33ff33; border: 2px solid #33ff33; text-shadow: 0 0 12px #33ff33; }
+        .cc-letter-box:nth-child(11) { animation-delay: 5.25s; color: #ff3333; border: 2px solid #ff3333; text-shadow: 0 0 12px #ff3333; }
+        @keyframes ccDropBounce {
+            0% { transform: translateY(-350px) rotate(-25deg); opacity: 0; }
+            60% { transform: translateY(15px) rotate(6deg); opacity: 1; }
+            80% { transform: translateY(-8px) rotate(-3deg); }
+            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        }
+        .cc-subtitle {
+            font-family: 'Black Ops One', cursive; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #ffd700;
+            text-shadow: 0 0 18px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+            opacity: 0; transform: translateX(-150px); animation: ccSwipeInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 6.0s; margin-bottom: 15px;
+        }
+        @keyframes ccSwipeInRight { to { opacity: 1; transform: translateX(0); } }
+        .cc-secure-loader-wrapper { display: flex; flex-direction: column; align-items: center; opacity: 0; animation: ccFadeInSecure 0.6s ease forwards; animation-delay: 6.6s; width: 280px; }
+        .cc-progress-bar-container { width: 100%; height: 7px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 242, 254, 0.5); border-radius: 4px; overflow: hidden; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); margin-bottom: 8px; }
+        .cc-progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe); box-shadow: 0 0 15px #00f2fe; animation: ccFillProgress 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 6.8s; }
+        @keyframes ccFillProgress { 0% { width: 0%; } 100% { width: 100%; } }
+        .cc-secure-status-text { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 12px rgba(0, 242, 254, 0.7); }
+        @keyframes ccFadeInSecure { to { opacity: 1; } }
+        .cc-footer-tag { position: absolute; bottom: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #4b5563; letter-spacing: 2px; z-index: 10; }
+    </style>
+
+    <canvas id="ccStarBubbleCanvas"></canvas>
+    <div class="cc-curtain-left"></div>
+    <div class="cc-curtain-right"></div>
+
+    <div class="cc-intro-container">
+        <div class="cc-rocket-logo-wrapper">
+            <div class="cc-rocket-ship">🚀</div>
+            <div class="cc-logo-box-container">
+                <img src="logo.jpeg" alt="Logo" class="cc-intro-logo">
+            </div>
+        </div>
+
+        <div class="cc-title-wrapper">
+            <div class="cc-word-group">
+                <div class="cc-letter-box">T</div>
+                <div class="cc-letter-box">E</div>
+                <div class="cc-letter-box">A</div>
+                <div class="cc-letter-box">M</div>
+            </div>
+            <div style="width: 14px;"></div>
+            <div class="cc-word-group">
+                <div class="cc-letter-box">P</div>
+                <div class="cc-letter-box">H</div>
+                <div class="cc-letter-box">A</div>
+                <div class="cc-letter-box">N</div>
+                <div class="cc-letter-box">T</div>
+                <div class="cc-letter-box">O</div>
+                <div class="cc-letter-box">M</div>
+            </div>
+        </div>
+
+        <div class="cc-subtitle">⚡ ALWAYS WITH YOU WITH FULL SUPPORT ⚡</div>
+
+        <div class="cc-secure-loader-wrapper">
+            <div class="cc-progress-bar-container"><div class="cc-progress-bar-fill"></div></div>
+            <div class="cc-secure-status-text">INITIALIZING SECURE ACCESS</div>
+        </div>
+    </div>
+
+    <div class="cc-footer-tag">&copy; 2026 TEAM PHANTOM &bull; SECURE TERMINAL</div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById("ccStarBubbleCanvas");
+            const ctx = canvas.getContext("2d");
+            function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+
+            const particles = [];
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    radius: Math.random() * 3 + 1, speedY: Math.random() * 0.5 + 0.25,
+                    speedX: (Math.random() - 0.5) * 0.25, opacity: Math.random() * 0.8 + 0.2, isBubble: Math.random() > 0.5
+                });
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY; p.x += p.speedX;
+                    if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+                    ctx.beginPath();
+                    if (p.isBubble) {
+                        ctx.arc(p.x, p.y, p.radius * 1.3, 0, Math.PI * 2);
+                        ctx.strokeStyle = `rgba(14, 165, 233, ${p.opacity * 0.5})`; ctx.lineWidth = 1.2; ctx.stroke();
+                    } else {
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`; ctx.shadowBlur = 10; ctx.shadowColor = '#ffd700'; ctx.fill();
+                    }
+                });
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+
+            window.addEventListener('load', () => {
+                setTimeout(() => { document.getElementById('classroomCinematicPopup').classList.add('open-cc-curtains'); }, 500);
+            });
+
+            setTimeout(() => {
+                const popup = document.getElementById('classroomCinematicPopup');
+                if (popup) {
+                    popup.style.opacity = '0';
+                    setTimeout(() => { popup.style.display = 'none'; }, 800);
+                }
+            }, 10200);
+        })();
+    </script>
+  </div>
+  <!-- ================= END OF CINEMATIC INTRO POPUP ================= -->
+
+  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
+  <div id="phantomWhatsAppModal" class="fixed inset-0 bg-black/85 z-[999999] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
+      
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
+        <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=TP';">
+      </div>
+
+      <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
+      <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
+        Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
+      </p>
+
+      <div class="flex flex-col items-center justify-center my-6">
+        <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-400 rounded-2xl shadow-[0_0_35px_rgba(255,215,0,0.4)] backdrop-blur-lg">
+          <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
+          <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
+          <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
+          <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
+        </div>
+        <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
+      </div>
+
+      <div class="space-y-3">
+        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-500 hover:to-sky-400 text-black hover:text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] transform hover:scale-[1.02] phantom-btn">
+          📱 JOIN UPDATES CHANNEL
+        </a>
+        
+        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+          🚀 CONTINUE TO SITE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let activeFreeExamTab = "";
+    let selectedFreeBatch = "";
+    let selectedFreeMode = "live";
+
+    // Canvas Background Animation
+    const canvas = document.getElementById("starBubbleCanvas");
+    const ctx = canvas.getContext("2d");
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const particles = [];
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 4 + 2.5,
+        starRadius: Math.random() * 4 + 3,
+        speedY: Math.random() * 0.9 + 0.3,
+        speedX: (Math.random() - 0.5) * 0.4,
+        opacity: Math.random() * 0.9 + 0.4,
+        isBubble: Math.random() > 0.45
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+        if (p.y > canvas.height) {
+          p.y = -20;
+          p.x = Math.random() * canvas.width;
+        }
+        ctx.beginPath();
+        if (p.isBubble) {
+          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+        } else {
+          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
+          ctx.shadowBlur = 25;
+          ctx.shadowColor = '#ffd700';
+          ctx.fill();
+        }
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Master list of subjects for each squadron/exam
+    const squadronSubjectsMaster = {
+      "cds-math": [
+        { name: "Lectures", desc: "Comprehensive Theory, Core Concepts & Conceptual Proofs.", image: "math-ima.jpeg" },
+        { name: "Mock", desc: "Timed Tactical Test Papers, Sectional Drills & Video Solutions.", image: "math-ima.jpeg" }
+      ],
+      "cds-kilo": [
+        { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems, Climatology & Oceanography.", image: "ota-chennai.jpeg" },
+        { name: "Indian Geography", desc: "Physiography, Drainage Networks, Climate Systems & Natural Resources.", image: "ota-chennai.jpeg" },
+        { name: "Modern History", desc: "Freedom Struggle, British Era, National Movement & Constitutional Evolution.", image: "ota-chennai.jpeg" },
+        { name: "Medieval History", desc: "Delhi Sultanate, Mughal Administration, Architecture & Regional Dynasties.", image: "ota-chennai.jpeg" },
+        { name: "Ancient History", desc: "Indus Valley Civilization, Vedic Period, Mauryan & Gupta Empires.", image: "ota-chennai.jpeg" },
+        { name: "English Grammar", desc: "Rules of Grammar, Parts of Speech, Sentence Correction & Syntax Rules.", image: "ota-chennai.jpeg" },
+        { name: "Vocabulary", desc: "Synonyms, Antonyms, Idioms, Phrasal Verbs & Contextual Word Mastery.", image: "ota-chennai.jpeg" },
+        { name: "Polity", desc: "Indian Constitution, Preamble, Fundamental Rights, Parliament & Judiciary.", image: "ota-chennai.jpeg" }
+      ],
+      "afcat": [
+        { name: "Math", desc: "Numerical Ability, Speed Arithmetic & Data Mastery.", image: "afcat-afa.jpeg" },
+        { name: "Reasoning", desc: "Verbal, Non-Verbal & Spatial Tactical Reasoning Drills.", image: "afcat-afa.jpeg" },
+        { name: "English Grammar", desc: "Core Rules, Syntax, Sentence Corrections & Error Detection.", image: "afcat-afa.jpeg" },
+        { name: "English Vocabulary", desc: "High-Yield Synonyms, Antonyms, Idioms & One-Word Substitutions.", image: "afcat-afa.jpeg" },
+        { name: "General Awareness", desc: "Static GK, Defense Systems, History, Polity & Geography Essentials.", image: "afcat-afa.jpeg" }
+      ],
+      "capf": [
+        { name: "Math", desc: "Quantitative Aptitude & Problem Solving Drills.", image: "capf-forces.jpeg" },
+        { name: "English", desc: "Grammar, Précis, Essay & Analytical Reports.", image: "capf-forces.jpeg" },
+        { name: "Physical Geography", desc: "Geomorphology, Atmospheric Systems, Climatology & Oceanography.", image: "capf-forces.jpeg" },
+        { name: "Modern History", desc: "Freedom Struggle, British Era & Constitutional Evolution.", image: "capf-forces.jpeg" },
+        { name: "Polity", desc: "Indian Constitution, Rights, Parliament & Judicial Framework.", image: "capf-forces.jpeg" }
+      ]
+    };
+
+    const freeVaultData = {
+      "CDS": [
+        { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules (Weekend Updates).", image: "math-ima.jpeg", batchId: "cds-math" },
+        { title: "CDS OTA", desc: "Complete Integrated English & General Studies Curriculum.", image: "ota-chennai.jpeg", batchId: "cds-kilo" }
+      ],
+      "AFCAT": [
+        { title: "AFCAT SQUADRON", desc: "Speed Mathematics, Reasoning & General Awareness Sessions.", image: "afcat-afa.jpeg", batchId: "afcat" }
+      ],
+      "CAPF": [
+        { title: "CAPF ASSISTANT COMMANDANT", desc: "Paper-1 & Paper-2 Special Guidance & Practice Modules.", image: "capf-forces.jpeg", batchId: "capf" }
+      ]
+    };
+
+    // Tab Toggle feature
+    window.switchFreeExamTab = function(examName) {
+      if (activeFreeExamTab === examName) {
+        activeFreeExamTab = "";
+        ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
+          const btn = document.getElementById('free-tab-' + tab);
+          if (btn) btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
+        });
+        document.getElementById("freeExamTilesContainer").innerHTML = "";
+        return;
+      }
+
+      activeFreeExamTab = examName;
+      ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
+        const btn = document.getElementById('free-tab-' + tab);
+        if (btn) {
+          if (tab === examName) {
+            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition shadow-lg phantom-btn cursor-pointer border border-amber-300";
+          } else {
+            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
+          }
+        }
+      });
+      renderFreeExamTiles();
+    }
+
+    function renderFreeExamTiles() {
+      const container = document.getElementById("freeExamTilesContainer");
+      if (!container) return;
+
+      const tiles = freeVaultData[activeFreeExamTab] || [];
+      let html = "";
+
+      tiles.forEach(tile => {
+        html += `
+          <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-black">
+                <img src="${tile.image}" alt="${tile.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=PHANTOM+FREE';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                <div class="absolute top-3 left-3"><span class="px-2.5 py-0.5 rounded bg-black/85 border border-amber-500/50 text-amber-400 font-orbitron text-[10px] tracking-widest font-bold uppercase shadow">FREE ACCESS</span></div>
+              </div>
+              <div class="p-5">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">${tile.title}</h3>
+                <p class="text-xs text-neutral-300 font-body mb-4">${tile.desc}</p>
+              </div>
+            </div>
+            <div class="p-5 pt-0">
+              <button onclick="window.openFreeModeSelection('${tile.batchId}', '${tile.title}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
+                FREE ACCESS &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    window.openFreeModeSelection = function(batchId, batchTitle) {
+      selectedFreeBatch = batchId;
+      document.getElementById("freeModeBatchBadge").innerText = batchTitle + " &bull; FREE VAULT";
+      document.getElementById("freeExamDashboardView").classList.add("hidden");
+      document.getElementById("freeModeSelectionView").classList.remove("hidden");
+    }
+
+    window.backToFreeDashboard = function() {
+      document.getElementById("freeModeSelectionView").classList.add("hidden");
+      document.getElementById("freeExamDashboardView").classList.remove("hidden");
+    }
+
+    window.selectFreeModeAction = function(mode) {
+      selectedFreeMode = mode;
+      document.getElementById("freeSubjectBatchBadge").innerText = selectedFreeBatch.toUpperCase() + " &bull; LIVE SQUADRON";
+      document.getElementById("freeSubjectHeading").innerText = selectedFreeBatch.toUpperCase() + " FREE SUBJECTS";
+
+      document.getElementById("freeModeSelectionView").classList.add("hidden");
+      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
+
+      renderFreeSubjectsGrid();
+    }
+
+    window.backToFreeModeSelection = function() {
+      document.getElementById("freeSubjectsGridView").classList.add("hidden");
+      document.getElementById("freeModeSelectionView").classList.remove("hidden");
+    }
+
+    function renderFreeSubjectsGrid() {
+      const container = document.getElementById("freeSubjectsContainer");
+      if (!container) return;
+
+      container.innerHTML = "";
+      const subjectsList = squadronSubjectsMaster[selectedFreeBatch] || squadronSubjectsMaster["cds-kilo"];
+
+      subjectsList.forEach((subj, index) => {
+        const card = document.createElement('div');
+        card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
+        
+        // Clicking a subject opens the lectures page where "It will be uploaded very soon" is displayed
+        card.onclick = () => {
+          document.getElementById("selectedFreeSubjectTitle").innerText = subj.name.toUpperCase() + " | LECTURES";
+          document.getElementById("freeSubjectsGridView").classList.add("hidden");
+          document.getElementById("freeLecturesView").classList.remove("hidden");
+        };
+
+        card.innerHTML = `
+          <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
+            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" loading="lazy" />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+            <div class="absolute top-2.5 left-2.5">
+              <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-wider text-amber-400 font-bold uppercase">
+                MODULE #${(index + 1).toString().padStart(2, '0')}
+              </span>
+            </div>
+            <div class="absolute top-2.5 right-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+            </div>
+          </div>
+          <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
+            <div>
+              <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1">${subj.name}</h3>
+              <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">${subj.desc}</p>
+            </div>
+            <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
+              <span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>
+              <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.backToFreeSubjectsGrid = function() {
+      document.getElementById("freeLecturesView").classList.add("hidden");
+      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
+    }
+
+    window.closeWatchHoursModal = function() {
+      const modal = document.getElementById("watchHoursModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    window.closePhantomModal = function() {
+      const modal = document.getElementById("phantomWhatsAppModal");
+      if (modal) modal.style.display = "none";
+    };
+
+    window.toggleSidebar = function() {
+      const drawer = document.getElementById('sidebarDrawer');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (!drawer || !overlay) return;
+      const isOpen = drawer.style.left === '0px';
+      if (isOpen) {
+        drawer.style.left = '-300px';
+        overlay.classList.add('hidden');
+      } else {
+        drawer.style.left = '0px';
+        overlay.classList.remove('hidden');
+      }
+    };
+
+    window.showHomeView = function() {
+      document.getElementById("batchModeMainView").classList.remove("hidden");
+      document.getElementById("testSeriesContainer").classList.add("hidden");
+    }
+
+    window.showWatchHoursModal = function() {
+      const modal = document.getElementById("watchHoursModal");
+      const disp = document.getElementById("modalWatchTimeDisplay");
+      const totalSecs = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      const hrs = Math.floor(totalSecs / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+      if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
+      if (modal) modal.classList.remove("hidden");
+    }
+
+    window.showTestSeriesView = function() {
+      document.getElementById("batchModeMainView").classList.add("hidden");
+      document.getElementById("testSeriesContainer").classList.remove("hidden");
+    }
+
+    let unsubscribeSnapshot = null;
+    const localUid = localStorage.getItem("phantom_uid");
+    const localToken = localStorage.getItem("phantom_session_token");
+
+    if (!localUid || !localToken) {
+      window.location.href = "index.html";
+    } else {
+      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
+        if (!docSnap.exists()) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const data = docSnap.data();
+
+        if (data.activeSession && localToken && data.activeSession !== localToken) {
+          if (unsubscribeSnapshot) unsubscribeSnapshot();
+          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
+          return;
+        }
+
+        document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
+        document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
+        document.getElementById('sidebarProfileEmail').innerText = data.email || "";
+
+        const allowed = data.allowedBatches || [];
+        const isCombo = allowed.includes("combo") || allowed.length >= 4;
+
+        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+        let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
+
+        const paidSection = document.getElementById("paidSquadronsSection");
+        const telegramContainer = document.getElementById("telegramNotificationContainer");
+
+        if (hasPaidAccessAny) {
+          if (paidSection) {
+            paidSection.classList.remove("hidden");
+            paidSection.style.display = "block";
+          }
+          if (telegramContainer) {
+            telegramContainer.classList.remove("hidden");
+          }
+          batchesList.forEach(batchId => {
+            const hasAccess = isCombo || allowed.includes(batchId);
+            applyPaidBatchAccess(batchId, hasAccess);
+          });
+        } else {
+          if (paidSection) {
+            paidSection.classList.add("hidden");
+            paidSection.style.display = "none";
+          }
+          if (telegramContainer) {
+            telegramContainer.classList.add("hidden");
+          }
+        }
+      });
+    }
+
+    function applyPaidBatchAccess(batchId, isUnlocked) {
+      const card = document.getElementById("card-" + batchId);
+      const statusBadge = document.getElementById("badge-" + batchId);
+      const actionBtn = document.getElementById("btn-" + batchId);
+
+      if (!card) return;
+
+      if (isUnlocked) {
+        card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
+        card.classList.add("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
+        statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+        statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
+
+        actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98] phantom-btn";
+        actionBtn.innerText = "ACCESS CLASSROOM";
+        actionBtn.disabled = false;
+        actionBtn.onclick = () => window.openBatchLectures(batchId);
+      } else {
+        card.classList.add("opacity-45", "grayscale", "border-neutral-800");
+        card.classList.remove("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
+        statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+        statusBadge.innerHTML = `<span>&#128274;</span> LOCKED`;
+
+        actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
+        actionBtn.innerText = "NOT ENROLLED";
+        actionBtn.disabled = true;
+        actionBtn.onclick = null;
+      }
+    }
+
+    window.openBatchLectures = function(batchId) {
+      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+    }
+
+    window.logoutCadet = function() {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      localStorage.removeItem("phantom_session_token");
+      localStorage.removeItem("phantom_uid");
+      window.location.href = "index.html";
+    };
+  </script>
 </body>
 </html>
