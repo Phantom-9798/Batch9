@@ -719,7 +719,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -1108,6 +1108,7 @@
             const hasAccess = isCombo || allowed.includes(batchId);
             applyPaidBatchAccess(batchId, hasAccess);
           });
+          renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
         } else {
           if (paidSection) {
             paidSection.classList.add("hidden");
@@ -1115,6 +1116,7 @@
           }
           if (telegramContainer) {
             telegramContainer.classList.add("hidden");
+            telegramContainer.innerHTML = "";
           }
         }
       });
@@ -1150,6 +1152,107 @@
       }
     }
 
+    const secureTgRegistry = {
+      "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
+      "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
+      "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
+      "capf": "https://t.me/+JmGvA3F25WY1YjA9"
+    };
+
+    window.renderTelegramNotification = function(allowed, isCombo, userId, clickedGroups) {
+      const container = document.getElementById("telegramNotificationContainer");
+      if (!container) return;
+
+      const allGroups = [
+        { id: "afcat", name: "AFCAT SQUADRON GROUP" },
+        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
+        { id: "cds-kilo", name: "CDS OTA SQUADRON" },
+        { id: "capf", name: "CAPF SQUADRON" }
+      ];
+
+      let userGroups = allGroups.filter(g => isCombo || allowed.includes(g.id));
+      if (userGroups.length === 0) {
+        container.innerHTML = "";
+        return;
+      }
+
+      const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
+      if (allClicked) {
+        container.innerHTML = "";
+        return;
+      }
+
+      let groupsHtml = "";
+      userGroups.forEach((group) => {
+        const isAlreadyClicked = clickedGroups.includes(group.id);
+        if (isAlreadyClicked) {
+          groupsHtml += `
+            <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
+              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Visited)</span>
+              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-300 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
+            </div>
+          `;
+        } else {
+          groupsHtml += `
+            <div class="p-3 rounded-xl bg-black/95 border border-amber-400/30 flex items-center justify-between gap-3">
+              <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
+              <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer phantom-btn">
+                JOIN GROUP &rarr;
+              </button>
+            </div>
+          `;
+        }
+      });
+
+      const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
+
+      container.innerHTML = `
+        <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
+          <div class="armor-panel border-amber-400/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(255,215,0,0.15)] flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">
+                ⚡
+              </div>
+              <div>
+                <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
+                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto">
+              <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
+                VIEW PENDING GROUPS (${remainingCount})
+              </button>
+            </div>
+          </div>
+          <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-400/40 space-y-3 max-w-xl mx-auto">
+            <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
+            ${groupsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    window.toggleJoinOptions = function() {
+      const dropdown = document.getElementById("joinDropdown");
+      if (dropdown) dropdown.classList.toggle("hidden");
+    }
+
+    window.secureRedirect = async function(groupId, userId) {
+      // Open directly inside the user's click action to avoid popup blockers.
+      const targetUrl = secureTgRegistry[groupId];
+      if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer");
+
+      try {
+        const cadetRef = doc(db, "cadets", userId);
+        await updateDoc(cadetRef, {
+          clickedGroups: arrayUnion(groupId)
+        });
+      } catch (e) {
+        console.error("Error updating clicked group in Firestore:", e);
+      }
+    }
+
+
     window.openBatchLectures = function(batchId) {
       window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
     }
@@ -1162,4 +1265,4 @@
     };
   </script>
 </body>
-</html> 
+</html>
