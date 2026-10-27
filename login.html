@@ -96,7 +96,7 @@
           const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.value);
 
           if (!name) throw new Error("Please provide your full cadet name.");
-          if (chosenBatches.length === 0) throw new Error("Please select at least one training batch.");
+          if (chosenBatches.length === 0) throw new Error("Please select at least one training batch or the Free Batch.");
           if (!password || password.length < 6) throw new Error("Password must be at least 6 characters long.");
 
           const q = query(collection(db, "cadets"), where("email", "==", email));
@@ -110,33 +110,42 @@
             finalAllowed = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
           }
 
+          // Check if user selected Free Batch
+          const isFreeRegistration = chosenBatches.includes("free-batch");
+          const accountStatus = isFreeRegistration ? "active" : "pending";
+
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const cadetUid = userCredential.user.uid;
 
-          // Save account with status "pending" so admin review is required
+          // Save account with status "active" if free, otherwise "pending"
           await setDoc(doc(db, "cadets", cadetUid), {
             uid: cadetUid,
             name: name,
             email: email,
             targetBatch: chosenBatches.join(", "),
-            status: "pending",
+            status: accountStatus,
             allowedBatches: finalAllowed,
             createdAt: new Date().toISOString()
           });
 
-          // Sign out immediately so new signups cannot enter without admin approval
-          await signOut(auth);
+          if (isFreeRegistration) {
+            // Instant session setup and entry for Free Batch users
+            await establishSessionAndEnter(cadetUid);
+          } else {
+            // Sign out for paid signups so they wait for admin approval
+            await signOut(auth);
 
-          statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed shadow-lg font-body font-bold";
-          statusAlert.innerHTML = `
-            <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 mb-1 text-sm tracking-wide">
-              <span>&#9888;</span> REGISTRATION PENDING APPROVAL
-            </div>
-            Cadet <b>${name}</b>, your account has been registered successfully! Your account is currently <b>pending administrative approval</b>. You will be able to log in once your enrollment is verified.
-          `;
-          statusAlert.classList.remove('hidden');
-          submitBtn.disabled = false;
-          submitBtn.innerText = "INITIALIZE SIGNUP";
+            statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed shadow-lg font-body font-bold";
+            statusAlert.innerHTML = `
+              <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 mb-1 text-sm tracking-wide">
+                <span>&#9888;</span> REGISTRATION PENDING APPROVAL
+              </div>
+              Cadet <b>${name}</b>, your account has been registered successfully! Your account is currently <b>pending administrative approval</b>. You will be able to log in once your enrollment is verified.
+            `;
+            statusAlert.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerText = "INITIALIZE SIGNUP";
+          }
 
         } else {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -392,6 +401,13 @@
               <span class="text-[11px] text-amber-400 font-mono font-bold">Multiple Select</span>
             </label>
             <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani">
+              
+              <!-- FREE BATCH OPTION (INSTANT AUTO-APPROVAL) -->
+              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-950/80 border border-emerald-500/80 hover:border-emerald-400 cursor-pointer transition shadow-sm">
+                <input type="checkbox" name="cadetBatches" value="free-batch" class="w-4 h-4 accent-emerald-400 rounded cursor-pointer">
+                <span class="text-emerald-300 font-serif-bold text-sm">⭐ Free Batch (Instant Access)</span>
+              </label>
+
               <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                 <input type="checkbox" name="cadetBatches" value="cds-math" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
                 <span class="text-white font-serif-bold text-sm">CDS Mathematics Specialist</span>
