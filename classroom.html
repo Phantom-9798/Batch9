@@ -350,26 +350,21 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
         </div>
 
-        <!-- View 4: Free Chapters & Lectures List Page (With "Watch Lecture" Button) -->
+        <!-- View 4: Free Lectures View ("It will be uploaded very soon" - No lectures added yet) -->
         <div id="freeLecturesView" class="hidden">
           <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO SUBJECTS
           </button>
 
-          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">LECTURES DOSSIER</div>
-              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="selectedFreeSubjectTitle">CHAPTER LECTURES</h2>
-              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Lecture to start streaming.</p>
+          <div class="armor-panel rounded-2xl p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-amber-400 tracking-wide uppercase mb-2" id="selectedFreeSubjectTitle">LECTURES DOSSIER</h2>
+            <p class="text-sm text-neutral-300 font-body mb-6">High-yield tactical study materials and video lectures for this module.</p>
+            
+            <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 max-w-lg mx-auto shadow-[0_0_25px_rgba(255,215,0,0.15)]">
+              <div class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</div>
+              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
             </div>
-            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> READY TO STREAM
-            </div>
-          </div>
-
-          <!-- Lectures Tiles Container -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeLecturesListContainer">
-            <!-- Dynamically populated lecture tiles with Watch Lecture buttons -->
           </div>
         </div>
 
@@ -933,9 +928,11 @@
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
         
-        // Clicking a subject now opens the lectures list view instead of jumping straight to player
+        // Clicking a subject opens the lectures page where "It will be uploaded very soon" is displayed
         card.onclick = () => {
-          renderFreeLecturesList(subj.name, selectedFreeBatch);
+          document.getElementById("selectedFreeSubjectTitle").innerText = subj.name.toUpperCase() + " | LECTURES";
+          document.getElementById("freeSubjectsGridView").classList.add("hidden");
+          document.getElementById("freeLecturesView").classList.remove("hidden");
         };
 
         card.innerHTML = `
@@ -957,57 +954,13 @@
               <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">${subj.desc}</p>
             </div>
             <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              <span class="text-[10px] font-mono text-emerald-400">📁 VIEW CHAPTERS</span>
+              <span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>
               <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
             </div>
           </div>
         `;
         container.appendChild(card);
       });
-    }
-
-    // Render Chapters & Lectures List for the selected subject with Watch Lecture buttons
-    function renderFreeLecturesList(subjectName, batchId) {
-      document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTERS & LECTURES";
-      document.getElementById("freeSubjectsGridView").classList.add("hidden");
-      document.getElementById("freeLecturesView").classList.remove("hidden");
-
-      const container = document.getElementById("freeLecturesListContainer");
-      if (!container) return;
-
-      // Sample mock lectures list for the subject (Ratio & Proportion / Part 1, Part 2, etc.)
-      const sampleLectures = [
-        { title: `${subjectName} - Lecture 01 (Foundations)`, duration: "45 Mins", desc: "Core fundamental concepts and basic problem solving." },
-        { title: `${subjectName} - Lecture 02 (Advanced Drills)`, duration: "55 Mins", desc: "High-yield previous year questions and tactical shortcuts." },
-        { title: `${subjectName} - Lecture 03 (Practice Session)`, duration: "60 Mins", desc: "Comprehensive live problem-solving practice session." }
-      ];
-
-      let html = "";
-      sampleLectures.forEach((lec, idx) => {
-        html += `
-          <div class="armor-panel rounded-xl overflow-hidden flex flex-col justify-between p-5 hover:border-amber-400 shadow-lg page-transition">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="px-2 py-0.5 rounded bg-black border border-neutral-700 text-amber-400 text-[10px] font-orbitron uppercase font-bold">SESSION #${(idx + 1).toString().padStart(2, '0')}</span>
-                <span class="text-xs font-mono text-emerald-400">${lec.duration}</span>
-              </div>
-              <h3 class="font-orbitron font-bold text-lg text-white mb-2">${lec.title}</h3>
-              <p class="text-xs text-neutral-300 font-body mb-6">${lec.desc}</p>
-            </div>
-            <button onclick="window.watchLectureAction('${batchId}', '${subjectName}', '${lec.title}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
-              WATCH LECTURE &rarr;
-            </button>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    // Redirect to player.html only when "Watch Lecture" is clicked
-    window.watchLectureAction = function(batchId, subjectName, lectureTitle) {
-      sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
-      window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&lecture=${encodeURIComponent(lectureTitle)}`;
     }
 
     window.backToFreeSubjectsGrid = function() {
@@ -1102,7 +1055,6 @@
             paidSection.classList.remove("hidden");
             paidSection.style.display = "block";
           }
-          // Show telegram group notification container ONLY for paid cadets
           if (telegramContainer) {
             telegramContainer.classList.remove("hidden");
           }
@@ -1115,7 +1067,6 @@
             paidSection.classList.add("hidden");
             paidSection.style.display = "none";
           }
-          // Hide telegram group notification container for free cadets
           if (telegramContainer) {
             telegramContainer.classList.add("hidden");
           }
