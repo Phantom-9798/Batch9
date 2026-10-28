@@ -92,11 +92,8 @@
       try {
         if (window.isRegisterMode) {
           const name = document.getElementById('cadetName').value.trim();
-          const selectedCheckboxes = document.querySelectorAll('input[name="cadetBatches"]:checked');
-          const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.value);
 
           if (!name) throw new Error("Please provide your full cadet name.");
-          if (chosenBatches.length === 0) throw new Error("Please select at least one training batch or the Free Batch.");
           if (!password || password.length < 6) throw new Error("Password must be at least 6 characters long.");
 
           const q = query(collection(db, "cadets"), where("email", "==", email));
@@ -105,47 +102,25 @@
             throw new Error("This email is already registered. Please proceed to login.");
           }
 
-          let finalAllowed = [...chosenBatches];
-          if (chosenBatches.includes("combo")) {
-            finalAllowed = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
-          }
-
-          // STRICT CHECK: Auto-activate ONLY if the user selected ONLY the Free Batch and nothing else
-          const isOnlyFreeRegistration = (chosenBatches.length === 1 && chosenBatches.includes("free-batch"));
-          const accountStatus = isOnlyFreeRegistration ? "active" : "pending";
+          // New signups automatically receive free-batch access and instant active status
+          const finalAllowed = ["free-batch"];
+          const accountStatus = "active";
 
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const cadetUid = userCredential.user.uid;
 
-          // Save account with status "active" if exclusively free, otherwise "pending"
           await setDoc(doc(db, "cadets", cadetUid), {
             uid: cadetUid,
             name: name,
             email: email,
-            targetBatch: chosenBatches.join(", "),
+            targetBatch: "Free Batch",
             status: accountStatus,
             allowedBatches: finalAllowed,
             createdAt: new Date().toISOString()
           });
 
-          if (isOnlyFreeRegistration) {
-            // Instant session setup and entry ONLY for exclusive Free Batch users
-            await establishSessionAndEnter(cadetUid);
-          } else {
-            // Sign out for paid / mixed signups so they wait for admin approval
-            await signOut(auth);
-
-            statusAlert.className = "mt-5 p-4 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed shadow-lg font-body font-bold";
-            statusAlert.innerHTML = `
-              <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 mb-1 text-sm tracking-wide">
-                <span>&#9888;</span> REGISTRATION PENDING APPROVAL
-              </div>
-              Cadet <b>${name}</b>, your account has been registered successfully! Your account is currently <b>pending administrative approval</b>. You will be able to log in once your enrollment is verified.
-            `;
-            statusAlert.classList.remove('hidden');
-            submitBtn.disabled = false;
-            submitBtn.innerText = "INITIALIZE SIGNUP";
-          }
+          // Instant session setup and entry for all new signups
+          await establishSessionAndEnter(cadetUid);
 
         } else {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -395,46 +370,6 @@
             <input type="password" id="cadetPassword" required placeholder="••••••••" class="w-full bg-neutral-900/95 border-2 border-amber-500/50 rounded-lg px-3.5 py-3 text-sm font-bold text-white placeholder-neutral-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/60 transition shadow-inner">
           </div>
 
-          <div id="batchField" class="hidden">
-            <label class="block text-xs uppercase tracking-wider text-amber-200 font-black mb-1.5 font-serif-bold text-sm flex items-center justify-between">
-              <span>Target Training Batch (Select 1 or more)</span>
-              <span class="text-[11px] text-amber-400 font-mono font-bold">Multiple Select</span>
-            </label>
-            <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani">
-              
-              <!-- FREE BATCH OPTION (INSTANT AUTO-APPROVAL ONLY IF CHOSEN ALONE) -->
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-950/80 border border-emerald-500/80 hover:border-emerald-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="free-batch" class="w-4 h-4 accent-emerald-400 rounded cursor-pointer">
-                <span class="text-emerald-300 font-serif-bold text-sm">⭐ Free Batch (Instant Access)</span>
-              </label>
-
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="cds-math" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-white font-serif-bold text-sm">CDS Mathematics Specialist</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="cds-kilo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-white font-serif-bold text-sm">CDS OTA Batch</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="afcat" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-white font-serif-bold text-sm">AFCAT</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="Mock Test" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-white font-serif-bold text-sm">Mock Test</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-neutral-900/90 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="capf" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-white font-serif-bold text-sm">CAPF</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-lg bg-amber-950/60 border border-amber-500/80 hover:border-amber-400 cursor-pointer transition shadow-sm">
-                <input type="checkbox" name="cadetBatches" value="combo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                <span class="text-amber-300 font-serif-bold text-sm">Tri-Service Mega Combo (All Batches)</span>
-              </label>
-            </div>
-          </div>
-
           <button type="submit" id="submitBtn" class="w-full py-3.5 mt-3 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-black tracking-wider uppercase text-sm shadow-[0_0_35px_rgba(255,215,0,0.5)] transition transform active:scale-[0.98] cursor-pointer phantom-btn">
             AUTHORIZE & LOGIN
           </button>
@@ -509,7 +444,6 @@
 
     function switchMode(mode) {
       const nameField = document.getElementById('nameField');
-      const batchField = document.getElementById('batchField');
       const forgotBtn = document.getElementById('forgotBtn');
       const submitBtn = document.getElementById('submitBtn');
       const tabLogin = document.getElementById('tabLogin');
@@ -521,7 +455,6 @@
       if (mode === 'register') {
         window.isRegisterMode = true;
         nameField.classList.remove('hidden');
-        batchField.classList.remove('hidden');
         if (forgotBtn) forgotBtn.classList.add('hidden');
         submitBtn.innerText = "INITIALIZE SIGNUP";
         
@@ -530,7 +463,6 @@
       } else {
         window.isRegisterMode = false;
         nameField.classList.add('hidden');
-        batchField.classList.add('hidden');
         if (forgotBtn) forgotBtn.classList.remove('hidden');
         submitBtn.innerText = "AUTHORIZE & LOGIN";
 
