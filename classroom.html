@@ -350,22 +350,24 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
         </div>
 
-        <!-- View 4: Free Lectures View ("It will be uploaded very soon" - No lectures added yet) -->
+        <!-- View 4: Free Lectures View (Dynamically fetches from free_tactical_curriculum with Watch Lecture & Notes buttons) -->
         <div id="freeLecturesView" class="hidden">
           <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO SUBJECTS
           </button>
 
-          <div class="armor-panel rounded-2xl p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-amber-400 tracking-wide uppercase mb-2" id="selectedFreeSubjectTitle">LECTURES DOSSIER</h2>
-            <p class="text-sm text-neutral-300 font-body mb-6">High-yield tactical study materials and video lectures for this module.</p>
-            
-            <div class="p-6 rounded-xl bg-neutral-900 border border-amber-400/40 max-w-lg mx-auto shadow-[0_0_25px_rgba(255,215,0,0.15)]">
-              <div class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</div>
-              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
+          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">LECTURES DOSSIER</div>
+              <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="selectedFreeSubjectTitle">CHAPTER LECTURES</h2>
+              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Lecture or Notes to begin.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FREE VAULT ACTIVE
             </div>
           </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeLecturesListContainer"></div>
         </div>
 
       </div>
@@ -452,117 +454,56 @@
 
     </div>
 
-    <!-- TEST SERIES VIEW -->
-    <div id="testSeriesContainer" class="hidden">
-      <div id="testDashboardView">
-        <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- TEST SERIES VIEW (BUILT-IN SINGLE PAGE) -->
+    <div id="testSeriesContainer" class="hidden w-full page-transition">
+      <div class="armor-panel rounded-2xl p-6 sm:p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> PRACTICE HUB
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
+              <span>🎯</span> TACTICAL ASSESSMENT CONSOLE
             </div>
-            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST DASHBOARD</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Select your target defense examination below to enter the test section and access free mock papers.</p>
+            <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">ALL-INDIA DEFENCE TEST SERIES</h2>
+            <p class="text-xs text-neutral-300 font-body mt-1">Timed full-length mock exams and sectional drills for CDS, AFCAT & CAPF.</p>
           </div>
-          <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
-            100% FREE ACCESS
-          </div>
+          <button onclick="showHomeView()" class="px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+            &larr; BACK TO HOME
+          </button>
         </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-xl text-blue-400 mb-2">CDS EXAM</h3>
-              <p class="text-xs text-neutral-300 mb-6">Combined Defence Services Examination</p>
-            </div>
-            <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
-          </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-xl text-blue-400 mb-2">NDA EXAM</h3>
-              <p class="text-xs text-neutral-300 mb-6">National Defence Academy Examination</p>
-            </div>
-            <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
-          </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-xl text-blue-400 mb-2">AFCAT EXAM</h3>
-              <p class="text-xs text-neutral-300 mb-6">Air Force Common Admission Test</p>
-            </div>
-            <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
-          </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-xl text-blue-400 mb-2">CAPF EXAM</h3>
-              <p class="text-xs text-neutral-300 mb-6">Central Armed Police Forces</p>
-            </div>
-            <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
-          </div>
-        </div>
-      </div>
 
-      <div id="testSectionView" class="hidden">
-        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-sky-600 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Dashboard</button>
-        <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> PRACTICE HUB
-            </div>
-            <h2 id="selectedExamTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST SECTION</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Choose a section below to access full mocks, previous year papers, and chapter-wise tests.</p>
-          </div>
-          <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
-            100% FREE ACCESS
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
             <div>
-              <h3 class="font-stencil text-lg text-blue-400 mb-2">Full Mock Tests</h3>
-              <p class="text-xs text-neutral-300 mb-6">Complete CBT simulation based on latest exam patterns.</p>
+              <span class="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #01</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CDS FULL MOCK TEST</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">Complete bilingual timed test paper following latest UPSC pattern.</p>
             </div>
-            <button onclick="openMockList('Full Mock')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
           </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-lg text-blue-400 mb-2">Previous Year Papers</h3>
-              <p class="text-xs text-neutral-300 mb-6">Real exam questions from previous years with solutions.</p>
-            </div>
-            <button onclick="openMockList('Previous Year Papers')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Papers</button>
-          </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-lg text-blue-400 mb-2">Sectional Mocks</h3>
-              <p class="text-xs text-neutral-300 mb-6">Subject and topic-wise practice sets.</p>
-            </div>
-            <button onclick="openMockList('Sectional Mocks')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
-          </div>
-          <div class="test-mode-panel rounded-2xl p-6 text-center hover:border-blue-400 transition">
-            <div>
-              <h3 class="font-stencil text-lg text-blue-400 mb-2">Chapter-wise Practice</h3>
-              <p class="text-xs text-neutral-300 mb-6">Master individual chapters step by step.</p>
-            </div>
-            <button onclick="openMockList('Chapter-wise Practice')" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Practice</button>
-          </div>
-        </div>
-      </div>
 
-      <div id="mockListView" class="hidden">
-        <button onclick="backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-sky-600 text-white font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Section</button>
-        <div class="test-mode-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> TEST SECTION
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #02</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">AFCAT SPEED DRILL</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">100 questions high-speed numerical and reasoning test set.</p>
             </div>
-            <h2 id="selectedSectionTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AVAILABLE TESTS</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Check out available practice tests and exam simulations below.</p>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
           </div>
-          <div class="bg-black/60 border border-blue-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-blue-400 font-bold">
-            100% FREE ACCESS
+
+          <div class="armor-panel rounded-xl p-6 flex flex-col justify-between group hover:border-amber-400 transition">
+            <div>
+              <span class="px-2 py-0.5 rounded bg-purple-950 border border-emerald-500/50 text-purple-300 text-[10px] font-orbitron font-bold uppercase">MOCK TEST #03</span>
+              <h3 class="font-stencil text-xl text-white mt-3 mb-1 group-hover:text-amber-400 transition">CAPF PAPER-2 DESCRIPTIVE</h3>
+              <p class="text-xs text-neutral-300 font-body mb-6">Essay, précis and analytical writing evaluation format.</p>
+            </div>
+            <button onclick="alert('Test will be unlocked soon as per schedule!')" class="w-full py-2.5 rounded-lg bg-neutral-900 group-hover:bg-amber-400 border border-amber-500/40 text-amber-300 group-hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition phantom-btn">
+              START TEST &rarr;
+            </button>
           </div>
         </div>
-        
-        <div id="mockItemsContainer" class="space-y-4"></div>
       </div>
     </div>
 
@@ -780,7 +721,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -1026,11 +967,8 @@
         const card = document.createElement('div');
         card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
         
-        // Clicking a subject opens the lectures page where "It will be uploaded very soon" is displayed
         card.onclick = () => {
-          document.getElementById("selectedFreeSubjectTitle").innerText = subj.name.toUpperCase() + " | LECTURES";
-          document.getElementById("freeSubjectsGridView").classList.add("hidden");
-          document.getElementById("freeLecturesView").classList.remove("hidden");
+          loadFreeLectures(subj.name, selectedFreeBatch, selectedFreeMode);
         };
 
         card.innerHTML = `
@@ -1059,6 +997,97 @@
         `;
         container.appendChild(card);
       });
+    }
+
+    // Fetch and load Free Lectures dynamically from Firestore collection 'free_tactical_curriculum'
+    async function loadFreeLectures(subjectName, batchId, modeVal) {
+      document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTERS & LECTURES";
+      document.getElementById("freeSubjectsGridView").classList.add("hidden");
+      document.getElementById("freeLecturesView").classList.remove("hidden");
+
+      const container = document.getElementById("freeLecturesListContainer");
+      if (!container) return;
+
+      container.innerHTML = `<div class="col-span-full text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
+
+      try {
+        const q = query(
+          collection(db, "free_tactical_curriculum"),
+          where("squadron", "==", batchId),
+          where("subject", "==", subjectName),
+          where("mode", "==", modeVal)
+        );
+        const querySnapshot = await getDocs(q);
+
+        container.innerHTML = "";
+
+        if (querySnapshot.empty) {
+          container.innerHTML = `
+            <div class="col-span-full armor-panel rounded-2xl p-8 text-center max-w-lg mx-auto w-full">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
+              <h3 class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</h3>
+              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let lectures = [];
+        querySnapshot.forEach((docSnap) => {
+          lectures.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // Sort by order number if available
+        lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        let html = "";
+        lectures.forEach((lec, idx) => {
+          const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
+          const durationText = lec.duration || "HD Session";
+          const descText = lec.description || "High-yield tactical study materials and video session.";
+          const videoUrl = lec.url || "#";
+          const notesUrl = lec.notesUrl || lec.pdfUrl || "";
+
+          html += `
+            <div class="armor-panel rounded-xl overflow-hidden flex flex-col justify-between p-5 hover:border-amber-400 shadow-lg page-transition">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="px-2 py-0.5 rounded bg-black border border-neutral-700 text-amber-400 text-[10px] font-orbitron uppercase font-bold">SESSION #${(idx + 1).toString().padStart(2, '0')}</span>
+                  <span class="text-xs font-mono text-emerald-400">${durationText}</span>
+                </div>
+                <h3 class="font-orbitron font-bold text-lg text-white mb-2">${lecTitle}</h3>
+                <p class="text-xs text-neutral-300 font-body mb-6">${descText}</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-auto">
+                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn text-center">
+                  WATCH NOW &rarr;
+                </button>
+                <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="py-3 rounded-xl bg-neutral-900 border border-amber-400/50 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn text-center">
+                  📄 NOTES
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+      } catch (err) {
+        console.error("Error loading free lectures: ", err);
+        container.innerHTML = `
+          <div class="col-span-full armor-panel rounded-2xl p-8 text-center max-w-lg mx-auto w-full">
+            <h3 class="font-orbitron font-extrabold text-base text-red-400 tracking-wider mb-1">Error Loading Content</h3>
+            <p class="text-xs text-neutral-400 font-mono">${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    window.watchFreeLectureAction = function(batchId, subjectName, lectureTitle, encodedUrl) {
+      const decodedUrl = decodeURIComponent(encodedUrl);
+      sessionStorage.setItem("phantom_current_video", decodedUrl);
+      sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
+      window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
     }
 
     window.backToFreeSubjectsGrid = function() {
@@ -1164,7 +1193,7 @@
 
         if (querySnapshot.empty) {
           let row = document.createElement("div");
-          row.className = "test-row";
+          row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
           row.innerHTML = `
             <div>
               <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
@@ -1179,7 +1208,7 @@
           querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
             let row = document.createElement("div");
-            row.className = "test-row";
+            row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
             row.innerHTML = `
               <div>
                 <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${data.title}</div>
@@ -1196,7 +1225,7 @@
       } catch (e) {
         console.error("Error fetching tests: ", e);
         let row = document.createElement("div");
-        row.className = "test-row";
+        row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
         row.innerHTML = `
           <div>
             <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
@@ -1391,7 +1420,6 @@
     }
 
     window.secureRedirect = async function(groupId, userId) {
-      // Open directly inside the user's click action to avoid popup blockers.
       const targetUrl = secureTgRegistry[groupId];
       if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer");
 
@@ -1404,7 +1432,6 @@
         console.error("Error updating clicked group in Firestore:", e);
       }
     }
-
 
     window.openBatchLectures = function(batchId) {
       window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
