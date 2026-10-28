@@ -628,7 +628,7 @@
           const docRef = doc(collection(db, targetCollection));
           batch.set(docRef, {
             squadron, subject, chapter, order: sNo, mode, title: fullTitle,
-            description: "Tactical lecture briefing.", duration: "HD Session", url,
+            duration: "HD Session", url,
             accessTier,
             createdAt: serverTimestamp()
           });
