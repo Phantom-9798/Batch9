@@ -245,8 +245,9 @@
         </div>
 
         <div>
-          <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Registered Email Address</label>
-          <input type="email" id="authCadetEmail" required placeholder="cadet@example.com" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400">
+          <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Registered Email Address (Locked)</label>
+          <!-- Email is locked and non-editable, auto-filled from login session -->
+          <input type="email" id="authCadetEmail" readonly disabled class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-sm font-bold text-neutral-400 cursor-not-allowed select-none">
         </div>
 
         <div>
@@ -659,8 +660,8 @@
         </div>
 
         <div>
-          <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Registered Email Address</label>
-          <input type="email" id="authCadetEmail" required placeholder="cadet@example.com" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400">
+          <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Registered Email Address (Locked)</label>
+          <input type="email" id="authCadetEmail" readonly disabled class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-sm font-bold text-neutral-400 cursor-not-allowed select-none">
         </div>
 
         <div>
@@ -1133,7 +1134,15 @@
 
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
-      if (modal) modal.classList.remove("hidden");
+      if (modal) {
+        // Automatically fill the email input with the logged-in cadet's email and lock it
+        const currentEmail = document.getElementById('sidebarProfileEmail').innerText;
+        const emailInput = document.getElementById('authCadetEmail');
+        if (emailInput && currentEmail && currentEmail !== "cadet@teamphantom.in") {
+          emailInput.value = currentEmail;
+        }
+        modal.classList.remove("hidden");
+      }
     }
 
     window.closePaidAuthModal = function() {
@@ -1150,7 +1159,7 @@
       const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.parentElement.querySelector('span').innerText);
 
       if (!name || !email || chosenBatches.length === 0 || !utr) {
-        alert("Please fill in your name, email, UTR number, and select at least one batch before sending proof on Telegram.");
+        alert("Please fill in your name, UTR number, and select at least one batch before sending proof on Telegram.");
         return;
       }
 
