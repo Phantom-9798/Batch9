@@ -1052,16 +1052,25 @@
 
       subjectsList.forEach((subj, index) => {
         const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
         
-        // Clicking a subject loads live lectures from Firestore collection 'free_tactical_curriculum'
+        // यहाँ लॉक होने पर स्टाइल बदल जाएगी
+        if (subj.locked) {
+          card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between opacity-50 grayscale border-neutral-800 transition-all duration-300 cursor-pointer group shadow-lg page-transition";
+        } else {
+          card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
+        }
+        
         card.onclick = () => {
           if (subj.locked) {
-            alert("Yeh subject abhi start nahi hua hai! Bahut jald launch hoga.");
+            alert("🔒 Yeh subject abhi start nahi hua hai! Bahut jald launch hoga.");
             return;
           }
           loadFreeLectures(subj.name, selectedFreeBatch, selectedFreeMode);
         };
+
+        const statusLabel = subj.locked 
+          ? `<span class="text-[10px] font-mono text-red-400 font-bold">🔒 LOCKED</span>` 
+          : `<span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>`;
 
         card.innerHTML = `
           <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
@@ -1073,7 +1082,7 @@
               </span>
             </div>
             <div class="absolute top-2.5 right-2.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full ${subj.locked ? 'bg-red-500' : 'bg-emerald-400'} animate-pulse inline-block"></span>
             </div>
           </div>
           <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
@@ -1082,7 +1091,7 @@
               <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">${subj.desc}</p>
             </div>
             <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              <span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>
+              ${statusLabel}
               <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
             </div>
           </div>
@@ -1090,7 +1099,6 @@
         container.appendChild(card);
       });
     }
-
     // Dynamic Free Lectures Loader from Firestore collection 'free_tactical_curriculum'
     async function loadFreeLectures(subjectName, batchId, modeVal) {
       document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTERS & LECTURES";
