@@ -180,8 +180,8 @@
       border: none;
     }
 
-    /* YOUTUBE ENGINE */
-    .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    /* YOUTUBE ENGINE WITH CLEAN CUSTOM BAR */
+    .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
     #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
     .tap-zone { position: absolute; top: 45px; bottom: 60px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .tap-zone-left { left: 0; } .tap-zone-right { right: 0; }
@@ -404,8 +404,8 @@
                 <div class="flex items-center gap-2">
                   <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
                     <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
-                    <select onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
-                      <option value="auto" class="bg-black">Auto</option>
+                    <select id="qualitySelector" onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
+                      <option value="default" class="bg-black">Auto (Adaptive)</option>
                       <option value="hd1080" class="bg-black">1080p HD</option>
                       <option value="hd720" class="bg-black">720p HD</option>
                       <option value="large" class="bg-black">480p</option>
@@ -423,7 +423,7 @@
             videoId: finalVideo,
             playerVars: {
               autoplay: 0,
-              controls: 0,
+              controls: 0,          /* HIDDEN TO PREVENT YOUTUBE LOGO/COPYRIGHT BAR */
               disablekb: 0,
               fs: 0,
               modestbranding: 1,
@@ -505,6 +505,15 @@
         }
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
+      }
+    }
+
+    function updateVideoQuality(quality) {
+      if (!ytInstance || !ytInstance.setPlaybackQuality) return;
+      ytInstance.setPlaybackQuality(quality);
+      if (ytInstance.getCurrentTime && ytInstance.seekTo) {
+        const currentTime = ytInstance.getCurrentTime();
+        ytInstance.seekTo(currentTime, true);
       }
     }
 
@@ -597,15 +606,6 @@
       else ytInstance.playVideo();
     }
 
-    function updateVideoQuality(quality) {
-      if (!ytInstance) return;
-      const target = quality === 'auto' ? 'default' : quality;
-      ytInstance.setPlaybackQuality(target);
-      if (ytInstance.getCurrentTime) {
-        ytInstance.seekTo(ytInstance.getCurrentTime(), true);
-      }
-    }
-
     function seekVideoTrack(e) {
       if (!ytInstance) return;
       const rect = e.currentTarget.getBoundingClientRect();
@@ -637,6 +637,7 @@
 
     // STUDY TIMER
     (function() {
+      const FOCUS_TIMER_KEY = "phantom_daily_seconds";
       const todayStr = new Date().toDateString();
       const lastDate = localStorage.getItem("phantom_study_date");
       
@@ -645,13 +646,15 @@
         localStorage.setItem("phantom_daily_seconds", "0");
       }
 
-      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      let totalSeconds = parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0");
       let sessionSeconds = 0;
 
       setInterval(() => {
-        totalSeconds++;
-        sessionSeconds++;
-        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+        if (!document.hidden) {
+          totalSeconds++;
+          sessionSeconds++;
+          localStorage.setItem(FOCUS_TIMER_KEY, totalSeconds.toString());
+        }
 
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
