@@ -350,7 +350,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
         </div>
 
-        <!-- View 4: Free Lectures View (Dynamically fetches from free_tactical_curriculum with Watch Lecture & Notes buttons) -->
+        <!-- View 4: Free Lectures View (Dynamically Fetches from Firestore 'free_tactical_curriculum') -->
         <div id="freeLecturesView" class="hidden">
           <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO SUBJECTS
@@ -454,7 +454,7 @@
 
     </div>
 
-    <!-- TEST SERIES VIEW (ORIGINAL RESTORED) -->
+    <!-- TEST SERIES VIEW (RESTORED ORIGINAL STRUCTURE & DATA) -->
     <div id="testSeriesContainer" class="hidden w-full page-transition">
       <div class="armor-panel rounded-2xl p-6 sm:p-8 mb-8">
         <div class="flex items-center justify-between mb-6">
