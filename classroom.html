@@ -233,11 +233,21 @@
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-800">
         <div>
           <h3 class="font-stencil text-xl sm:text-2xl text-amber-400 tracking-wider">GET PAID AUTHORIZATION</h3>
-          <p class="text-xs text-neutral-300 font-body">Complete Step 1 (Telegram Proof) to unlock Step 2 (Submit Access).</p>
+          <p class="text-xs text-neutral-300 font-body">Manage your tactical squadron access requests.</p>
         </div>
         <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
 
+      <!-- PENDING NOTICE (Shows up automatically if request is already sent) -->
+      <div id="authPendingNotice" class="hidden mb-6 p-5 rounded-xl bg-amber-950/80 border-2 border-amber-500 text-amber-200 text-center space-y-3 font-body">
+        <div class="text-2xl animate-pulse">⏳</div>
+        <div class="font-orbitron font-extrabold text-sm text-amber-300 tracking-wider">ACCESS PENDING</div>
+        <p class="text-xs leading-relaxed text-neutral-300">
+          Your payment authorization request has already been submitted and is currently <b>pending verification</b> by Team Phantom. Access will be granted shortly after review.
+        </p>
+      </div>
+
+      <!-- FORM (Hidden if pending, shown if normal/free user) -->
       <form id="paidAuthForm" onsubmit="submitPaidAuthProof(event)" class="space-y-4 font-body">
         <div>
           <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Cadet Full Name</label>
@@ -288,7 +298,6 @@
             <span>📱</span> 1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM
           </button>
           
-          <!-- Initially Disabled until Step 1 is clicked -->
           <button type="submit" id="authSubmitBtn" disabled class="w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition">
             2. SUBMIT FOR ACCESS (Complete Step 1 First)
           </button>
@@ -799,7 +808,7 @@
         { name: "Physics", desc: "Fundamental physics principles.", image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=400&q=80", locked: true },
         { name: "Internal Security", desc: "Border management & threats.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" },
         { name: "International Relation", desc: "Global diplomacy & pacts.", image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Social Issues", designate: "Indian society & welfare.", image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=400&q=80" },
+        { name: "Social Issues", desc: "Indian society & welfare.", image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=400&q=80" },
         { name: "Reasoning", desc: "Analytical ability drills.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80", locked: true },
         { name: "Math", desc: "Quantitative aptitude sets.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=400&q=80" }
       ]
@@ -1062,23 +1071,42 @@
     }
 
     let telegramProofClicked = false;
+    let cachedCadetData = null;
+
+    onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
+      if (docSnap.exists()) {
+        cachedCadetData = docSnap.data();
+      }
+    });
 
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
-      if (modal) {
+      const formEl = document.getElementById("paidAuthForm");
+      const pendingNotice = document.getElementById("authPendingNotice");
+
+      if (modal && cachedCadetData) {
         // Auto-fill logged-in cadet's email and lock it
-        const currentEmail = document.getElementById('sidebarProfileEmail').innerText;
         const emailInput = document.getElementById('authCadetEmail');
-        if (emailInput && currentEmail && currentEmail !== "cadet@teamphantom.in") {
-          emailInput.value = currentEmail;
+        if (emailInput && cachedCadetData.email) {
+          emailInput.value = cachedCadetData.email;
         }
 
-        // Reset state on modal open
-        telegramProofClicked = false;
-        const submitBtn = document.getElementById('authSubmitBtn');
-        submitBtn.disabled = true;
-        submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
-        submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
+        const allowed = cachedCadetData.allowedBatches || [];
+        const hasPaidActive = allowed.includes("combo") || ["cds-math", "cds-kilo", "afcat", "capf"].some(b => allowed.includes(b));
+
+        if (cachedCadetData.utrNumber && !hasPaidActive) {
+          formEl.classList.add("hidden");
+          pendingNotice.classList.remove("hidden");
+        } else {
+          formEl.classList.remove("hidden");
+          pendingNotice.classList.add("hidden");
+
+          telegramProofClicked = false;
+          const submitBtn = document.getElementById('authSubmitBtn');
+          submitBtn.disabled = true;
+          submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
+          submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
+        }
 
         modal.classList.remove("hidden");
       }
@@ -1112,7 +1140,6 @@
       const tgUrl = `https://t.me/teamPhantom98?text=${encodeURIComponent(msg)}`;
       window.open(tgUrl, '_blank', 'noopener,noreferrer');
 
-      // Enable Step 2 button after clicking Telegram proof
       telegramProofClicked = true;
       const submitBtn = document.getElementById('authSubmitBtn');
       submitBtn.disabled = false;
@@ -1151,7 +1178,6 @@
         if (localUid) {
           let finalTargetBatch = chosenBatches.join(", ");
           
-          // Save payment request details, requested batches and UTR in Firebase under cadet's document
           const cadetRef = doc(db, "cadets", localUid);
           await updateDoc(cadetRef, {
             targetBatch: finalTargetBatch,
