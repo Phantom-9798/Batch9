@@ -181,16 +181,8 @@
     }
 
     /* YOUTUBE ENGINE */
-    .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
-    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
-    .tap-zone { position: absolute; top: 45px; bottom: 60px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .tap-zone-left { left: 0; } .tap-zone-right { right: 0; }
-    .skip-alert-badge { background: rgba(255, 215, 0, 0.9); color: #000; font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; padding: 10px 18px; border-radius: 9999px; opacity: 0; pointer-events: none; transform: scale(0.6); transition: all 0.2s ease; }
-    .skip-alert-badge.show { opacity: 1; transform: scale(1.1); }
-    .tactical-custom-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%); padding: 10px 16px 8px 16px; display: flex; flex-direction: column; gap: 6px; z-index: 40; transition: opacity 0.35s ease; }
-    .hud-hidden { opacity: 0 !important; pointer-events: none !important; }
-    .tactical-progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.18); border-radius: 3px; cursor: pointer; position: relative; }
-    .tactical-progress-fill { height: 100%; background: #ffd700; width: 0%; border-radius: 3px; }
+    .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
+    #ytPlayerFrame { position: absolute; width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; }
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
     header, main, footer { position: relative; z-index: 10; }
@@ -316,9 +308,6 @@
 
   <script>
     let ytInstance = null;
-    let isPlaying = false;
-    let timerSync = null;
-    let hideControlsTimeout = null;
     let isNexield = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -370,51 +359,6 @@
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
-
-            <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
-              <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
-            </div>
-
-            <div class="tap-zone tap-zone-right" onclick="handleTapZone('right')">
-              <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
-            </div>
-
-            <div class="tactical-custom-bar" id="ytCustomBar" onclick="event.stopPropagation()">
-              <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
-                <div class="tactical-progress-fill" id="trackFill"></div>
-              </div>
-
-              <div class="flex items-center justify-between text-xs font-mono pt-1">
-                <div class="flex items-center gap-2">
-                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-xs uppercase px-3 py-1 bg-amber-400 hover:bg-amber-500 rounded transition cursor-pointer">
-                    ▶ PLAY
-                  </button>
-
-                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    « 10s
-                  </button>
-
-                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px] px-1">00:00 / 00:00</span>
-
-                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    10s »
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
-                    <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
-                    <select onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
-                      <option value="auto" class="bg-black">Auto</option>
-                      <option value="hd1080" class="bg-black">1080p HD</option>
-                      <option value="hd720" class="bg-black">720p HD</option>
-                      <option value="large" class="bg-black">480p</option>
-                      <option value="medium" class="bg-black">360p</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         `;
 
@@ -423,30 +367,20 @@
             videoId: finalVideo,
             playerVars: {
               autoplay: 0,
-              controls: 0,
-              disablekb: 0,
-              fs: 0,
-              modestbranding: 1,
-              rel: 0,
+              controls: 1,         /* Native YouTube controls enabled */
+              modestbranding: 1,   /* Clean minimal branding */
+              rel: 0,              /* No recommended external videos */
               showinfo: 0,
-              iv_load_policy: 3
+              iv_load_policy: 3,
+              fs: 1                /* Native fullscreen enabled */
             },
             events: {
               onReady: (e) => {
-                startTimerSync();
-                resetAutoHideTimer();
+                // Stream ready
               },
               onStateChange: (e) => {
-                const btn = document.getElementById("playTrigger");
                 if (e.data === YT.PlayerState.PLAYING) {
-                  isPlaying = true;
-                  if (btn) btn.innerText = "⏸ PAUSE";
                   document.getElementById('securityOverlay').classList.add('hidden');
-                  resetAutoHideTimer();
-                } else {
-                  isPlaying = false;
-                  if (btn) btn.innerText = "▶ PLAY";
-                  showControls();
                 }
               }
             }
@@ -456,14 +390,6 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-
-        const screenEl = document.getElementById("phantomConsoleScreen");
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          resetAutoHideTimer();
-        });
-
-        resetAutoHideTimer();
       }
     });
 
@@ -474,23 +400,6 @@
       } else if (ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
-    }
-
-    function showControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.remove("hud-hidden");
-    }
-
-    function hideControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.add("hud-hidden");
-    }
-
-    function resetAutoHideTimer() {
-      clearTimeout(hideControlsTimeout);
-      hideControlsTimeout = setTimeout(() => {
-        hideControls();
-      }, 3000);
     }
 
     function updateVideoSpeed(rate) {
@@ -505,29 +414,6 @@
         }
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
-      }
-    }
-
-    // FIXED / ENHANCED VIDEO QUALITY SWITCHER
-    function updateVideoQuality(quality) {
-      if (!ytInstance || !ytInstance.setPlaybackQuality) return;
-      const target = quality === 'auto' ? 'default' : quality;
-      
-      // Force set playback quality
-      ytInstance.setPlaybackQuality(target);
-      
-      // Force refresh player resolution stream if available
-      if (typeof ytInstance.getAvailableQualityLevels === 'function') {
-        const levels = ytInstance.getAvailableQualityLevels();
-        if (levels && levels.length > 0) {
-          ytInstance.setPlaybackQuality(target);
-        }
-      }
-      
-      // Seamless resume at current timestamp to enforce quality rendering
-      if (ytInstance.getCurrentTime && ytInstance.seekTo) {
-        const currentTime = ytInstance.getCurrentTime();
-        ytInstance.seekTo(currentTime, true);
       }
     }
 
@@ -565,92 +451,9 @@
       }
     });
 
-    let leftTimer = null, rightTimer = null;
-    let leftClicks = 0, rightClicks = 0;
-
-    function handleTapZone(side) {
-      showControls();
-      resetAutoHideTimer();
-
-      if (side === 'left') {
-        leftClicks++;
-        if (leftClicks === 1) {
-          leftTimer = setTimeout(() => {
-            toggleVideoPlay();
-            leftClicks = 0;
-          }, 270);
-        } else if (leftClicks === 2) {
-          clearTimeout(leftTimer);
-          skipSeconds(-10);
-          triggerBadge('skipLeftBadge');
-          leftClicks = 0;
-        }
-      } else {
-        rightClicks++;
-        if (rightClicks === 1) {
-          rightTimer = setTimeout(() => {
-            toggleVideoPlay();
-            rightClicks = 0;
-          }, 270);
-        } else if (rightClicks === 2) {
-          clearTimeout(rightTimer);
-          skipSeconds(10);
-          triggerBadge('skipRightBadge');
-          rightClicks = 0;
-        }
-      }
-    }
-
-    function skipSeconds(s) {
-      if (!ytInstance || !ytInstance.getCurrentTime) return;
-      const target = Math.max(0, ytInstance.getCurrentTime() + s);
-      ytInstance.seekTo(target, true);
-    }
-
-    function triggerBadge(id) {
-      const b = document.getElementById(id);
-      if (!b) return;
-      b.classList.add('show');
-      setTimeout(() => b.classList.remove('show'), 550);
-    }
-
-    function toggleVideoPlay() {
-      if (!ytInstance) return;
-      if (isPlaying) ytInstance.pauseVideo();
-      else ytInstance.playVideo();
-    }
-
-    function seekVideoTrack(e) {
-      if (!ytInstance) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      ytInstance.seekTo(pos * ytInstance.getDuration(), true);
-    }
-
-    function startTimerSync() {
-      if (timerSync) clearInterval(timerSync);
-      timerSync = setInterval(() => {
-        if (ytInstance && ytInstance.getCurrentTime) {
-          const c = ytInstance.getCurrentTime();
-          const d = ytInstance.getDuration();
-          if (d > 0) {
-            const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const counter = document.getElementById("timeCounter");
-            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
-          }
-        }
-      }, 500);
-    }
-
-    function formatSeconds(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
     // STUDY TIMER
     (function() {
+      const FOCUS_TIMER_KEY = "phantom_daily_seconds";
       const todayStr = new Date().toDateString();
       const lastDate = localStorage.getItem("phantom_study_date");
       
@@ -659,13 +462,15 @@
         localStorage.setItem("phantom_daily_seconds", "0");
       }
 
-      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      let totalSeconds = parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0");
       let sessionSeconds = 0;
 
       setInterval(() => {
-        totalSeconds++;
-        sessionSeconds++;
-        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+        if (!document.hidden) {
+          totalSeconds++;
+          sessionSeconds++;
+          localStorage.setItem(FOCUS_TIMER_KEY, totalSeconds.toString());
+        }
 
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
