@@ -233,17 +233,18 @@
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-800">
         <div>
           <h3 class="font-stencil text-xl sm:text-2xl text-amber-400 tracking-wider">GET PAID AUTHORIZATION</h3>
-          <p class="text-xs text-neutral-300 font-body">Manage your tactical squadron access requests.</p>
+          <p class="text-xs text-neutral-300 font-body">Submit or update your tactical squadron payment authorization request.</p>
         </div>
         <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
 
       <!-- PENDING NOTICE -->
-      <div id="authPendingNotice" class="hidden mb-6 p-5 rounded-xl bg-amber-950/80 border-2 border-amber-500 text-amber-200 text-center space-y-3 font-body">
-        <div class="text-2xl animate-pulse">⏳</div>
-        <div class="font-orbitron font-extrabold text-sm text-amber-300 tracking-wider">ACCESS PENDING</div>
+      <div id="authPendingNotice" class="hidden mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left">
+        <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 text-xs tracking-wide">
+          <span>⏳</span> PREVIOUS REQUEST UNDER REVIEW
+        </div>
         <p class="text-xs leading-relaxed text-neutral-300">
-          Your payment authorization request has already been submitted and is currently <b>pending verification</b> by Team Phantom. Access will be granted shortly after review.
+          A payment request has already been submitted for this account and is currently <b>pending review</b>. If you need to correct any details, you can update and submit this form again.
         </p>
       </div>
 
@@ -661,212 +662,6 @@
     <p class="text-[11px] font-body text-neutral-400 tracking-wider">&copy; 2026 TEAM PHANTOM. ALL RIGHTS RESERVED.</p>
   </footer>
 
-  <!-- ================= TEAM PHANTOM CINEMATIC INTRO POPUP OVERLAY ================= -->
-  <div id="classroomCinematicPopup" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background-color: #04070b; background-image: radial-gradient(circle at center, #0a1628 0%, #04070b 100%); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.8s ease-in-out; -webkit-user-select: none; user-select: none;">
-    <style>
-        #classroomCinematicPopup * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
-        #ccStarBubbleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; }
-        .cc-curtain-left, .cc-curtain-right {
-            position: absolute; top: 0; width: 50%; height: 100%;
-            background: linear-gradient(90deg, #996515 0%, #d4af37 20%, #ffd700 50%, #d4af37 80%, #996515 100%);
-            background-size: 80px 100%; z-index: 100;
-            transition: transform 2.8s cubic-bezier(0.77, 0, 0.175, 1);
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.9);
-            border-bottom: 8px solid #5c4033;
-        }
-        .cc-curtain-left { left: 0; transform-origin: left; border-right: 4px solid #4a3319; }
-        .cc-curtain-right { right: 0; transform-origin: right; border-left: 4px solid #4a3319; }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-left { transform: translateX(-100%); }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-right { transform: translateX(100%); }
-
-        .cc-intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; position: relative; z-index: 10; }
-        .cc-rocket-logo-wrapper { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; height: 90px; width: 100%; }
-        .cc-logo-box-container { position: absolute; opacity: 0; transform: scale(0.2); animation: ccDropLogoCenter 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; animation-delay: 3.2s; }
-        .cc-intro-logo { width: 70px; height: 70px; object-fit: cover; border-radius: 14px; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
-        .cc-rocket-ship { position: absolute; font-size: 34px; transform: rotate(45deg); z-index: 20; animation: ccFlyRocketVerySlow 5.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 0.8s; }
-        @keyframes ccFlyRocketVerySlow {
-            0% { left: -180px; top: 25px; opacity: 0; transform: scale(0.6) rotate(55deg); }
-            20% { opacity: 1; transform: scale(1.1) rotate(45deg); }
-            50% { left: calc(50% - 15px); top: -5px; transform: scale(1.2) rotate(40deg); }
-            80% { opacity: 1; }
-            100% { left: 110vw; top: -60px; opacity: 0; transform: scale(0.8) rotate(30deg); }
-        }
-        @keyframes ccDropLogoCenter {
-            0% { opacity: 0; transform: scale(0.3) translateY(-30px); }
-            70% { opacity: 1; transform: scale(1.1) translateY(5px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .cc-title-wrapper { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .cc-word-group { display: flex; gap: 8px; }
-        .cc-letter-box {
-            width: 46px; height: 56px; background: rgba(10, 18, 30, 0.95); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-family: 'Black Ops One', cursive; font-size: 26px;
-            opacity: 0; transform: translateY(-350px) rotate(-20deg); animation: ccDropBounce 0.8s cubic-bezier(0.25, 1, 0.5, 1.25) forwards;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-        }
-        .cc-letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
-        .cc-letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
-        .cc-letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffd700; border: 2px solid #ffd700; text-shadow: 0 0 12px #ffd700; }
-        .cc-letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
-        .cc-letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
-        .cc-letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
-        .cc-letter-box:nth-child(7)  { animation-delay: 4.85s; color: #ff9933; border: 2px solid #ff9933; text-shadow: 0 0 12px #ff9933; }
-        .cc-letter-box:nth-child(8)  { animation-delay: 4.95s; color: #9933ff; border: 2px solid #9933ff; text-shadow: 0 0 12px #9933ff; }
-        .cc-letter-box:nth-child(9)  { animation-delay: 5.05s; color: #ffff33; border: 2px solid #ffff33; text-shadow: 0 0 12px #ffff33; }
-        .cc-letter-box:nth-child(10) { animation-delay: 5.15s; color: #33ff33; border: 2px solid #33ff33; text-shadow: 0 0 12px #33ff33; }
-        .cc-letter-box:nth-child(11) { animation-delay: 5.25s; color: #ff3333; border: 2px solid #ff3333; text-shadow: 0 0 12px #ff3333; }
-        @keyframes ccDropBounce {
-            0% { transform: translateY(-350px) rotate(-25deg); opacity: 0; }
-            60% { transform: translateY(15px) rotate(6deg); opacity: 1; }
-            80% { transform: translateY(-8px) rotate(-3deg); }
-            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        }
-        .cc-subtitle {
-            font-family: 'Black Ops One', cursive; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #ffd700;
-            text-shadow: 0 0 18px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
-            opacity: 0; transform: translateX(-150px); animation: ccSwipeInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            animation-delay: 6.0s; margin-bottom: 15px;
-        }
-        @keyframes ccSwipeInRight { to { opacity: 1; transform: translateX(0); } }
-        .cc-secure-loader-wrapper { display: flex; flex-direction: column; align-items: center; opacity: 0; animation: ccFadeInSecure 0.6s ease forwards; animation-delay: 6.6s; width: 280px; }
-        .cc-progress-bar-container { width: 100%; height: 7px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 242, 254, 0.5); border-radius: 4px; overflow: hidden; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); margin-bottom: 8px; }
-        .cc-progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe); box-shadow: 0 0 15px #00f2fe; animation: ccFillProgress 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 6.8s; }
-        @keyframes ccFillProgress { 0% { width: 0%; } 100% { width: 100%; } }
-        .cc-secure-status-text { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 12px rgba(0, 242, 254, 0.7); }
-        @keyframes ccFadeInSecure { to { opacity: 1; } }
-        .cc-footer-tag { position: absolute; bottom: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #4b5563; letter-spacing: 2px; z-index: 10; }
-    </style>
-
-    <canvas id="ccStarBubbleCanvas"></canvas>
-    <div class="cc-curtain-left"></div>
-    <div class="cc-curtain-right"></div>
-
-    <div class="cc-intro-container">
-        <div class="cc-rocket-logo-wrapper">
-            <div class="cc-rocket-ship">🚀</div>
-            <div class="cc-logo-box-container">
-                <img src="logo.jpeg" alt="Logo" class="cc-intro-logo">
-            </div>
-        </div>
-
-        <div class="cc-title-wrapper">
-            <div class="cc-word-group">
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">E</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-            <div style="width: 14px;"></div>
-            <div class="cc-word-group">
-                <div class="cc-letter-box">P</div>
-                <div class="cc-letter-box">H</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">N</div>
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">O</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-        </div>
-
-        <div class="cc-subtitle">⚡ ALWAYS WITH YOU WITH FULL SUPPORT ⚡</div>
-
-        <div class="cc-secure-loader-wrapper">
-            <div class="cc-progress-bar-container"><div class="cc-progress-bar-fill"></div></div>
-            <div class="cc-secure-status-text">INITIALIZING SECURE ACCESS</div>
-        </div>
-    </div>
-
-    <div class="cc-footer-tag">&copy; 2026 TEAM PHANTOM &bull; SECURE TERMINAL</div>
-
-    <script>
-        (function() {
-            const canvas = document.getElementById("ccStarBubbleCanvas");
-            const ctx = canvas.getContext("2d");
-            function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-            window.addEventListener("resize", resizeCanvas);
-            resizeCanvas();
-
-            const particles = [];
-            for (let i = 0; i < 120; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                    radius: Math.random() * 3.5 + 1.5, speedY: Math.random() * 0.7 + 0.3,
-                    speedX: (Math.random() - 0.5) * 0.3, opacity: Math.random() * 0.9 + 0.3, isBubble: Math.random() > 0.4
-                });
-            }
-
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
-                    p.y += p.speedY; p.x += p.speedX;
-                    if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
-                    ctx.beginPath();
-                    if (p.isBubble) {
-                        ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(14, 165, 233, ${p.opacity * 0.7})`; ctx.lineWidth = 1.4; ctx.stroke();
-                    } else {
-                        ctx.arc(p.x, p.y, p.radius * 1.2, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`; ctx.shadowBlur = 15; ctx.shadowColor = '#ffd700'; ctx.fill();
-                    }
-                });
-                requestAnimationFrame(animateParticles);
-            }
-            animateParticles();
-
-            window.addEventListener('load', () => {
-                setTimeout(() => { document.getElementById('classroomCinematicPopup').classList.add('open-cc-curtains'); }, 500);
-            });
-
-            setTimeout(() => {
-                const popup = document.getElementById('classroomCinematicPopup');
-                if (popup) {
-                    popup.style.opacity = '0';
-                    setTimeout(() => { popup.style.display = 'none'; }, 800);
-                }
-            }, 10200);
-        })();
-    </script>
-  </div>
-  <!-- ================= END OF CINEMATIC INTRO POPUP ================= -->
-
-  <!-- Blue transition overlay shown when continuing into the dashboard -->
-  <div id="phantomBlueTransition" aria-hidden="true" style="position:fixed;inset:0;z-index:999998;pointer-events:none;opacity:0;background:radial-gradient(circle at center,rgba(14,165,233,.55),rgba(2,6,23,.96));transition:opacity .45s ease;"></div>
-
-  <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
-  <div id="phantomWhatsAppModal" class="fixed inset-0 bg-black/85 z-[999999] flex items-center justify-center p-4 backdrop-blur-md">
-    <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
-      
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
-        <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=TP';">
-      </div>
-
-      <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
-      <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
-        Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
-      </p>
-
-      <div class="flex flex-col items-center justify-center my-6">
-        <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-400 rounded-2xl shadow-[0_0_35px_rgba(255,215,0,0.4)] backdrop-blur-lg">
-          <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
-          <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
-          <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
-          <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
-        </div>
-        <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
-      </div>
-
-      <div class="space-y-3">
-        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-500 hover:to-sky-400 text-black hover:text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] transform hover:scale-[1.02] phantom-btn">
-          📱 JOIN UPDATES CHANNEL
-        </a>
-        
-        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
-          🚀 CONTINUE TO SITE
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -920,57 +715,6 @@
     let activeFreeExamTab = "";
     let selectedFreeBatch = "";
     let selectedFreeMode = "live";
-
-    // Dense Canvas Background Animation for Dashboard
-    const canvas = document.getElementById("starBubbleCanvas");
-    const ctx = canvas.getContext("2d");
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const particles = [];
-    for (let i = 0; i < 140; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2,
-        starRadius: Math.random() * 4.5 + 2.5,
-        speedY: Math.random() * 1.1 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.9 + 0.3,
-        isBubble: Math.random() > 0.4
-      });
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        if (p.y > canvas.height) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
-        }
-        ctx.beginPath();
-        if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.4, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.8})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        } else {
-          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 20;
-          ctx.shadowColor = '#ffd700';
-          ctx.fill();
-        }
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
 
     // Master list of subjects for each squadron/exam
     const squadronSubjectsMaster = {
@@ -1297,7 +1041,6 @@
 
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
-      const formEl = document.getElementById("paidAuthForm");
       const pendingNotice = document.getElementById("authPendingNotice");
 
       if (modal && cachedCadetData) {
@@ -1310,18 +1053,16 @@
         const hasPaidActive = allowed.includes("combo") || ["cds-math", "cds-kilo", "afcat", "capf"].some(b => allowed.includes(b));
 
         if (cachedCadetData.utrNumber && !hasPaidActive) {
-          formEl.classList.add("hidden");
           pendingNotice.classList.remove("hidden");
         } else {
-          formEl.classList.remove("hidden");
           pendingNotice.classList.add("hidden");
-
-          telegramProofClicked = false;
-          const submitBtn = document.getElementById('authSubmitBtn');
-          submitBtn.disabled = true;
-          submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
-          submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
         }
+
+        telegramProofClicked = false;
+        const submitBtn = document.getElementById('authSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
+        submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
 
         modal.classList.remove("hidden");
       }
