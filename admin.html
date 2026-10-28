@@ -168,7 +168,14 @@
       <div id="singleSection">
         <div class="grid-2">
           <div>
-            <label>SELECT TARGET SQUADRON</label>
+            <label>DISPATCH ACCESS TIER</label>
+            <select id="singleAccessTier" style="color: #fbbf24; font-weight: bold;">
+              <option value="paid">Authorized Paid Squadron</option>
+              <option value="free">Free Vault (Public Free Access)</option>
+            </select>
+          </div>
+          <div>
+            <label>SELECT TARGET SQUADRON / EXAM</label>
             <select id="squadronSelect" style="color: #34d399;">
               <option value="cds-kilo">CDS OTA Squadron</option>
               <option value="cds-math">CDS Mathematics Specialist</option>
@@ -176,17 +183,20 @@
               <option value="capf">CAPF Squadron</option>
             </select>
           </div>
-          <div>
-            <label>MODULE / SUBJECT NAME</label>
-            <input id="subjectInput" type="text" placeholder="e.g. Physical Geography, Polity">
-          </div>
         </div>
 
         <div class="grid-2">
           <div>
+            <label>MODULE / SUBJECT NAME</label>
+            <input id="subjectInput" type="text" placeholder="e.g. Physical Geography, Polity">
+          </div>
+          <div>
             <label>CHAPTER NAME (Optional)</label>
             <input id="chapterInput" type="text" placeholder="e.g. Geomorphology">
           </div>
+        </div>
+
+        <div class="grid-2">
           <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px;">
             <div>
               <label>CLASS #</label>
@@ -200,11 +210,10 @@
               </select>
             </div>
           </div>
-        </div>
-
-        <div>
-          <label>LECTURE TITLE</label>
-          <input id="titleInput" type="text" placeholder="e.g. Geomorphology Class 01">
+          <div>
+            <label>LECTURE TITLE</label>
+            <input id="titleInput" type="text" placeholder="e.g. Geomorphology Class 01">
+          </div>
         </div>
 
         <div>
@@ -232,6 +241,13 @@
       <div id="bulkSection" class="hidden">
         <div class="grid-3">
           <div>
+            <label>DISPATCH ACCESS TIER</label>
+            <select id="bulkAccessTier" style="color: #fbbf24; font-weight: bold;">
+              <option value="paid">Authorized Paid Squadron</option>
+              <option value="free">Free Vault (Public Free Access)</option>
+            </select>
+          </div>
+          <div>
             <label>TARGET SQUADRON</label>
             <select id="bulkSquadron" style="color: #34d399;">
               <option value="cds-kilo">CDS OTA Squadron</option>
@@ -244,12 +260,19 @@
             <label>MODULE / SUBJECT</label>
             <input id="bulkSubject" type="text" placeholder="e.g. Mathematics">
           </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 12px;">
           <div>
             <label>STREAM MODE</label>
             <select id="bulkMode" style="color: #fbbf24;">
               <option value="recorded">Recorded Vault</option>
               <option value="live">Live Squadron</option>
             </select>
+          </div>
+          <div>
+            <label>CHAPTER NAME (Optional)</label>
+            <input id="bulkChapter" type="text" placeholder="e.g. Core Concepts">
           </div>
         </div>
 
@@ -280,7 +303,7 @@
         </div>
       </div>
 
-      <!-- ================= MODE 4: TEST UPLOADER (AUTO-TITLE FETCH FROM URL) ================= -->
+      <!-- ================= MODE 4: TEST UPLOADER ================= -->
       <div id="uploaderSection" class="hidden">
         <div style="background: rgba(30, 58, 138, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
           <h3 class="font-orbitron" style="font-size: 14px; color: #60a5fa; margin: 0 0 4px 0;">📤 TEST UPLOADER COMMAND (AUTO-FETCH TITLE)</h3>
@@ -332,10 +355,17 @@
       <div id="managerSection" class="hidden">
         <div style="background: rgba(153, 27, 27, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
           <h3 class="font-orbitron" style="font-size: 14px; color: #f87171; margin: 0 0 4px 0;">⚠️ TACTICAL PURGE PROTOCOL</h3>
-          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select the exact Squadron, Mode, Subject, and optional Chapter below to wipe out specific lectures from Firestore.</p>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select Access Tier, Squadron, Mode, Subject, and optional Chapter below to wipe out specific lectures from Firestore.</p>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-3" style="margin-bottom: 12px;">
+          <div>
+            <label>ACCESS TIER TO PURGE</label>
+            <select id="purgeTier" style="color: #f87171; font-weight: bold;">
+              <option value="paid">Authorized Paid Squadron</option>
+              <option value="free">Free Vault</option>
+            </select>
+          </div>
           <div>
             <label>TARGET SQUADRON</label>
             <select id="purgeSquadron" style="color: #34d399;">
@@ -346,19 +376,22 @@
             </select>
           </div>
           <div>
+            <label>STREAM MODE</label>
+            <select id="purgeMode" style="color: #fbbf24;">
+              <option value="recorded">Recorded Vault</option>
+              <option value="live">Live Squadron</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
             <label>MODULE / SUBJECT NAME</label>
             <input id="purgeSubject" type="text" placeholder="e.g. Mathematics">
           </div>
           <div>
             <label>CHAPTER NAME (Optional)</label>
             <input id="purgeChapter" type="text" placeholder="e.g. Ratio & Proportion">
-          </div>
-          <div>
-            <label>STREAM MODE</label>
-            <select id="purgeMode" style="color: #fbbf24;">
-              <option value="recorded">Recorded Vault</option>
-              <option value="live">Live Squadron</option>
-            </select>
           </div>
         </div>
 
@@ -470,11 +503,9 @@
         if (filename.includes('.')) {
           filename = filename.substring(0, filename.lastIndexOf('.'));
         }
-        // Replace underscores with spaces for clean title
         const cleanTitle = filename.replace(/_/g, ' ');
         titleInput.value = cleanTitle;
       } catch (e) {
-        // Fallback if URL is incomplete
         let parts = urlInput.split('/');
         let lastPart = parts[parts.length - 1] || urlInput;
         if (lastPart.includes('.')) lastPart = lastPart.substring(0, lastPart.lastIndexOf('.'));
@@ -514,8 +545,9 @@
       });
     }
 
-    // Lecture Dispatch Logic
+    // Lecture Dispatch Logic (Supports both Free and Paid Collections)
     window.dispatchSingleLecture = async () => {
+      const accessTier = document.getElementById("singleAccessTier").value; // "free" or "paid"
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
       const chapter = document.getElementById("chapterInput").value.trim() || "General";
@@ -535,12 +567,16 @@
       btn.innerText = "TRANSMITTING...";
       btn.disabled = true;
 
+      // Select collection based on Access Tier
+      const targetCollection = accessTier === 'free' ? "free_tactical_curriculum" : "tactical_curriculum";
+
       try {
-        await addDoc(collection(db, "tactical_curriculum"), {
+        await addDoc(collection(db, targetCollection), {
           squadron, subject, chapter, order, mode, title, description, duration, url,
+          accessTier,
           createdAt: serverTimestamp()
         });
-        showStatus(`[CONFIRMED] Lecture "${title}" successfully stored.`, true);
+        showStatus(`[CONFIRMED] Lecture "${title}" successfully dispatched to [${targetCollection.toUpperCase()}].`, true);
         document.getElementById("titleInput").value = "";
         document.getElementById("urlInput").value = "";
         document.getElementById("descriptionInput").value = "";
@@ -555,8 +591,10 @@
     };
 
     window.dispatchBulkTsv = async () => {
+      const accessTier = document.getElementById("bulkAccessTier").value;
       const squadron = document.getElementById("bulkSquadron").value;
       const subject = document.getElementById("bulkSubject").value.trim();
+      const chapter = document.getElementById("bulkChapter").value.trim() || "Core Concepts";
       const mode = document.getElementById("bulkMode").value;
       const tsv = document.getElementById("bulkTsvData").value.trim();
 
@@ -569,6 +607,8 @@
       const btn = document.getElementById("bulkSubmitBtn");
       btn.innerText = "PROCESSING BULK...";
       btn.disabled = true;
+
+      const targetCollection = accessTier === 'free' ? "free_tactical_curriculum" : "tactical_curriculum";
 
       try {
         let batch = writeBatch(db);
@@ -585,10 +625,11 @@
           const fullTitle = parts[1].trim();
           const url = parts[2].trim();
 
-          const docRef = doc(collection(db, "tactical_curriculum"));
+          const docRef = doc(collection(db, targetCollection));
           batch.set(docRef, {
-            squadron, subject, chapter: "Core Concepts", order: sNo, mode, title: fullTitle,
+            squadron, subject, chapter, order: sNo, mode, title: fullTitle,
             description: "Tactical lecture briefing.", duration: "HD Session", url,
+            accessTier,
             createdAt: serverTimestamp()
           });
 
@@ -603,7 +644,7 @@
         }
 
         if (batchCount > 0) await batch.commit();
-        showStatus(`[BULK SUCCESS] ${count} Lectures dispatched successfully!`, true);
+        showStatus(`[BULK SUCCESS] ${count} lectures dispatched to [${targetCollection.toUpperCase()}]!`, true);
         document.getElementById("bulkTsvData").value = "";
       } catch (e) {
         showStatus(`[BULK FAILURE] Error: ${e.message}`, false);
@@ -635,6 +676,7 @@
     };
 
     window.executePurge = async () => {
+      const tier = document.getElementById("purgeTier").value; // "free" or "paid"
       const squadron = document.getElementById("purgeSquadron").value;
       const subject = document.getElementById("purgeSubject").value.trim();
       const chapter = document.getElementById("purgeChapter").value.trim();
@@ -645,14 +687,16 @@
         return;
       }
 
-      if (!confirm(`WARNING: Are you sure you want to delete all lectures for subject "${subject}" in ${squadron}?`)) return;
+      if (!confirm(`WARNING: Are you sure you want to delete all lectures for subject "${subject}" from [${tier.toUpperCase()}] collection?`)) return;
 
       const btn = document.getElementById("purgeSubmitBtn");
       btn.innerText = "WIPING DATA...";
       btn.disabled = true;
 
+      const targetCollection = tier === 'free' ? "free_tactical_curriculum" : "tactical_curriculum";
+
       try {
-        const q = query(collection(db, "tactical_curriculum"));
+        const q = query(collection(db, targetCollection));
         const querySnapshot = await getDocs(q);
         const batch = writeBatch(db);
         let deletedCount = 0;
@@ -669,9 +713,9 @@
 
         if (deletedCount > 0) {
           await batch.commit();
-          showStatus(`[PURGE SUCCESS] ${deletedCount} lectures wiped out from Firestore.`, true);
+          showStatus(`[PURGE SUCCESS] ${deletedCount} lectures wiped out from [${targetCollection.toUpperCase()}].`, true);
         } else {
-          showStatus(`[NOTICE] No matching lectures found to purge.`, false);
+          showStatus(`[NOTICE] No matching lectures found to purge in [${targetCollection.toUpperCase()}].`, false);
         }
       } catch (e) {
         showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
