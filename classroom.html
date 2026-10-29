@@ -970,51 +970,100 @@
     let selectedFreeBatch = "";
     let selectedFreeMode = "live";
 
-    // Dense Canvas Background Animation for Dashboard
+    // Glowing outline stars + multicolour bubbles for the dashboard background
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
+    const particleColors = [
+      [56, 189, 248], [255, 215, 0], [255, 255, 255],
+      [192, 132, 252], [244, 114, 182], [52, 211, 153],
+      [251, 146, 60], [129, 140, 248]
+    ];
     const particles = [];
-    for (let i = 0; i < 140; i++) {
+    for (let i = 0; i < 155; i++) {
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2,
-        starRadius: Math.random() * 4.5 + 2.5,
-        speedY: Math.random() * 1.1 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.9 + 0.3,
-        isBubble: Math.random() > 0.4
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * 2.6 + 1.4,
+        starRadius: Math.random() * 3.4 + 2.0,
+        speedY: Math.random() * 0.65 + 0.15,
+        speedX: (Math.random() - 0.5) * 0.35,
+        opacity: Math.random() * 0.55 + 0.25,
+        color: particleColors[Math.floor(Math.random() * particleColors.length)],
+        isBubble: Math.random() > 0.48,
+        phase: Math.random() * Math.PI * 2,
+        twinkle: Math.random() * 0.045 + 0.012
       });
     }
 
+    function drawOutlineStar(x, y, outerRadius, innerRadius, color, alpha, phase) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(phase);
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const angle = -Math.PI / 2 + i * Math.PI / 5;
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const px = Math.cos(angle) * radius;
+        const py = Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+      ctx.lineWidth = 1.15;
+      ctx.shadowBlur = 13;
+      ctx.shadowColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.95)`;
+      ctx.stroke();
+      // Tiny glowing centre, without filling the star shape
+      ctx.beginPath();
+      ctx.arc(0, 0, 0.65, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.75})`;
+      ctx.fill();
+      ctx.restore();
+    }
+
     function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       particles.forEach(p => {
         p.y += p.speedY;
         p.x += p.speedX;
-        if (p.y > canvas.height) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
+        p.phase += p.twinkle;
+        if (p.y > window.innerHeight + 16) {
+          p.y = -16;
+          p.x = Math.random() * window.innerWidth;
         }
-        ctx.beginPath();
+        if (p.x < -16) p.x = window.innerWidth + 16;
+        if (p.x > window.innerWidth + 16) p.x = -16;
+
+        const color = p.color;
+        const alpha = Math.max(0.12, p.opacity * (0.72 + Math.sin(p.phase) * 0.28));
         if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.4, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.8})`;
-          ctx.lineWidth = 1.5;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * 1.35, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+          ctx.lineWidth = 1.05;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.85)`;
           ctx.stroke();
-        } else {
-          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 20;
-          ctx.shadowColor = '#ffd700';
+          ctx.beginPath();
+          ctx.arc(p.x - p.radius * 0.35, p.y - p.radius * 0.4, Math.max(0.45, p.radius * 0.22), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
           ctx.fill();
+          ctx.restore();
+        } else {
+          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.42, color, alpha, p.phase * 0.35);
         }
       });
       requestAnimationFrame(animateParticles);
@@ -1350,31 +1399,35 @@
     function updatePaidAuthRequestNotice(data) {
       const notice = document.getElementById("authPendingNotice");
       if (!notice || !data) return;
-      const allowed = Array.isArray(data.allowedBatches) ? data.allowedBatches : [];
-      const requested = String(data.targetBatch || "").split(",").map(v => v.trim()).filter(Boolean);
-      // No previously submitted request means no status banner on the first visit.
+
       const requestSubmitted = data.accessRequestSubmitted === true || Boolean(data.paymentSubmittedAt);
+      const requested = String(data.targetBatch || "").split(",").map(v => v.trim()).filter(Boolean);
       if (!requestSubmitted || requested.length === 0) {
         notice.classList.add("hidden");
         return;
       }
 
-      // Admin may grant any paid batch, not necessarily the exact batch requested.
-      // Once at least one paid batch is assigned in allowedBatches, show approved.
-      const paidBatchIds = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
-      const hasAnyGrantedPaidBatch = allowed.includes("combo") || allowed.some(batchId => paidBatchIds.includes(batchId));
+      // Keep showing PENDING until allowedBatches changes after this request.
+      // The baseline is saved at submit time, so old paid access does not
+      // automatically reveal an approval/success message for a new request.
+      const baseline = Array.isArray(data.accessRequestBaselineBatches)
+        ? [...data.accessRequestBaselineBatches].sort()
+        : [...(Array.isArray(data.allowedBatches) ? data.allowedBatches : [])].sort();
+      const allowed = [...(Array.isArray(data.allowedBatches) ? data.allowedBatches : [])].sort();
+      const grantedAfterRequest = allowed.length !== baseline.length ||
+        allowed.some((batchId, index) => batchId !== baseline[index]);
+
+      if (grantedAfterRequest) {
+        notice.classList.add("hidden");
+        return;
+      }
+
+      notice.className = "mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left";
       notice.classList.remove("hidden");
       const heading = notice.querySelector("div");
       const message = notice.querySelector("p");
-      if (hasAnyGrantedPaidBatch) {
-        notice.className = "mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500 text-emerald-200 space-y-2 font-body text-left";
-        if (heading) heading.innerHTML = "<span>✓</span> ACCESS APPROVED";
-        if (message) message.textContent = "Access approved.";
-      } else {
-        notice.className = "mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left";
-        if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
-        if (message) message.innerHTML = "Your request access is pending.<br>You can edit your details and submit again.";
-      }
+      if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
+      if (message) message.innerHTML = "Your request access is pending.<br>You can edit your details and submit again.";
     }
 
     onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
@@ -1489,6 +1542,10 @@
 
       try {
         const finalTargetBatch = chosenBatches.join(", ");
+        const requestBaselineBatches = Array.isArray(cachedCadetData?.allowedBatches)
+          ? [...cachedCadetData.allowedBatches]
+          : [];
+        const requestSubmittedAt = new Date().toISOString();
         const localUid = localStorage.getItem("phantom_uid");
         if (localUid) {
           
@@ -1499,22 +1556,20 @@
             paymentName: paymentName,
             paymentDate: paymentDate,
             utrNumber: utr,
-            paymentSubmittedAt: new Date().toISOString(),
-            accessRequestSubmitted: true
+            paymentSubmittedAt: requestSubmittedAt,
+            accessRequestSubmitted: true,
+            accessRequestBaselineBatches: requestBaselineBatches
           });
         }
 
-        alertBox.className = "mt-4 p-3 rounded-xl text-xs bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 font-orbitron font-black block";
-        alertBox.innerText = "Your access request has been sent to the admin. It will be reviewed within 24 hours.";
-        alertBox.classList.remove('hidden');
-        // Save the latest request in local cache, but show its approval status only when
-        // the cadet opens Gate Authorization again.
+        // Do not show an approval/success banner to the cadet.
+        // Show PENDING immediately after every successful submission.
+        alertBox.classList.add("hidden");
         if (cachedCadetData) {
-          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: new Date().toISOString(), accessRequestSubmitted: true };
+          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: requestSubmittedAt, accessRequestSubmitted: true, accessRequestBaselineBatches: requestBaselineBatches };
         }
-        authStatusShouldShow = false;
-        const pendingNotice = document.getElementById("authPendingNotice");
-        if (pendingNotice) pendingNotice.classList.add("hidden");
+        authStatusShouldShow = true;
+        if (cachedCadetData) updatePaidAuthRequestNotice(cachedCadetData);
         // Keep the form open for corrections/resubmission; require Step 1 again each time.
         telegramProofClicked = false;
         submitBtn.disabled = true;
