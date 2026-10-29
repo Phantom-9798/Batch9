@@ -970,7 +970,7 @@
     let selectedFreeBatch = "";
     let selectedFreeMode = "live";
 
-    // Glowing outline stars + multicolour bubbles for the dashboard background
+    // Original cyan bubbles + larger, bright golden outline stars
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -984,29 +984,23 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    const particleColors = [
-      [56, 189, 248], [255, 215, 0], [255, 255, 255],
-      [192, 132, 252], [244, 114, 182], [52, 211, 153],
-      [251, 146, 60], [129, 140, 248]
-    ];
     const particles = [];
-    for (let i = 0; i < 155; i++) {
+    for (let i = 0; i < 140; i++) {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        radius: Math.random() * 2.6 + 1.4,
-        starRadius: Math.random() * 3.4 + 2.0,
-        speedY: Math.random() * 0.65 + 0.15,
-        speedX: (Math.random() - 0.5) * 0.35,
-        opacity: Math.random() * 0.55 + 0.25,
-        color: particleColors[Math.floor(Math.random() * particleColors.length)],
-        isBubble: Math.random() > 0.48,
+        radius: Math.random() * 4 + 2,
+        starRadius: Math.random() * 4.5 + 3.0,
+        speedY: Math.random() * 1.1 + 0.4,
+        speedX: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.9 + 0.3,
+        isBubble: Math.random() > 0.4,
         phase: Math.random() * Math.PI * 2,
         twinkle: Math.random() * 0.045 + 0.012
       });
     }
 
-    function drawOutlineStar(x, y, outerRadius, innerRadius, color, alpha, phase) {
+    function drawOutlineStar(x, y, outerRadius, innerRadius, alpha, phase) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(phase);
@@ -1020,15 +1014,17 @@
         else ctx.lineTo(px, py);
       }
       ctx.closePath();
-      ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
-      ctx.lineWidth = 1.15;
-      ctx.shadowBlur = 13;
-      ctx.shadowColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.95)`;
+      ctx.strokeStyle = `rgba(255, 205, 35, ${alpha})`;
+      ctx.lineWidth = 1.65;
+      ctx.shadowBlur = 22;
+      ctx.shadowColor = "rgba(255, 190, 0, 1)";
       ctx.stroke();
-      // Tiny glowing centre, without filling the star shape
+      // Bright golden inner glow, while keeping the star outline unfilled
       ctx.beginPath();
-      ctx.arc(0, 0, 0.65, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.75})`;
+      ctx.arc(0, 0, 0.85, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 230, 120, ${Math.min(1, alpha + 0.15)})`;
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = "#ffd700";
       ctx.fill();
       ctx.restore();
     }
@@ -1039,31 +1035,26 @@
         p.y += p.speedY;
         p.x += p.speedX;
         p.phase += p.twinkle;
-        if (p.y > window.innerHeight + 16) {
-          p.y = -16;
+        if (p.y > window.innerHeight + 20) {
+          p.y = -20;
           p.x = Math.random() * window.innerWidth;
         }
-        if (p.x < -16) p.x = window.innerWidth + 16;
-        if (p.x > window.innerWidth + 16) p.x = -16;
+        if (p.x < -20) p.x = window.innerWidth + 20;
+        if (p.x > window.innerWidth + 20) p.x = -20;
 
-        const color = p.color;
-        const alpha = Math.max(0.12, p.opacity * (0.72 + Math.sin(p.phase) * 0.28));
+        const alpha = Math.max(0.12, Math.min(1, p.opacity * (0.72 + Math.sin(p.phase) * 0.28)));
         if (p.isBubble) {
+          // Keep bubbles exactly in the original style and radius: cyan outline, no multicolour.
           ctx.save();
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius * 1.35, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
-          ctx.lineWidth = 1.05;
-          ctx.shadowBlur = 12;
-          ctx.shadowColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.85)`;
+          ctx.arc(p.x, p.y, p.radius * 1.4, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.8})`;
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 0;
           ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(p.x - p.radius * 0.35, p.y - p.radius * 0.4, Math.max(0.45, p.radius * 0.22), 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
-          ctx.fill();
           ctx.restore();
         } else {
-          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.42, color, alpha, p.phase * 0.35);
+          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.42, alpha, p.phase * 0.35);
         }
       });
       requestAnimationFrame(animateParticles);
