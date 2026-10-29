@@ -1359,11 +1359,14 @@
         return;
       }
 
-      const allRequestedApproved = requested.every(batchId => isRequestedBatchApproved(batchId, allowed));
+      // Admin may grant any paid batch, not necessarily the exact batch requested.
+      // Once at least one paid batch is assigned in allowedBatches, show approved.
+      const paidBatchIds = ["cds-math", "cds-kilo", "afcat", "capf", "combo"];
+      const hasAnyGrantedPaidBatch = allowed.includes("combo") || allowed.some(batchId => paidBatchIds.includes(batchId));
       notice.classList.remove("hidden");
       const heading = notice.querySelector("div");
       const message = notice.querySelector("p");
-      if (allRequestedApproved) {
+      if (hasAnyGrantedPaidBatch) {
         notice.className = "mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500 text-emerald-200 space-y-2 font-body text-left";
         if (heading) heading.innerHTML = "<span>✓</span> ACCESS APPROVED";
         if (message) message.textContent = "Access approved.";
