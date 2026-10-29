@@ -227,22 +227,22 @@
     </div>
   </div>
 
-  <!-- GET PAID AUTHORIZATION MODAL (WIDE / HORIZONTAL LAYOUT) -->
-  <div id="paidAuthModal" class="fixed inset-0 bg-black/85 z-50 hidden backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="armor-panel rounded-2xl max-w-4xl w-full p-6 sm:p-8 relative page-transition my-8 border-2 border-amber-400 shadow-[0_0_60px_rgba(255,215,0,0.35)]">
+  <!-- GET PAID AUTHORIZATION MODAL (RESPONSIVE WIDE LAYOUT) -->
+  <div id="paidAuthModal" class="fixed inset-0 bg-black/85 z-50 hidden backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="armor-panel rounded-2xl max-w-4xl w-full p-4 sm:p-8 relative page-transition my-6 border-2 border-amber-400 shadow-[0_0_60px_rgba(255,215,0,0.35)]">
       
-      <!-- TOP HEADER WITH BACK BUTTON -->
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-800">
-        <div class="flex items-center gap-3">
-          <button onclick="closePaidAuthModal()" class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 phantom-btn">
+      <!-- TOP HEADER WITH MOBILE-FRIENDLY BACK BUTTON -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-neutral-800">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button onclick="closePaidAuthModal()" class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 phantom-btn shrink-0">
             &larr; BACK
           </button>
           <div>
-            <h3 class="font-stencil text-xl sm:text-2xl text-amber-400 tracking-wider">GET PAID AUTHORIZATION</h3>
-            <p class="text-xs text-neutral-300 font-body">Submit or update your tactical squadron payment authorization request.</p>
+            <h3 class="font-stencil text-lg sm:text-2xl text-amber-400 tracking-wider">GET PAID AUTHORIZATION</h3>
+            <p class="text-[11px] sm:text-xs text-neutral-300 font-body">Submit or update your tactical squadron payment authorization request.</p>
           </div>
         </div>
-        <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+        <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold shrink-0">✕</button>
       </div>
 
       <!-- PENDING NOTICE -->
@@ -286,7 +286,7 @@
           <div class="space-y-4 flex flex-col justify-between">
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">UTR / Transaction Reference Number</label>
-              <input type="text" id="authUtr" required placeholder="Enter 12-digit UTR or UPI reference number" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 mb-4">
+              <input type="text" id="authUtr" required placeholder="Enter 12-digit UTR or UPI reference number" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 mb-2">
             </div>
 
             <div>
@@ -294,26 +294,26 @@
                 <span>Choose Your Batch For Enrolment (Multiple Select)</span>
                 <span class="text-[10px] text-amber-400 font-mono font-bold">Check all that apply</span>
               </label>
-              <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani max-h-48 overflow-y-auto pr-1" id="authBatchCheckboxes">
-                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
+              <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani max-h-44 overflow-y-auto pr-1" id="authBatchCheckboxes">
+                <label class="flex items-center gap-2.5 p-2 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="cds-math" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CDS Mathematics Specialist</span>
+                  <span class="text-white font-serif-bold text-xs sm:text-sm">CDS Mathematics Specialist</span>
                 </label>
-                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
+                <label class="flex items-center gap-2.5 p-2 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="cds-kilo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CDS OTA Batch</span>
+                  <span class="text-white font-serif-bold text-xs sm:text-sm">CDS OTA Batch</span>
                 </label>
-                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
+                <label class="flex items-center gap-2.5 p-2 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="afcat" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">AFCAT</span>
+                  <span class="text-white font-serif-bold text-xs sm:text-sm">AFCAT</span>
                 </label>
-                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
+                <label class="flex items-center gap-2.5 p-2 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="capf" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CAPF</span>
+                  <span class="text-white font-serif-bold text-xs sm:text-sm">CAPF</span>
                 </label>
-                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-amber-950/60 border border-amber-500/80 hover:border-amber-400 cursor-pointer transition shadow-sm">
+                <label class="flex items-center gap-2.5 p-2 rounded-lg bg-amber-950/60 border border-amber-500/80 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="combo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-amber-300 font-serif-bold text-sm">Tri-Service Mega Combo (All Batches)</span>
+                  <span class="text-amber-300 font-serif-bold text-xs sm:text-sm">Tri-Service Mega Combo (All Batches)</span>
                 </label>
               </div>
             </div>
@@ -939,57 +939,6 @@
     let selectedFreeBatch = "";
     let selectedFreeMode = "live";
 
-    // Dense Canvas Background Animation for Dashboard
-    const canvas = document.getElementById("starBubbleCanvas");
-    const ctx = canvas.getContext("2d");
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const particles = [];
-    for (let i = 0; i < 140; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2,
-        starRadius: Math.random() * 4.5 + 2.5,
-        speedY: Math.random() * 1.1 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.9 + 0.3,
-        isBubble: Math.random() > 0.4
-      });
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        if (p.y > canvas.height) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
-        }
-        ctx.beginPath();
-        if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.4, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.8})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        } else {
-          ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 20;
-          ctx.shadowColor = '#ffd700';
-          ctx.fill();
-        }
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
-
     // Master list of subjects for each squadron/exam
     const squadronSubjectsMaster = {
       "cds-math": [
@@ -1326,6 +1275,7 @@
         const allowed = cachedCadetData.allowedBatches || [];
         const hasPaidActive = allowed.includes("combo") || ["cds-math", "cds-kilo", "afcat", "capf"].some(b => allowed.includes(b));
 
+        // Display pending notice if UTR is submitted and paid access is NOT active yet
         if (cachedCadetData.utrNumber && !hasPaidActive) {
           pendingNotice.classList.remove("hidden");
         } else {
