@@ -1353,7 +1353,7 @@
       const allowed = Array.isArray(data.allowedBatches) ? data.allowedBatches : [];
       const requested = String(data.targetBatch || "").split(",").map(v => v.trim()).filter(Boolean);
       // No previously submitted request means no status banner on the first visit.
-      const requestSubmitted = Boolean(data.paymentSubmittedAt || data.utrNumber || data.targetBatch);
+      const requestSubmitted = data.accessRequestSubmitted === true || Boolean(data.paymentSubmittedAt);
       if (!requestSubmitted || requested.length === 0) {
         notice.classList.add("hidden");
         return;
@@ -1496,7 +1496,8 @@
             paymentName: paymentName,
             paymentDate: paymentDate,
             utrNumber: utr,
-            paymentSubmittedAt: new Date().toISOString()
+            paymentSubmittedAt: new Date().toISOString(),
+            accessRequestSubmitted: true
           });
         }
 
@@ -1506,7 +1507,7 @@
         // Save the latest request in local cache, but show its approval status only when
         // the cadet opens Gate Authorization again.
         if (cachedCadetData) {
-          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: new Date().toISOString() };
+          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: new Date().toISOString(), accessRequestSubmitted: true };
         }
         authStatusShouldShow = false;
         const pendingNotice = document.getElementById("authPendingNotice");
