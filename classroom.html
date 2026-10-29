@@ -278,14 +278,12 @@
         <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
 
-      <!-- PENDING NOTICE -->
+      <!-- REQUEST STATUS: shown only after a request has been submitted -->
       <div id="authPendingNotice" class="hidden mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left">
         <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 text-xs tracking-wide">
-          <span>⏳</span> PREVIOUS REQUEST UNDER REVIEW
+          <span>⏳</span> REVIEW PENDING
         </div>
-        <p class="text-xs leading-relaxed text-neutral-300">
-          A payment request has already been submitted for this account and is currently <b>pending review</b>. If you need to correct any details, you can update and submit this form again.
-        </p>
+        <p class="text-xs leading-relaxed text-neutral-300">Your request access is pending.<br>You can edit your details and submit again.</p>
       </div>
 
       <!-- WIDE HORIZONTAL FORM (2-COLUMN GRID ON DESKTOP) -->
@@ -1339,38 +1337,61 @@
 
     let telegramProofClicked = false;
     let cachedCadetData = null;
+    let authStatusShouldShow = false;
+
+    function isRequestedBatchApproved(batchId, allowed) {
+      const granted = Array.isArray(allowed) ? allowed : [];
+      const allIndividualBatches = ["cds-math", "cds-kilo", "afcat", "capf"];
+      if (granted.includes("combo")) return true;
+      if (batchId === "combo") return allIndividualBatches.every(id => granted.includes(id));
+      return granted.includes(batchId);
+    }
+
+    function updatePaidAuthRequestNotice(data) {
+      const notice = document.getElementById("authPendingNotice");
+      if (!notice || !data) return;
+      const allowed = Array.isArray(data.allowedBatches) ? data.allowedBatches : [];
+      const requested = String(data.targetBatch || "").split(",").map(v => v.trim()).filter(Boolean);
+      // No previously submitted request means no status banner on the first visit.
+      const requestSubmitted = Boolean(data.paymentSubmittedAt || data.utrNumber || data.targetBatch);
+      if (!requestSubmitted || requested.length === 0) {
+        notice.classList.add("hidden");
+        return;
+      }
+
+      const allRequestedApproved = requested.every(batchId => isRequestedBatchApproved(batchId, allowed));
+      notice.classList.remove("hidden");
+      const heading = notice.querySelector("div");
+      const message = notice.querySelector("p");
+      if (allRequestedApproved) {
+        notice.className = "mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500 text-emerald-200 space-y-2 font-body text-left";
+        if (heading) heading.innerHTML = "<span>✓</span> ACCESS APPROVED";
+        if (message) message.textContent = "Access approved.";
+      } else {
+        notice.className = "mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left";
+        if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
+        if (message) message.innerHTML = "Your request access is pending.<br>You can edit your details and submit again.";
+      }
+    }
 
     onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
       if (docSnap.exists()) {
         cachedCadetData = docSnap.data();
+        const modal = document.getElementById("paidAuthModal");
+        if (authStatusShouldShow && modal && !modal.classList.contains("hidden")) updatePaidAuthRequestNotice(cachedCadetData);
       }
     });
 
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
-      const pendingNotice = document.getElementById("authPendingNotice");
 
       if (modal && cachedCadetData) {
+        authStatusShouldShow = true;
         const emailInput = document.getElementById('authCadetEmail');
-        if (emailInput && cachedCadetData.email) {
-          emailInput.value = cachedCadetData.email;
-        }
+        if (emailInput && cachedCadetData.email) emailInput.value = cachedCadetData.email;
 
-        const allowed = cachedCadetData.allowedBatches || [];
-        const hasPaidActive = allowed.includes("combo") || ["cds-math", "cds-kilo", "afcat", "capf"].some(b => allowed.includes(b));
-
-        const requestSubmitted = Boolean(
-          cachedCadetData.paymentSubmittedAt || cachedCadetData.utrNumber ||
-          cachedCadetData.targetBatch
-        );
-        const isReviewPending = requestSubmitted && !hasPaidActive;
-        if (pendingNotice) {
-          pendingNotice.classList.toggle("hidden", !isReviewPending);
-          const heading = pendingNotice.querySelector("div");
-          const message = pendingNotice.querySelector("p");
-          if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
-          if (message) message.innerHTML = "Your access request is <b>Review Pending</b> until the admin approves your request. You can correct any details and submit the request again; the form will remain available.";
-        }
+        // Status is based on the batch(es) requested, not whether the user has any paid access at all.
+        updatePaidAuthRequestNotice(cachedCadetData);
 
         // Prefill the latest saved request so the cadet can correct it and resubmit.
         const nameInput = document.getElementById('authCadetName');
@@ -1464,9 +1485,9 @@
       submitBtn.innerText = "SUBMITTING REQUEST...";
 
       try {
+        const finalTargetBatch = chosenBatches.join(", ");
         const localUid = localStorage.getItem("phantom_uid");
         if (localUid) {
-          let finalTargetBatch = chosenBatches.join(", ");
           
           const cadetRef = doc(db, "cadets", localUid);
           await updateDoc(cadetRef, {
@@ -1479,18 +1500,18 @@
           });
         }
 
-        alertBox.className = "mt-4 p-3 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 font-orbitron font-black block";
-        alertBox.innerText = "⏳ REVIEW PENDING: Request submitted. You can correct details and submit again until your access is approved.";
+        alertBox.className = "mt-4 p-3 rounded-xl text-xs bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 font-orbitron font-black block";
+        alertBox.innerText = "Your access request has been sent to the admin. It will be reviewed within 24 hours.";
         alertBox.classList.remove('hidden');
-        const pendingNotice = document.getElementById('authPendingNotice');
-        if (pendingNotice) {
-          pendingNotice.classList.remove('hidden');
-          const heading = pendingNotice.querySelector('div');
-          const message = pendingNotice.querySelector('p');
-          if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
-          if (message) message.innerHTML = "Your access request is <b>Review Pending</b> until the admin approves your request. You can correct any details and submit the request again; the form will remain available.";
+        // Save the latest request in local cache, but show its approval status only when
+        // the cadet opens Gate Authorization again.
+        if (cachedCadetData) {
+          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: new Date().toISOString() };
         }
-        // Keep the modal and form open so a cadet can correct details and resubmit.
+        authStatusShouldShow = false;
+        const pendingNotice = document.getElementById("authPendingNotice");
+        if (pendingNotice) pendingNotice.classList.add("hidden");
+        // Keep the form open for corrections/resubmission; require Step 1 again each time.
         telegramProofClicked = false;
         submitBtn.disabled = true;
         submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
