@@ -245,13 +245,13 @@
         <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold shrink-0">✕</button>
       </div>
 
-      <!-- PENDING NOTICE -->
+      <!-- PENDING NOTICE (Always shown at top if a UTR was submitted previously and not yet active) -->
       <div id="authPendingNotice" class="hidden mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left">
         <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 text-xs tracking-wide">
-          <span>⏳</span> PREVIOUS REQUEST UNDER REVIEW
+          <span>⏳</span> REVIEW PENDING: YOUR REQUEST IS UNDER VERIFICATION
         </div>
         <p class="text-xs leading-relaxed text-neutral-300">
-          A payment request has already been submitted for this account and is currently <b>pending review</b>. If you need to correct any details, you can update and submit this form again.
+          Your payment request has been sent to Team Phantom and is currently awaiting approval. If you entered incorrect details, you can update them using the form below and submit again.
         </p>
       </div>
 
@@ -1273,9 +1273,11 @@
         }
 
         const allowed = cachedCadetData.allowedBatches || [];
-        const hasPaidActive = allowed.includes("combo") || ["cds-math", "cds-kilo", "afcat", "capf"].some(b => allowed.includes(b));
+        const isCombo = allowed.includes("combo") || allowed.length >= 4;
+        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+        const hasPaidActive = isCombo || batchesList.some(b => allowed.includes(b));
 
-        // Display pending notice if UTR is submitted and paid access is NOT active yet
+        // Always show pending notice if UTR is submitted and paid access is NOT active yet
         if (cachedCadetData.utrNumber && !hasPaidActive) {
           pendingNotice.classList.remove("hidden");
         } else {
@@ -1389,7 +1391,7 @@
         console.error("Error saving payment request:", err);
         alertBox.className = "mt-4 p-3 rounded-xl text-xs bg-red-950/90 border border-red-500/80 text-red-200 font-orbitron font-black block";
         alertBox.innerText = "ERROR: Failed to submit request. Please try again.";
-        alertBox.classList.remove('hidden');
+        alertBox.classList.add('hidden');
         submitBtn.disabled = false;
         submitBtn.innerText = "2. SUBMIT FOR ACCESS";
       }
