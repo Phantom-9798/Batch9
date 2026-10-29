@@ -1279,7 +1279,7 @@
         lectures.forEach((lec, idx) => {
           const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
           const durationText = lec.duration || "HD Session";
-          const descText = lec.description || "High-yield tactical study materials and video session.";
+          const descText = lec.description || "";
           const videoUrl = lec.url || "#";
           const notesUrl = lec.notesUrl || lec.pdfUrl || "";
 
