@@ -160,17 +160,23 @@
       display: flex; align-items: center; gap: 8px;
       background: rgba(4, 7, 11, 0.9); border: 1px solid rgba(255, 215, 0, 0.5);
       padding: 5px 10px; border-radius: 8px;
+    }
+    
+    /* डिफ़ॉल्ट (नॉर्मल मोड) में स्पीड और एग्जिट बॉक्स हमेशा दिखेगा */
+    .hud-autohide-group {
+      display: flex; align-items: center; gap: 8px;
+      opacity: 1; pointer-events: auto;
       transition: opacity 0.4s ease-in-out;
     }
 
-    /* जब फुलस्क्रीन हो और एक्टिविटी न हो, तब पूरा बॉक्स (स्पीड और एग्जिट दोनों सहित) गायब हो जाएगा */
-    .fs-mode-active .tactical-permanent-hud.fullscreen-auto-hide {
+    /* जब फुलस्क्रीन हो जाएगा, तब यह क्लास लग जाएगी जिससे स्पीड और एग्जिट बॉक्स छुप जाएगा */
+    .fs-mode-active .hud-autohide-group {
       opacity: 0 !important;
       pointer-events: none !important;
     }
 
-    /* जब फुलस्क्रीन में कर्सर मूव या टैप होगा, तब पूरा बॉक्स कम ट्रांसपेरेंसी (0.3) के साथ शो होगा */
-    .fs-mode-active .tactical-permanent-hud.fullscreen-auto-hide.show-hud {
+    /* फुलस्क्रीन में जब स्क्रीन पर टैप या कर्सर हिलेगा, तब यह क्लास लग जाएगी जिससे बॉक्स 30% ट्रांसपेरेंसी पर दिखने लगेगा */
+    .fs-mode-active .hud-autohide-group.show-fs-hud {
       opacity: 0.3 !important;
       pointer-events: auto !important;
     }
@@ -299,8 +305,8 @@
         <!-- TOP-RIGHT PERMANENT HUD BAR -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
           
-          <!-- स्पीड और फुलस्क्रीन/एग्जिट बटन वाला पूरा बॉक्स जो फुलस्क्रीन में ऑटो-हाइड होगा -->
-          <div id="hudAutohideGroup" class="flex items-center gap-2 fullscreen-auto-hide">
+          <!-- स्पीड और एग्जिट बटन वाला बॉक्स जो फुलस्क्रीन में ऑटो-हाइड होगा -->
+          <div id="hudAutohideGroup" class="hud-autohide-group">
             <div class="flex items-center gap-1.5">
               <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
               <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetFullscreenHud();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
@@ -527,10 +533,10 @@
       const hudGroup = document.getElementById("hudAutohideGroup");
       
       if (isFullscreen && hudGroup) {
-        hudGroup.classList.add("show-hud");
+        hudGroup.classList.add("show-fs-hud");
         clearTimeout(fsHudTimeout);
         fsHudTimeout = setTimeout(() => {
-          hudGroup.classList.remove("show-hud");
+          hudGroup.classList.remove("show-fs-hud");
         }, 5000); // 5 सेकंड बाद बॉक्स पूरी तरह गायब हो जाएगा
       }
     }
@@ -590,10 +596,14 @@
       if (!isFs) {
         target.classList.remove("fs-mode-active");
         if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
+        // नॉर्मल मोड में आते ही बॉक्स वापस परमानेंट दिखने लगेगा
+        const hudGroup = document.getElementById("hudAutohideGroup");
+        if (hudGroup) hudGroup.classList.remove("show-fs-hud");
       } else {
         target.classList.add("fs-mode-active");
         if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
-        showAndResetFullscreenHud(); // फुलस्क्रीन होते ही 5 सेकंड के लिए दिखा कर हाइड करेंगे
+        // फुलस्क्रीन होते ही बॉक्स शुरू में छुप जाएगा, टैप/मूव करने पर 5 सेकंड दिखेगा
+        showAndResetFullscreenHud();
       }
     });
 
