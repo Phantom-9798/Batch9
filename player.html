@@ -154,12 +154,18 @@
     .big-play-btn { width: 72px; height: 72px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid #ffffff; margin-left: 4px; }
 
-    /* TOP-RIGHT PERMANENT HUD BAR */
+    /* TOP-RIGHT PERMANENT HUD BAR (AUTO-HIDE & LOW OPACITY DIMMED) */
     .tactical-permanent-hud {
       position: absolute; top: 12px; right: 14px; z-index: 60;
       display: flex; align-items: center; gap: 8px;
       background: rgba(4, 7, 11, 0.9); border: 1px solid rgba(255, 215, 0, 0.5);
       padding: 5px 10px; border-radius: 8px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease-in-out;
+    }
+    .tactical-permanent-hud.controls-visible-dimmed {
+      opacity: 0.3 !important; /* बहुत कम ट्रांसपेरेंसी ताकि पीछे के नोट्स दिखें */
+      pointer-events: auto !important;
     }
     .fs-hud-btn { background: rgba(255, 215, 0, 0.9); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
 
@@ -282,10 +288,11 @@
           </span>
         </div>
 
+        <!-- TOP-RIGHT PERMANENT HUD BAR (AUTO-HIDE & LOW OPACITY DIMMED) -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
           <div class="flex items-center gap-1.5">
             <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
-            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
+            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetHudTimeout();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
               <option value="1" class="bg-black">1.0x</option>
               <option value="1.25" class="bg-black">1.25x</option>
               <option value="1.5" class="bg-black">1.5x</option>
@@ -296,7 +303,7 @@
 
           <div class="h-4 w-[1px] bg-neutral-700"></div>
 
-          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen()" class="fs-hud-btn font-orbitron">
+          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen(); showAndResetHudTimeout();" class="fs-hud-btn font-orbitron">
             [⛶ FULLSCREEN]
           </button>
         </div>
@@ -319,6 +326,7 @@
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
+    let hudHideTimeout = null;
     let isNexield = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -423,7 +431,7 @@
             videoId: finalVideo,
             playerVars: {
               autoplay: 0,
-              controls: 0,          /* HIDDEN TO PREVENT YOUTUBE LOGO/COPYRIGHT BAR */
+              controls: 0,
               disablekb: 0,
               fs: 0,
               modestbranding: 1,
@@ -461,6 +469,14 @@
         screenEl.addEventListener("mousemove", () => {
           showControls();
           resetAutoHideTimer();
+          showAndResetHudTimeout();
+        });
+
+        // स्क्रीन पर टैप/क्लिक करने पर कंट्रोल्स और डिम्ड HUD शो होंगे
+        screenEl.addEventListener("click", () => {
+          showControls();
+          resetAutoHideTimer();
+          showAndResetHudTimeout();
         });
 
         resetAutoHideTimer();
@@ -491,6 +507,18 @@
       hideControlsTimeout = setTimeout(() => {
         hideControls();
       }, 3000);
+    }
+
+    // TOP RIGHT HUD AUTO-HIDE & LOW OPACITY LOGIC (कहा था कि डिफ़ॉल्ट रूप से गायब और क्लिक/मूव पर 30% ट्रांसपेरेंसी के साथ शो हो)
+    function showAndResetHudTimeout() {
+      const hud = document.getElementById("topPermanentHud");
+      if (hud) {
+        hud.classList.add("controls-visible-dimmed");
+      }
+      clearTimeout(hudHideTimeout);
+      hudHideTimeout = setTimeout(() => {
+        if (hud) hud.classList.remove("controls-visible-dimmed");
+      }, 5000); // 5 सेकंड बाद वापस पूरी तरह गायब हो जाएगा
     }
 
     function updateVideoSpeed(rate) {
@@ -557,6 +585,7 @@
     function handleTapZone(side) {
       showControls();
       resetAutoHideTimer();
+      showAndResetHudTimeout();
 
       if (side === 'left') {
         leftClicks++;
