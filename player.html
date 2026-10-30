@@ -154,19 +154,25 @@
     .big-play-btn { width: 72px; height: 72px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid #ffffff; margin-left: 4px; }
 
-    /* TOP-RIGHT PERMANENT HUD BAR (AUTO-HIDE & LOW OPACITY DIMMED) */
+    /* TOP-RIGHT PERMANENT HUD BAR */
     .tactical-permanent-hud {
       position: absolute; top: 12px; right: 14px; z-index: 60;
       display: flex; align-items: center; gap: 8px;
       background: rgba(4, 7, 11, 0.9); border: 1px solid rgba(255, 215, 0, 0.5);
       padding: 5px 10px; border-radius: 8px;
-      opacity: 0; pointer-events: none;
+    }
+    
+    /* स्पीड और एग्जिट बटन के लिए ऑटो-हाइड और डिम्ड ओपेसिटी क्लास */
+    .hud-autohide-group {
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0.3; pointer-events: auto;
       transition: opacity 0.4s ease-in-out;
     }
-    .tactical-permanent-hud.controls-visible-dimmed {
-      opacity: 0.3 !important; /* बहुत कम ट्रांसपेरेंसी ताकि पीछे के नोट्स दिखें */
-      pointer-events: auto !important;
+    .hud-autohide-group.controls-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
+
     .fs-hud-btn { background: rgba(255, 215, 0, 0.9); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
 
     /* ZOOM / DIRECT VIDEO & NEXIELD STYLING FIX */
@@ -288,21 +294,26 @@
           </span>
         </div>
 
-        <!-- TOP-RIGHT PERMANENT HUD BAR (AUTO-HIDE & LOW OPACITY DIMMED) -->
+        <!-- TOP-RIGHT PERMANENT HUD BAR -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
-          <div class="flex items-center gap-1.5">
-            <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
-            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetHudTimeout();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
-              <option value="1" class="bg-black">1.0x</option>
-              <option value="1.25" class="bg-black">1.25x</option>
-              <option value="1.5" class="bg-black">1.5x</option>
-              <option value="1.75" class="bg-black">1.75x</option>
-              <option value="2" class="bg-black">2.0x</option>
-            </select>
+          
+          <!-- स्पीड और एग्जिट/फुलस्क्रीन बटन वाला ग्रुप जो 5 सेकंड में हाइड होगा -->
+          <div id="hudAutohideGroup" class="hud-autohide-group controls-hidden">
+            <div class="flex items-center gap-1.5">
+              <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
+              <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetHudTimeout();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
+                <option value="1" class="bg-black">1.0x</option>
+                <option value="1.25" class="bg-black">1.25x</option>
+                <option value="1.5" class="bg-black">1.5x</option>
+                <option value="1.75" class="bg-black">1.75x</option>
+                <option value="2" class="bg-black">2.0x</option>
+              </select>
+            </div>
+
+            <div class="h-4 w-[1px] bg-neutral-700"></div>
           </div>
 
-          <div class="h-4 w-[1px] bg-neutral-700"></div>
-
+          <!-- फुलस्क्रीन बटन हमेशा परमानेंट दिखेगा -->
           <button id="permanentFsBtn" onclick="toggleTacticalFullscreen(); showAndResetHudTimeout();" class="fs-hud-btn font-orbitron">
             [⛶ FULLSCREEN]
           </button>
@@ -472,7 +483,6 @@
           showAndResetHudTimeout();
         });
 
-        // स्क्रीन पर टैप/क्लिक करने पर कंट्रोल्स और डिम्ड HUD शो होंगे
         screenEl.addEventListener("click", () => {
           showControls();
           resetAutoHideTimer();
@@ -509,16 +519,16 @@
       }, 3000);
     }
 
-    // TOP RIGHT HUD AUTO-HIDE & LOW OPACITY LOGIC (कहा था कि डिफ़ॉल्ट रूप से गायब और क्लिक/मूव पर 30% ट्रांसपेरेंसी के साथ शो हो)
+    // स्पीड और एग्जिट बटन के लिए 5 सेकंड ऑटो-हाइड और कम ट्रांसपेरेंसी लॉजिक
     function showAndResetHudTimeout() {
-      const hud = document.getElementById("topPermanentHud");
-      if (hud) {
-        hud.classList.add("controls-visible-dimmed");
+      const hudGroup = document.getElementById("hudAutohideGroup");
+      if (hudGroup) {
+        hudGroup.classList.remove("controls-hidden");
       }
       clearTimeout(hudHideTimeout);
       hudHideTimeout = setTimeout(() => {
-        if (hud) hud.classList.remove("controls-visible-dimmed");
-      }, 5000); // 5 सेकंड बाद वापस पूरी तरह गायब हो जाएगा
+        if (hudGroup) hudGroup.classList.add("controls-hidden");
+      }, 5000); // 5 सेकंड बाद हाइड हो जाएंगे
     }
 
     function updateVideoSpeed(rate) {
