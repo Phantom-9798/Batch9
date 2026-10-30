@@ -160,17 +160,19 @@
       display: flex; align-items: center; gap: 8px;
       background: rgba(4, 7, 11, 0.9); border: 1px solid rgba(255, 215, 0, 0.5);
       padding: 5px 10px; border-radius: 8px;
-    }
-    
-    /* स्पीड और एग्जिट बटन के लिए ऑटो-हाइड और डिम्ड ओपेसिटी क्लास */
-    .hud-autohide-group {
-      display: flex; align-items: center; gap: 8px;
-      opacity: 0.3; pointer-events: auto;
       transition: opacity 0.4s ease-in-out;
     }
-    .hud-autohide-group.controls-hidden {
+
+    /* जब फुलस्क्रीन हो और एक्टिविटी न हो, तब पूरा बॉक्स (स्पीड और एग्जिट दोनों सहित) गायब हो जाएगा */
+    .fs-mode-active .tactical-permanent-hud.fullscreen-auto-hide {
       opacity: 0 !important;
       pointer-events: none !important;
+    }
+
+    /* जब फुलस्क्रीन में कर्सर मूव या टैप होगा, तब पूरा बॉक्स कम ट्रांसपेरेंसी (0.3) के साथ शो होगा */
+    .fs-mode-active .tactical-permanent-hud.fullscreen-auto-hide.show-hud {
+      opacity: 0.3 !important;
+      pointer-events: auto !important;
     }
 
     .fs-hud-btn { background: rgba(255, 215, 0, 0.9); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
@@ -297,11 +299,11 @@
         <!-- TOP-RIGHT PERMANENT HUD BAR -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
           
-          <!-- स्पीड और एग्जिट/फुलस्क्रीन बटन वाला ग्रुप जो 5 सेकंड में हाइड होगा -->
-          <div id="hudAutohideGroup" class="hud-autohide-group controls-hidden">
+          <!-- स्पीड और फुलस्क्रीन/एग्जिट बटन वाला पूरा बॉक्स जो फुलस्क्रीन में ऑटो-हाइड होगा -->
+          <div id="hudAutohideGroup" class="flex items-center gap-2 fullscreen-auto-hide">
             <div class="flex items-center gap-1.5">
               <span class="text-neutral-400 text-[10px] font-orbitron font-bold">SPD:</span>
-              <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetHudTimeout();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
+              <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value); showAndResetFullscreenHud();" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
                 <option value="1" class="bg-black">1.0x</option>
                 <option value="1.25" class="bg-black">1.25x</option>
                 <option value="1.5" class="bg-black">1.5x</option>
@@ -314,7 +316,7 @@
           </div>
 
           <!-- फुलस्क्रीन बटन हमेशा परमानेंट दिखेगा -->
-          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen(); showAndResetHudTimeout();" class="fs-hud-btn font-orbitron">
+          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen(); showAndResetFullscreenHud();" class="fs-hud-btn font-orbitron">
             [⛶ FULLSCREEN]
           </button>
         </div>
@@ -337,7 +339,7 @@
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
-    let hudHideTimeout = null;
+    let fsHudTimeout = null;
     let isNexield = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -480,13 +482,13 @@
         screenEl.addEventListener("mousemove", () => {
           showControls();
           resetAutoHideTimer();
-          showAndResetHudTimeout();
+          showAndResetFullscreenHud();
         });
 
         screenEl.addEventListener("click", () => {
           showControls();
           resetAutoHideTimer();
-          showAndResetHudTimeout();
+          showAndResetFullscreenHud();
         });
 
         resetAutoHideTimer();
@@ -519,16 +521,18 @@
       }, 3000);
     }
 
-    // स्पीड और एग्जिट बटन के लिए 5 सेकंड ऑटो-हाइड और कम ट्रांसपेरेंसी लॉजिक
-    function showAndResetHudTimeout() {
+    // फुलस्क्रीन मोड में स्पीड और एग्जिट बॉक्स के लिए 5 सेकंड ऑटो-हाइड और डिम्ड लॉजिक
+    function showAndResetFullscreenHud() {
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
       const hudGroup = document.getElementById("hudAutohideGroup");
-      if (hudGroup) {
-        hudGroup.classList.remove("controls-hidden");
+      
+      if (isFullscreen && hudGroup) {
+        hudGroup.classList.add("show-hud");
+        clearTimeout(fsHudTimeout);
+        fsHudTimeout = setTimeout(() => {
+          hudGroup.classList.remove("show-hud");
+        }, 5000); // 5 सेकंड बाद बॉक्स पूरी तरह गायब हो जाएगा
       }
-      clearTimeout(hudHideTimeout);
-      hudHideTimeout = setTimeout(() => {
-        if (hudGroup) hudGroup.classList.add("controls-hidden");
-      }, 5000); // 5 सेकंड बाद हाइड हो जाएंगे
     }
 
     function updateVideoSpeed(rate) {
@@ -567,7 +571,6 @@
         } else if (target.msRequestFullscreen) {
           target.msRequestFullscreen();
         }
-        if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
       } else {
         if (document.exitFullscreen) {
           document.exitFullscreen();
@@ -576,16 +579,21 @@
         } else if (document.msExitFullscreen) {
           document.msExitFullscreen();
         }
-        if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
       }
     }
 
     document.addEventListener("fullscreenchange", () => {
+      const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+
+      if (!isFs) {
+        target.classList.remove("fs-mode-active");
         if (fsBtn) fsBtn.innerText = "[⛶ FULLSCREEN]";
       } else {
+        target.classList.add("fs-mode-active");
         if (fsBtn) fsBtn.innerText = "[✕ EXIT]";
+        showAndResetFullscreenHud(); // फुलस्क्रीन होते ही 5 सेकंड के लिए दिखा कर हाइड करेंगे
       }
     });
 
@@ -595,7 +603,7 @@
     function handleTapZone(side) {
       showControls();
       resetAutoHideTimer();
-      showAndResetHudTimeout();
+      showAndResetFullscreenHud();
 
       if (side === 'left') {
         leftClicks++;
