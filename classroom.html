@@ -1756,19 +1756,29 @@
         const paidSection = document.getElementById("paidSquadronsSection");
         const telegramContainer = document.getElementById("telegramNotificationContainer");
 
+        // फ्री बैच हमेशा शो हो, इसलिए telegramContainer को हमेशा active रखेंगे
+        if (telegramContainer) {
+          telegramContainer.classList.remove("hidden");
+        }
+
         if (hasPaidAccessAny) {
           if (paidSection) {
             paidSection.classList.remove("hidden");
             paidSection.style.display = "block";
           }
-          if (telegramContainer) {
-            telegramContainer.classList.remove("hidden");
-          }
           batchesList.forEach(batchId => {
             const hasAccess = isCombo || allowed.includes(batchId);
             applyPaidBatchAccess(batchId, hasAccess);
           });
-          renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
+        } else {
+          if (paidSection) {
+            paidSection.classList.add("hidden");
+            paidSection.style.display = "none";
+          }
+        }
+
+        // यह फंक्शन अब हर यूजर के लिए कॉल होगा ताकि फ्री-बेंच (Free-batch) हमेशा ऊपर दिख सके
+        renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
         } else {
           if (paidSection) {
             paidSection.classList.add("hidden");
