@@ -1777,20 +1777,8 @@
           }
         }
 
-        // यह फंक्शन अब हर यूजर के लिए कॉल होगा ताकि फ्री-बेंच (Free-batch) हमेशा ऊपर दिख सके
+        // यह फंक्शन हर यूजर के लिए रन होगा ताकि फ्री-बैच और पेड ग्रुप्स दिख सकें
         renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
-        } else {
-          if (paidSection) {
-            paidSection.classList.add("hidden");
-            paidSection.style.display = "none";
-          }
-          if (telegramContainer) {
-            telegramContainer.classList.add("hidden");
-            telegramContainer.innerHTML = "";
-          }
-        }
-      });
-    }
 
     function applyPaidBatchAccess(batchId, isUnlocked) {
       const card = document.getElementById("card-" + batchId);
