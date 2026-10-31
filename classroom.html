@@ -1779,6 +1779,10 @@
 
         // यह फंक्शन हर यूजर के लिए रन होगा ताकि फ्री-बैच और पेड ग्रुप्स दिख सकें
         renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
+      }); // <--- यहाँ onSnapshot का ब्रैकेट सही से बंद हो रहा है
+    }
+
+    // अब ये सारे फंक्शन onSnapshot के बाहर (Global Scope में) रहेंगे:
 
     function applyPaidBatchAccess(batchId, isUnlocked) {
       const card = document.getElementById("card-" + batchId);
