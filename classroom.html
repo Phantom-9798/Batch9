@@ -1832,7 +1832,7 @@
         { id: "capf", name: "CAPF SQUADRON" }
       ];
 
-      let userGroups = allGroups.filter(g => isCombo || allowed.includes(g.id));
+      let userGroups = allGroups.filter(g => g.id === "Free-batch" || isCombo || allowed.includes(g.id));
       if (userGroups.length === 0) {
         container.innerHTML = "";
         return;
