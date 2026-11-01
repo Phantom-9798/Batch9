@@ -1778,7 +1778,8 @@
         }
 
         // यह फंक्शन हर यूजर के लिए रन होगा ताकि फ्री-बैच और पेड ग्रुप्स दिख सकें
-        renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
+        const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
+        renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
       }); // <--- यहाँ onSnapshot का ब्रैकेट सही से बंद हो रहा है
     }
 
