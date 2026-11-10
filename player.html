@@ -385,12 +385,9 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // CLOUDFLARE WORKER STREAMING INTEGRATION
-      // Agar link YouTube, Zoom, ya direct .mp4 nahi hai, toh ise Cloudflare Worker URL ke through stream kiya jayega
       if (finalVideo && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4") && !finalVideo.endsWith(".webm") && !finalVideo.includes("drive.google.com") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
-        // Agar yeh sirf Telegram ki File ID hai, toh ise Cloudflare Worker ke base URL ke sath attach kar diya jayega
         finalVideo = `https://phantomstream.hkr9835.workers.dev/?file_id=${finalVideo}`;
       } else if (finalVideo && finalVideo.startsWith("http") && !finalVideo.includes("youtube") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4")) {
-        // Agar user ne direct worker link diya hai
         // Keep as is
       }
 
@@ -467,7 +464,7 @@
             videoId: finalVideo,
             playerVars: {
               autoplay: 0,
-              controls: 0,          /* HIDDEN TO PREVENT YOUTUBE LOGO/COPYRIGHT BAR */
+              controls: 0,
               disablekb: 0,
               fs: 0,
               modestbranding: 1,
