@@ -207,7 +207,7 @@
       line-height: 1;
     }
 
-    /* ZOOM / DIRECT VIDEO & CLOUDFLARE STREAMING STYLING */
+    /* ZOOM / DIRECT VIDEO & NEXIELD STYLING FIX */
     .zoom-box, .nexield-box {
       position: relative;
       width: 100%;
@@ -384,15 +384,30 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // CLOUDFLARE WORKER STREAMING INTEGRATION
-      if (finalVideo && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4") && !finalVideo.endsWith(".webm") && !finalVideo.includes("drive.google.com") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
-        finalVideo = `https://phantomstream.hkr9835.workers.dev/?file_id=${finalVideo}`;
-      } else if (finalVideo && finalVideo.startsWith("http") && !finalVideo.includes("youtube") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4")) {
-        // Keep as is
+      // AUTOMATIC TELEGRAM FILE ID TO CLOUDFLARE WORKER CONVERTER
+      if (finalVideo) {
+        if (!finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4") && !finalVideo.endsWith(".webm") && !finalVideo.includes("drive.google.com") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
+          finalVideo = `https://phantomstream.hkr9835.workers.dev/?file_id=${finalVideo}`;
+        }
       }
 
-      // Check if it's Cloudflare Worker stream or generic video iframe
-      if (finalVideo && (finalVideo.includes("workers.dev") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com") || finalVideo.includes("zoom"))) {
+      if (finalVideo && (finalVideo.includes("workers.dev") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
+        isNexield = true;
+        playerRoot.innerHTML = `
+          <div class="nexield-box">
+            <video 
+              id="nexieldVideo" 
+              src="${finalVideo}" 
+              class="nexield-frame" 
+              controls 
+              controlsList="nodownload" 
+              playsinline
+              oncontextmenu="return false;">
+            </video>
+          </div>
+        `;
+      } 
+      else if (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be")) {
         isNexield = true;
         playerRoot.innerHTML = `
           <div class="nexield-box">
@@ -400,12 +415,19 @@
               id="nexieldIframe" 
               src="${finalVideo}" 
               class="nexield-frame" 
-              allowfullscreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
       } 
+      else if (finalVideo && finalVideo.includes("zoom")) {
+        isNexield = false;
+        playerRoot.innerHTML = `
+          <div class="zoom-box">
+            <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+          </div>
+        `;
+      }
       else {
         isNexield = false;
         playerRoot.innerHTML = `
@@ -511,7 +533,8 @@
     function activateStream() {
       document.getElementById('securityOverlay').classList.add('hidden');
       if (isNexield) {
-        // Cloudflare Worker / Direct stream activation
+        const vid = document.getElementById("nexieldVideo");
+        if (vid) vid.play();
       } else if (ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
@@ -537,13 +560,8 @@
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
       if (isNexield) {
-        const iframe = document.getElementById("nexieldIframe");
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage(JSON.stringify({
-            method: 'setPlaybackRate',
-            value: spd
-          }), '*');
-        }
+        const vid = document.getElementById("nexieldVideo");
+        if (vid) vid.playbackRate = spd;
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
@@ -599,6 +617,8 @@
       showControls();
       resetAutoHideTimer();
 
+      if (isNexield) return;
+
       if (side === 'left') {
         leftClicks++;
         if (leftClicks === 1) {
@@ -629,6 +649,11 @@
     }
 
     function skipSeconds(s) {
+      if (isNexield) {
+        const vid = document.getElementById("nexieldVideo");
+        if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
+        return;
+      }
       if (!ytInstance || !ytInstance.getCurrentTime) return;
       const target = Math.max(0, ytInstance.getCurrentTime() + s);
       ytInstance.seekTo(target, true);
@@ -642,12 +667,29 @@
     }
 
     function toggleVideoPlay() {
+      if (isNexield) {
+        const vid = document.getElementById("nexieldVideo");
+        if (vid) {
+          if (vid.paused) vid.play();
+          else vid.pause();
+        }
+        return;
+      }
       if (!ytInstance) return;
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
     }
 
     function seekVideoTrack(e) {
+      if (isNexield) {
+        const vid = document.getElementById("nexieldVideo");
+        if (vid && vid.duration) {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const pos = (e.clientX - rect.left) / rect.width;
+          vid.currentTime = pos * vid.duration;
+        }
+        return;
+      }
       if (!ytInstance) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
@@ -657,6 +699,18 @@
     function startTimerSync() {
       if (timerSync) clearInterval(timerSync);
       timerSync = setInterval(() => {
+        if (isNexield) {
+          const vid = document.getElementById("nexieldVideo");
+          if (vid && vid.duration > 0) {
+            const c = vid.currentTime;
+            const d = vid.duration;
+            const fill = document.getElementById("trackFill");
+            if (fill) fill.style.width = ((c / d) * 100) + "%";
+            const counter = document.getElementById("timeCounter");
+            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
+          }
+          return;
+        }
         if (ytInstance && ytInstance.getCurrentTime) {
           const c = ytInstance.getCurrentTime();
           const d = ytInstance.getDuration();
