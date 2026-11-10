@@ -207,15 +207,15 @@
       line-height: 1;
     }
 
-    /* ZOOM / DIRECT VIDEO & NEXIELD STYLING FIX */
-    .zoom-box, .nexield-box {
+    /* DIRECT ARCHIVE VIDEO STYLING */
+    .archive-box {
       position: relative;
       width: 100%;
       height: 100%;
       background: #000;
       overflow: hidden;
     }
-    .zoom-frame, .nexield-frame {
+    .archive-frame {
       position: absolute;
       top: 0;
       left: 0;
@@ -359,7 +359,7 @@
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
-    let isNexield = false;
+    let isArchiveVideo = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -384,23 +384,15 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // INTERNET ARCHIVE (archive.org) DIRECT LINK HANDLER
-      // Agar parameter me direct link nahi hai aur koi short ID ya file name hai, toh use archive.org direct link me convert kar dega
-      if (finalVideo) {
-        if (!finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
-          // Yahan apni archive.org ki base directory ya item name set kar sakte ho
-          finalVideo = `https://archive.org/download/team-phantom-lectures/${finalVideo}`;
-        }
-      }
-
+      // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
       if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
-        isNexield = true;
+        isArchiveVideo = true;
         playerRoot.innerHTML = `
-          <div class="nexield-box">
+          <div class="archive-box">
             <video 
-              id="nexieldVideo" 
+              id="archiveVideo" 
               src="${finalVideo}" 
-              class="nexield-frame" 
+              class="archive-frame" 
               controls 
               controlsList="nodownload" 
               playsinline
@@ -410,20 +402,20 @@
         `;
       } 
       else if (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be")) {
-        isNexield = true;
+        isArchiveVideo = true;
         playerRoot.innerHTML = `
-          <div class="nexield-box">
+          <div class="archive-box">
             <iframe 
-              id="nexieldIframe" 
+              id="archiveIframe" 
               src="${finalVideo}" 
-              class="nexield-frame" 
+              class="archive-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
       } 
       else if (finalVideo && finalVideo.includes("zoom")) {
-        isNexield = false;
+        isArchiveVideo = false;
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
@@ -431,7 +423,7 @@
         `;
       }
       else {
-        isNexield = false;
+        isArchiveVideo = false;
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
@@ -534,8 +526,8 @@
 
     function activateStream() {
       document.getElementById('securityOverlay').classList.add('hidden');
-      if (isNexield) {
-        const vid = document.getElementById("nexieldVideo");
+      if (isArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
         if (vid) vid.play();
       } else if (ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
@@ -561,8 +553,8 @@
 
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
-      if (isNexield) {
-        const vid = document.getElementById("nexieldVideo");
+      if (isArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
@@ -619,7 +611,7 @@
       showControls();
       resetAutoHideTimer();
 
-      if (isNexield) return;
+      if (isArchiveVideo) return;
 
       if (side === 'left') {
         leftClicks++;
@@ -651,8 +643,8 @@
     }
 
     function skipSeconds(s) {
-      if (isNexield) {
-        const vid = document.getElementById("nexieldVideo");
+      if (isArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
         if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
         return;
       }
@@ -669,8 +661,8 @@
     }
 
     function toggleVideoPlay() {
-      if (isNexield) {
-        const vid = document.getElementById("nexieldVideo");
+      if (isArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
         if (vid) {
           if (vid.paused) vid.play();
           else vid.pause();
@@ -683,8 +675,8 @@
     }
 
     function seekVideoTrack(e) {
-      if (isNexield) {
-        const vid = document.getElementById("nexieldVideo");
+      if (isArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
         if (vid && vid.duration) {
           const rect = e.currentTarget.getBoundingClientRect();
           const pos = (e.clientX - rect.left) / rect.width;
@@ -701,8 +693,8 @@
     function startTimerSync() {
       if (timerSync) clearInterval(timerSync);
       timerSync = setInterval(() => {
-        if (isNexield) {
-          const vid = document.getElementById("nexieldVideo");
+        if (isArchiveVideo) {
+          const vid = document.getElementById("archiveVideo");
           if (vid && vid.duration > 0) {
             const c = vid.currentTime;
             const d = vid.duration;
