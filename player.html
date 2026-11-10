@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-   <script>
+  <script>
   (() => {
     // 1. Right Click Disable
     document.addEventListener('contextmenu', e => e.preventDefault());
@@ -363,7 +363,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
+      let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
       const urlTitle = urlParams.get("title");
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
@@ -384,14 +384,16 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // AUTOMATIC TELEGRAM FILE ID TO CLOUDFLARE WORKER CONVERTER
+      // INTERNET ARCHIVE (archive.org) DIRECT LINK HANDLER
+      // Agar parameter me direct link nahi hai aur koi short ID ya file name hai, toh use archive.org direct link me convert kar dega
       if (finalVideo) {
-        if (!finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.endsWith(".mp4") && !finalVideo.endsWith(".webm") && !finalVideo.includes("drive.google.com") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
-          finalVideo = `https://phantomstream.hkr9835.workers.dev/?file_id=${finalVideo}`;
+        if (!finalVideo.includes("youtube") && !finalVideo.includes("youtu.be") && !finalVideo.includes("zoom") && !finalVideo.startsWith("http://") && !finalVideo.startsWith("https://")) {
+          // Yahan apni archive.org ki base directory ya item name set kar sakte ho
+          finalVideo = `https://archive.org/download/team-phantom-lectures/${finalVideo}`;
         }
       }
 
-      if (finalVideo && (finalVideo.includes("workers.dev") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
+      if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isNexield = true;
         playerRoot.innerHTML = `
           <div class="nexield-box">
