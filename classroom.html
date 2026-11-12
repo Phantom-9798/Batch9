@@ -1,87 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <script>
-  (() => {
-    // 1. Right Click Disable
-    document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // 2. Keyboard Shortcuts Block (F12, Inspect, View Source, Save Page) + Anti-Piracy Auto-Logout Trap
-    document.addEventListener('keydown', e => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Immediate Anti-Piracy / F12 Breach Action: Auto-Logout & Terminate Session
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
-        sessionStorage.clear();
-        
-        document.body.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
-            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8); box-shadow: 0 0 50px rgba(239, 68, 68, 0.3); max-width: 420px; width: 100%;">
-              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171; font-weight: 900; letter-spacing: 1px;">⚠️ SECURITY BREACH</h2>
-              <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px; font-weight: 700;">Unauthorized developer tool or shortcut detected. Session terminated.</p>
-              <div style="font-size: 12px; color: #94a3b8; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Redirecting to gateway...</div>
-            </div>
-          </div>
-        `;
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 2000);
-
-        return false;
-      }
-    });
-
-    // 3. DevTools Freezing & Detection Trap
-    setInterval(() => {
-      const start = performance.now();
-      debugger;
-      const end = performance.now();
-      if (end - start > 100) {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
-        sessionStorage.clear();
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied & Session Terminated.</h2>';
-        setTimeout(() => { window.location.href = "index.html"; }, 1500);
-      }
-    }, 1000);
-
-    // 4. Console Auto Clear
-    setInterval(() => {
-      console.clear();
-    }, 1500);
-
-    // 5. 1DM / Downloader Detection & Auto-Logout Script
-    window.addEventListener('DOMContentLoaded', function() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
-        localStorage.removeItem("phantom_session_token");
-        localStorage.removeItem("phantom_uid");
-        sessionStorage.clear();
-        
-        document.body.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
-            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8); box-shadow: 0 0 50px rgba(239, 68, 68, 0.3); max-width: 420px; width: 100%;">
-              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171; font-weight: 900; letter-spacing: 1px;">⚠️ SECURITY ALERT</h2>
-              <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px; font-weight: 700;">1DM downloader detected, logging out.</p>
-              <div style="font-size: 12px; color: #94a3b8; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Terminating session & redirecting...</div>
-            </div>
-          </div>
-        `;
-
-        setTimeout(function() {
-          window.location.href = "index.html";
-        }, 2500);
-      }
-    });
-  })();
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
@@ -162,10 +81,10 @@
       position: relative;
     }
     .phantom-btn:hover {
-      background-color: #ffaa00 !important;
-      color: #000000 !important;
-      border-color: #ffd700 !important;
-      box-shadow: 0 0 25px #ffaa00, 0 0 50px #ffd700, inset 0 0 15px rgba(255, 255, 255, 0.6);
+      background-color: #0ea5e9 !important;
+      color: #ffffff !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
       transform: translateY(-2px);
     }
     .phantom-btn:active { transform: scale(0.96); }
@@ -256,6 +175,60 @@
       #phantomFocusDock { max-width: calc(100vw - 16px); bottom: 8px; padding: 7px 9px; gap: 6px; font-size: 8px; letter-spacing: 0; flex-wrap: wrap; justify-content: center; }
     }
   </style>
+
+  <script>
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+    })();
+// 1. 1DM aur Downloaders ko detect karne ka function
+function detectDownloaderAndLogout() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Check karo ki User-Agent mein 1dm, idm ya koi downloader keyword hai kya
+    if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        triggerLogoutWithWarning("1DM downloader detected, logging out.");
+    }
+}
+
+ // Warning dikhane aur logout karne ka main function
+function triggerLogoutWithWarning(errorMessage) {
+    // Firebase / Local session clear karo
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Screen par turant error banner ya full-screen block dikhao
+    document.body.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+            <div style="background: #1e293b; padding: 30px; border-radius: 8px; border: 1px solid #ef4444; max-width: 400px; width: 100%;">
+                <h2 style="margin-bottom: 15px; font-size: 22px; color: #f87171;">⚠️ Security Alert</h2>
+                <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px;">${errorMessage}</p>
+                <div style="font-size: 13px; color: #94a3b8;">Cleaning session and redirecting...</div>
+            </div>
+        </div>
+    `;
+
+    // 2 ya 3 সেকেন্ড ke baad user ko login page par bhej do
+    setTimeout(function() {
+        window.location.href = "login.html"; // Apne login page ka sahi path yahan daal dena
+    }, 2500);
+}
+
+// Page load hote hi check run karega
+window.addEventListener('DOMContentLoaded', function() {
+    detectDownloaderAndLogout();
+});
+  </script>
 </head>
 
 <body class="text-neutral-100 min-h-screen flex flex-col justify-between">
@@ -1683,8 +1656,7 @@
       const mins = Math.floor((totalSecs % 3600) / 60);
       const secs = totalSecs % 60;
       if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
-      if (modal) modal.classList.0 ? modal.classList.remove("hidden") : modal.classList.remove("hidden");
-      modal.classList.remove("hidden");
+      if (modal) modal.classList.remove("hidden");
     }
 
     window.showTestSeriesView = function() {
@@ -1821,6 +1793,7 @@
         const paidSection = document.getElementById("paidSquadronsSection");
         const telegramContainer = document.getElementById("telegramNotificationContainer");
 
+        // फ्री बैच हमेशा शो हो, इसलिए telegramContainer को हमेशा active रखेंगे
         if (telegramContainer) {
           telegramContainer.classList.remove("hidden");
         }
@@ -1841,9 +1814,13 @@
           }
         }
 
-        renderTelegramNotification(allowed, isCombo, localUid, data.clickedGroups || []);
-      });
+        // यह फंक्शन हर यूजर के लिए रन होगा ताकि फ्री-बैच और पेड ग्रुप्स दिख सकें
+        const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
+        renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
+      }); // <--- यहाँ onSnapshot का ब्रैकेट सही से बंद हो रहा है
     }
+
+    // अब ये सारे फंक्शन onSnapshot के बाहर (Global Scope में) रहेंगे:
 
     function applyPaidBatchAccess(batchId, isUnlocked) {
       const card = document.getElementById("card-" + batchId);
@@ -1987,5 +1964,5 @@
       window.location.href = "index.html";
     };
   </script>
-</body> 
+</body>
 </html>
