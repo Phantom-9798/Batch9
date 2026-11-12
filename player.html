@@ -385,24 +385,24 @@
       const playerRoot = document.getElementById("playerRoot");
 
       // TELEGRAM STREAMING & ARCHIVE DIRECT STREAMING PLAYER RENDERER (Optimized for port 45580 & direct stream)
-      if (finalVideo && (finalVideo.includes("botkeep.cloud") || finalVideo.includes("archive.org") || finalVideo.includes("/stream/") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
-        isArchiveVideo = true;
-        playerRoot.innerHTML = `
-          <div class="archive-box">
-            <video 
-              id="archiveVideo" 
-              src="${finalVideo}" 
-              class="archive-frame" 
-              controls 
-              controlsList="nodownload" 
-              playsinline
-              crossorigin="anonymous"
-              preload="auto"
-              oncontextmenu="return false;">
-            </video>
-          </div>
-        `;
-      } 
+      if (finalVideo && (finalVideo.includes("telegram.org") || finalVideo.includes("botkeep.cloud") || finalVideo.includes("archive.org") || finalVideo.includes("/stream/") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm"))) {
+  isArchiveVideo = true;
+  playerRoot.innerHTML = `
+    <div class="archive-box">
+      <video 
+        id="archiveVideo" 
+        src="${finalVideo}" 
+        class="archive-frame" 
+        controls 
+        controlsList="nodownload" 
+        playsinline
+        crossorigin="anonymous"
+        preload="auto"
+        oncontextmenu="return false;">
+      </video>
+    </div>
+  `;
+}
       else if (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be")) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
