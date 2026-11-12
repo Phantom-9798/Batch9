@@ -390,14 +390,16 @@
         playerRoot.innerHTML = `
           <div class="archive-box">
             <video 
-              id="archiveVideo" 
-              src="${finalVideo}" 
-              class="archive-frame" 
-              controls 
-              controlsList="nodownload" 
-              playsinline
-              oncontextmenu="return false;">
-            </video>
+  id="archiveVideo" 
+  src="${finalVideo}" 
+  class="archive-frame" 
+  controls 
+  controlsList="nodownload" 
+  playsinline
+  crossorigin="anonymous"
+  preload="auto"
+  oncontextmenu="return false;">
+</video>
           </div>
         `;
       } 
