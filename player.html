@@ -384,22 +384,22 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // TELEGRAM STREAMING & ARCHIVE DIRECT STREAMING PLAYER RENDERER (Updated to support port 45580 / botkeep)
+      // TELEGRAM STREAMING & ARCHIVE DIRECT STREAMING PLAYER RENDERER (Optimized for port 45580 & direct stream)
       if (finalVideo && (finalVideo.includes("botkeep.cloud") || finalVideo.includes("archive.org") || finalVideo.includes("/stream/") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
           <div class="archive-box">
             <video 
-  id="archiveVideo" 
-  src="${finalVideo}" 
-  class="archive-frame" 
-  controls 
-  controlsList="nodownload" 
-  playsinline
-  crossorigin="anonymous"
-  preload="auto"
-  oncontextmenu="return false;">
-</video>
+              id="archiveVideo" 
+              src="${finalVideo}" 
+              class="archive-frame" 
+              controls 
+              controlsList="nodownload" 
+              playsinline
+              crossorigin="anonymous"
+              preload="auto"
+              oncontextmenu="return false;">
+            </video>
           </div>
         `;
       } 
