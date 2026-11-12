@@ -207,7 +207,7 @@
       line-height: 1;
     }
 
-    /* DIRECT ARCHIVE VIDEO STYLING */
+    /* DIRECT ARCHIVE / TELEGRAM STREAMING VIDEO STYLING */
     .archive-box {
       position: relative;
       width: 100%;
@@ -384,8 +384,8 @@
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
-      if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
+      // TELEGRAM STREAMING & ARCHIVE DIRECT STREAMING PLAYER RENDERER
+      if (finalVideo && (finalVideo.includes("botkeep.cloud") || finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
           <div class="archive-box">
