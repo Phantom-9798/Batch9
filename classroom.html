@@ -191,6 +191,43 @@
         }
       });
     })();
+// 1. 1DM aur Downloaders ko detect karne ka function
+function detectDownloaderAndLogout() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Check karo ki User-Agent mein 1dm, idm ya koi downloader keyword hai kya
+    if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        triggerLogoutWithWarning("1DM downloader detected, logging out.");
+    }
+}
+
+ // Warning dikhane aur logout karne ka main function
+function triggerLogoutWithWarning(errorMessage) {
+    // Firebase / Local session clear karo
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Screen par turant error banner ya full-screen block dikhao
+    document.body.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+            <div style="background: #1e293b; padding: 30px; border-radius: 8px; border: 1px solid #ef4444; max-width: 400px; width: 100%;">
+                <h2 style="margin-bottom: 15px; font-size: 22px; color: #f87171;">⚠️ Security Alert</h2>
+                <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px;">${errorMessage}</p>
+                <div style="font-size: 13px; color: #94a3b8;">Cleaning session and redirecting...</div>
+            </div>
+        </div>
+    `;
+
+    // 2 ya 3 সেকেন্ড ke baad user ko login page par bhej do
+    setTimeout(function() {
+        window.location.href = "login.html"; // Apne login page ka sahi path yahan daal dena
+    }, 2500);
+}
+
+// Page load hote hi check run karega
+window.addEventListener('DOMContentLoaded', function() {
+    detectDownloaderAndLogout();
+});
   </script>
 </head>
 
