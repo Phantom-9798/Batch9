@@ -103,6 +103,10 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Make db and firebase modules globally available for dynamically injected pages
+    window.db = db;
+    window.firebaseFirestore = { doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion: window.arrayUnion };
+
     window.authAction = async function(event) {
       event.preventDefault();
       const email = document.getElementById('cadetEmail').value.trim();
@@ -197,12 +201,12 @@
       }
     }
 
-    // --- SINGLE-PAGE APPLICATION (SPA) DYNAMIC LOADER ---
+    // --- SINGLE-PAGE APPLICATION (SPA) DYNAMIC LOADER (FIXED WITH CSS INJECTION) ---
     window.enterAppDashboard = function() {
       document.getElementById('view-intro-screen').classList.add('hidden');
       document.getElementById('view-login-screen').classList.add('hidden');
       document.getElementById('view-app-screen').classList.remove('hidden');
-      loadPageContent('classroom.html');
+      window.loadPageContent('classroom.html');
     };
 
     window.loadPageContent = async function(pageFilename, queryString = '') {
@@ -211,21 +215,36 @@
       
       try {
         const fullUrl = queryString ? `${pageFilename}?${queryString}` : pageFilename;
+        window.currentQueryString = queryString;
         const res = await fetch(fullUrl);
         if (!res.ok) throw new Error("Failed to load module stream.");
         const htmlText = await res.text();
         
         const parser = new DOMParser();
         const docParsed = parser.parseFromString(htmlText, 'text/html');
-        const fetchedMain = docParsed.querySelector('main') || docParsed.body;
         
-        container.innerHTML = fetchedMain.innerHTML;
+        // Inject styles from fetched page head so layout doesn't break
+        document.querySelectorAll('style[data-spa-injected]').forEach(el => el.remove());
+        const fetchedStyles = docParsed.querySelectorAll('style');
+        fetchedStyles.forEach(styleEl => {
+          const newStyle = document.createElement('style');
+          newStyle.setAttribute('data-spa-injected', 'true');
+          newStyle.textContent = styleEl.textContent;
+          document.head.appendChild(newStyle);
+        });
+
+        const fetchedBody = docParsed.body;
+        container.innerHTML = fetchedBody.innerHTML;
 
         const scripts = container.querySelectorAll('script');
         scripts.forEach(oldScript => {
           const newScript = document.createElement('script');
           Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          }
           oldScript.parentNode.replaceChild(newScript, oldScript);
         });
 
@@ -506,34 +525,6 @@
             color: #4b5563;
             letter-spacing: 2px;
             z-index: 10;
-        }
-
-        .armor-card {
-            background: rgba(6, 12, 30, 0.96);
-            border: 2px solid rgba(255, 215, 0, 0.7);
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.1);
-            position: relative;
-            z-index: 10;
-            width: 100%;
-        }
-
-        .phantom-btn {
-            transition: all 0.3s ease-in-out;
-            position: relative;
-        }
-        .phantom-btn:hover {
-            background-color: #0ea5e9 !important;
-            color: #ffffff !important;
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        .phantom-btn:active { transform: scale(0.96); }
-
-        header, main, footer {
-            position: relative;
-            z-index: 10;
-            width: 100%;
         }
     </style>
 </head>
@@ -842,21 +833,36 @@
             
             try {
                 const fullUrl = queryString ? `${pageFilename}?${queryString}` : pageFilename;
+                window.currentQueryString = queryString;
                 const res = await fetch(fullUrl);
                 if (!res.ok) throw new Error("Failed to load module stream.");
                 const htmlText = await res.text();
                 
                 const parser = new DOMParser();
                 const docParsed = parser.parseFromString(htmlText, 'text/html');
-                const fetchedMain = docParsed.querySelector('main') || docParsed.body;
                 
-                container.innerHTML = fetchedMain.innerHTML;
+                // Inject styles from fetched page head so layout doesn't break
+                document.querySelectorAll('style[data-spa-injected]').forEach(el => el.remove());
+                const fetchedStyles = docParsed.querySelectorAll('style');
+                fetchedStyles.forEach(styleEl => {
+                    const newStyle = document.createElement('style');
+                    newStyle.setAttribute('data-spa-injected', 'true');
+                    newStyle.textContent = styleEl.textContent;
+                    document.head.appendChild(newStyle);
+                });
+
+                const fetchedBody = docParsed.body;
+                container.innerHTML = fetchedBody.innerHTML;
 
                 const scripts = container.querySelectorAll('script');
                 scripts.forEach(oldScript => {
                     const newScript = document.createElement('script');
                     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    }
                     oldScript.parentNode.replaceChild(newScript, oldScript);
                 });
 
@@ -878,6 +884,27 @@
             sessionStorage.clear();
             document.getElementById('view-app-screen').classList.add('hidden');
             document.getElementById('view-login-screen').classList.remove('hidden');
+        };
+
+        window.forgotPasswordAction = async function() {
+            const email = document.getElementById('cadetEmail').value.trim();
+            const statusAlert = document.getElementById('statusAlert');
+            if (!email) {
+                statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-amber-950/90 border border-amber-500/80 text-amber-200 block text-left leading-relaxed font-body font-bold";
+                statusAlert.innerHTML = `<span class="font-black text-amber-300">NOTICE:</span> Please enter your registered Email Address above first, then click Forgot Password.`;
+                statusAlert.classList.remove('hidden');
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 block text-center font-orbitron font-black tracking-wider shadow-lg";
+                statusAlert.innerHTML = `<b>Password Reset Dispatched:</b> A reset link has been sent to <b>${email}</b>. Check your inbox.`;
+                statusAlert.classList.remove('hidden');
+            } catch (error) {
+                statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-red-950/90 border border-red-500/80 text-red-200 block text-left leading-relaxed font-body font-bold";
+                statusAlert.innerHTML = `<span class="font-black text-red-300">ERROR:</span> ${error.message}`;
+                statusAlert.classList.remove('hidden');
+            }
         };
     </script>
 </body>
