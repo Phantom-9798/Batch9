@@ -25,7 +25,13 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
+        localStorage.clear();
+        sessionStorage.clear();
         document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.reload();
+        }, 2000);
       }
     }, 1000);
 
@@ -43,7 +49,236 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
+      authDomain: "team-phantom-enrollment.firebaseapp.com",
+      projectId: "team-phantom-enrollment",
+      storageBucket: "team-phantom-enrollment.firebasestorage.app",
+      messagingSenderId: "658049687096",
+      appId: "1:658049687096:web:8464788a43126a6bced0cd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    let currentBatch = "capf";
+    let currentSubject = "Mentor Session";
+
+    // --- SECURE SESSION VALIDATION ---
+    const localUid = localStorage.getItem("phantom_uid");
+    const localToken = localStorage.getItem("phantom_session_token");
+
+    if (!localUid || !localToken) {
+      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+      else window.location.href = "index.html";
+    } else {
+      onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
+        if (!docSnap.exists()) {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.href = "index.html";
+          return;
+        }
+
+        const data = docSnap.data();
+
+        // Single Device Guard
+        if (data.activeSession && localToken && data.activeSession !== localToken) {
+          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.href = "index.html";
+          return;
+        }
+
+        renderLecturesList();
+      });
+    }
+
+    function renderLecturesList() {
+      const searchStr = window.currentQueryString || window.location.search;
+      const urlParams = new URLSearchParams(searchStr);
+      currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
+      currentSubject = urlParams.get('subject') || 'General Awareness';
+      const mode = urlParams.get('mode') || 'live';
+
+      const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
+      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge}`;
+      document.getElementById('chapterHeading').innerText = currentSubject;
+
+      const staticLectures = [];
+
+      // 🔥 DIRECT SUBJECT QUERY
+      const q = query(
+        collection(db, "tactical_curriculum"),
+        where("squadron", "==", currentBatch.toLowerCase().trim()),
+        where("mode", "==", mode),
+        where("subject", "==", currentSubject.trim())
+      );
+
+      onSnapshot(q, (snapshot) => {
+        const dynamicLectures = [];
+        const seenVideos = new Set();
+
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          const vUrl = (d.url || d.videoUrl || "").trim();
+          const cleanTitle = (d.title || "").trim().toLowerCase();
+          const uniqueKey = vUrl || cleanTitle;
+
+          if (!seenVideos.has(uniqueKey)) {
+            seenVideos.add(uniqueKey);
+            dynamicLectures.push({
+              lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
+              title: d.title,
+              duration: d.duration || "",
+              videoId: vUrl,
+              pdfUrl: d.pdfUrl || "#",
+              order: Number(d.order) || 999
+            });
+          }
+        });
+
+        dynamicLectures.sort((a, b) => a.order - b.order);
+
+        const combined = [...staticLectures];
+        dynamicLectures.forEach(dyn => {
+          const exists = combined.some(st => (st.title && st.title.toLowerCase() === dyn.title.toLowerCase()) || (st.videoId && st.videoId === dyn.videoId));
+          if (!exists) combined.push(dyn);
+        });
+
+        displayLectures(combined, currentSubject, mode);
+      }, (err) => {
+        console.warn("Curriculum sync fallback:", err);
+        displayLectures(staticLectures, currentSubject, mode);
+      });
+    }
+
+    function displayLectures(lectures, subjectName, mode) {
+      const container = document.getElementById('lecturesContainer');
+      container.innerHTML = "";
+      document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
+
+      if (lectures.length === 0) {
+        container.innerHTML = `
+          <div class="armor-panel rounded-2xl p-12 text-center border border-amber-400/40 w-full">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 mb-4 text-2xl">
+              ⏳
+            </div>
+            <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2 uppercase">
+              IT WILL BE UPLOADED VERY SOON
+            </h3>
+            <p class="text-xs text-neutral-300 font-body max-w-md mx-auto">
+              ${mode === 'recorded' ? 'Recorded syllabus dossiers for this module are currently under synchronization.' : `Live lectures for "${subjectName}" are scheduled.`}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const badgeStyles = [
+        { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" }, // Pink/Magenta
+        { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" }, // Blue
+        { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" }, // Purple
+        { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" }, // Emerald
+        { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }   // Amber
+      ];
+
+      let html = "";
+      lectures.forEach((lec, idx) => {
+        let embedSrc = lec.videoId;
+        if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
+          const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          if (match && match[1]) {
+            embedSrc = match[1];
+          }
+        }
+
+        const badgeIndex = idx % badgeStyles.length;
+        const currentBadge = badgeStyles[badgeIndex];
+        const classNumStr = String(idx + 1).padStart(2, '0');
+        const durationText = lec.duration ? `• ⏱ ${lec.duration}` : '';
+        const safeTitle = (lec.title || "TACTICAL SESSION").replace(/'/g, "\\'");
+
+        html += `
+          <div class="lecture-rect-row page-transition">
+            <div class="flex items-center gap-4 overflow-hidden">
+              <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
+                ${classNumStr}
+              </div>
+              <div class="overflow-hidden">
+                <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
+                <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lec.title}</h4>
+                <p class="text-xs text-neutral-300 font-body truncate mt-0.5">Tactical lecture session ${durationText}</p>
+              </div>
+            </div>
+            <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
+              <button onclick="window.playLectureVideo('${embedSrc}', '${safeTitle}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+                ▶ Watch
+              </button>
+              <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+                📄 Notes
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // --- ADAPTED FOR SPA LOADER ---
+    window.playLectureVideo = function(videoId, title) {
+      if (!videoId || videoId === "#" || videoId === "") {
+        alert("It will be uploaded very soon.");
+        return;
+      }
+      const cleanTitle = title || "TACTICAL SESSION";
+      sessionStorage.setItem("phantom_current_video", videoId);
+      sessionStorage.setItem("phantom_current_title", cleanTitle);
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent("player.html");
+      } else {
+        window.location.href = "player.html";
+      }
+    };
+
+    window.openClassNotes = function(url) {
+      if (!url || url === "#" || url === "") {
+        alert("Notes dossier: It will be uploaded very soon.");
+        return;
+      }
+      window.open(url, "_blank");
+    };
+
+    window.navigateBackToSubjects = function() {
+      const searchStr = window.currentQueryString || window.location.search;
+      const urlParams = new URLSearchParams(searchStr);
+      const batch = urlParams.get('batch') || urlParams.get('squadron') || 'cds-kilo';
+      const mode = urlParams.get('mode') || 'live';
+      const qStr = `batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent('subjects.html', qStr);
+      } else {
+        window.location.href = `subjects.html?${qStr}`;
+      }
+    };
+
+    window.terminateCadetSession = function() {
+      localStorage.removeItem("phantom_session_token");
+      localStorage.removeItem("phantom_uid");
+      sessionStorage.clear();
+      if (typeof window.logoutCadetMaster === 'function') {
+        window.logoutCadetMaster();
+      } else {
+        window.location.href = window.location.pathname;
+      }
+    };
+  </script>
 
   <style>
     * {
@@ -62,8 +297,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
+      align-items: stretch; /* Stretch body fully */
       overflow-x: hidden;
       overflow-y: auto;
       position: relative;
@@ -71,6 +305,7 @@
       user-select: none;
     }
 
+    /* Falling Stars & Small Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -98,9 +333,44 @@
     }
     .phantom-btn:active { transform: scale(0.96); }
 
+    /* Long Rectangular Lecture Rows (100% Full Width Stretched) */
+    .lecture-rect-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 16, 36, 0.96);
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 14px;
+      padding: 14px 24px;
+      gap: 16px;
+      transition: all 0.25s ease;
+      width: 100%;
+    }
+    .lecture-rect-row:hover {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+    }
+    @media (max-width: 640px) {
+      .lecture-rect-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+        gap: 12px;
+      }
+      .lecture-rect-actions {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+      }
+      .lecture-rect-actions button {
+        flex: 1;
+      }
+    }
+
     #phantomStudyTimerWidget {
       position: fixed;
-      top: 15px;
+      bottom: 20px;
       right: 20px;
       z-index: 99999;
       background: rgba(4, 7, 13, 0.95);
@@ -155,13 +425,16 @@
       box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
       position: relative;
       z-index: 10;
+      width: 100%;
     }
 
-    header, main, footer { position: relative; z-index: 10; }
+    header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 </head>
 
-<body>
+<body class="text-white min-h-screen flex flex-col justify-between w-full">
+
+  <!-- Background Canvas for Falling Stars & Small Bubbles -->
   <canvas id="starBubbleCanvas"></canvas>
 
   <div id="phantomStudyTimerWidget">
@@ -182,8 +455,9 @@
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
-  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+  <!-- Full-Width Header -->
+  <header class="w-full pt-6 pb-4 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.3)] shrink-0 flex items-center justify-center">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/020617/ffd700?text=PHANTOM';">
@@ -209,31 +483,28 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    <!-- Top Header Banner matching Photo 1 exactly -->
-    <div class="armor-panel rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-5">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-amber-400 flex items-center justify-center text-black shadow-lg">
-          <i class="fas fa-book-open text-2xl"></i>
+  <!-- 100% Full-Width Stretched Main Container -->
+  <main class="w-full px-6 py-8 flex-grow">
+    <div class="armor-panel rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
+          BRIEFING ARCHIVE
         </div>
-        <div>
-          <div class="flex items-center gap-2 text-cyan-400 font-orbitron text-xs font-bold tracking-widest uppercase mb-1">
-            <i class="fas fa-bookmark"></i> SUBJECT
-          </div>
-          <h2 class="font-stencil text-2xl sm:text-4xl text-white tracking-wide uppercase" id="chapterHeading">
-            ENGLISH VOCABULARY
-          </h2>
-        </div>
+        <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="chapterHeading">
+          LOADING SUBJECT...
+        </h2>
+        <p class="text-xs text-neutral-300 font-body mt-1">
+          Access high-definition tactical classes, concept walkthroughs, and official dossier notes below.
+        </p>
       </div>
-      <div class="flex flex-col items-end gap-1 text-right">
-        <span class="text-xs uppercase tracking-wider font-orbitron text-amber-400">Classes</span>
-        <h3 class="text-lg font-bold text-white" id="allClassesTitle">All classes</h3>
-        <span class="text-xs text-neutral-400 font-mono" id="lectureCountBadge">5 classes available</span>
+      <div class="flex items-center gap-2 bg-black/60 border border-emerald-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="lectureCountBadge">STREAM READY</span>
       </div>
     </div>
 
-    <!-- Long Rectangular Rows Container matching Photo 1 layout -->
-    <div class="flex flex-col gap-4 pb-6" id="lecturesContainer"></div>
+    <!-- Long Rectangular Rows Container (Stretched Full Width) -->
+    <div class="space-y-4 w-full" id="lecturesContainer"></div>
   </main>
 
   <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3.5 px-4 text-center">
@@ -243,7 +514,7 @@
   </footer>
 
   <script>
-    // Canvas background
+    // --- CANVAS PARTICLES ANIMATION (Smaller Radius) ---
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -254,15 +525,15 @@
     resizeCanvas();
 
     const particles = [];
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 100; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2.5,
-        starRadius: Math.random() * 4 + 3,
-        speedY: Math.random() * 0.9 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.9 + 0.4,
+        radius: Math.random() * 2 + 1,       // Small bubble radius
+        starRadius: Math.random() * 2.5 + 1.2, // Small star radius
+        speedY: Math.random() * 0.7 + 0.2,
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.8 + 0.3,
         isBubble: Math.random() > 0.45
       });
     }
@@ -273,19 +544,19 @@
         p.y += p.speedY;
         p.x += p.speedX;
         if (p.y > canvas.height) {
-          p.y = -20;
+          p.y = -10;
           p.x = Math.random() * canvas.width;
         }
         ctx.beginPath();
         if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
-          ctx.lineWidth = 1.6;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+          ctx.lineWidth = 1.0;
           ctx.stroke();
         } else {
           ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 25;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = '#ffd700';
           ctx.fill();
         }
@@ -293,84 +564,57 @@
       requestAnimationFrame(animateParticles);
     }
     animateParticles();
+  </script>
 
-    // Sample data matching Photo 1 layout: 01 IDIOMS, 02 ONE WORD SUBSTITUTION CLASS 1, 03 ONE WORD SUBSTITUTION CLASS 2
-    const sampleLectures = [
-      { lectureNo: "01", title: "IDIOMS", duration: "45m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
-      { lectureNo: "02", title: "ONE WORD SUBSTITUTION CLASS 1", duration: "52m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
-      { lectureNo: "03", title: "ONE WORD SUBSTITUTION CLASS 2", duration: "1h 05m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
-      { lectureNo: "04", title: "SYNONYMS & ANTONYMS MASTERCLASS", duration: "58m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
-      { lectureNo: "05", title: "SPOTTING ERRORS PRACTICE", duration: "50m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" }
-    ];
+  <script>
+    // --- CONTINUOUS STUDY TIMER & AUDIO ---
+    (function() {
+      const todayStr = new Date().toDateString();
+      const lastDate = localStorage.getItem("phantom_study_date");
+      
+      if (lastDate !== todayStr) {
+        localStorage.setItem("phantom_study_date", todayStr);
+        localStorage.setItem("phantom_daily_seconds", "0");
+      }
 
-    function renderLectures(lectures) {
-      const container = document.getElementById('lecturesContainer');
-      container.innerHTML = "";
-      document.getElementById('lectureCountBadge').innerText = `${lectures.length} classes available`;
+      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+      let sessionSeconds = 0;
 
-      lectures.forEach((lec, index) => {
-        const card = document.createElement('div');
-        // Long rectangular row layout with distinct badge colors matching Photo 1
-        const badgeColors = [
-          'bg-purple-600 text-white',
-          'bg-blue-600 text-white',
-          'bg-rose-600 text-white',
-          'bg-amber-600 text-white',
-          'bg-emerald-600 text-white'
-        ];
-        const colorClass = badgeColors[index % badgeColors.length];
+      setInterval(() => {
+        totalSeconds++;
+        sessionSeconds++;
+        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
 
-        card.className = "armor-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-amber-400 transition group shadow-lg";
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+        const displayEl = document.getElementById("phantomTimerDisplay");
+        if (displayEl) displayEl.innerText = displayStr;
 
-        card.innerHTML = `
-          <div class="flex items-center gap-4 w-full sm:w-auto">
-            <div class="px-4 py-3 rounded-xl font-orbitron font-extrabold text-sm sm:text-base ${colorClass} shadow-md flex flex-col items-center justify-center min-w-[70px]">
-              <span class="text-[10px] opacity-80 uppercase">CLASS</span>
-              <span>${lec.lectureNo}</span>
-            </div>
-            <div>
-              <h3 class="font-orbitron font-bold text-base sm:text-lg text-white group-hover:text-amber-400 transition">
-                ${lec.title}
-              </h3>
-              ${lec.duration ? `<span class="text-xs font-mono text-neutral-400 flex items-center gap-1 mt-1">⏱ Duration: ${lec.duration}</span>` : ''}
-            </div>
-          </div>
+        const pHrs = Math.floor(sessionSeconds / 3600);
+        const pMins = Math.floor((sessionSeconds % 3600) / 60);
+        const pSecs = sessionSeconds % 60;
+        const pDisplayStr = pHrs > 0 
+          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
+          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+        
+        const autoPomoEl = document.getElementById("autoPomoDisplay");
+        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
+      }, 1000);
+    })();
 
-          <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <button onclick="window.playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\'")}')" class="px-5 py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-400 hover:to-sky-300 text-black font-orbitron font-extrabold text-xs rounded-xl uppercase tracking-wider transition shadow cursor-pointer phantom-btn flex items-center gap-2">
-              <i class="fas fa-play"></i> Watch
-            </button>
-            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-orbitron font-bold text-xs rounded-xl uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-2">
-              <i class="fas fa-file-pdf text-blue-400"></i> Notes
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    window.playLectureVideo = function(videoId, title) {
-      sessionStorage.setItem("phantom_current_video", videoId);
-      sessionStorage.setItem("phantom_current_title", title);
-      window.location.href = "player.html";
-    };
-
-    window.openClassNotes = function(url) {
-      alert("Opening class notes PDF dossier...");
-    };
-
-    window.navigateBackToSubjects = function() {
-      window.location.href = "index.html";
-    };
-
-    window.terminateCadetSession = function() {
-      localStorage.removeItem("phantom_session_token");
-      localStorage.removeItem("phantom_uid");
-      sessionStorage.clear();
-      window.location.href = "index.html";
-    };
-
-    renderLectures(sampleLectures);
+    window.addEventListener('load', () => {
+      const audio = document.getElementById("ambientAudio");
+      if (audio) {
+        audio.volume = 0.4;
+        audio.play().catch(() => {
+          document.addEventListener('click', () => {
+            audio.play().catch(() => {});
+          }, { once: true });
+        });
+      }
+    });
   </script>
 </body>
 </html>
