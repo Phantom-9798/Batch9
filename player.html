@@ -29,7 +29,13 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
+        localStorage.clear();
+        sessionStorage.clear();
         document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.reload();
+        }, 2000);
       }
     }, 1000);
 
@@ -37,6 +43,26 @@
     setInterval(() => {
       console.clear();
     }, 1500);
+
+    // 5. 1DM / Downloader Detection
+    window.addEventListener('DOMContentLoaded', function() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        document.body.innerHTML = `
+          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
+            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8);">
+              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171;">⚠️ SECURITY ALERT</h2>
+              <p style="font-size: 16px; color: #f1f5f9;">1DM downloader detected, logging out.</p>
+            </div>
+          </div>
+        `;
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+        }, 2500);
+      }
+    });
   })();
   </script>
 
@@ -59,18 +85,18 @@
       font-weight: 700;
     }
 
-    /* Force Full Solid Rich Navy Blue Background */
+    /* Force Full Solid Rich Navy Blue Background - Strict Single Viewport (No Scroll) */
     html, body {
       background-color: #020617 !important;
       background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
       color: #f8fafc !important;
-      min-height: 100vh;
+      height: 100vh;
+      max-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden;
       position: relative;
       -webkit-user-select: none;
       user-select: none;
@@ -97,23 +123,23 @@
     /* 1. Corner Live Time Tracker Widget */
     #phantomStudyTimerWidget {
       position: fixed;
-      top: 15px;
-      right: 20px;
+      bottom: 8px;
+      right: 15px;
       z-index: 99999;
       background: rgba(4, 7, 13, 0.95);
       border: 1px solid rgba(255, 215, 0, 0.5);
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
-      padding: 6px 12px;
-      border-radius: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
       font-family: 'Orbitron', sans-serif;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       backdrop-filter: blur(8px);
     }
     #phantomStudyTimerWidget .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background-color: #ffd700;
       border-radius: 50%;
       animation: phantomPulse 1.5s infinite;
@@ -127,21 +153,21 @@
     /* 2. Floating Focus Status Dock (Bottom Center) */
     #phantomFocusDock {
       position: fixed;
-      bottom: 20px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 99998;
       background: rgba(6, 12, 30, 0.96);
       border: 1px solid rgba(255, 215, 0, 0.5);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
-      padding: 8px 18px;
+      padding: 4px 12px;
       border-radius: 9999px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 8px;
       font-family: 'Orbitron', sans-serif;
       backdrop-filter: blur(10px);
-      font-size: 11px;
+      font-size: 9px;
       color: #ffd700;
       font-weight: bold;
       letter-spacing: 1px;
@@ -150,18 +176,20 @@
     .armor-panel {
       background: rgba(6, 12, 30, 0.96);
       border: 2px solid rgba(255, 215, 0, 0.7);
-      box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
       position: relative;
       z-index: 10;
+      width: 100%;
     }
 
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
+      max-height: calc(100vh - 220px);
       aspect-ratio: 16 / 9;
       background: #000000;
       overflow: hidden;
-      border-radius: 0.75rem;
+      border-radius: 0.4rem;
     }
 
     #phantomConsoleScreen:fullscreen,
@@ -175,7 +203,6 @@
       background: #000 !important;
     }
 
-    /* SECURITY OVERLAY STYLING */
     .security-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -185,31 +212,29 @@
       z-index: 60; cursor: pointer; transition: opacity 0.3s ease;
     }
     .security-overlay.hidden { opacity: 0; pointer-events: none; }
-    .brand-title { color: #ff2222; font-family: 'Black Ops One', cursive; font-size: 26px; text-shadow: 0 0 15px rgba(255,0,0,0.85); margin-bottom: 6px; }
-    .lecture-subtitle { color: #ffbb00; font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; margin-bottom: 6px; }
-    .big-play-btn { width: 72px; height: 72px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255,0,0,0.95); }
-    .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid #ffffff; margin-left: 4px; }
+    .brand-title { color: #ff2222; font-family: 'Black Ops One', cursive; font-size: 22px; text-shadow: 0 0 15px rgba(255,0,0,0.85); margin-bottom: 2px; }
+    .lecture-subtitle { color: #ffbb00; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; margin-bottom: 2px; }
+    .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
+    .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* TOP-RIGHT ULTRA COMPACT HUD BAR */
     .tactical-permanent-hud {
-      position: absolute; top: 8px; right: 8px; z-index: 60;
+      position: absolute; top: 6px; right: 6px; z-index: 60;
       display: flex; align-items: center; gap: 4px;
       background: rgba(4, 7, 11, 0.85); border: 1px solid rgba(255, 215, 0, 0.4);
-      padding: 2px 4px; border-radius: 5px; backdrop-filter: blur(6px);
+      padding: 2px 4px; border-radius: 4px; backdrop-filter: blur(6px);
     }
     .fs-hud-btn { 
       background: rgba(255, 215, 0, 0.9); 
       color: #000; 
-      font-size: 10px; 
+      font-size: 9px; 
       font-weight: 900; 
-      padding: 2px 5px; 
+      padding: 2px 4px; 
       border-radius: 3px; 
       cursor: pointer; 
       border: none;
       line-height: 1;
     }
 
-    /* DIRECT ARCHIVE VIDEO STYLING */
     .archive-box {
       position: relative;
       width: 100%;
@@ -226,30 +251,29 @@
       border: none;
     }
 
-    /* YOUTUBE ENGINE WITH CLEAN CUSTOM BAR */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
     #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
-    .tap-zone { position: absolute; top: 45px; bottom: 60px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .tap-zone { position: absolute; top: 35px; bottom: 45px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .tap-zone-left { left: 0; } .tap-zone-right { right: 0; }
-    .skip-alert-badge { background: rgba(255, 215, 0, 0.9); color: #000; font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; padding: 10px 18px; border-radius: 9999px; opacity: 0; pointer-events: none; transform: scale(0.6); transition: all 0.2s ease; }
+    .skip-alert-badge { background: rgba(255, 215, 0, 0.9); color: #000; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; padding: 6px 14px; border-radius: 9999px; opacity: 0; pointer-events: none; transform: scale(0.6); transition: all 0.2s ease; }
     .skip-alert-badge.show { opacity: 1; transform: scale(1.1); }
-    .tactical-custom-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%); padding: 10px 16px 8px 16px; display: flex; flex-direction: column; gap: 6px; z-index: 40; transition: opacity 0.35s ease; }
+    .tactical-custom-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%); padding: 6px 12px 5px 12px; display: flex; flex-direction: column; gap: 3px; z-index: 40; transition: opacity 0.35s ease; }
     .hud-hidden { opacity: 0 !important; pointer-events: none !important; }
-    .tactical-progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.18); border-radius: 3px; cursor: pointer; position: relative; }
-    .tactical-progress-fill { height: 100%; background: #ffd700; width: 0%; border-radius: 3px; }
+    .tactical-progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; cursor: pointer; position: relative; }
+    .tactical-progress-fill { height: 100%; background: #ffd700; width: 0%; border-radius: 2px; }
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
-    header, main, footer { position: relative; z-index: 10; }
+    header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 </head>
 
-<body class="text-white min-h-screen flex flex-col justify-between" oncontextmenu="return false;">
+<body class="text-white h-screen max-h-screen flex flex-col justify-between w-full overflow-hidden" oncontextmenu="return false;">
 
   <!-- STUDY TIMER WIDGET -->
   <div id="phantomStudyTimerWidget">
     <div class="pulse-dot"></div>
-    <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
-    <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
+    <div style="font-size: 7px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus:</div>
+    <div id="phantomTimerDisplay" style="font-size: 9px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
   </div>
 
   <!-- FOCUS STATUS DOCK -->
@@ -265,34 +289,34 @@
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
-  <!-- TOP HEADER WITH LOGO -->
-  <header class="w-full pt-4 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <img src="logo.jpeg" alt="Logo" class="h-10 w-10 object-cover rounded-lg border border-amber-400 shadow-md">
+  <!-- TOP HEADER -->
+  <header class="w-full pt-2 pb-2 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md z-50 shrink-0">
+    <div class="w-full flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.jpeg" alt="Logo" class="h-7 w-7 object-cover rounded-lg border border-amber-400 shadow-sm">
         <div>
-          <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300 uppercase" id="playerTitle">
+          <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold" id="classLabelIndicator">CLASS SESSION</div>
+          <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase" id="playerTitle">
             TEAM PHANTOM CONSOLE
           </h1>
-          <p class="text-[10px] text-neutral-400 font-mono">teamphantom.vercel.app &bull; SECURE</p>
         </div>
       </div>
-      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
-        &larr; BACK
+      <button onclick="window.navigateBackFromPlayer()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-orbitron font-bold px-2.5 py-1 rounded-md uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-1">
+        &larr; Back to Classes
       </button>
     </div>
   </header>
 
   <!-- MAIN VIDEO VIEWPORT -->
-  <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full flex flex-col items-center justify-center">
-    <div class="w-full armor-panel rounded-2xl p-2 sm:p-3 overflow-hidden shadow-2xl relative">
+  <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
+    <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
       <div id="phantomConsoleScreen">
         
         <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
           <div class="brand-title">TEAM PHANTOM</div>
           <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
-          <div class="trusted-text" style="color: #a3a3a3; font-size: 11px; font-family: monospace;">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
-          <div class="big-play-btn mt-3"></div>
+          <div class="trusted-text" style="color: #a3a3a3; font-size: 9px; font-family: monospace;">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
+          <div class="big-play-btn mt-2"></div>
         </div>
 
         <div id="securityWatermark" class="phantom-watermark-layer">
@@ -304,9 +328,8 @@
           </span>
         </div>
 
-        <!-- TOP-RIGHT ULTRA COMPACT HUD -->
         <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
-          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-black/90 text-amber-400 font-bold text-[10px] px-0.5 py-0 rounded border border-amber-500/40 outline-none cursor-pointer font-orbitron appearance-none text-center" style="width: 32px;">
+          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-black/90 text-amber-400 font-bold text-[9px] px-1 py-0.2 rounded border border-amber-500/40 outline-none cursor-pointer font-orbitron appearance-none text-center" style="width: 34px;">
             <option value="1">1x</option>
             <option value="1.25">1.25</option>
             <option value="1.5">1.5</option>
@@ -322,12 +345,24 @@
         <div id="playerRoot" class="w-full h-full relative"></div>
 
       </div>
+
+      <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
+        <div>
+          <span class="px-1.5 py-0.2 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">TACTICAL DOSSIER</span>
+          <h3 class="font-orbitron font-bold text-xs sm:text-sm text-white mt-0.5" id="lectureDetailTitle">Loading Session Details...</h3>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE STREAM
+          </span>
+        </div>
+      </div>
+
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3 px-4 text-center">
-    <p class="text-[11px] font-mono text-amber-300 tracking-wider">
+  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-1.5 px-4 text-center shrink-0">
+    <p class="text-[9px] font-mono text-amber-300 tracking-wider">
       &copy; 2026 TEAM PHANTOM &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
     </p>
   </footer>
@@ -340,7 +375,8 @@
     let isArchiveVideo = false;
 
     document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
+      const searchStr = window.currentQueryString || window.location.search;
+      const urlParams = new URLSearchParams(searchStr);
       let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
       const urlTitle = urlParams.get("title");
 
@@ -357,12 +393,16 @@
       }
 
       if (finalTitle) {
-        document.getElementById("playerTitle").innerText = decodeURIComponent(finalTitle);
+        const decodedTitle = decodeURIComponent(finalTitle);
+        document.getElementById("playerTitle").innerText = decodedTitle;
+        document.getElementById("lectureDetailTitle").innerText = decodedTitle;
+        if (decodedTitle.includes("(")) {
+          document.getElementById("classLabelIndicator").innerText = decodedTitle.split('(')[1].replace(')', '').toUpperCase() + " • SESSION";
+        }
       }
 
       const playerRoot = document.getElementById("playerRoot");
 
-      // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
       if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
@@ -419,27 +459,27 @@
                 <div class="tactical-progress-fill" id="trackFill"></div>
               </div>
 
-              <div class="flex items-center justify-between text-xs font-mono pt-1">
-                <div class="flex items-center gap-2">
-                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-xs uppercase px-3 py-1 bg-amber-400 hover:bg-amber-500 rounded transition cursor-pointer">
+              <div class="flex items-center justify-between text-xs font-mono pt-0.5">
+                <div class="flex items-center gap-1.5">
+                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-[11px] uppercase px-2.5 py-0.5 bg-amber-400 hover:bg-amber-500 rounded transition cursor-pointer">
                     ▶ PLAY
                   </button>
 
-                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
+                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
                     « 10s
                   </button>
 
-                  <span id="timeCounter" class="text-neutral-300 font-mono text-[11px] px-1">00:00 / 00:00</span>
+                  <span id="timeCounter" class="text-neutral-300 font-mono text-[10px] px-1">00:00 / 00:00</span>
 
-                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[11px] px-2 py-1 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
+                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
                     10s »
                   </button>
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.5">
-                    <span class="text-neutral-400 text-[10px] font-orbitron">QUAL:</span>
-                    <select id="qualitySelector" onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-xs outline-none cursor-pointer">
+                <div class="flex items-center gap-1">
+                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.2">
+                    <span class="text-neutral-400 text-[9px] font-orbitron">QUAL:</span>
+                    <select id="qualitySelector" onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-[10px] outline-none cursor-pointer">
                       <option value="default" class="bg-black">Auto (Adaptive)</option>
                       <option value="hd1080" class="bg-black">1080p HD</option>
                       <option value="hd720" class="bg-black">720p HD</option>
@@ -702,6 +742,15 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
+    // --- ADAPTED FOR SPA BACK NAVIGATION ---
+    window.navigateBackFromPlayer = function() {
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent('lectures.html');
+      } else {
+        window.history.back();
+      }
+    };
+
     // STUDY TIMER
     (function() {
       const FOCUS_TIMER_KEY = "phantom_daily_seconds";
@@ -750,7 +799,8 @@
       setInterval(() => {
         const now = new Date();
         if (timeStampEl) {
-          timeStampEl.innerText = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
+          const timeStamp_text = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
+          timeStampEl.innerText = timeStamp_text;
         }
       }, 1000);
 
