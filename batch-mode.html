@@ -73,11 +73,11 @@
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      window.location.href = "index.html";
+      window.location.href = "intro.html";
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          window.location.href = "index.html";
+          window.location.href = "intro.html";
           return;
         }
 
@@ -89,7 +89,7 @@
           alert("Notice: Cadet account is currently not active.");
           localStorage.removeItem("phantom_session_token");
           localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          window.location.href = "intro.html";
           return;
         }
 
@@ -99,7 +99,7 @@
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
           localStorage.removeItem("phantom_session_token");
           localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          window.location.href = "intro.html";
           return;
         }
 
@@ -126,7 +126,7 @@
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      window.location.href = "index.html";
+      window.location.href = "intro.html";
     };
   </script>
 
