@@ -234,11 +234,7 @@
         </div>
       `;
       setTimeout(function() {
-          if (typeof window.logoutCadetMaster === 'function') {
-            window.logoutCadetMaster();
-          } else {
-            window.location.href = "index.html";
-          }
+          window.location.href = "login.html";
       }, 2500);
     }
 
@@ -253,7 +249,7 @@
   <canvas id="starBubbleCanvas"></canvas>
 
   <!-- SIDEBAR NAVIGATION DRAWER -->
-  <div id="sidebarOverlay" onclick="window.toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+  <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity"></div>
   <aside id="sidebarDrawer" class="fixed top-0 left-[-300px] w-72 sm:w-80 h-full bg-neutral-950 border-r-2 border-amber-400/50 z-50 transition-all duration-300 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.9)]">
     <div>
       <div class="p-5 bg-neutral-900 border-b border-neutral-800 flex items-center gap-3.5 relative overflow-hidden">
@@ -266,16 +262,16 @@
         </div>
       </div>
       <nav class="p-3 space-y-1.5 font-orbitron text-xs">
-        <button onclick="window.showHomeView(); window.toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 font-bold tracking-wider transition text-left cursor-pointer phantom-btn">
+        <button onclick="showHomeView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 font-bold tracking-wider transition text-left cursor-pointer phantom-btn">
           <span>🏠</span> HOME
         </button>
-        <button onclick="window.showWatchHoursModal(); window.toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
+        <button onclick="showWatchHoursModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
           <span>⏱️</span> MY WATCH HOURS
         </button>
-        <button onclick="window.showTestSeriesView(); window.toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
+        <button onclick="showTestSeriesView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
           <span>📝</span> TEST SERIES
         </button>
-        <button onclick="window.showPaidAuthModal(); window.toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
+        <button onclick="showPaidAuthModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
           <span>🪙</span> GET PAID AUTHORIZATION
         </button>
         
@@ -308,7 +304,7 @@
         <div class="text-xs font-orbitron text-neutral-400 uppercase tracking-widest mb-1">TOTAL LOGGED TIME</div>
         <div class="font-stencil text-4xl text-emerald-400 tracking-wider" id="modalWatchTimeDisplay">00h 00m 00s</div>
       </div>
-      <button onclick="window.closeWatchHoursModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">CLOSE ANALYTICS</button>
+      <button onclick="closeWatchHoursModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">CLOSE ANALYTICS</button>
     </div>
   </div>
 
@@ -317,7 +313,7 @@
     <div class="armor-panel rounded-2xl max-w-4xl w-full p-6 sm:p-8 relative page-transition my-8 border-2 border-amber-400 shadow-[0_0_60px_rgba(255,215,0,0.35)]">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-800">
         <div class="flex items-center gap-3">
-          <button onclick="window.closePaidAuthModal()" class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 phantom-btn">
+          <button onclick="closePaidAuthModal()" class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 phantom-btn">
             &larr; BACK
           </button>
           <div>
@@ -325,7 +321,7 @@
             <p class="text-xs text-neutral-300 font-body">Submit or update your tactical squadron payment authorization request.</p>
           </div>
         </div>
-        <button onclick="window.closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+        <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
 
       <div id="authPendingNotice" class="hidden mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left">
@@ -335,7 +331,7 @@
         <p class="text-xs leading-relaxed text-neutral-300">Your request access is pending.<br>You can edit your details and submit again.</p>
       </div>
 
-      <form id="paidAuthForm" onsubmit="window.submitPaidAuthProof(event)" class="space-y-4 font-body">
+      <form id="paidAuthForm" onsubmit="submitPaidAuthProof(event)" class="space-y-4 font-body">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-4">
             <div>
@@ -391,7 +387,7 @@
             </div>
 
             <div class="space-y-2 pt-2">
-              <button type="button" onclick="window.sendProofToTelegram()" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn flex items-center justify-center gap-2">
+              <button type="button" onclick="sendProofToTelegram()" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn flex items-center justify-center gap-2">
                 <span>📱</span> 1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM
               </button>
               <button type="submit" id="authSubmitBtn" disabled class="w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition">
@@ -427,7 +423,7 @@
   <header class="w-full pt-6 pb-4 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-30">
     <div class="w-full flex items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <button onclick="window.toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">☰</button>
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">☰</button>
         <div class="relative w-12 h-12 rounded-xl bg-black border border-amber-400/80 p-1 flex items-center justify-center overflow-hidden">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=PHANTOM';">
         </div>
@@ -647,34 +643,34 @@
               <h3 class="font-stencil text-xl text-amber-400 mb-2 group-hover:text-amber-300">CDS EXAM</h3>
               <p class="text-xs text-neutral-300 mb-6">Combined Defence Services Examination</p>
             </div>
-            <button onclick="window.openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
+            <button onclick="openTestSection('CDS')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-xl text-amber-400 mb-2 group-hover:text-amber-300">NDA EXAM</h3>
               <p class="text-xs text-neutral-300 mb-6">National Defence Academy Examination</p>
             </div>
-            <button onclick="window.openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
+            <button onclick="openTestSection('NDA')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-xl text-amber-400 mb-2 group-hover:text-amber-300">AFCAT EXAM</h3>
               <p class="text-xs text-neutral-300 mb-6">Air Force Common Admission Test</p>
             </div>
-            <button onclick="window.openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
+            <button onclick="openTestSection('AFCAT')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-xl text-amber-400 mb-2 group-hover:text-amber-300">CAPF EXAM</h3>
               <p class="text-xs text-neutral-300 mb-6">Central Armed Police Forces</p>
             </div>
-            <button onclick="window.openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
+            <button onclick="openTestSection('CAPF')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">Explore Tests</button>
           </div>
         </div>
       </div>
 
       <div id="testSectionView" class="hidden w-full">
-        <button onclick="window.backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Dashboard</button>
+        <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Dashboard</button>
         <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
@@ -694,34 +690,34 @@
               <h3 class="font-stencil text-lg text-amber-400 mb-2 group-hover:text-amber-300">Full Mock Tests</h3>
               <p class="text-xs text-neutral-300 mb-6">Complete CBT simulation based on latest exam patterns.</p>
             </div>
-            <button onclick="window.openMockList('Full Mock')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
+            <button onclick="openMockList('Full Mock')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-lg text-amber-400 mb-2 group-hover:text-amber-300">Previous Year Papers</h3>
               <p class="text-xs text-neutral-300 mb-6">Real exam questions from previous years with solutions.</p>
             </div>
-            <button onclick="window.openMockList('Previous Year Papers')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Papers</button>
+            <button onclick="openMockList('Previous Year Papers')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Papers</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-lg text-amber-400 mb-2 group-hover:text-amber-300">Sectional Mocks</h3>
               <p class="text-xs text-neutral-300 mb-6">Subject and topic-wise practice sets.</p>
             </div>
-            <button onclick="window.openMockList('Sectional Mocks')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
+            <button onclick="openMockList('Sectional Mocks')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Mocks</button>
           </div>
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-lg text-amber-400 mb-2 group-hover:text-amber-300">Chapter-wise Practice</h3>
               <p class="text-xs text-neutral-300 mb-6">Master individual chapters step by step.</p>
             </div>
-            <button onclick="window.openMockList('Chapter-wise Practice')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Practice</button>
+            <button onclick="openMockList('Chapter-wise Practice')" class="w-full py-2.5 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">View Practice</button>
           </div>
         </div>
       </div>
 
       <div id="mockListView" class="hidden w-full">
-        <button onclick="window.backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Section</button>
+        <button onclick="backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Section</button>
         <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
@@ -758,7 +754,7 @@
         <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] phantom-btn">
           📱 JOIN UPDATES CHANNEL
         </a>
-        <button onclick="window.closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
           🚀 CONTINUE TO SITE
         </button>
       </div>
@@ -1156,16 +1152,11 @@
       }
     }
 
-    // --- ADAPTED FOR SPA MASTER LOADER ---
     window.watchFreeLectureAction = function(batchId, subjectName, lectureTitle, encodedUrl) {
       const decodedUrl = decodeURIComponent(encodedUrl);
       sessionStorage.setItem("phantom_current_video", decodedUrl);
       sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent("player.html", `batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`);
-      } else {
-        window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
-      }
+      window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
     }
 
     window.backToFreeSubjectsGrid = function() {
@@ -1568,7 +1559,7 @@
           groupsHtml += `
             <div class="p-3 rounded-xl bg-black/95 border border-amber-400/30 flex items-center justify-between gap-3">
               <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
-              <button onclick="window.secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer phantom-btn">
+              <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer phantom-btn">
                 JOIN GROUP &rarr;
               </button>
             </div>
@@ -1589,7 +1580,7 @@
               </div>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
-              <button onclick="window.toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
+              <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
                 VIEW PENDING GROUPS (${remainingCount})
               </button>
             </div>
@@ -1620,24 +1611,15 @@
       }
     }
 
-    // --- ADAPTED FOR SPA MASTER LOADER ---
     window.openBatchLectures = function(batchId) {
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent("batch-mode.html", "batch=" + encodeURIComponent(batchId));
-      } else {
-        window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
-      }
+      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
     }
 
     window.logoutCadet = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
-      }
+      window.location.href = "index.html";
     };
   </script>
 </body>
