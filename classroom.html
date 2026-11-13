@@ -197,55 +197,6 @@
 
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
-
-  <script>
-    (() => {
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('keydown', e => {
-        if (
-          e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-    })();
-
-    function detectDownloaderAndLogout() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
-        triggerLogoutWithWarning("1DM downloader detected, logging out.");
-      }
-    }
-
-    function triggerLogoutWithWarning(errorMessage) {
-      localStorage.clear();
-      sessionStorage.clear();
-      document.body.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-            <div style="background: #1e293b; padding: 30px; border-radius: 8px; border: 1px solid #ef4444; max-width: 400px; width: 100%;">
-                <h2 style="margin-bottom: 15px; font-size: 22px; color: #f87171;">⚠️ Security Alert</h2>
-                <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px;">${errorMessage}</p>
-                <div style="font-size: 13px; color: #94a3b8;">Cleaning session and redirecting...</div>
-            </div>
-        </div>
-      `;
-      setTimeout(function() {
-          if (typeof window.logoutCadetMaster === 'function') {
-            window.logoutCadetMaster();
-          } else {
-            window.location.href = window.location.pathname;
-          }
-      }, 2500);
-    }
-
-    window.addEventListener('DOMContentLoaded', function() {
-        detectDownloaderAndLogout();
-    });
-  </script>
 </head>
 
 <body class="text-neutral-100 min-h-screen flex flex-col justify-between w-full">
@@ -765,890 +716,548 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-      authDomain: "team-phantom-enrollment.firebaseapp.com",
-      projectId: "team-phantom-enrollment",
-      storageBucket: "team-phantom-enrollment.firebasestorage.app",
-      messagingSenderId: "658049687096",
-      appId: "1:658049687096:web:8464788a43126a6bced0cd"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const FOCUS_TIMER_KEY = "phantom_daily_seconds";
-    let phantomSessionSeconds = 0;
-    function formatFocusTime(totalSeconds) {
-      const safe = Math.max(0, Math.floor(Number(totalSeconds) || 0));
-      const h = Math.floor(safe / 3600);
-      const m = Math.floor((safe % 3600) / 60);
-      const sec = safe % 60;
-      return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(sec).padStart(2, "0")}s`;
-    }
-    function updateFocusTimerDisplays() {
-      let total = 0;
-      try { total = Math.max(0, parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0", 10) || 0); } catch (_) {}
-      const focusDisplay = document.getElementById("phantomTimerDisplay");
-      const sessionDisplay = document.getElementById("autoPomoDisplay");
-      if (focusDisplay) focusDisplay.textContent = formatFocusTime(total);
-      if (sessionDisplay) {
-        const mins = Math.floor(phantomSessionSeconds / 60);
-        const secs = phantomSessionSeconds % 60;
-        sessionDisplay.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  <!-- SCRIPT EXECUTED IMMEDIATELY FOR SPA DYNAMIC INJECTION -->
+  <script>
+    (function() {
+      const db = window.db;
+      if (!db) {
+        console.error("Firestore database instance not found globally.");
+        return;
       }
-    }
-    updateFocusTimerDisplays();
-    setInterval(() => {
-      if (!document.hidden) {
-        phantomSessionSeconds += 1;
-        try {
-          const current = Math.max(0, parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0", 10) || 0);
-          localStorage.setItem(FOCUS_TIMER_KEY, String(current + 1));
-        } catch (_) {}
+
+      const { doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } = window.firebaseFirestore || {};
+
+      const FOCUS_TIMER_KEY = "phantom_daily_seconds";
+      let phantomSessionSeconds = 0;
+      function formatFocusTime(totalSeconds) {
+        const safe = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+        const h = Math.floor(safe / 3600);
+        const m = Math.floor((safe % 3600) / 60);
+        const sec = safe % 60;
+        return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m ${String(sec).padStart(2, "0")}s`;
+      }
+      function updateFocusTimerDisplays() {
+        let total = 0;
+        try { total = Math.max(0, parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0", 10) || 0); } catch (_) {}
+        const focusDisplay = document.getElementById("phantomTimerDisplay");
+        const sessionDisplay = document.getElementById("autoPomoDisplay");
+        if (focusDisplay) focusDisplay.textContent = formatFocusTime(total);
+        if (sessionDisplay) {
+          const mins = Math.floor(phantomSessionSeconds / 60);
+          const secs = phantomSessionSeconds % 60;
+          sessionDisplay.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+        }
       }
       updateFocusTimerDisplays();
-    }, 1000);
-
-    let activeFreeExamTab = "";
-    let selectedFreeBatch = "";
-    let selectedFreeMode = "live";
-
-    // Small radius configuration for star-bubble canvas animation
-    const canvas = document.getElementById("starBubbleCanvas");
-    const ctx = canvas.getContext("2d");
-    function resizeCanvas() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.floor(window.innerWidth * dpr);
-      canvas.height = Math.floor(window.innerHeight * dpr);
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    const particles = [];
-    for (let i = 0; i < 120; i++) {
-      particles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        radius: Math.random() * 2.0 + 1.0,      // Reduced bubble radius
-        starRadius: Math.random() * 2.5 + 1.5,  // Reduced star radius
-        speedY: Math.random() * 0.8 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.8 + 0.2,
-        isBubble: Math.random() > 0.4,
-        phase: Math.random() * Math.PI * 2,
-        twinkle: Math.random() * 0.04 + 0.01
-      });
-    }
-
-    function drawOutlineStar(x, y, outerRadius, innerRadius, alpha, phase) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(phase);
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const angle = -Math.PI / 2 + i * Math.PI / 5;
-        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        const px = Math.cos(angle) * radius;
-        const py = Math.sin(angle) * radius;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-      ctx.strokeStyle = `rgba(255, 205, 35, ${alpha})`;
-      ctx.lineWidth = 1.0;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "rgba(255, 190, 0, 0.8)";
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(0, 0, 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 230, 120, ${Math.min(1, alpha + 0.15)})`;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        p.phase += p.twinkle;
-        if (p.y > window.innerHeight + 10) {
-          p.y = -10;
-          p.x = Math.random() * window.innerWidth;
+      setInterval(() => {
+        if (!document.hidden) {
+          phantomSessionSeconds += 1;
+          try {
+            const current = Math.max(0, parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0", 10) || 0);
+            localStorage.setItem(FOCUS_TIMER_KEY, String(current + 1));
+          } catch (_) {}
         }
-        if (p.x < -10) p.x = window.innerWidth + 10;
-        if (p.x > window.innerWidth + 10) p.x = -10;
+        updateFocusTimerDisplays();
+      }, 1000);
 
-        const alpha = Math.max(0.1, Math.min(1, p.opacity * (0.7 + Math.sin(p.phase) * 0.3)));
-        if (p.isBubble) {
+      window.activeFreeExamTab = "";
+      window.selectedFreeBatch = "";
+      window.selectedFreeMode = "live";
+
+      // Small radius configuration for star-bubble canvas animation
+      const canvas = document.getElementById("starBubbleCanvas");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        function resizeCanvas() {
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = Math.floor(window.innerWidth * dpr);
+          canvas.height = Math.floor(window.innerHeight * dpr);
+          canvas.style.width = window.innerWidth + "px";
+          canvas.style.height = window.innerHeight + "px";
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        for (let i = 0; i < 120; i++) {
+          particles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            radius: Math.random() * 2.0 + 1.0,
+            starRadius: Math.random() * 2.5 + 1.5,
+            speedY: Math.random() * 0.8 + 0.3,
+            speedX: (Math.random() - 0.5) * 0.3,
+            opacity: Math.random() * 0.8 + 0.2,
+            isBubble: Math.random() > 0.4,
+            phase: Math.random() * Math.PI * 2,
+            twinkle: Math.random() * 0.04 + 0.01
+          });
+        }
+
+        function drawOutlineStar(x, y, outerRadius, innerRadius, alpha, phase) {
           ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(phase);
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+          for (let i = 0; i < 10; i++) {
+            const angle = -Math.PI / 2 + i * Math.PI / 5;
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const px = Math.cos(angle) * radius;
+            const py = Math.sin(angle) * radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = `rgba(255, 205, 35, ${alpha})`;
           ctx.lineWidth = 1.0;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "rgba(255, 190, 0, 0.8)";
           ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, 0, 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 230, 120, ${Math.min(1, alpha + 0.15)})`;
+          ctx.fill();
           ctx.restore();
-        } else {
-          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.4, alpha, p.phase * 0.3);
         }
-      });
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
 
-    const squadronSubjectsMaster = {
-      "cds-math": [
-        { name: "Lectures", desc: "Theory & Concepts.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=300&q=80" },
-        { name: "Mock", desc: "Tactical Test Papers.", image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=300&q=80", locked: true }
-      ],
-      "cds-kilo": [
-        { name: "Physical Geo", desc: "Geomorphology.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Indian Geo", desc: "Drainage & Climate.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Modern History", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Medieval History", desc: "Mughal & Sultanate.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Editorial", desc: "Reading & Analysis.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
-        { name: "Ancient History", desc: "Indus & Vedic.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "GS Muster", desc: "Rapid Revision.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "English Grammar", desc: "Rules & Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
-        { name: "Vocabulary", desc: "Synonyms & Idioms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
-        { name: "Economics", desc: "Macro & Micro.", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Polity", desc: "Constitution & Parliament.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Biology", desc: "Human Systems.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=300&q=80" }
-      ],
-      "afcat": [
-        { name: "Math", desc: "Numerical Ability.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=300&q=80" },
-        { name: "Reasoning", desc: "Verbal & Non-Verbal.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80" },
-        { name: "Grammar", desc: "Core Rules.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
-        { name: "Editorial", desc: "Reading Comprehension.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
-        { name: "Vocabulary", desc: "Idioms & Synonyms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
-        { name: "General Aw.", desc: "Static GK & Defense.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
-      ],
-      "capf": [
-        { name: "Physical Geo", desc: "Landforms.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80" },
-        { name: "Modern Hist", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Editorial", desc: "Paper-2 Essay.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
-        { name: "Grammar", desc: "Paper-2 Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
-        { name: "Polity", desc: "Governance.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
-        { name: "Security", desc: "Border Management.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
-      ]
-    };
+        function animateParticles() {
+          ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          particles.forEach(p => {
+            p.y += p.speedY;
+            p.x += p.speedX;
+            p.phase += p.twinkle;
+            if (p.y > window.innerHeight + 10) {
+              p.y = -10;
+              p.x = Math.random() * window.innerWidth;
+            }
+            if (p.x < -10) p.x = window.innerWidth + 10;
+            if (p.x > window.innerWidth + 10) p.x = -10;
 
-    const freeVaultData = {
-      "CDS": [
-        { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules.", image: "math-ima.jpeg", batchId: "cds-math" },
-        { title: "CDS OTA", desc: "Complete Integrated English & General Studies Curriculum.", image: "ota-chennai.jpeg", batchId: "cds-kilo" }
-      ],
-      "AFCAT": [
-        { title: "AFCAT SQUADRON", desc: "Speed Mathematics, Reasoning & General Awareness Sessions.", image: "afcat-afa.jpeg", batchId: "afcat" }
-      ],
-      "CAPF": [
-        { title: "CAPF ASSISTANT COMMANDANT", desc: "Paper-1 & Paper-2 Special Guidance & Practice Modules.", image: "capf-forces.jpeg", batchId: "capf" }
-      ]
-    };
+            const alpha = Math.max(0.1, Math.min(1, p.opacity * (0.7 + Math.sin(p.phase) * 0.3)));
+            if (p.isBubble) {
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+              ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+              ctx.lineWidth = 1.0;
+              ctx.stroke();
+              ctx.restore();
+            } else {
+              drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.4, alpha, p.phase * 0.3);
+            }
+          });
+          requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+      }
 
-    window.switchFreeExamTab = function(examName) {
-      if (activeFreeExamTab === examName) {
-        activeFreeExamTab = "";
+      window.squadronSubjectsMaster = {
+        "cds-math": [
+          { name: "Lectures", desc: "Theory & Concepts.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=300&q=80" },
+          { name: "Mock", desc: "Tactical Test Papers.", image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=300&q=80", locked: true }
+        ],
+        "cds-kilo": [
+          { name: "Physical Geo", desc: "Geomorphology.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Indian Geo", desc: "Drainage & Climate.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Modern History", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Medieval History", desc: "Mughal & Sultanate.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Editorial", desc: "Reading & Analysis.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+          { name: "Ancient History", desc: "Indus & Vedic.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "GS Muster", desc: "Rapid Revision.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "English Grammar", desc: "Rules & Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+          { name: "Vocabulary", desc: "Synonyms & Idioms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
+          { name: "Economics", desc: "Macro & Micro.", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Polity", desc: "Constitution & Parliament.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Biology", desc: "Human Systems.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=300&q=80" }
+        ],
+        "afcat": [
+          { name: "Math", desc: "Numerical Ability.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=300&q=80" },
+          { name: "Reasoning", desc: "Verbal & Non-Verbal.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80" },
+          { name: "Grammar", desc: "Core Rules.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+          { name: "Editorial", desc: "Reading Comprehension.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+          { name: "Vocabulary", desc: "Idioms & Synonyms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
+          { name: "General Aw.", desc: "Static GK & Defense.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
+        ],
+        "capf": [
+          { name: "Physical Geo", desc: "Landforms.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80" },
+          { name: "Modern Hist", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Editorial", desc: "Paper-2 Essay.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+          { name: "Grammar", desc: "Paper-2 Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+          { name: "Polity", desc: "Governance.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
+          { name: "Security", desc: "Border Management.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
+        ]
+      };
+
+      window.freeVaultData = {
+        "CDS": [
+          { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules.", image: "math-ima.jpeg", batchId: "cds-math" },
+          { title: "CDS OTA", desc: "Complete Integrated English & General Studies Curriculum.", image: "ota-chennai.jpeg", batchId: "cds-kilo" }
+        ],
+        "AFCAT": [
+          { title: "AFCAT SQUADRON", desc: "Speed Mathematics, Reasoning & General Awareness Sessions.", image: "afcat-afa.jpeg", batchId: "afcat" }
+        ],
+        "CAPF": [
+          { title: "CAPF ASSISTANT COMMANDANT", desc: "Paper-1 & Paper-2 Special Guidance & Practice Modules.", image: "capf-forces.jpeg", batchId: "capf" }
+        ]
+      };
+
+      window.switchFreeExamTab = function(examName) {
+        if (window.activeFreeExamTab === examName) {
+          window.activeFreeExamTab = "";
+          ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
+            const btn = document.getElementById('free-tab-' + tab);
+            if (btn) btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
+          });
+          document.getElementById("freeExamTilesContainer").innerHTML = "";
+          return;
+        }
+        window.activeFreeExamTab = examName;
         ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
           const btn = document.getElementById('free-tab-' + tab);
-          if (btn) btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
-        });
-        document.getElementById("freeExamTilesContainer").innerHTML = "";
-        return;
-      }
-      activeFreeExamTab = examName;
-      ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
-        const btn = document.getElementById('free-tab-' + tab);
-        if (btn) {
-          if (tab === examName) {
-            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition shadow-lg phantom-btn cursor-pointer border border-amber-300";
-          } else {
-            btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
+          if (btn) {
+            if (tab === examName) {
+              btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition shadow-lg phantom-btn cursor-pointer border border-amber-300";
+            } else {
+              btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
+            }
           }
-        }
-      });
-      renderFreeExamTiles();
-    }
-
-    function renderFreeExamTiles() {
-      const container = document.getElementById("freeExamTilesContainer");
-      if (!container) return;
-      const tiles = freeVaultData[activeFreeExamTab] || [];
-      let html = "";
-      tiles.forEach(tile => {
-        html += `
-          <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition w-full">
-            <div>
-              <div class="relative w-full h-48 overflow-hidden bg-black">
-                <img src="${tile.image}" alt="${tile.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=PHANTOM+FREE';"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-                <div class="absolute top-3 left-3"><span class="px-2.5 py-0.5 rounded bg-black/85 border border-amber-500/50 text-amber-400 font-orbitron text-[10px] tracking-widest font-bold uppercase shadow">FREE ACCESS</span></div>
-              </div>
-              <div class="p-5">
-                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">${tile.title}</h3>
-                <p class="text-xs text-neutral-300 font-body mb-4">${tile.desc}</p>
-              </div>
-            </div>
-            <div class="p-5 pt-0">
-              <button onclick="window.openFreeModeSelection('${tile.batchId}', '${tile.title}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
-                FREE ACCESS &rarr;
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    window.openFreeModeSelection = function(batchId, batchTitle) {
-      selectedFreeBatch = batchId;
-      document.getElementById("freeModeBatchBadge").innerText = batchTitle + " • FREE VAULT";
-      document.getElementById("freeExamDashboardView").classList.add("hidden");
-      document.getElementById("freeModeSelectionView").classList.remove("hidden");
-    }
-
-    window.backToFreeDashboard = function() {
-      document.getElementById("freeModeSelectionView").classList.add("hidden");
-      document.getElementById("freeExamDashboardView").classList.remove("hidden");
-    }
-
-    window.selectFreeModeAction = function(mode) {
-      selectedFreeMode = mode;
-      document.getElementById("freeSubjectBatchBadge").innerText = selectedFreeBatch.toUpperCase() + " • LIVE SQUADRON";
-      document.getElementById("freeSubjectHeading").innerText = selectedFreeBatch.toUpperCase() + " FREE SUBJECTS";
-
-      document.getElementById("freeModeSelectionView").classList.add("hidden");
-      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
-      renderFreeSubjectsGrid();
-    }
-
-    window.backToFreeModeSelection = function() {
-      document.getElementById("freeSubjectsGridView").classList.add("hidden");
-      document.getElementById("freeModeSelectionView").classList.remove("hidden");
-    }
-
-    function renderFreeSubjectsGrid() {
-      const container = document.getElementById("freeSubjectsContainer");
-      if (!container) return;
-      container.innerHTML = "";
-      const subjectsList = squadronSubjectsMaster[selectedFreeBatch] || squadronSubjectsMaster["cds-kilo"];
-
-      subjectsList.forEach((subj) => {
-        const card = document.createElement('div');
-        card.className = subj.locked ? "subject-square-tile opacity-40 grayscale" : "subject-square-tile";
-        card.onclick = () => {
-          if (subj.locked) {
-            alert("🔒 Yeh subject abhi start nahi hua hai! Bahut jald launch hoga.");
-            return;
-          }
-          loadFreeLectures(subj.name, selectedFreeBatch, selectedFreeMode);
-        };
-
-        card.innerHTML = `
-          <div class="absolute inset-0 z-0">
-            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover opacity-35 group-hover:scale-110 transition-transform duration-500" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#060c1e] via-[#060c1e]/80 to-transparent"></div>
-          </div>
-          <div class="relative z-10 flex flex-col items-center justify-center h-full p-2">
-            <h4 class="font-orbitron font-extrabold text-sm sm:text-base text-white tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] line-clamp-2 mb-1">${subj.name}</h4>
-            <span class="text-[9px] font-mono text-amber-300 font-bold uppercase tracking-widest">${subj.locked ? 'LOCKED' : 'EXPLORE'}</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    async function loadFreeLectures(subjectName, batchId, modeVal) {
-      document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTER LECTURES";
-      document.getElementById("freeSubjectsGridView").classList.add("hidden");
-      document.getElementById("freeLecturesView").classList.remove("hidden");
-
-      const container = document.getElementById("freeLecturesListContainer");
-      if (!container) return;
-      container.innerHTML = `<div class="text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
-
-      try {
-        const q = query(
-          collection(db, "free_tactical_curriculum"),
-          where("squadron", "==", batchId),
-          where("subject", "==", subjectName),
-          where("mode", "==", modeVal)
-        );
-        const querySnapshot = await getDocs(q);
-        container.innerHTML = "";
-
-        let lectures = [];
-        querySnapshot.forEach((docSnap) => {
-          lectures.push({ id: docSnap.id, ...docSnap.data() });
         });
+        renderFreeExamTiles();
+      };
 
-        if (lectures.length === 0) {
-          lectures = [
-            { id: "demo_1", title: `${subjectName} - Orientation & Foundation Lecture`, duration: "45m", description: "Core tactical breakdown and concepts overview.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-            { id: "demo_2", title: `${subjectName} - Advanced Problem Solving Drill`, duration: "1h 12m", description: "High-yield previous year questions and shortcut tricks.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-            { id: "demo_3", title: `${subjectName} - Master Revision & Practice Set`, duration: "58m", description: "Comprehensive practice session with expert tips.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-          ];
-        }
-
-        lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        const badgeStyles = [
-          { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" }, // Pink/Magenta
-          { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" }, // Blue
-          { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" }, // Purple
-          { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" }, // Emerald
-          { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }   // Amber
-        ];
-
+      function renderFreeExamTiles() {
+        const container = document.getElementById("freeExamTilesContainer");
+        if (!container) return;
+        const tiles = window.freeVaultData[window.activeFreeExamTab] || [];
         let html = "";
-        lectures.forEach((lec, idx) => {
-          const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
-          const durationText = lec.duration || "HD Session";
-          const descText = lec.description || "Tactical lecture notes & video session.";
-          const videoUrl = lec.url || "#";
-          const notesUrl = lec.notesUrl || lec.pdfUrl || "";
-
-          const badgeIndex = idx % badgeStyles.length;
-          const currentBadge = badgeStyles[badgeIndex];
-          const classNumStr = String(idx + 1).padStart(2, '0');
-
+        tiles.forEach(tile => {
           html += `
-            <div class="lecture-rect-row page-transition w-full">
-              <div class="flex items-center gap-4 overflow-hidden">
-                <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
-                  ${classNumStr}
+            <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition w-full">
+              <div>
+                <div class="relative w-full h-48 overflow-hidden bg-black">
+                  <img src="${tile.image}" alt="${tile.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=PHANTOM+FREE';"/>
+                  <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                  <div class="absolute top-3 left-3"><span class="px-2.5 py-0.5 rounded bg-black/85 border border-amber-500/50 text-amber-400 font-orbitron text-[10px] tracking-widest font-bold uppercase shadow">FREE ACCESS</span></div>
                 </div>
-                <div class="overflow-hidden">
-                  <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
-                  <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lecTitle}</h4>
-                  <p class="text-xs text-neutral-300 font-body truncate mt-0.5">${descText} &bull; <span class="text-emerald-400 font-mono">${durationText}</span></p>
+                <div class="p-5">
+                  <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">${tile.title}</h3>
+                  <p class="text-xs text-neutral-300 font-body mb-4">${tile.desc}</p>
                 </div>
               </div>
-              <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
-                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
-                  ▶ Watch
-                </button>
-                <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
-                  📄 Notes
+              <div class="p-5 pt-0">
+                <button onclick="window.openFreeModeSelection('${tile.batchId}', '${tile.title}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
+                  FREE ACCESS &rarr;
                 </button>
               </div>
             </div>
           `;
         });
-
         container.innerHTML = html;
-      } catch (err) {
-        console.error("Error loading free lectures: ", err);
-        container.innerHTML = `
-          <div class="armor-panel rounded-2xl p-6 text-center w-full">
-            <h3 class="font-orbitron font-extrabold text-sm text-red-400 mb-1">Error Loading Content</h3>
-            <p class="text-xs text-neutral-400 font-mono">${err.message}</p>
-          </div>
-        `;
-      }
-    }
-
-    // --- ADAPTED FOR SPA MASTER LOADER ---
-    window.watchFreeLectureAction = function(batchId, subjectName, lectureTitle, encodedUrl) {
-      const decodedUrl = decodeURIComponent(encodedUrl);
-      sessionStorage.setItem("phantom_current_video", decodedUrl);
-      sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent("player.html", `batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`);
-      } else {
-        window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
-      }
-    }
-
-    window.backToFreeSubjectsGrid = function() {
-      document.getElementById("freeLecturesView").classList.add("hidden");
-      document.getElementById("freeSubjectsGridView").classList.remove("hidden");
-    }
-
-    window.closeWatchHoursModal = function() {
-      const modal = document.getElementById("watchHoursModal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    let telegramProofClicked = false;
-    let cachedCadetData = null;
-    let authStatusShouldShow = false;
-
-    onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
-      if (docSnap.exists()) {
-        cachedCadetData = docSnap.data();
-        const modal = document.getElementById("paidAuthModal");
-        if (authStatusShouldShow && modal && !modal.classList.contains("hidden")) updatePaidAuthRequestNotice(cachedCadetData);
-      }
-    });
-
-    window.showPaidAuthModal = function() {
-      const modal = document.getElementById("paidAuthModal");
-      if (modal) {
-        authStatusShouldShow = true;
-        if (cachedCadetData) {
-          const emailInput = document.getElementById('authCadetEmail');
-          if (emailInput && cachedCadetData.email) emailInput.value = cachedCadetData.email;
-          updatePaidAuthRequestNotice(cachedCadetData);
-          const nameInput = document.getElementById('authCadetName');
-          const paymentNameInput = document.getElementById('authPaymentName');
-          const dateInput = document.getElementById('authPaymentDate');
-          const utrInput = document.getElementById('authUtr');
-          if (nameInput && cachedCadetData.fullName) nameInput.value = cachedCadetData.fullName;
-          if (paymentNameInput && cachedCadetData.paymentName) paymentNameInput.value = cachedCadetData.paymentName;
-          if (dateInput && cachedCadetData.paymentDate) dateInput.value = cachedCadetData.paymentDate;
-          if (utrInput && cachedCadetData.utrNumber) utrInput.value = cachedCadetData.utrNumber;
-          const savedBatches = String(cachedCadetData.targetBatch || '').split(',').map(v => v.trim());
-          document.querySelectorAll('input[name="authBatches"]').forEach(cb => {
-            cb.checked = savedBatches.includes(cb.value);
-          });
-        }
-        telegramProofClicked = false;
-        const submitBtn = document.getElementById('authSubmitBtn');
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
-          submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
-        }
-        modal.classList.remove("hidden");
-      }
-    }
-
-    window.closePaidAuthModal = function() {
-      const modal = document.getElementById("paidAuthModal");
-      if (modal) modal.classList.add("hidden");
-    }
-
-    window.sendProofToTelegram = function() {
-      const name = document.getElementById('authCadetName').value.trim();
-      const paymentName = document.getElementById('authPaymentName').value.trim();
-      const email = document.getElementById('authCadetEmail').value.trim();
-      const paymentDate = document.getElementById('authPaymentDate').value;
-      const utr = document.getElementById('authUtr').value.trim();
-      const selectedCheckboxes = document.querySelectorAll('input[name="authBatches"]:checked');
-      const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.parentElement.querySelector('span').innerText);
-
-      if (!name || !paymentName || !email || !paymentDate || chosenBatches.length === 0 || !utr) {
-        alert("Please fill in all details, payment name, date, UTR number, and select at least one batch before sending proof on Telegram.");
-        return;
       }
 
-      const msg = `🛡️ *PAID AUTHORIZATION PROOF* 🛡️\n\n` +
-                  `• *Cadet Name:* ${name}\n` +
-                  `• *Payment Name:* ${paymentName}\n` +
-                  `• *Email:* ${email}\n` +
-                  `• *Selected Batches:* ${chosenBatches.join(", ")}\n` +
-                  `• *Payment Date:* ${paymentDate}\n` +
-                  `• *UTR Number:* ${utr}\n\n` +
-                  `_Attached: Payment Screenshot_`;
+      window.openFreeModeSelection = function(batchId, batchTitle) {
+        window.selectedFreeBatch = batchId;
+        document.getElementById("freeModeBatchBadge").innerText = batchTitle + " • FREE VAULT";
+        document.getElementById("freeExamDashboardView").classList.add("hidden");
+        document.getElementById("freeModeSelectionView").classList.remove("hidden");
+      };
 
-      const tgUrl = `https://t.me/Teamphantom97_bot?text=${encodeURIComponent(msg)}`;
-      window.open(tgUrl, '_blank', 'noopener,noreferrer');
-      telegramProofClicked = true;
-      const submitBtn = document.getElementById('authSubmitBtn');
-      submitBtn.disabled = false;
-      submitBtn.className = "w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_20px_rgba(255,215,0,0.4)] phantom-btn";
-      submitBtn.innerText = "2. SUBMIT FOR ACCESS";
-    }
+      window.backToFreeDashboard = function() {
+        document.getElementById("freeModeSelectionView").classList.add("hidden");
+        document.getElementById("freeExamDashboardView").classList.remove("hidden");
+      };
 
-    window.submitPaidAuthProof = async function(event) {
-      event.preventDefault();
-      if (!telegramProofClicked) {
-        alert("Please click on '1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM' first!");
-        return;
-      }
-      const name = document.getElementById('authCadetName').value.trim();
-      const paymentName = document.getElementById('authPaymentName').value.trim();
-      const email = document.getElementById('authCadetEmail').value.trim();
-      const paymentDate = document.getElementById('authPaymentDate').value;
-      const utr = document.getElementById('authUtr').value.trim();
-      const selectedCheckboxes = document.querySelectorAll('input[name="authBatches"]:checked');
-      const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.value);
+      window.selectFreeModeAction = function(mode) {
+        window.selectedFreeMode = mode;
+        document.getElementById("freeSubjectBatchBadge").innerText = window.selectedFreeBatch.toUpperCase() + " • LIVE SQUADRON";
+        document.getElementById("freeSubjectHeading").innerText = window.selectedFreeBatch.toUpperCase() + " FREE SUBJECTS";
 
-      if (chosenBatches.length === 0) {
-        alert("Please select at least one target batch.");
-        return;
-      }
-      const alertBox = document.getElementById('authStatusAlert');
-      const submitBtn = document.getElementById('authSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "SUBMITTING REQUEST...";
+        document.getElementById("freeModeSelectionView").classList.add("hidden");
+        document.getElementById("freeSubjectsGridView").classList.remove("hidden");
+        renderFreeSubjectsGrid();
+      };
 
-      try {
-        const finalTargetBatch = chosenBatches.join(", ");
-        const requestBaselineBatches = Array.isArray(cachedCadetData?.allowedBatches) ? [...cachedCadetData.allowedBatches] : [];
-        const requestSubmittedAt = new Date().toISOString();
-        const localUid = localStorage.getItem("phantom_uid");
-        if (localUid) {
-          const cadetRef = doc(db, "cadets", localUid);
-          await updateDoc(cadetRef, {
-            fullName: name,
-            targetBatch: finalTargetBatch,
-            paymentName: paymentName,
-            paymentDate: paymentDate,
-            utrNumber: utr,
-            paymentSubmittedAt: requestSubmittedAt,
-            accessRequestSubmitted: true,
-            accessRequestBaselineBatches: requestBaselineBatches
-          });
-        }
-        alertBox.classList.add("hidden");
-        if (cachedCadetData) {
-          cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: requestSubmittedAt, accessRequestSubmitted: true, accessRequestBaselineBatches: requestBaselineBatches };
-        }
-        authStatusShouldShow = true;
-        if (cachedCadetData) updatePaidAuthRequestNotice(cachedCadetData);
-        telegramProofClicked = false;
-        submitBtn.disabled = true;
-        submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
-        submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
-      } catch (err) {
-        console.error("Error saving payment request:", err);
-        submitBtn.disabled = false;
-        submitBtn.innerText = "2. SUBMIT FOR ACCESS";
-      }
-    }
+      window.backToFreeModeSelection = function() {
+        document.getElementById("freeSubjectsGridView").classList.add("hidden");
+        document.getElementById("freeModeSelectionView").classList.remove("hidden");
+      };
 
-    window.closePhantomModal = function() {
-      const modal = document.getElementById("phantomWhatsAppModal");
-      if (modal) {
-        modal.style.transition = "opacity .35s ease";
-        modal.style.opacity = "0";
-        setTimeout(() => { modal.style.display = "none"; }, 350);
-      }
-    };
-
-    window.toggleSidebar = function() {
-      const drawer = document.getElementById('sidebarDrawer');
-      const overlay = document.getElementById('sidebarOverlay');
-      if (!drawer || !overlay) return;
-      const isOpen = drawer.style.left === '0px';
-      if (isOpen) {
-        drawer.style.left = '-300px';
-        overlay.classList.add('hidden');
-      } else {
-        drawer.style.left = '0px';
-        overlay.classList.remove('hidden');
-      }
-    };
-
-    window.showHomeView = function() {
-      document.getElementById("batchModeMainView").classList.remove("hidden");
-      document.getElementById("testSeriesContainer").classList.add("hidden");
-    }
-
-    window.showWatchHoursModal = function() {
-      const modal = document.getElementById("watchHoursModal");
-      const disp = document.getElementById("modalWatchTimeDisplay");
-      const totalSecs = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-      const hrs = Math.floor(totalSecs / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-      if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
-      if (modal) modal.classList.remove("hidden");
-    }
-
-    window.showTestSeriesView = function() {
-      document.getElementById("batchModeMainView").classList.add("hidden");
-      document.getElementById("testSeriesContainer").classList.remove("hidden");
-      document.getElementById("testDashboardView").classList.remove("hidden");
-      document.getElementById("testSectionView").classList.add("hidden");
-      document.getElementById("mockListView").classList.add("hidden");
-    }
-
-    let currentExam = "";
-    let currentSection = "";
-
-    window.openTestSection = function(examName) {
-      currentExam = examName;
-      document.getElementById("selectedExamTitle").innerText = examName + " | TEST SECTION";
-      document.getElementById("testDashboardView").classList.add("hidden");
-      document.getElementById("testSectionView").classList.remove("hidden");
-    }
-
-    window.backToTestDashboard = function() {
-      document.getElementById("testSectionView").classList.add("hidden");
-      document.getElementById("testDashboardView").classList.remove("hidden");
-    }
-
-    window.backToTestSection = function() {
-      document.getElementById("mockListView").classList.add("hidden");
-      document.getElementById("testSectionView").classList.remove("hidden");
-    }
-
-    window.openMockList = async function(sectionName) {
-      currentSection = sectionName;
-      document.getElementById("selectedSectionTitle").innerText = currentExam + " - " + sectionName;
-      document.getElementById("testSectionView").classList.add("hidden");
-      document.getElementById("mockListView").classList.remove("hidden");
-
-      let container = document.getElementById("mockItemsContainer");
-      container.innerHTML = `<div style="text-align:center; color: #94a3b8; padding: 20px;" class="font-orbitron">Loading tests...</div>`;
-
-      try {
-        const q = query(
-          collection(db, "phantom_tests"),
-          where("exam", "==", currentExam),
-          where("section", "==", currentSection)
-        );
-        const querySnapshot = await getDocs(q);
+      function renderFreeSubjectsGrid() {
+        const container = document.getElementById("freeSubjectsContainer");
+        if (!container) return;
         container.innerHTML = "";
+        const subjectsList = window.squadronSubjectsMaster[window.selectedFreeBatch] || window.squadronSubjectsMaster["cds-kilo"];
 
-        if (querySnapshot.empty) {
-          let row = document.createElement("div");
-          row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
-          row.innerHTML = `
-            <div>
-              <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
-              <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
+        subjectsList.forEach((subj) => {
+          const card = document.createElement('div');
+          card.className = subj.locked ? "subject-square-tile opacity-40 grayscale" : "subject-square-tile";
+          card.onclick = () => {
+            if (subj.locked) {
+              alert("🔒 Yeh subject abhi start nahi hua hai! Bahut jald launch hoga.");
+              return;
+            }
+            loadFreeLectures(subj.name, window.selectedFreeBatch, window.selectedFreeMode);
+          };
+
+          card.innerHTML = `
+            <div class="absolute inset-0 z-0">
+              <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover opacity-35 group-hover:scale-110 transition-transform duration-500" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#060c1e] via-[#060c1e]/80 to-transparent"></div>
             </div>
-            <div>
-              <span class="px-4 py-2 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-400 font-orbitron font-bold text-xs uppercase tracking-wider">Upcoming</span>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full p-2">
+              <h4 class="font-orbitron font-extrabold text-sm sm:text-base text-white tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] line-clamp-2 mb-1">${subj.name}</h4>
+              <span class="text-[9px] font-mono text-amber-300 font-bold uppercase tracking-widest">${subj.locked ? 'LOCKED' : 'EXPLORE'}</span>
             </div>
           `;
-          container.appendChild(row);
-        } else {
+          container.appendChild(card);
+        });
+      }
+
+      async function loadFreeLectures(subjectName, batchId, modeVal) {
+        document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTER LECTURES";
+        document.getElementById("freeSubjectsGridView").classList.add("hidden");
+        document.getElementById("freeLecturesView").classList.remove("hidden");
+
+        const container = document.getElementById("freeLecturesListContainer");
+        if (!container) return;
+        container.innerHTML = `<div class="text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
+
+        try {
+          const q = query(
+            collection(db, "free_tactical_curriculum"),
+            where("squadron", "==", batchId),
+            where("subject", "==", subjectName),
+            where("mode", "==", modeVal)
+          );
+          const querySnapshot = await getDocs(q);
+          container.innerHTML = "";
+
+          let lectures = [];
           querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            let row = document.createElement("div");
-            row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
-            row.innerHTML = `
-              <div>
-                <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${data.title}</div>
-                <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
-              </div>
-              <div style="display: flex; gap: 10px;">
-                <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Start Now</a>
-                <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Analysis</a>
+            lectures.push({ id: docSnap.id, ...docSnap.data() });
+          });
+
+          if (lectures.length === 0) {
+            lectures = [
+              { id: "demo_1", title: `${subjectName} - Orientation & Foundation Lecture`, duration: "45m", description: "Core tactical breakdown and concepts overview.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+              { id: "demo_2", title: `${subjectName} - Advanced Problem Solving Drill`, duration: "1h 12m", description: "High-yield previous year questions and shortcut tricks.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+              { id: "demo_3", title: `${subjectName} - Master Revision & Practice Set`, duration: "58m", description: "Comprehensive practice session with expert tips.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
+            ];
+          }
+
+          lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+          const badgeStyles = [
+            { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" },
+            { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" },
+            { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" },
+            { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" },
+            { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }
+          ];
+
+          let html = "";
+          lectures.forEach((lec, idx) => {
+            const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
+            const durationText = lec.duration || "HD Session";
+            const descText = lec.description || "Tactical lecture notes & video session.";
+            const videoUrl = lec.url || "#";
+            const notesUrl = lec.notesUrl || lec.pdfUrl || "";
+
+            const badgeIndex = idx % badgeStyles.length;
+            const currentBadge = badgeStyles[badgeIndex];
+            const classNumStr = String(idx + 1).padStart(2, '0');
+
+            html += `
+              <div class="lecture-rect-row page-transition w-full">
+                <div class="flex items-center gap-4 overflow-hidden">
+                  <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
+                    ${classNumStr}
+                  </div>
+                  <div class="overflow-hidden">
+                    <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
+                    <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lecTitle}</h4>
+                    <p class="text-xs text-neutral-300 font-body truncate mt-0.5">${descText} &bull; <span class="text-emerald-400 font-mono">${durationText}</span></p>
+                  </div>
+                </div>
+                <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
+                  <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
+                    ▶ Watch
+                  </button>
+                  <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+                    📄 Notes
+                  </button>
+                </div>
               </div>
             `;
-            container.appendChild(row);
           });
-        }
-      } catch (e) {
-        console.error("Error fetching tests: ", e);
-      }
-    }
 
-    let unsubscribeSnapshot = null;
-    const localUid = localStorage.getItem("phantom_uid");
-    const localToken = localStorage.getItem("phantom_session_token");
-
-    if (!localUid || !localToken) {
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
-      }
-    } else {
-      unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
-        if (!docSnap.exists()) {
-          if (typeof window.logoutCadetMaster === 'function') {
-            window.logoutCadetMaster();
-          } else {
-            window.location.href = window.location.pathname;
-          }
-          return;
-        }
-        const data = docSnap.data();
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          if (typeof window.logoutCadetMaster === 'function') {
-            window.logoutCadetMaster();
-          } else {
-            window.location.href = window.location.pathname;
-          }
-          return;
-        }
-
-        document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileEmail').innerText = data.email || "";
-
-        const allowed = data.allowedBatches || [];
-        const isCombo = allowed.includes("combo") || allowed.length >= 4;
-        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
-        let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
-
-        const paidSection = document.getElementById("paidSquadronsSection");
-        const telegramContainer = document.getElementById("telegramNotificationContainer");
-
-        if (telegramContainer) telegramContainer.classList.remove("hidden");
-
-        if (hasPaidAccessAny) {
-          if (paidSection) {
-            paidSection.classList.remove("hidden");
-            paidSection.style.display = "block";
-          }
-          batchesList.forEach(batchId => {
-            const hasAccess = isCombo || allowed.includes(batchId);
-            applyPaidBatchAccess(batchId, hasAccess);
-          });
-        } else {
-          if (paidSection) {
-            paidSection.classList.add("hidden");
-            paidSection.style.display = "none";
-          }
-        }
-
-        const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
-        renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
-      });
-    }
-
-    function applyPaidBatchAccess(batchId, isUnlocked) {
-      const card = document.getElementById("card-" + batchId);
-      const statusBadge = document.getElementById("badge-" + batchId);
-      const actionBtn = document.getElementById("btn-" + batchId);
-      if (!card) return;
-
-      if (isUnlocked) {
-        card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.add("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98] phantom-btn";
-        actionBtn.innerText = "ACCESS CLASSROOM";
-        actionBtn.disabled = false;
-        actionBtn.onclick = () => window.openBatchLectures(batchId);
-      } else {
-        card.classList.add("opacity-45", "grayscale", "border-neutral-800");
-        card.classList.remove("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
-        statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span>🔒</span> LOCKED`;
-        actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
-        actionBtn.innerText = "NOT ENROLLED";
-        actionBtn.disabled = true;
-        actionBtn.onclick = null;
-      }
-    }
-
-    const secureTgRegistry = {
-      "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
-      "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
-      "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
-      "Free-batch": "https://t.me/+E2hXFyRiHLwwODFl",
-      "capf": "https://t.me/+JmGvA3F25WY1YjA9"
-    };
-
-    window.renderTelegramNotification = function(allowed, isCombo, userId, clickedGroups) {
-      const container = document.getElementById("telegramNotificationContainer");
-      if (!container) return;
-
-      const allGroups = [
-        { id: "afcat", name: "AFCAT SQUADRON GROUP" },
-        { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
-        { id: "cds-kilo", name: "CDS OTA SQUADRON" },
-        { id: "Free-batch", name: "FREE BATCH SQUADRON" },
-        { id: "capf", name: "CAPF SQUADRON" }
-      ];
-
-      let userGroups = allGroups.filter(g => g.id === "Free-batch" || isCombo || allowed.includes(g.id));
-      if (userGroups.length === 0) {
-        container.innerHTML = "";
-        return;
-      }
-
-      const allClicked = userGroups.every(g => clickedGroups.includes(g.id));
-      if (allClicked) {
-        container.innerHTML = "";
-        return;
-      }
-
-      let groupsHtml = "";
-      userGroups.forEach((group) => {
-        const isAlreadyClicked = clickedGroups.includes(group.id);
-        if (isAlreadyClicked) {
-          groupsHtml += `
-            <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
-              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">✓ ${group.name} (Visited)</span>
-              <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-300 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
-            </div>
-          `;
-        } else {
-          groupsHtml += `
-            <div class="p-3 rounded-xl bg-black/95 border border-amber-400/30 flex items-center justify-between gap-3">
-              <span class="text-xs font-mono text-amber-300 font-semibold">${group.name}</span>
-              <button onclick="secureRedirect('${group.id}', '${userId}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-[11px] uppercase tracking-wider shadow transition shrink-0 cursor-pointer phantom-btn">
-                JOIN GROUP &rarr;
-              </button>
+          container.innerHTML = html;
+        } catch (err) {
+          console.error("Error loading free lectures: ", err);
+          container.innerHTML = `
+            <div class="armor-panel rounded-2xl p-6 text-center w-full">
+              <h3 class="font-orbitron font-extrabold text-sm text-red-400 mb-1">Error Loading Content</h3>
+              <p class="text-xs text-neutral-400 font-mono">${err.message}</p>
             </div>
           `;
         }
-      });
+      }
 
-      const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
+      window.watchFreeLectureAction = function(batchId, subjectName, lectureTitle, encodedUrl) {
+        const decodedUrl = decodeURIComponent(encodedUrl);
+        sessionStorage.setItem("phantom_current_video", decodedUrl);
+        sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
+        if (typeof window.loadPageContent === 'function') {
+          window.loadPageContent("player.html", `batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`);
+        } else {
+          window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
+        }
+      };
 
-      container.innerHTML = `
-        <div id="notifBar" class="w-full mb-6">
-          <div class="armor-panel border-amber-400/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(255,215,0,0.15)] flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">⚡</div>
-              <div>
-                <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
-                <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3 w-full md:w-auto">
-              <button onclick="toggleJoinOptions()" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn">
-                VIEW PENDING GROUPS (${remainingCount})
-              </button>
-            </div>
-          </div>
-          <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-400/40 space-y-3 w-full">
-            <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
-            ${groupsHtml}
-          </div>
-        </div>
-      `;
-    }
+      window.backToFreeSubjectsGrid = function() {
+        document.getElementById("freeLecturesView").classList.add("hidden");
+        document.getElementById("freeSubjectsGridView").classList.remove("hidden");
+      };
 
-    window.toggleJoinOptions = function() {
-      const dropdown = document.getElementById("joinDropdown");
-      if (dropdown) dropdown.classList.toggle("hidden");
-    }
+      window.closeWatchHoursModal = function() {
+        const modal = document.getElementById("watchHoursModal");
+        if (modal) modal.classList.add("hidden");
+      };
 
-    window.secureRedirect = async function(groupId, userId) {
-      const targetUrl = secureTgRegistry[groupId];
-      if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer");
-      try {
-        const cadetRef = doc(db, "cadets", userId);
-        await updateDoc(cadetRef, {
-          clickedGroups: arrayUnion(groupId)
+      window.showPaidAuthModal = function() {
+        const modal = document.getElementById("paidAuthModal");
+        if (modal) modal.classList.remove("hidden");
+      };
+
+      window.closePaidAuthModal = function() {
+        const modal = document.getElementById("paidAuthModal");
+        if (modal) modal.classList.add("hidden");
+      };
+
+      window.toggleSidebar = function() {
+        const drawer = document.getElementById('sidebarDrawer');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (!drawer || !overlay) return;
+        const isOpen = drawer.style.left === '0px';
+        if (isOpen) {
+          drawer.style.left = '-300px';
+          overlay.classList.add('hidden');
+        } else {
+          drawer.style.left = '0px';
+          overlay.classList.remove('hidden');
+        }
+      };
+
+      window.showHomeView = function() {
+        document.getElementById("batchModeMainView").classList.remove("hidden");
+        document.getElementById("testSeriesContainer").classList.add("hidden");
+      };
+
+      window.showWatchHoursModal = function() {
+        const modal = document.getElementById("watchHoursModal");
+        const disp = document.getElementById("modalWatchTimeDisplay");
+        const totalSecs = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        if (disp) disp.innerText = `${hrs.toString().padStart(2,'0')}h ${mins.toString().padStart(2,'0')}m ${secs.toString().padStart(2,'0')}s`;
+        if (modal) modal.classList.remove("hidden");
+      };
+
+      window.showTestSeriesView = function() {
+        document.getElementById("batchModeMainView").classList.add("hidden");
+        document.getElementById("testSeriesContainer").classList.remove("hidden");
+      };
+
+      window.openBatchLectures = function(batchId) {
+        if (typeof window.loadPageContent === 'function') {
+          window.loadPageContent("batch-mode.html", "batch=" + encodeURIComponent(batchId));
+        } else {
+          window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+        }
+      };
+
+      const localUid = localStorage.getItem("phantom_uid");
+      const localToken = localStorage.getItem("phantom_session_token");
+
+      if (localUid && localToken) {
+        onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
+          if (!docSnap.exists()) return;
+          const data = docSnap.data();
+          const nameEl = document.getElementById('cadetNameDisplay');
+          const emailEl = document.getElementById('cadetEmailDisplay');
+          const sidebarName = document.getElementById('sidebarProfileName');
+          const sidebarEmail = document.getElementById('sidebarProfileEmail');
+
+          if (nameEl) nameEl.innerText = data.name || "Cadet";
+          if (emailEl) emailEl.innerText = data.email || "";
+          if (sidebarName) sidebarName.innerText = data.name || "Cadet";
+          if (sidebarEmail) sidebarEmail.innerText = data.email || "";
+
+          const allowed = data.allowedBatches || [];
+          const isCombo = allowed.includes("combo") || allowed.length >= 4;
+          const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+          let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
+
+          const paidSection = document.getElementById("paidSquadronsSection");
+          const telegramContainer = document.getElementById("telegramNotificationContainer");
+
+          if (telegramContainer) telegramContainer.classList.remove("hidden");
+
+          if (hasPaidAccessAny) {
+            if (paidSection) {
+              paidSection.classList.remove("hidden");
+              paidSection.style.display = "block";
+            }
+            batchesList.forEach(batchId => {
+              const hasAccess = isCombo || allowed.includes(batchId);
+              applyPaidBatchAccess(batchId, hasAccess);
+            });
+          } else {
+            if (paidSection) {
+              paidSection.classList.add("hidden");
+              paidSection.style.display = "none";
+            }
+          }
         });
-      } catch (e) {
-        console.error("Error updating clicked group in Firestore:", e);
       }
-    }
 
-    // --- ADAPTED FOR SPA MASTER LOADER ---
-    window.openBatchLectures = function(batchId) {
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent("batch-mode.html", "batch=" + encodeURIComponent(batchId));
-      } else {
-        window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
-      }
-    }
+      function applyPaidBatchAccess(batchId, isUnlocked) {
+        const card = document.getElementById("card-" + batchId);
+        const statusBadge = document.getElementById("badge-" + batchId);
+        const actionBtn = document.getElementById("btn-" + batchId);
+        if (!card) return;
 
-    window.logoutCadet = function() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      localStorage.removeItem("phantom_session_token");
-      localStorage.removeItem("phantom_uid");
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
+        if (isUnlocked) {
+          card.classList.remove("opacity-45", "grayscale", "border-neutral-800");
+          card.classList.add("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
+          if (statusBadge) {
+            statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+            statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
+          }
+          if (actionBtn) {
+            actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98] phantom-btn";
+            actionBtn.innerText = "ACCESS CLASSROOM";
+            actionBtn.disabled = false;
+            actionBtn.onclick = () => window.openBatchLectures(batchId);
+          }
+        } else {
+          card.classList.add("opacity-45", "grayscale", "border-neutral-800");
+          card.classList.remove("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
+          if (statusBadge) {
+            statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
+            statusBadge.innerHTML = `<span>🔒</span> LOCKED`;
+          }
+          if (actionBtn) {
+            actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
+            actionBtn.innerText = "NOT ENROLLED";
+            actionBtn.disabled = true;
+            actionBtn.onclick = null;
+          }
+        }
       }
-    };
+    })();
   </script>
 </body>
 </html>
