@@ -25,13 +25,7 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        localStorage.clear();
-        sessionStorage.clear();
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;font-family:Rajdhani,sans-serif;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        setTimeout(() => {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.reload();
-        }, 2000);
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
       }
     }, 1000);
 
@@ -402,13 +396,11 @@
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-      else window.location.href = "index.html";
+      window.location.href = "index.html";
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.href = "index.html";
+          window.location.href = "index.html";
           return;
         }
 
@@ -417,16 +409,18 @@
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active or pending verification.");
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.href = "index.html";
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.href = "index.html";
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
@@ -435,16 +429,14 @@
     }
 
     function renderBatchCurriculum(allowedBatches) {
-      const searchStr = window.currentQueryString || window.location.search;
-      const urlParams = new URLSearchParams(searchStr);
+      const urlParams = new URLSearchParams(window.location.search);
       currentBatchParam = urlParams.get('batch') || 'cds-kilo';
       currentModeParam = (urlParams.get('mode') === 'recorded') ? 'recorded' : 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
       if (!isCombo && !allowedBatches.includes(currentBatchParam)) {
         alert("ACCESS DENIED: You are not authorized for this specific squadron.");
-        if (typeof window.loadPageContent === 'function') window.loadPageContent('classroom.html');
-        else window.location.href = "classroom.html";
+        window.location.href = "classroom.html";
         return;
       }
 
@@ -457,15 +449,7 @@
 
       const backBtn = document.getElementById('backToModesBtn');
       if (backBtn) {
-        backBtn.onclick = (e) => {
-          e.preventDefault();
-          const qStr = `batch=${encodeURIComponent(currentBatchParam)}`;
-          if (typeof window.loadPageContent === 'function') {
-            window.loadPageContent('batch-mode.html', qStr);
-          } else {
-            window.location.href = `batch-mode.html?${qStr}`;
-          }
-        };
+        backBtn.href = `batch-mode.html?batch=${encodeURIComponent(currentBatchParam)}`;
       }
 
       const container = document.getElementById('subjectsContainer');
@@ -503,25 +487,15 @@
       });
     }
 
-    // --- ADAPTED FOR SPA LOADER ---
     function openSubjectModule(batch, subjectName, mode) {
-      const queryString = `batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent('lectures.html', queryString);
-      } else {
-        window.location.href = `lectures.html?${queryString}`;
-      }
+      window.location.href = `lectures.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
     }
 
     window.terminateCadetSession = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
-      }
+      window.location.href = "index.html";
     };
   </script>
 
@@ -707,7 +681,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <a id="backToModesBtn" href="#" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <a id="backToModesBtn" href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; BACK TO MODES
         </a>
         <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
@@ -717,7 +691,7 @@
     </div>
   </header>
 
-  <!-- MAIN CURRICULUM SECTION -->
+  <!-- MAIN CURRICULUM SECTION (Full-Width Screen Fit) -->
   <main class="w-full px-6 py-8 flex-grow">
     <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
       <div>
@@ -735,7 +709,7 @@
       </div>
     </div>
 
-    <!-- SUBJECT TABS GRID -->
+    <!-- SUBJECT TABS GRID (Expanded columns for full screen width coverage) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 pb-6 w-full" id="subjectsContainer"></div>
   </main>
 
@@ -747,6 +721,7 @@
   </footer>
 
   <script>
+    // --- CANVAS PARTICLES ANIMATION (Smaller Bubble & Star Radius) ---
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -761,8 +736,8 @@
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 2 + 1,
-        starRadius: Math.random() * 2.5 + 1.2,
+        radius: Math.random() * 2 + 1,       // Small bubble radius
+        starRadius: Math.random() * 2.5 + 1.2, // Small star radius
         speedY: Math.random() * 0.7 + 0.2,
         speedX: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.8 + 0.3,
