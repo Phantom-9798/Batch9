@@ -25,40 +25,14 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        localStorage.clear();
-        sessionStorage.clear();
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;font-family:Rajdhani,sans-serif;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        setTimeout(() => {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.reload();
-        }, 2000);
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
       }
     }, 1000);
 
     // 4. Console Auto Clear
-    setInterval => {
+    setInterval(() => {
       console.clear();
     }, 1500);
-
-    // 5. 1DM / Downloader Detection
-    window.addEventListener('DOMContentLoaded', function() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        document.body.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
-            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8);">
-              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171;">⚠️ SECURITY ALERT</h2>
-              <p style="font-size: 16px; color: #f1f5f9;">1DM downloader detected, logging out.</p>
-            </div>
-          </div>
-        `;
-        setTimeout(() => {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-        }, 2500);
-      }
-    });
   })();
   </script>
   <meta charset="UTF-8" />
@@ -90,76 +64,69 @@
     let unsubscribeSnapshot = null;
     let targetBatch = "cds";
 
-    // Robust URL / SPA Query Parameters parsing
-    const searchStr = window.currentQueryString || window.location.search;
-    const urlParams = new URLSearchParams(searchStr);
+    // URL Parameters
+    const urlParams = new URLSearchParams(window.location.search);
     targetBatch = urlParams.get('batch') || 'cds';
 
-    // --- SESSION VALIDATION ---
+    // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+      window.location.href = "index.html";
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          window.location.href = "index.html";
           return;
         }
 
         const data = docSnap.data();
 
+        // Status verification
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active.");
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
+        // Single Device Guard
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          localStorage.removeItem("phantom_session_token");
+          localStorage.removeItem("phantom_uid");
+          window.location.href = "index.html";
           return;
         }
 
+        // Batch Enrollment Check
         const allowedBatches = data.allowedBatches || [];
         const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
         if (!isCombo && !allowedBatches.includes(targetBatch)) {
           alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
-          if (typeof window.loadPageContent === 'function') {
-            window.loadPageContent('classroom.html');
-          } else {
-            window.location.href = "classroom.html";
-          }
+          window.location.href = "classroom.html";
           return;
         }
 
+        // Set UI Header
         document.getElementById("batchBadge").innerText = `${targetBatch.toUpperCase()} SQUADRON`;
         document.getElementById("batchTitle").innerText = `${targetBatch.toUpperCase()} BATCH ACCESS`;
       });
     }
 
-    // --- ADAPTED FOR SPA LOADER ---
     window.selectMode = function(mode) {
-      const queryString = `batch=${encodeURIComponent(targetBatch)}&mode=${encodeURIComponent(mode)}`;
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent('subjects.html', queryString);
-      } else {
-        window.location.href = `subjects.html?${queryString}`;
-      }
+      window.location.href = `subjects.html?batch=${encodeURIComponent(targetBatch)}&mode=${encodeURIComponent(mode)}`;
     };
 
     window.terminateCadetSession = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
-      }
+      window.location.href = "index.html";
     };
   </script>
 
@@ -172,6 +139,7 @@
       font-weight: 700;
     }
 
+    /* Force Full Solid Rich Navy Blue Background */
     html, body {
       background-color: #020617 !important;
       background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
@@ -189,6 +157,7 @@
       width: 100%;
     }
 
+    /* Falling Stars & Small Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -267,6 +236,7 @@
       letter-spacing: 1px;
     }
 
+    /* Reduced card size styling */
     .armor-panel-compact {
       background: rgba(6, 12, 30, 0.96);
       border: 2px solid rgba(255, 215, 0, 0.7);
@@ -284,6 +254,7 @@
 
 <body class="text-white min-h-screen flex flex-col justify-between w-full">
 
+  <!-- Background Canvas for Falling Stars & Small Bubbles -->
   <canvas id="starBubbleCanvas"></canvas>
 
   <div id="phantomStudyTimerWidget">
@@ -304,7 +275,7 @@
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
-  <!-- TOP HEADER -->
+  <!-- TOP HEADER (Full Width Fit) -->
   <header class="w-full pt-5 pb-3 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
     <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
@@ -322,7 +293,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="if(typeof window.loadPageContent==='function') window.loadPageContent('classroom.html'); else window.location.href='classroom.html';" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <button onclick="window.location.href='classroom.html'" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; CHANGE SQUADRON
         </button>
         <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
@@ -332,7 +303,7 @@
     </div>
   </header>
 
-  <!-- MAIN DEPLOYMENT SELECTION -->
+  <!-- MAIN DEPLOYMENT SELECTION (Full Width & Balanced Screen Fit) -->
   <main class="w-full max-w-5xl mx-auto px-6 py-8 flex-grow flex flex-col justify-center items-center">
     
     <div class="text-center mb-8 w-full">
@@ -347,7 +318,7 @@
       </p>
     </div>
 
-    <!-- DUAL CARDS GRID -->
+    <!-- DUAL CARDS GRID (Full Width Balanced Fit) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
       
       <!-- FOLDER 1: LIVE BATCH -->
@@ -417,6 +388,7 @@
   </footer>
 
   <script>
+    // --- CANVAS PARTICLES ANIMATION (Smaller Radius) ---
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -431,8 +403,8 @@
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 2 + 1,
-        starRadius: Math.random() * 2.5 + 1.2,
+        radius: Math.random() * 2 + 1,       // Much smaller bubble radius
+        starRadius: Math.random() * 2.5 + 1.2, // Much smaller star radius
         speedY: Math.random() * 0.7 + 0.2,
         speedX: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.8 + 0.3,
