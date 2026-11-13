@@ -25,14 +25,40 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        localStorage.clear();
+        sessionStorage.clear();
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;font-family:Rajdhani,sans-serif;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.reload();
+        }, 2000);
       }
     }, 1000);
 
     // 4. Console Auto Clear
-    setInterval(() => {
+    setInterval => {
       console.clear();
     }, 1500);
+
+    // 5. 1DM / Downloader Detection
+    window.addEventListener('DOMContentLoaded', function() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        document.body.innerHTML = `
+          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
+            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8);">
+              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171;">⚠️ SECURITY ALERT</h2>
+              <p style="font-size: 16px; color: #f1f5f9;">1DM downloader detected, logging out.</p>
+            </div>
+          </div>
+        `;
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+        }, 2500);
+      }
+    });
   })();
   </script>
   <meta charset="UTF-8" />
@@ -64,69 +90,76 @@
     let unsubscribeSnapshot = null;
     let targetBatch = "cds";
 
-    // URL Parameters
-    const urlParams = new URLSearchParams(window.location.search);
+    // Robust URL / SPA Query Parameters parsing
+    const searchStr = window.currentQueryString || window.location.search;
+    const urlParams = new URLSearchParams(searchStr);
     targetBatch = urlParams.get('batch') || 'cds';
 
-    // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
+    // --- SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
           return;
         }
 
         const data = docSnap.data();
 
-        // Status verification
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
           return;
         }
 
-        // Single Device Guard
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
           return;
         }
 
-        // Batch Enrollment Check
         const allowedBatches = data.allowedBatches || [];
         const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
         if (!isCombo && !allowedBatches.includes(targetBatch)) {
           alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
-          window.location.href = "classroom.html";
+          if (typeof window.loadPageContent === 'function') {
+            window.loadPageContent('classroom.html');
+          } else {
+            window.location.href = "classroom.html";
+          }
           return;
         }
 
-        // Set UI Header
         document.getElementById("batchBadge").innerText = `${targetBatch.toUpperCase()} SQUADRON`;
         document.getElementById("batchTitle").innerText = `${targetBatch.toUpperCase()} BATCH ACCESS`;
       });
     }
 
+    // --- ADAPTED FOR SPA LOADER ---
     window.selectMode = function(mode) {
-      window.location.href = `subjects.html?batch=${encodeURIComponent(targetBatch)}&mode=${encodeURIComponent(mode)}`;
+      const queryString = `batch=${encodeURIComponent(targetBatch)}&mode=${encodeURIComponent(mode)}`;
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent('subjects.html', queryString);
+      } else {
+        window.location.href = `subjects.html?${queryString}`;
+      }
     };
 
     window.terminateCadetSession = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') {
+        window.logoutCadetMaster();
+      } else {
+        window.location.href = window.location.pathname;
+      }
     };
   </script>
 
@@ -139,7 +172,6 @@
       font-weight: 700;
     }
 
-    /* Force Full Solid Rich Navy Blue Background */
     html, body {
       background-color: #020617 !important;
       background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
@@ -154,9 +186,9 @@
       position: relative;
       -webkit-user-select: none;
       user-select: none;
+      width: 100%;
     }
 
-    /* Falling Stars & Medium Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -171,7 +203,6 @@
     .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
     .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
 
-    /* Moving Glowing Hover Light Effect on All Buttons */
     .phantom-btn {
       transition: all 0.3s ease-in-out;
       position: relative;
@@ -185,7 +216,6 @@
     }
     .phantom-btn:active { transform: scale(0.96); }
 
-    /* 1. Corner Live Time Tracker Widget */
     #phantomStudyTimerWidget {
       position: fixed;
       top: 15px;
@@ -215,7 +245,6 @@
       100% { transform: scale(0.95); opacity: 0.8; }
     }
 
-    /* 2. Floating Focus Status Dock (Bottom Center) */
     #phantomFocusDock {
       position: fixed;
       bottom: 20px;
@@ -238,31 +267,31 @@
       letter-spacing: 1px;
     }
 
-    .armor-panel {
+    .armor-panel-compact {
       background: rgba(6, 12, 30, 0.96);
       border: 2px solid rgba(255, 215, 0, 0.7);
-      box-shadow: 0 0 60px rgba(255, 215, 0, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.15);
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.1);
       position: relative;
       z-index: 10;
+      padding: 1.5rem !important;
+      border-radius: 1rem !important;
+      width: 100%;
     }
 
-    header, main, footer { position: relative; z-index: 10; }
+    header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 </head>
 
-<body class="text-white min-h-screen flex flex-col justify-between">
+<body class="text-white min-h-screen flex flex-col justify-between w-full">
 
-  <!-- Background Canvas for Falling Stars & Medium Bubbles -->
   <canvas id="starBubbleCanvas"></canvas>
 
-  <!-- Top Corner Live Time Tracker (Auto-running continuously) -->
   <div id="phantomStudyTimerWidget">
     <div class="pulse-dot"></div>
     <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
     <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
   </div>
 
-  <!-- Bottom Floating Status Dock -->
   <div id="phantomFocusDock">
     <span>🛡️ MISSION MODE: ACTIVE</span>
     <span>|</span>
@@ -271,34 +300,32 @@
     <span>🎵 AUDIO: ON</span>
   </div>
 
-  <!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
   <audio id="ambientAudio" autoplay loop>
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
   <!-- TOP HEADER -->
-  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+  <header class="w-full pt-5 pb-3 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.3)] shrink-0 flex items-center justify-center">
+        <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-black border border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.3)] shrink-0 flex items-center justify-center">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/020617/ffd700?text=PHANTOM';">
         </div>
         <div>
-          <!-- TEAM PHANTOM Heading with Aesthetic Gradient Color -->
-          <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">
+          <h1 class="font-stencil text-xl sm:text-3xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">
             TEAM PHANTOM
           </h1>
-          <p class="font-orbitron text-[10px] sm:text-xs text-neutral-400 tracking-widest uppercase">
+          <p class="font-orbitron text-[9px] sm:text-[10px] text-neutral-400 tracking-widest uppercase">
             TACTICAL DEPLOYMENT CONSOLE
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="window.location.href='classroom.html'" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <button onclick="if(typeof window.loadPageContent==='function') window.loadPageContent('classroom.html'); else window.location.href='classroom.html';" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; CHANGE SQUADRON
         </button>
-        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           LOGOUT
         </button>
       </div>
@@ -306,74 +333,74 @@
   </header>
 
   <!-- MAIN DEPLOYMENT SELECTION -->
-  <main class="max-w-4xl mx-auto px-4 py-12 flex-grow w-full flex flex-col justify-center">
+  <main class="w-full max-w-5xl mx-auto px-6 py-8 flex-grow flex flex-col justify-center items-center">
     
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-3" id="batchBadge">
+    <div class="text-center mb-8 w-full">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-2" id="batchBadge">
         OPERATIONAL BRIEFING
       </div>
-      <h2 class="font-stencil text-3xl sm:text-4xl text-white tracking-wider uppercase mb-2" id="batchTitle">
+      <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wider uppercase mb-1" id="batchTitle">
         SELECT SQUADRON MODE
       </h2>
-      <p class="text-neutral-300 text-sm font-body max-w-lg mx-auto">
+      <p class="text-neutral-300 text-xs font-body max-w-md mx-auto">
         Choose your learning stream: attend the ongoing live syllabus batch or access complete recorded archives.
       </p>
     </div>
 
     <!-- DUAL CARDS GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
       
       <!-- FOLDER 1: LIVE BATCH -->
-      <div onclick="window.selectMode('live')" class="armor-panel rounded-2xl p-8 hover:border-emerald-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+      <div onclick="window.selectMode('live')" class="armor-panel-compact hover:border-emerald-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
         
         <div>
-          <div class="flex items-center justify-between mb-6">
-            <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-3xl text-emerald-400 group-hover:scale-110 transition duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 transition duration-300">
               ⚡
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-[11px] font-orbitron font-bold tracking-wider uppercase">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              ONGOING STREAM
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              LIVE STREAM
             </span>
           </div>
 
-          <h3 class="font-orbitron text-2xl font-black text-white group-hover:text-emerald-400 transition mb-3">
+          <h3 class="font-orbitron text-xl font-black text-white group-hover:text-emerald-400 transition mb-2">
             LIVE BATCH
           </h3>
-          <p class="text-xs text-neutral-300 font-body leading-relaxed mb-6">
+          <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
             Access daily operational classes, real-time curriculum progression, daily assignments, and current syllabus walkthroughs.
           </p>
         </div>
 
-        <button class="w-full py-3 bg-neutral-900 group-hover:bg-emerald-600 border border-emerald-500/40 group-hover:border-emerald-400 text-emerald-300 group-hover:text-black font-orbitron font-extrabold text-xs rounded-xl uppercase tracking-wider transition duration-300 phantom-btn">
+        <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-emerald-600 border border-emerald-500/40 group-hover:border-emerald-400 text-emerald-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
           ENTER LIVE SQUADRON &rarr;
         </button>
       </div>
 
       <!-- FOLDER 2: RECORDED BATCH -->
-      <div onclick="window.selectMode('recorded')" class="armor-panel rounded-2xl p-8 hover:border-amber-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl group-hover:bg-amber-400/20 transition"></div>
+      <div onclick="window.selectMode('recorded')" class="armor-panel-compact hover:border-amber-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-xl group-hover:bg-amber-400/20 transition"></div>
         
         <div>
-          <div class="flex items-center justify-between mb-6">
-            <div class="w-14 h-14 rounded-xl bg-amber-400/10 border border-amber-500/40 flex items-center justify-center text-3xl text-amber-400 group-hover:scale-110 transition duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-11 h-11 rounded-xl bg-amber-400/10 border border-amber-500/40 flex items-center justify-center text-2xl text-amber-400 group-hover:scale-110 transition duration-300">
               📁
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-500/60 text-amber-300 text-[11px] font-orbitron font-bold tracking-wider uppercase">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/60 text-amber-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
               FULL VAULT
             </span>
           </div>
 
-          <h3 class="font-orbitron text-2xl font-black text-white group-hover:text-amber-400 transition mb-3">
+          <h3 class="font-orbitron text-xl font-black text-white group-hover:text-amber-400 transition mb-2">
             RECORDED BATCH
           </h3>
-          <p class="text-xs text-neutral-300 font-body leading-relaxed mb-6">
-            Comprehensive archive of pre-recorded full syllabus lectures, high-speed revision sessions, and chapter-wise class dossiers.
+          <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
+            Comprehensive archive of pre-recorded full syllabus lectures, high-speed revision sessions, and chapter dossiers.
           </p>
         </div>
 
-        <button class="w-full py-3 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 group-hover:border-amber-400 text-amber-300 group-hover:text-black font-orbitron font-extrabold text-xs rounded-xl uppercase tracking-wider transition duration-300 phantom-btn">
+        <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 group-hover:border-amber-400 text-amber-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
           ACCESS COMPLETE VAULT &rarr;
         </button>
       </div>
@@ -383,14 +410,13 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-4 px-4 text-center">
-    <p class="text-[11px] font-body text-neutral-400 tracking-wider">
+  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3 px-4 text-center">
+    <p class="text-[10px] font-body text-neutral-400 tracking-wider">
       &copy; 2026 TEAM PHANTOM. MILITARY PRECISION PROTOCOL.
     </p>
   </footer>
 
   <script>
-    // --- CANVAS PARTICLES ANIMATION ---
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -401,15 +427,15 @@
     resizeCanvas();
 
     const particles = [];
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 100; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2.5,
-        starRadius: Math.random() * 4 + 3,
-        speedY: Math.random() * 0.9 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.9 + 0.4,
+        radius: Math.random() * 2 + 1,
+        starRadius: Math.random() * 2.5 + 1.2,
+        speedY: Math.random() * 0.7 + 0.2,
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.8 + 0.3,
         isBubble: Math.random() > 0.45
       });
     }
@@ -420,19 +446,19 @@
         p.y += p.speedY;
         p.x += p.speedX;
         if (p.y > canvas.height) {
-          p.y = -20;
+          p.y = -10;
           p.x = Math.random() * canvas.width;
         }
         ctx.beginPath();
         if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
-          ctx.lineWidth = 1.6;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+          ctx.lineWidth = 1.0;
           ctx.stroke();
         } else {
           ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 25;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = '#ffd700';
           ctx.fill();
         }
@@ -443,7 +469,6 @@
   </script>
 
   <script>
-    // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
     (function() {
       const todayStr = new Date().toDateString();
       const lastDate = localStorage.getItem("phantom_study_date");
@@ -483,25 +508,6 @@
         }
       }, 1000);
     })();
-
-    // 2. Automatic Daily Mission Briefing on Entry
-    window.addEventListener('DOMContentLoaded', () => {
-      const lastBriefDate = localStorage.getItem("phantom_brief_date");
-      const todayStr = new Date().toDateString();
-
-      if (lastBriefDate !== todayStr) {
-        localStorage.setItem("phantom_brief_date", todayStr);
-        setTimeout(() => {
-          const quotes = [
-            "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-            "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-            "\"Discipline is choosing between what you want now and what you want most.\""
-          ];
-          const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-          alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
-        }, 800);
-      }
-    });
 
     window.addEventListener('load', () => {
       const audio = document.getElementById("ambientAudio");
