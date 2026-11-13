@@ -25,13 +25,7 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        localStorage.clear();
-        sessionStorage.clear();
         document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
-        setTimeout(() => {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.reload();
-        }, 2000);
       }
     }, 1000);
 
@@ -74,13 +68,11 @@
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-      else window.location.href = "index.html";
+      window.location.href = "index.html";
     } else {
       onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.href = "index.html";
+          window.location.href = "index.html";
           return;
         }
 
@@ -91,8 +83,7 @@
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
           localStorage.removeItem("phantom_session_token");
           localStorage.removeItem("phantom_uid");
-          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
-          else window.location.href = "index.html";
+          window.location.href = "index.html";
           return;
         }
 
@@ -101,8 +92,7 @@
     }
 
     function renderLecturesList() {
-      const searchStr = window.currentQueryString || window.location.search;
-      const urlParams = new URLSearchParams(searchStr);
+      const urlParams = new URLSearchParams(window.location.search);
       currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
       currentSubject = urlParams.get('subject') || 'General Awareness';
       const mode = urlParams.get('mode') || 'live';
@@ -231,7 +221,6 @@
       container.innerHTML = html;
     }
 
-    // --- ADAPTED FOR SPA LOADER ---
     window.playLectureVideo = function(videoId, title) {
       if (!videoId || videoId === "#" || videoId === "") {
         alert("It will be uploaded very soon.");
@@ -240,11 +229,7 @@
       const cleanTitle = title || "TACTICAL SESSION";
       sessionStorage.setItem("phantom_current_video", videoId);
       sessionStorage.setItem("phantom_current_title", cleanTitle);
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent("player.html");
-      } else {
-        window.location.href = "player.html";
-      }
+      window.location.href = "player.html";
     };
 
     window.openClassNotes = function(url) {
@@ -256,27 +241,17 @@
     };
 
     window.navigateBackToSubjects = function() {
-      const searchStr = window.currentQueryString || window.location.search;
-      const urlParams = new URLSearchParams(searchStr);
-      const batch = urlParams.get('batch') || urlParams.get('squadron') || 'cds-kilo';
+      const urlParams = new URLSearchParams(window.location.search);
+      const batch = urlParams.get('batch') || 'cds-kilo';
       const mode = urlParams.get('mode') || 'live';
-      const qStr = `batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
-      if (typeof window.loadPageContent === 'function') {
-        window.loadPageContent('subjects.html', qStr);
-      } else {
-        window.location.href = `subjects.html?${qStr}`;
-      }
+      window.location.href = `subjects.html?batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
     };
 
     window.terminateCadetSession = function() {
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
       sessionStorage.clear();
-      if (typeof window.logoutCadetMaster === 'function') {
-        window.logoutCadetMaster();
-      } else {
-        window.location.href = window.location.pathname;
-      }
+      window.location.href = "index.html";
     };
   </script>
 
