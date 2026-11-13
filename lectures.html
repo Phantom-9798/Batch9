@@ -43,207 +43,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
-      authDomain: "team-phantom-enrollment.firebaseapp.com",
-      projectId: "team-phantom-enrollment",
-      storageBucket: "team-phantom-enrollment.firebasestorage.app",
-      messagingSenderId: "658049687096",
-      appId: "1:658049687096:web:8464788a43126a6bced0cd"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
-    let currentBatch = "capf";
-    let currentSubject = "Mentor Session";
-
-    // --- SECURE SESSION VALIDATION ---
-    const localUid = localStorage.getItem("phantom_uid");
-    const localToken = localStorage.getItem("phantom_session_token");
-
-    if (!localUid || !localToken) {
-      window.location.href = "index.html";
-    } else {
-      onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
-        if (!docSnap.exists()) {
-          window.location.href = "index.html";
-          return;
-        }
-
-        const data = docSnap.data();
-
-        // Single Device Guard
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
-          return;
-        }
-
-        renderLecturesList();
-      });
-    }
-
-    function renderLecturesList() {
-      const urlParams = new URLSearchParams(window.location.search);
-      currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
-      currentSubject = urlParams.get('subject') || 'General Awareness';
-      const mode = urlParams.get('mode') || 'live';
-
-      const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge}`;
-      document.getElementById('chapterHeading').innerText = currentSubject;
-
-      const staticLectures = [];
-
-      // 🔥 DIRECT SUBJECT QUERY
-      const q = query(
-        collection(db, "tactical_curriculum"),
-        where("squadron", "==", currentBatch.toLowerCase().trim()),
-        where("mode", "==", mode),
-        where("subject", "==", currentSubject.trim())
-      );
-
-      onSnapshot(q, (snapshot) => {
-        const dynamicLectures = [];
-        const seenVideos = new Set();
-
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          const vUrl = (d.url || d.videoUrl || "").trim();
-          const cleanTitle = (d.title || "").trim().toLowerCase();
-          const uniqueKey = vUrl || cleanTitle;
-
-          if (!seenVideos.has(uniqueKey)) {
-            seenVideos.add(uniqueKey);
-            dynamicLectures.push({
-              lectureNo: String(d.order || dynamicLectures.length + 1).padStart(2, '0'),
-              title: d.title,
-              duration: d.duration || "",
-              videoId: vUrl,
-              pdfUrl: d.pdfUrl || "#",
-              order: Number(d.order) || 999
-            });
-          }
-        });
-
-        dynamicLectures.sort((a, b) => a.order - b.order);
-
-        const combined = [...staticLectures];
-        dynamicLectures.forEach(dyn => {
-          const exists = combined.some(st => (st.title && st.title.toLowerCase() === dyn.title.toLowerCase()) || (st.videoId && st.videoId === dyn.videoId));
-          if (!exists) combined.push(dyn);
-        });
-
-        displayLectures(combined, currentSubject, mode);
-      }, (err) => {
-        console.warn("Curriculum sync fallback:", err);
-        displayLectures(staticLectures, currentSubject, mode);
-      });
-    }
-
-    function displayLectures(lectures, subjectName, mode) {
-      const container = document.getElementById('lecturesContainer');
-      container.innerHTML = "";
-      document.getElementById('lectureCountBadge').innerText = `${lectures.length} SESSIONS READY`;
-
-      if (lectures.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full armor-panel rounded-2xl p-12 text-center border border-amber-400/40">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 mb-4 text-2xl">
-              ⏳
-            </div>
-            <h3 class="font-orbitron text-lg sm:text-xl text-amber-400 font-bold tracking-wider mb-2 uppercase">
-              IT WILL BE UPLOADED VERY SOON
-            </h3>
-            <p class="text-xs text-neutral-300 font-body max-w-md mx-auto">
-              ${mode === 'recorded' ? 'Recorded syllabus dossiers for this module are currently under synchronization.' : `Live lectures for "${subjectName}" are scheduled.`}
-            </p>
-          </div>
-        `;
-        return;
-      }
-
-      lectures.forEach((lec) => {
-        const card = document.createElement('div');
-        card.className = "armor-panel rounded-xl p-5 flex flex-col justify-between hover:border-amber-400 transition group shadow-lg";
-
-        let embedSrc = lec.videoId;
-        if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
-          const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-          if (match && match[1]) {
-            embedSrc = match[1];
-          }
-        }
-
-        const durationHtml = lec.duration ? `<span class="text-[11px] font-mono text-neutral-300 flex items-center gap-1">⏱ ${lec.duration}</span>` : '';
-
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="px-2.5 py-0.5 rounded bg-black/80 border border-neutral-700 text-amber-400 font-mono text-xs font-bold">
-                SESSION #${lec.lectureNo}
-              </span>
-              ${durationHtml}
-            </div>
-            <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-3">
-              ${lec.title}
-            </h3>
-          </div>
-
-          <div class="pt-3 border-t border-neutral-800/80 flex items-center gap-2">
-            <button onclick="window.playLectureVideo('${embedSrc}', '${lec.title.replace(/'/g, "\\'")}')" class="flex-1 py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-400 hover:to-sky-300 text-black font-orbitron font-extrabold text-xs rounded-lg uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
-              WATCH LECTURE
-            </button>
-            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-3 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-orbitron font-bold text-xs rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
-              NOTES (PDF)
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    window.playLectureVideo = function(videoId, title) {
-      if (!videoId || videoId === "#" || videoId === "") {
-        alert("It will be uploaded very soon.");
-        return;
-      }
-      const cleanTitle = title || "TACTICAL SESSION";
-      sessionStorage.setItem("phantom_current_video", videoId);
-      sessionStorage.setItem("phantom_current_title", cleanTitle);
-      window.location.href = "player.html";
-    };
-
-    window.openClassNotes = function(url) {
-      if (!url || url === "#" || url === "") {
-        alert("Notes dossier: It will be uploaded very soon.");
-        return;
-      }
-      window.open(url, "_blank");
-    };
-
-    window.navigateBackToSubjects = function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const batch = urlParams.get('batch') || 'cds-kilo';
-      const mode = urlParams.get('mode') || 'live';
-      window.location.href = `subjects.html?batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
-    };
-
-    window.terminateCadetSession = function() {
-      localStorage.removeItem("phantom_session_token");
-      localStorage.removeItem("phantom_uid");
-      sessionStorage.clear();
-      window.location.href = "index.html";
-    };
-  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     * {
@@ -271,7 +71,6 @@
       user-select: none;
     }
 
-    /* Falling Stars & Medium Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -286,7 +85,6 @@
     .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
     .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
 
-    /* Moving Glowing Hover Light Effect on All Buttons */
     .phantom-btn {
       transition: all 0.3s ease-in-out;
       position: relative;
@@ -300,7 +98,6 @@
     }
     .phantom-btn:active { transform: scale(0.96); }
 
-    /* 1. Corner Live Time Tracker Widget */
     #phantomStudyTimerWidget {
       position: fixed;
       top: 15px;
@@ -330,7 +127,6 @@
       100% { transform: scale(0.95); opacity: 0.8; }
     }
 
-    /* 2. Floating Focus Status Dock (Bottom Center) */
     #phantomFocusDock {
       position: fixed;
       bottom: 20px;
@@ -365,9 +161,7 @@
   </style>
 </head>
 
-<body class="text-white min-h-screen flex flex-col justify-between">
-
-  <!-- Background Canvas for Falling Stars & Medium Bubbles -->
+<body>
   <canvas id="starBubbleCanvas"></canvas>
 
   <div id="phantomStudyTimerWidget">
@@ -395,7 +189,6 @@
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/020617/ffd700?text=PHANTOM';">
         </div>
         <div>
-          <!-- TEAM PHANTOM Heading with Gradient Color -->
           <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">
             TEAM PHANTOM
           </h1>
@@ -417,25 +210,30 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="badgeIndicator">
-          BRIEFING ARCHIVE
+    <!-- Top Header Banner matching Photo 1 exactly -->
+    <div class="armor-panel rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-amber-400 flex items-center justify-center text-black shadow-lg">
+          <i class="fas fa-book-open text-2xl"></i>
         </div>
-        <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="chapterHeading">
-          LOADING SUBJECT...
-        </h2>
-        <p class="text-xs text-neutral-300 font-body mt-1">
-          Access high-definition tactical classes, concept walkthroughs, and official dossier notes below.
-        </p>
+        <div>
+          <div class="flex items-center gap-2 text-cyan-400 font-orbitron text-xs font-bold tracking-widest uppercase mb-1">
+            <i class="fas fa-bookmark"></i> SUBJECT
+          </div>
+          <h2 class="font-stencil text-2xl sm:text-4xl text-white tracking-wide uppercase" id="chapterHeading">
+            ENGLISH VOCABULARY
+          </h2>
+        </div>
       </div>
-      <div class="flex items-center gap-2 bg-black/60 border border-emerald-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-emerald-400">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="lectureCountBadge">STREAM READY</span>
+      <div class="flex flex-col items-end gap-1 text-right">
+        <span class="text-xs uppercase tracking-wider font-orbitron text-amber-400">Classes</span>
+        <h3 class="text-lg font-bold text-white" id="allClassesTitle">All classes</h3>
+        <span class="text-xs text-neutral-400 font-mono" id="lectureCountBadge">5 classes available</span>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-6" id="lecturesContainer"></div>
+    <!-- Long Rectangular Rows Container matching Photo 1 layout -->
+    <div class="flex flex-col gap-4 pb-6" id="lecturesContainer"></div>
   </main>
 
   <footer class="w-full bg-black/95 border-t border-amber-500/20 py-3.5 px-4 text-center">
@@ -445,7 +243,7 @@
   </footer>
 
   <script>
-    // --- CANVAS PARTICLES ANIMATION ---
+    // Canvas background
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -495,57 +293,84 @@
       requestAnimationFrame(animateParticles);
     }
     animateParticles();
-  </script>
 
-  <script>
-    // --- CONTINUOUS STUDY TIMER & AUDIO ---
-    (function() {
-      const todayStr = new Date().toDateString();
-      const lastDate = localStorage.getItem("phantom_study_date");
-      
-      if (lastDate !== todayStr) {
-        localStorage.setItem("phantom_study_date", todayStr);
-        localStorage.setItem("phantom_daily_seconds", "0");
-      }
+    // Sample data matching Photo 1 layout: 01 IDIOMS, 02 ONE WORD SUBSTITUTION CLASS 1, 03 ONE WORD SUBSTITUTION CLASS 2
+    const sampleLectures = [
+      { lectureNo: "01", title: "IDIOMS", duration: "45m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
+      { lectureNo: "02", title: "ONE WORD SUBSTITUTION CLASS 1", duration: "52m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
+      { lectureNo: "03", title: "ONE WORD SUBSTITUTION CLASS 2", duration: "1h 05m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
+      { lectureNo: "04", title: "SYNONYMS & ANTONYMS MASTERCLASS", duration: "58m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" },
+      { lectureNo: "05", title: "SPOTTING ERRORS PRACTICE", duration: "50m", videoId: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "#" }
+    ];
 
-      let totalSeconds = parseInt(localStorage.getItem("phantom_daily_seconds") || "0");
-      let sessionSeconds = 0;
+    function renderLectures(lectures) {
+      const container = document.getElementById('lecturesContainer');
+      container.innerHTML = "";
+      document.getElementById('lectureCountBadge').innerText = `${lectures.length} classes available`;
 
-      setInterval(() => {
-        totalSeconds++;
-        sessionSeconds++;
-        localStorage.setItem("phantom_daily_seconds", totalSeconds.toString());
+      lectures.forEach((lec, index) => {
+        const card = document.createElement('div');
+        // Long rectangular row layout with distinct badge colors matching Photo 1
+        const badgeColors = [
+          'bg-purple-600 text-white',
+          'bg-blue-600 text-white',
+          'bg-rose-600 text-white',
+          'bg-amber-600 text-white',
+          'bg-emerald-600 text-white'
+        ];
+        const colorClass = badgeColors[index % badgeColors.length];
 
-        const hrs = Math.floor(totalSeconds / 3600);
-        const mins = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
-        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-        const displayEl = document.getElementById("phantomTimerDisplay");
-        if (displayEl) displayEl.innerText = displayStr;
+        card.className = "armor-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-amber-400 transition group shadow-lg";
 
-        const pHrs = Math.floor(sessionSeconds / 3600);
-        const pMins = Math.floor((sessionSeconds % 3600) / 60);
-        const pSecs = sessionSeconds % 60;
-        const pDisplayStr = pHrs > 0 
-          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
-        
-        const autoPomoEl = document.getElementById("autoPomoDisplay");
-        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
-      }, 1000);
-    })();
+        card.innerHTML = `
+          <div class="flex items-center gap-4 w-full sm:w-auto">
+            <div class="px-4 py-3 rounded-xl font-orbitron font-extrabold text-sm sm:text-base ${colorClass} shadow-md flex flex-col items-center justify-center min-w-[70px]">
+              <span class="text-[10px] opacity-80 uppercase">CLASS</span>
+              <span>${lec.lectureNo}</span>
+            </div>
+            <div>
+              <h3 class="font-orbitron font-bold text-base sm:text-lg text-white group-hover:text-amber-400 transition">
+                ${lec.title}
+              </h3>
+              ${lec.duration ? `<span class="text-xs font-mono text-neutral-400 flex items-center gap-1 mt-1">⏱ Duration: ${lec.duration}</span>` : ''}
+            </div>
+          </div>
 
-    window.addEventListener('load', () => {
-      const audio = document.getElementById("ambientAudio");
-      if (audio) {
-        audio.volume = 0.4;
-        audio.play().catch(() => {
-          document.addEventListener('click', () => {
-            audio.play().catch(() => {});
-          }, { once: true });
-        });
-      }
-    });
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button onclick="window.playLectureVideo('${lec.videoId}', '${lec.title.replace(/'/g, "\'")}')" class="px-5 py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-400 hover:to-sky-300 text-black font-orbitron font-extrabold text-xs rounded-xl uppercase tracking-wider transition shadow cursor-pointer phantom-btn flex items-center gap-2">
+              <i class="fas fa-play"></i> Watch
+            </button>
+            <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 font-orbitron font-bold text-xs rounded-xl uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-2">
+              <i class="fas fa-file-pdf text-blue-400"></i> Notes
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.playLectureVideo = function(videoId, title) {
+      sessionStorage.setItem("phantom_current_video", videoId);
+      sessionStorage.setItem("phantom_current_title", title);
+      window.location.href = "player.html";
+    };
+
+    window.openClassNotes = function(url) {
+      alert("Opening class notes PDF dossier...");
+    };
+
+    window.navigateBackToSubjects = function() {
+      window.location.href = "index.html";
+    };
+
+    window.terminateCadetSession = function() {
+      localStorage.removeItem("phantom_session_token");
+      localStorage.removeItem("phantom_uid");
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    };
+
+    renderLectures(sampleLectures);
   </script>
 </body>
 </html>
