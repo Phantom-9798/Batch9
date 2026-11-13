@@ -567,7 +567,6 @@
       btn.innerText = "TRANSMITTING...";
       btn.disabled = true;
 
-      // Select collection based on Access Tier
       const targetCollection = accessTier === 'free' ? "free_tactical_curriculum" : "tactical_curriculum";
 
       try {
@@ -654,25 +653,46 @@
       }
     };
 
+    // 🔥 UPDATED EXTRACTOR LOGIC FOR NEW NEXIELD HTML STRUCTURE (LESSONS_DATA)
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
       if (!html.trim()) { alert("Please paste HTML code first!"); return; }
 
-      const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
-      let match;
       let tsvResult = "";
       let count = 1;
 
-      while ((match = regex.exec(html)) !== null) {
-        const title = match[1];
-        const token = match[2];
-        const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-        tsvResult += `${count}\t${title}\t${fullUrl}\n`;
-        count++;
-      }
+      try {
+        // 1. Try parsing modern LESSONS_DATA array format
+        const match = html.match(/const\s+LESSONS_DATA\s*=\s*(\[[\s\S]*?\]);/);
+        if (match) {
+          const lessonsData = eval('(' + match[1] + ')');
+          lessonsData.forEach(item => {
+            const title = item.title || "Lecture";
+            const zoomLink = item.zoomLink || item.url || "";
+            const linkType = item.linkType || "zoom";
+            const proxy = (linkType === "vimeo") ? "https://vimp.nexield.in" : "https://zoomp.nexield.in";
+            const fullUrl = `${proxy}?title=${encodeURIComponent(title)}&link=${encodeURIComponent(zoomLink)}`;
+            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
+            count++;
+          });
+        } else {
+          // 2. Fallback to old regex pattern if LESSONS_DATA not found
+          const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
+          let regMatch;
+          while ((regMatch = regex.exec(html)) !== null) {
+            const title = regMatch[1];
+            const token = regMatch[2];
+            const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
+            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
+            count++;
+          }
+        }
 
-      outputEl.value = count === 1 ? "❌ No links found!" : tsvResult;
+        outputEl.value = count === 1 ? "❌ No lectures or links found in the pasted HTML!" : tsvResult;
+      } catch (err) {
+        outputEl.value = "❌ Parsing Error: " + err.message;
+      }
     };
 
     window.executePurge = async () => {
