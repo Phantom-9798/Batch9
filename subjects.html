@@ -25,7 +25,13 @@
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        localStorage.clear();
+        sessionStorage.clear();
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;font-family:Rajdhani,sans-serif;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        setTimeout(() => {
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.reload();
+        }, 2000);
       }
     }, 1000);
 
@@ -173,7 +179,6 @@
       }
     ];
 
-    // Master Curriculum Data for all squadrons
     const curriculumData = {
       "cds-math": {
         title: "CDS Mathematics Specialist",
@@ -397,11 +402,13 @@
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+      else window.location.href = "index.html";
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.href = "index.html";
           return;
         }
 
@@ -410,18 +417,16 @@
         if (data.status !== "active") {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("Notice: Cadet account is currently not active or pending verification.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.href = "index.html";
           return;
         }
 
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') window.logoutCadetMaster();
+          else window.location.href = "index.html";
           return;
         }
 
@@ -430,14 +435,16 @@
     }
 
     function renderBatchCurriculum(allowedBatches) {
-      const urlParams = new URLSearchParams(window.location.search);
+      const searchStr = window.currentQueryString || window.location.search;
+      const urlParams = new URLSearchParams(searchStr);
       currentBatchParam = urlParams.get('batch') || 'cds-kilo';
       currentModeParam = (urlParams.get('mode') === 'recorded') ? 'recorded' : 'live';
 
       const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
       if (!isCombo && !allowedBatches.includes(currentBatchParam)) {
         alert("ACCESS DENIED: You are not authorized for this specific squadron.");
-        window.location.href = "classroom.html";
+        if (typeof window.loadPageContent === 'function') window.loadPageContent('classroom.html');
+        else window.location.href = "classroom.html";
         return;
       }
 
@@ -450,7 +457,15 @@
 
       const backBtn = document.getElementById('backToModesBtn');
       if (backBtn) {
-        backBtn.href = `batch-mode.html?batch=${encodeURIComponent(currentBatchParam)}`;
+        backBtn.onclick = (e) => {
+          e.preventDefault();
+          const qStr = `batch=${encodeURIComponent(currentBatchParam)}`;
+          if (typeof window.loadPageContent === 'function') {
+            window.loadPageContent('batch-mode.html', qStr);
+          } else {
+            window.location.href = `batch-mode.html?${qStr}`;
+          }
+        };
       }
 
       const container = document.getElementById('subjectsContainer');
@@ -458,78 +473,55 @@
 
       const activeSubjectsList = (currentBatchParam === "cds-kilo") ? cdsOtaFullSubjects : currentCurriculum.subjects;
 
-      activeSubjectsList.forEach((subj, index) => {
+      activeSubjectsList.forEach((subj) => {
         const card = document.createElement('div');
-        
-       const isActuallyLocked = !isRecorded && subj.locked;
+        const isActuallyLocked = !isRecorded && subj.locked;
 
-const cardClass = isActuallyLocked 
-    ? 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between transition group shadow-lg locked' 
-    : 'armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 transition cursor-pointer group shadow-lg';
-  
-card.className = cardClass; //
+        card.className = isActuallyLocked 
+          ? 'subject-square-tile opacity-40 grayscale locked' 
+          : 'subject-square-tile group';
 
-card.onclick = () => {
-  if (isActuallyLocked) {
-    alert("यह सब्जेक्ट अभी लाइव शुरू नहीं हुआ है (Coming Soon)!");
-    return;
-  }
-  openSubjectModule(currentBatchParam, subj.name, currentModeParam);
-};
+        card.onclick = () => {
+          if (isActuallyLocked) {
+            alert("यह सब्जेक्ट अभी लाइव शुरू नहीं हुआ है (Coming Soon)!");
+            return;
+          }
+          openSubjectModule(currentBatchParam, subj.name, currentModeParam);
+        };
 
         card.innerHTML = `
-          <!-- CARD TOP IMAGE -->
-          <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
-            <img 
-              src="${subj.image}" 
-              alt="${subj.name}" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" 
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            
-            <div class="absolute top-2.5 left-2.5">
-              <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-wider text-amber-400 font-bold uppercase">
-                MODULE #${(index + 1).toString().padStart(2, '0')}
-              </span>
-            </div>
-            
-            <div class="absolute top-2.5 right-2.5">
-              <span class="w-2.5 h-2.5 rounded-full ${isRecorded ? 'bg-amber-400 shadow-[0_0_8px_rgba(255,215,0,0.6)]' : 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]'} inline-block"></span>
-            </div>
+          <div class="absolute inset-0 z-0">
+            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover opacity-35 group-hover:scale-110 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#060c1e] via-[#060c1e]/80 to-transparent"></div>
           </div>
-
-          <!-- CARD BOTTOM DETAILS -->
-          <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
-            <div>
-              <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1">
-                ${subj.name}
-              </h3>
-              <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">
-                ${subj.desc}
-              </p>
-            </div>
-            <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              <span class="text-[10px] font-mono ${isRecorded ? 'text-amber-400' : 'text-emerald-400'}">
-                ${isRecorded ? 'RECORDED VAULT' : '🔴 LIVE READY'}
-              </span>
-              <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
-            </div>
+          <div class="relative z-10 flex flex-col items-center justify-center h-full p-2">
+            <h4 class="font-orbitron font-extrabold text-sm sm:text-base text-white tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] line-clamp-2 mb-1">${subj.name}</h4>
+            <span class="text-[9px] font-mono text-amber-300 font-bold uppercase tracking-widest">${isActuallyLocked ? 'LOCKED' : 'EXPLORE'}</span>
           </div>
         `;
         container.appendChild(card);
       });
     }
 
+    // --- ADAPTED FOR SPA LOADER ---
     function openSubjectModule(batch, subjectName, mode) {
-      window.location.href = `lectures.html?batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
+      const queryString = `batch=${encodeURIComponent(batch)}&subject=${encodeURIComponent(subjectName)}&mode=${encodeURIComponent(mode)}`;
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent('lectures.html', queryString);
+      } else {
+        window.location.href = `lectures.html?${queryString}`;
+      }
     }
 
     window.terminateCadetSession = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') {
+        window.logoutCadetMaster();
+      } else {
+        window.location.href = window.location.pathname;
+      }
     };
   </script>
 
@@ -559,7 +551,7 @@ card.onclick = () => {
       user-select: none;
     }
 
-    /* Falling Stars & Medium Bubbles Canvas Background */
+    /* Falling Stars & Small Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -574,7 +566,6 @@ card.onclick = () => {
     .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
     .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
 
-    /* Moving Glowing Hover Light Effect on All Buttons */
     .phantom-btn {
       transition: all 0.3s ease-in-out;
       position: relative;
@@ -588,10 +579,33 @@ card.onclick = () => {
     }
     .phantom-btn:active { transform: scale(0.96); }
 
-    /* 1. Corner Live Time Tracker Widget */
+    /* Compact Square Subject Tiles matching classroom style */
+    .subject-square-tile {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+      border-radius: 1rem;
+      background: rgba(6, 12, 30, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    .subject-square-tile:hover {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 22px rgba(14, 165, 233, 0.5);
+      transform: translateY(-3px);
+    }
+
+    /* Focus timer relocated to bottom right / dock area to prevent layout narrowing */
     #phantomStudyTimerWidget {
       position: fixed;
-      top: 15px;
+      bottom: 20px;
       right: 20px;
       z-index: 99999;
       background: rgba(4, 7, 13, 0.95);
@@ -618,7 +632,6 @@ card.onclick = () => {
       100% { transform: scale(0.95); opacity: 0.8; }
     }
 
-    /* 2. Floating Focus Status Dock (Bottom Center) */
     #phantomFocusDock {
       position: fixed;
       bottom: 20px;
@@ -649,49 +662,21 @@ card.onclick = () => {
       z-index: 10;
     }
 
-    /* Locked Subject Styling & Not Started Badge */
-    .armor-panel.locked {
-      opacity: 0.55;
-      filter: grayscale(70%);
-      border-color: rgba(255, 215, 0, 0.3) !important;
-      cursor: not-allowed;
-    }
-    .armor-panel.locked::after {
-      content: "🔒 NOT STARTED";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #04070b;
-      color: #ffd700;
-      padding: 8px 14px;
-      font-size: 12px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      border: 2px solid #ffd700;
-      border-radius: 6px;
-      z-index: 50;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-      letter-spacing: 1px;
-    }
-
     header, main, footer { position: relative; z-index: 10; }
   </style>
 </head>
 
 <body class="text-white min-h-screen flex flex-col justify-between">
 
-  <!-- Background Canvas for Falling Stars & Medium Bubbles -->
+  <!-- Background Canvas for Falling Stars & Small Bubbles -->
   <canvas id="starBubbleCanvas"></canvas>
 
-  <!-- Top Corner Live Time Tracker (Auto-running continuously) -->
   <div id="phantomStudyTimerWidget">
     <div class="pulse-dot"></div>
     <div style="font-size: 9px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus Time:</div>
     <div id="phantomTimerDisplay" style="font-size: 11px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
   </div>
 
-  <!-- Bottom Floating Status Dock -->
   <div id="phantomFocusDock">
     <span>🛡️ MISSION MODE: ACTIVE</span>
     <span>|</span>
@@ -700,22 +685,18 @@ card.onclick = () => {
     <span>🎵 AUDIO: ON</span>
   </div>
 
-  <!-- Hidden Audio Element for Automatic Ambient Focus White Noise -->
   <audio id="ambientAudio" autoplay loop>
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
   <!-- TOP HEADER -->
   <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      
-      <!-- LOGO & BRANDING -->
+    <div class="w-full px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-4">
         <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black border border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.3)] shrink-0 flex items-center justify-center">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/020617/ffd700?text=PHANTOM';">
         </div>
         <div>
-          <!-- TEAM PHANTOM Heading with Aesthetic Gradient Color -->
           <h1 class="font-stencil text-2xl sm:text-4xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-amber-300">
             TEAM PHANTOM
           </h1>
@@ -725,24 +706,20 @@ card.onclick = () => {
         </div>
       </div>
 
-      <!-- NAVIGATION & CADET INFO -->
       <div class="flex items-center gap-3">
-        <a id="backToModesBtn" href="classroom.html" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <a id="backToModesBtn" href="#" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; BACK TO MODES
         </a>
         <button onclick="window.terminateCadetSession()" class="bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 text-xs font-orbitron font-bold px-3.5 py-2 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           LOGOUT
         </button>
       </div>
-
     </div>
   </header>
 
   <!-- MAIN CURRICULUM SECTION -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-    
-    <!-- SQUADRON SUMMARY CARD -->
-    <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+  <main class="w-full px-6 py-8 flex-grow">
+    <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="batchBadge">
           SELECTED SQUADRON
@@ -759,8 +736,7 @@ card.onclick = () => {
     </div>
 
     <!-- SUBJECT TABS GRID -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-6" id="subjectsContainer"></div>
-
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 pb-6 w-full" id="subjectsContainer"></div>
   </main>
 
   <!-- FOOTER -->
@@ -771,7 +747,6 @@ card.onclick = () => {
   </footer>
 
   <script>
-    // --- CANVAS PARTICLES ANIMATION ---
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -782,15 +757,15 @@ card.onclick = () => {
     resizeCanvas();
 
     const particles = [];
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 100; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 4 + 2.5,
-        starRadius: Math.random() * 4 + 3,
-        speedY: Math.random() * 0.9 + 0.3,
-        speedX: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.9 + 0.4,
+        radius: Math.random() * 2 + 1,
+        starRadius: Math.random() * 2.5 + 1.2,
+        speedY: Math.random() * 0.7 + 0.2,
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.8 + 0.3,
         isBubble: Math.random() > 0.45
       });
     }
@@ -801,19 +776,19 @@ card.onclick = () => {
         p.y += p.speedY;
         p.x += p.speedX;
         if (p.y > canvas.height) {
-          p.y = -20;
+          p.y = -10;
           p.x = Math.random() * canvas.width;
         }
         ctx.beginPath();
         if (p.isBubble) {
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.85})`;
-          ctx.lineWidth = 1.6;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+          ctx.lineWidth = 1.0;
           ctx.stroke();
         } else {
           ctx.arc(p.x, p.y, p.starRadius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 223, 0, ${p.opacity})`;
-          ctx.shadowBlur = 25;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = '#ffd700';
           ctx.fill();
         }
@@ -824,7 +799,6 @@ card.onclick = () => {
   </script>
 
   <script>
-    // 1. Fully Automatic Continuous Study Time Tracker & Session Timer
     (function() {
       const todayStr = new Date().toDateString();
       const lastDate = localStorage.getItem("phantom_study_date");
@@ -864,25 +838,6 @@ card.onclick = () => {
         }
       }, 1000);
     })();
-
-    // 2. Automatic Daily Mission Briefing on Entry
-    window.addEventListener('DOMContentLoaded', () => {
-      const lastBriefDate = localStorage.getItem("phantom_brief_date");
-      const todayStr = new Date().toDateString();
-
-      if (lastBriefDate !== todayStr) {
-        localStorage.setItem("phantom_brief_date", todayStr);
-        setTimeout(() => {
-          const quotes = [
-            "\"An Officer and a Gentleman never gets distracted from the objective. Focus is your greatest weapon.\"",
-            "\"The sweat saved in training translates to zero blood shed in the exam battleground.\"",
-            "\"Discipline is choosing between what you want now and what you want most.\""
-          ];
-          const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-          alert("📜 TEAM PHANTOM MISSION BRIEFING:\n\n" + randomQuote);
-        }, 800);
-      }
-    });
 
     window.addEventListener('load', () => {
       const audio = document.getElementById("ambientAudio");
