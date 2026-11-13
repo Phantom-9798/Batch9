@@ -671,7 +671,7 @@
             const title = item.title || "Lecture";
             const zoomLink = item.zoomLink || item.url || "";
             const linkType = item.linkType || "zoom";
-            const proxy = (linkType === "vimeo") ? "https://vimp.nexield.in" : "https://zoomp.nexield.in";
+            const proxy = (linkType === "vimeo") ? "https://vimpd.nexield.in" : "https://zoomp.nexield.in";
             const fullUrl = `${proxy}?title=${encodeURIComponent(title)}&link=${encodeURIComponent(zoomLink)}`;
             tsvResult += `${count}\t${title}\t${fullUrl}\n`;
             count++;
