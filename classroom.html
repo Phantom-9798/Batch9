@@ -42,7 +42,6 @@
       user-select: none;
     }
 
-    /* Falling Stars & Bubbles Canvas Background */
     #starBubbleCanvas {
       position: fixed;
       top: 0;
@@ -75,7 +74,6 @@
       animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Moving Glowing Hover Light Effect on All Buttons & Subject Cards */
     .phantom-btn {
       transition: all 0.3s ease-in-out;
       position: relative;
@@ -88,6 +86,63 @@
       transform: translateY(-2px);
     }
     .phantom-btn:active { transform: scale(0.96); }
+
+    /* Compact Square Subject Tiles */
+    .subject-square-tile {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+      border-radius: 1rem;
+      background: rgba(6, 12, 30, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    .subject-square-tile:hover {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 22px rgba(14, 165, 233, 0.5);
+      transform: translateY(-3px);
+    }
+
+    /* Long Rectangular Lecture Rows */
+    .lecture-rect-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 16, 36, 0.96);
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 14px;
+      padding: 14px 20px;
+      gap: 16px;
+      transition: all 0.25s ease;
+    }
+    .lecture-rect-row:hover {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+    }
+    @media (max-width: 640px) {
+      .lecture-rect-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+        gap: 12px;
+      }
+      .lecture-rect-actions {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+      }
+      .lecture-rect-actions button {
+        flex: 1;
+      }
+    }
 
     #phantomStudyTimerWidget {
       position: fixed;
@@ -140,40 +195,7 @@
       letter-spacing: 1px;
     }
 
-    header, main, footer { position: relative; z-index: 10; }
-
-    /* Paid authorization modal: fit small mobile screens and allow full scrolling */
-    #paidAuthModal { align-items: flex-start; overscroll-behavior: contain; }
-    #paidAuthModal > .armor-panel {
-      width: min(100%, 56rem);
-      max-height: calc(100dvh - 2rem);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-    #paidAuthModal input, #paidAuthModal button { min-width: 0; }
-    @media (max-width: 640px) {
-      #paidAuthModal { padding: .5rem; }
-      #paidAuthModal > .armor-panel {
-        width: 100%;
-        max-height: calc(100dvh - 1rem);
-        padding: 1rem;
-        margin: .5rem 0;
-        border-radius: 1rem;
-      }
-      #paidAuthModal > .armor-panel > div:first-child { gap: .5rem; align-items: flex-start; }
-      #paidAuthModal > .armor-panel > div:first-child > div { min-width: 0; flex: 1; }
-      #paidAuthModal > .armor-panel > div:first-child h3 { font-size: 1rem; line-height: 1.35; overflow-wrap: anywhere; }
-      #paidAuthModal > .armor-panel > div:first-child p { font-size: .7rem; line-height: 1.4; }
-      #paidAuthModal > .armor-panel > div:first-child button:first-child { padding: .4rem .55rem; flex-shrink: 0; }
-      #paidAuthModal > .armor-panel > div:first-child button:last-child { flex-shrink: 0; }
-      #paidAuthModal label { overflow-wrap: anywhere; }
-      #paidAuthModal #authBatchCheckboxes { max-height: 10rem; }
-      #paidAuthModal button { white-space: normal; line-height: 1.4; }
-      #phantomStudyTimerWidget { top: 6px; right: 6px; transform: scale(.85); transform-origin: top right; }
-      #phantomFocusDock { max-width: calc(100vw - 16px); bottom: 8px; padding: 7px 9px; gap: 6px; font-size: 8px; letter-spacing: 0; flex-wrap: wrap; justify-content: center; }
-    }
+    header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 
   <script>
@@ -191,24 +213,18 @@
         }
       });
     })();
-// 1. 1DM aur Downloaders ko detect karne ka function
-function detectDownloaderAndLogout() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    
-    // Check karo ki User-Agent mein 1dm, idm ya koi downloader keyword hai kya
-    if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
-        triggerLogoutWithWarning("1DM downloader detected, logging out.");
-    }
-}
 
- // Warning dikhane aur logout karne ka main function
-function triggerLogoutWithWarning(errorMessage) {
-    // Firebase / Local session clear karo
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Screen par turant error banner ya full-screen block dikhao
-    document.body.innerHTML = `
+    function detectDownloaderAndLogout() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        triggerLogoutWithWarning("1DM downloader detected, logging out.");
+      }
+    }
+
+    function triggerLogoutWithWarning(errorMessage) {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.body.innerHTML = `
         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
             <div style="background: #1e293b; padding: 30px; border-radius: 8px; border: 1px solid #ef4444; max-width: 400px; width: 100%;">
                 <h2 style="margin-bottom: 15px; font-size: 22px; color: #f87171;">⚠️ Security Alert</h2>
@@ -216,27 +232,27 @@ function triggerLogoutWithWarning(errorMessage) {
                 <div style="font-size: 13px; color: #94a3b8;">Cleaning session and redirecting...</div>
             </div>
         </div>
-    `;
+      `;
+      setTimeout(function() {
+          if (typeof window.logoutCadetMaster === 'function') {
+            window.logoutCadetMaster();
+          } else {
+            window.location.href = window.location.pathname;
+          }
+      }, 2500);
+    }
 
-    // 2 ya 3 সেকেন্ড ke baad user ko login page par bhej do
-    setTimeout(function() {
-        window.location.href = "login.html"; // Apne login page ka sahi path yahan daal dena
-    }, 2500);
-}
-
-// Page load hote hi check run karega
-window.addEventListener('DOMContentLoaded', function() {
-    detectDownloaderAndLogout();
-});
+    window.addEventListener('DOMContentLoaded', function() {
+        detectDownloaderAndLogout();
+    });
   </script>
 </head>
 
-<body class="text-neutral-100 min-h-screen flex flex-col justify-between">
+<body class="text-neutral-100 min-h-screen flex flex-col justify-between w-full">
 
-  <!-- Background Canvas for Falling Stars & Bubbles Animation -->
   <canvas id="starBubbleCanvas"></canvas>
 
-  <!-- ================= SIDEBAR NAVIGATION DRAWER ================= -->
+  <!-- SIDEBAR NAVIGATION DRAWER -->
   <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden backdrop-blur-sm transition-opacity"></div>
   <aside id="sidebarDrawer" class="fixed top-0 left-[-300px] w-72 sm:w-80 h-full bg-neutral-950 border-r-2 border-amber-400/50 z-50 transition-all duration-300 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.9)]">
     <div>
@@ -251,36 +267,35 @@ window.addEventListener('DOMContentLoaded', function() {
       </div>
       <nav class="p-3 space-y-1.5 font-orbitron text-xs">
         <button onclick="showHomeView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-400/10 text-amber-300 border border-amber-400/30 font-bold tracking-wider transition text-left cursor-pointer phantom-btn">
-          <span>&#127968;</span> HOME
+          <span>🏠</span> HOME
         </button>
         <button onclick="showWatchHoursModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
-          <span>&#9201;</span> MY WATCH HOURS
+          <span>⏱️</span> MY WATCH HOURS
         </button>
         <button onclick="showTestSeriesView(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
-          <span>&#128221;</span> TEST SERIES
+          <span>📝</span> TEST SERIES
         </button>
         <button onclick="showPaidAuthModal(); toggleSidebar();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-300 hover:bg-neutral-900 hover:text-white transition text-left font-bold tracking-wider cursor-pointer phantom-btn">
-          <span>&#128176;</span> GET PAID AUTHORIZATION
+          <span>🪙</span> GET PAID AUTHORIZATION
         </button>
         
         <div class="pt-2 pb-1 border-t border-neutral-900 my-2"></div>
 
         <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:bg-emerald-950/35 transition text-left font-bold tracking-wider phantom-btn">
-          <span>&#128227;</span> WHATSAPP CHANNEL
+          <span>📢</span> WHATSAPP CHANNEL
         </a>
         <a href="https://t.me/Teamphantom97_bot" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sky-400 hover:bg-sky-950/35 transition text-left font-bold tracking-wider phantom-btn">
-          <span>&#9888;</span> REPORT PROBLEM
+          <span>⚠️</span> REPORT PROBLEM
         </a>
       </nav>
     </div>
     
-    <!-- Footer Logout & Developer Tag -->
     <div class="p-4 border-t border-neutral-900 bg-neutral-950 space-y-2">
       <div class="text-center font-orbitron text-[10px] text-amber-400/80 tracking-widest uppercase">
         DEV BY TEAM PHANTOM
       </div>
       <button onclick="window.logoutCadet()" class="w-full py-3 rounded-xl bg-red-950/60 border border-red-500/50 hover:bg-red-900/60 text-red-300 font-orbitron font-bold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer phantom-btn">
-        <span>&#128274;</span> LOG OUT
+        <span>🔒</span> LOG OUT
       </button>
     </div>
   </aside>
@@ -297,11 +312,9 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <!-- GET PAID AUTHORIZATION MODAL (WIDE / HORIZONTAL LAYOUT) -->
+  <!-- GET PAID AUTHORIZATION MODAL -->
   <div id="paidAuthModal" class="fixed inset-0 bg-black/85 z-50 hidden backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
     <div class="armor-panel rounded-2xl max-w-4xl w-full p-6 sm:p-8 relative page-transition my-8 border-2 border-amber-400 shadow-[0_0_60px_rgba(255,215,0,0.35)]">
-      
-      <!-- TOP HEADER WITH BACK BUTTON -->
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-800">
         <div class="flex items-center gap-3">
           <button onclick="closePaidAuthModal()" class="px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 phantom-btn">
@@ -315,7 +328,6 @@ window.addEventListener('DOMContentLoaded', function() {
         <button onclick="closePaidAuthModal()" class="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white flex items-center justify-center font-bold">✕</button>
       </div>
 
-      <!-- REQUEST STATUS: shown only after a request has been submitted -->
       <div id="authPendingNotice" class="hidden mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left">
         <div class="flex items-center gap-2 font-orbitron font-extrabold text-amber-300 text-xs tracking-wide">
           <span>⏳</span> REVIEW PENDING
@@ -323,40 +335,32 @@ window.addEventListener('DOMContentLoaded', function() {
         <p class="text-xs leading-relaxed text-neutral-300">Your request access is pending.<br>You can edit your details and submit again.</p>
       </div>
 
-      <!-- WIDE HORIZONTAL FORM (2-COLUMN GRID ON DESKTOP) -->
       <form id="paidAuthForm" onsubmit="submitPaidAuthProof(event)" class="space-y-4 font-body">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          <!-- Column 1 -->
           <div class="space-y-4">
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Cadet Full Name</label>
               <input type="text" id="authCadetName" required placeholder="e.g. Vikram Sharma" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400">
             </div>
-
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Payment Name <span class="text-neutral-400 text-[10px]">(Sender Account Name)</span></label>
               <input type="text" id="authPaymentName" required placeholder="e.g. Rahul Sharma" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400">
             </div>
-
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Registered Email Address (Locked)</label>
               <input type="email" id="authCadetEmail" readonly disabled class="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-sm font-bold text-neutral-400 cursor-not-allowed select-none">
             </div>
-
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">Date of Payment</label>
               <input type="date" id="authPaymentDate" required class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-amber-400">
             </div>
           </div>
 
-          <!-- Column 2 -->
           <div class="space-y-4 flex flex-col justify-between">
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1 font-orbitron">UTR / Transaction Reference Number</label>
               <input type="text" id="authUtr" required placeholder="Enter 12-digit UTR or UPI reference number" class="w-full bg-neutral-900 border border-amber-500/50 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 mb-4">
             </div>
-
             <div>
               <label class="block text-xs uppercase tracking-wider text-amber-300 font-black mb-1.5 font-orbitron flex items-center justify-between">
                 <span>Choose Your Batch For Enrolment (Multiple Select)</span>
@@ -365,23 +369,23 @@ window.addEventListener('DOMContentLoaded', function() {
               <div class="grid grid-cols-1 gap-2 text-xs font-rajdhani max-h-48 overflow-y-auto pr-1" id="authBatchCheckboxes">
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="cds-math" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CDS Mathematics Specialist</span>
+                  <span class="text-white text-sm">CDS Mathematics Specialist</span>
                 </label>
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="cds-kilo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CDS OTA Batch</span>
+                  <span class="text-white text-sm">CDS OTA Batch</span>
                 </label>
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="afcat" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">AFCAT</span>
+                  <span class="text-white text-sm">AFCAT</span>
                 </label>
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="capf" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-white font-serif-bold text-sm">CAPF</span>
+                  <span class="text-white text-sm">CAPF</span>
                 </label>
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-amber-950/60 border border-amber-500/80 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="combo" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
-                  <span class="text-amber-300 font-serif-bold text-sm">Tri-Service Mega Combo (All Batches)</span>
+                  <span class="text-amber-300 text-sm">Tri-Service Mega Combo (All Batches)</span>
                 </label>
               </div>
             </div>
@@ -390,16 +394,13 @@ window.addEventListener('DOMContentLoaded', function() {
               <button type="button" onclick="sendProofToTelegram()" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn flex items-center justify-center gap-2">
                 <span>📱</span> 1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM
               </button>
-              
               <button type="submit" id="authSubmitBtn" disabled class="w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition">
                 2. SUBMIT FOR ACCESS (Complete Step 1 First)
               </button>
             </div>
           </div>
-
         </div>
       </form>
-
       <div id="authStatusAlert" class="mt-4 hidden p-3 rounded-xl text-xs font-orbitron text-center font-bold"></div>
     </div>
   </div>
@@ -422,11 +423,11 @@ window.addEventListener('DOMContentLoaded', function() {
     <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
   </audio>
 
-  <!-- TOP HEADER -->
-  <header class="w-full pt-6 pb-4 px-4 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+  <!-- TOP HEADER (Full Width Layout) -->
+  <header class="w-full pt-6 pb-4 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md sticky top-0 z-30">
+    <div class="w-full flex items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">&#9776;</button>
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-amber-400/60 flex items-center justify-center text-amber-400 text-xl transition cursor-pointer phantom-btn">☰</button>
         <div class="relative w-12 h-12 rounded-xl bg-black border border-amber-400/80 p-1 flex items-center justify-center overflow-hidden">
           <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=PHANTOM';">
         </div>
@@ -445,22 +446,18 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
   </header>
 
-  <!-- TELEGRAM GROUP NOTIFICATION CONTAINER (VISIBLE ONLY FOR PAID CADETS) -->
-  <div id="telegramNotificationContainer" class="w-full max-w-6xl mx-auto px-4 mt-6 hidden"></div>
+  <div id="telegramNotificationContainer" class="w-full px-6 mt-6 hidden"></div>
 
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full page-transition">
+  <!-- MAIN CONTAINER (100% Full Width Screen Fit) -->
+  <main class="w-full px-6 py-8 flex-grow page-transition">
     
-    <!-- HOME / DASHBOARD VIEW -->
     <div id="batchModeMainView">
 
-      <!-- ================= FREE TACTICAL VAULT SECTION (SINGLE PAGE FLOW) ================= -->
+      <!-- FREE TACTICAL VAULT SECTION -->
       <div class="w-full mb-12">
         
         <!-- View 1: Exam Tabs & Tiles -->
         <div id="freeExamDashboardView">
-          
-          <!-- Large, prominent Exam Tabs (CDS, AFCAT, CAPF) -->
           <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-8">
             <button onclick="window.switchFreeExamTab('CDS')" id="free-tab-CDS" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
               🛡️ CDS
@@ -473,8 +470,7 @@ window.addEventListener('DOMContentLoaded', function() {
             </button>
           </div>
 
-          <!-- Free Tiles Container -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeExamTilesContainer"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full" id="freeExamTilesContainer"></div>
         </div>
 
         <!-- View 2: Live Mode Only -->
@@ -503,13 +499,13 @@ window.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
 
-        <!-- View 3: Subjects Grid (Squadron-wise correct subjects) -->
+        <!-- View 3: Subjects Grid (Compact Square Tiles) -->
         <div id="freeSubjectsGridView" class="hidden">
           <button onclick="window.backToFreeModeSelection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO MODE SELECTION
           </button>
 
-          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
             <div>
               <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1" id="freeSubjectBatchBadge">FREE CURRICULUM</div>
               <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="freeSubjectHeading">FREE SUBJECTS</h2>
@@ -520,36 +516,38 @@ window.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="freeSubjectsContainer"></div>
+          <!-- Compact Square Subject Grid (Expanded Columns for Full Width) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 w-full" id="freeSubjectsContainer"></div>
         </div>
 
-        <!-- View 4: Free Lectures View (Dynamically Fetches from Firestore 'free_tactical_curriculum') -->
+        <!-- View 4: Free Lectures View (Long Rectangular Row Layout) -->
         <div id="freeLecturesView" class="hidden">
           <button onclick="window.backToFreeSubjectsGrid()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-amber-400 text-amber-400 font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">
             &larr; BACK TO SUBJECTS
           </button>
 
-          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
             <div>
               <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">LECTURES DOSSIER</div>
               <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide uppercase" id="selectedFreeSubjectTitle">CHAPTER LECTURES</h2>
-              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Now or Notes to begin.</p>
+              <p class="text-xs text-neutral-300 font-body mt-1">Select a lecture below and click Watch Now or Notes.</p>
             </div>
             <div class="flex items-center gap-2 bg-black/60 border border-amber-500/40 px-3.5 py-2 rounded-xl text-xs font-mono text-amber-400">
               <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FREE VAULT ACTIVE
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="freeLecturesListContainer"></div>
+          <!-- Long Rectangular Rows Container (Full Width) -->
+          <div class="space-y-3.5 w-full" id="freeLecturesListContainer"></div>
         </div>
 
       </div>
 
-      <!-- ================= PAID AUTHORIZED SQUADRONS SECTION (ONLY FOR PAID CADETS) ================= -->
+      <!-- PAID AUTHORIZED SQUADRONS SECTION -->
       <div id="paidSquadronsSection" class="hidden w-full mt-12 pt-8 border-t-2 border-amber-500/30">
-        <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="armor-panel rounded-2xl p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1"><span>&#9733;</span> TACTICAL FLIGHT CONTROL</div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1"><span>★</span> TACTICAL FLIGHT CONTROL</div>
             <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AUTHORIZED PAID SQUADRONS</h2>
             <p class="text-xs text-neutral-300 font-body mt-1">Your enrolled premium batch curriculum and regular live classes.</p>
           </div>
@@ -558,7 +556,7 @@ window.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           <div id="card-cds-math" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
             <div>
               <div class="relative w-full h-48 overflow-hidden bg-black">
@@ -627,23 +625,23 @@ window.addEventListener('DOMContentLoaded', function() {
 
     </div>
 
-    <!-- TEST SERIES VIEW — OLD TEST DATA/FLOW WITH NEW TACTICAL TILE DESIGN -->
+    <!-- TEST SERIES VIEW -->
     <div id="testSeriesContainer" class="hidden w-full page-transition">
       <div id="testDashboardView">
-        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> PRACTICE HUB
+              <span>★</span> PRACTICE HUB
             </div>
             <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST DASHBOARD</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Select your target defense examination below to enter the test section and access free mock papers.</p>
+            <p class="text-xs text-neutral-300 font-body mt-1">Select your target defense examination below to enter test section.</p>
           </div>
           <div class="bg-black/60 border border-amber-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-amber-400 font-bold">
             100% FREE ACCESS
           </div>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-xl text-amber-400 mb-2 group-hover:text-amber-300">CDS EXAM</h3>
@@ -675,22 +673,22 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
 
-      <div id="testSectionView" class="hidden">
+      <div id="testSectionView" class="hidden w-full">
         <button onclick="backToTestDashboard()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Dashboard</button>
-        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> PRACTICE HUB
+              <span>★</span> PRACTICE HUB
             </div>
             <h2 id="selectedExamTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">TEST SECTION</h2>
-            <p class="text-xs text-neutral-300 font-body mt-1">Choose a section below to access full mocks, previous year papers, and chapter-wise tests.</p>
+            <p class="text-xs text-neutral-300 font-body mt-1">Choose a section below to access full mocks and practice sets.</p>
           </div>
           <div class="bg-black/60 border border-amber-500/40 px-4 py-2 rounded-xl text-xs font-orbitron text-amber-400 font-bold">
             100% FREE ACCESS
           </div>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           <div class="armor-panel rounded-2xl p-6 text-center hover:border-amber-400 transition group">
             <div>
               <h3 class="font-stencil text-lg text-amber-400 mb-2 group-hover:text-amber-300">Full Mock Tests</h3>
@@ -722,12 +720,12 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
 
-      <div id="mockListView" class="hidden">
+      <div id="mockListView" class="hidden w-full">
         <button onclick="backToTestSection()" class="mb-6 px-4 py-2 rounded-lg bg-neutral-900 hover:bg-amber-400 text-amber-300 hover:text-black font-orbitron text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 phantom-btn">⬅ Back to Test Section</button>
-        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="armor-panel rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-orbitron font-bold tracking-wider uppercase mb-1">
-              <span>&#9733;</span> TEST SECTION
+              <span>★</span> TEST SECTION
             </div>
             <h2 id="selectedSectionTitle" class="font-stencil text-2xl sm:text-3xl text-white tracking-wide">AVAILABLE TESTS</h2>
             <p class="text-xs text-neutral-300 font-body mt-1">Check out available practice tests and exam simulations below.</p>
@@ -736,8 +734,7 @@ window.addEventListener('DOMContentLoaded', function() {
             100% FREE ACCESS
           </div>
         </div>
-        
-        <div id="mockItemsContainer" class="space-y-4"></div>
+        <div id="mockItemsContainer" class="space-y-4 w-full"></div>
       </div>
     </div>
 
@@ -747,205 +744,20 @@ window.addEventListener('DOMContentLoaded', function() {
     <p class="text-[11px] font-body text-neutral-400 tracking-wider">&copy; 2026 TEAM PHANTOM. ALL RIGHTS RESERVED.</p>
   </footer>
 
-  <!-- ================= TEAM PHANTOM CINEMATIC INTRO POPUP OVERLAY ================= -->
-  <div id="classroomCinematicPopup" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background-color: #04070b; background-image: radial-gradient(circle at center, #0a1628 0%, #04070b 100%); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.8s ease-in-out; -webkit-user-select: none; user-select: none;">
-    <style>
-        #classroomCinematicPopup * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
-        #ccStarBubbleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2; }
-        .cc-curtain-left, .cc-curtain-right {
-            position: absolute; top: 0; width: 50%; height: 100%;
-            background: linear-gradient(90deg, #996515 0%, #d4af37 20%, #ffd700 50%, #d4af37 80%, #996515 100%);
-            background-size: 80px 100%; z-index: 100;
-            transition: transform 2.8s cubic-bezier(0.77, 0, 0.175, 1);
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.9);
-            border-bottom: 8px solid #5c4033;
-        }
-        .cc-curtain-left { left: 0; transform-origin: left; border-right: 4px solid #4a3319; }
-        .cc-curtain-right { right: 0; transform-origin: right; border-left: 4px solid #4a3319; }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-left { transform: translateX(-100%); }
-        #classroomCinematicPopup.open-cc-curtains .cc-curtain-right { transform: translateX(100%); }
-
-        .cc-intro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; position: relative; z-index: 10; }
-        .cc-rocket-logo-wrapper { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; height: 90px; width: 100%; }
-        .cc-logo-box-container { position: absolute; opacity: 0; transform: scale(0.2); animation: ccDropLogoCenter 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; animation-delay: 3.2s; }
-        .cc-intro-logo { width: 70px; height: 70px; object-fit: cover; border-radius: 14px; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); }
-        .cc-rocket-ship { position: absolute; font-size: 34px; transform: rotate(45deg); z-index: 20; animation: ccFlyRocketVerySlow 5.0s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 0.8s; }
-        @keyframes ccFlyRocketVerySlow {
-            0% { left: -180px; top: 25px; opacity: 0; transform: scale(0.6) rotate(55deg); }
-            20% { opacity: 1; transform: scale(1.1) rotate(45deg); }
-            50% { left: calc(50% - 15px); top: -5px; transform: scale(1.2) rotate(40deg); }
-            80% { opacity: 1; }
-            100% { left: 110vw; top: -60px; opacity: 0; transform: scale(0.8) rotate(30deg); }
-        }
-        @keyframes ccDropLogoCenter {
-            0% { opacity: 0; transform: scale(0.3) translateY(-30px); }
-            70% { opacity: 1; transform: scale(1.1) translateY(5px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .cc-title-wrapper { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .cc-word-group { display: flex; gap: 8px; }
-        .cc-letter-box {
-            width: 46px; height: 56px; background: rgba(10, 18, 30, 0.95); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-family: 'Black Ops One', cursive; font-size: 26px;
-            opacity: 0; transform: translateY(-350px) rotate(-20deg); animation: ccDropBounce 0.8s cubic-bezier(0.25, 1, 0.5, 1.25) forwards;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-        }
-        .cc-letter-box:nth-child(1)  { animation-delay: 4.2s; color: #ff3366; border: 2px solid #ff3366; text-shadow: 0 0 12px #ff3366; }
-        .cc-letter-box:nth-child(2)  { animation-delay: 4.3s; color: #33ccff; border: 2px solid #33ccff; text-shadow: 0 0 12px #33ccff; }
-        .cc-letter-box:nth-child(3)  { animation-delay: 4.4s; color: #ffd700; border: 2px solid #ffd700; text-shadow: 0 0 12px #ffd700; }
-        .cc-letter-box:nth-child(4)  { animation-delay: 4.5s; color: #33ff99; border: 2px solid #33ff99; text-shadow: 0 0 12px #33ff99; }
-        .cc-letter-box:nth-child(5)  { animation-delay: 4.65s; color: #ff66ff; border: 2px solid #ff66ff; text-shadow: 0 0 12px #ff66ff; }
-        .cc-letter-box:nth-child(6)  { animation-delay: 4.75s; color: #00ffff; border: 2px solid #00ffff; text-shadow: 0 0 12px #00ffff; }
-        .cc-letter-box:nth-child(7)  { animation-delay: 4.85s; color: #ff9933; border: 2px solid #ff9933; text-shadow: 0 0 12px #ff9933; }
-        .cc-letter-box:nth-child(8)  { animation-delay: 4.95s; color: #9933ff; border: 2px solid #9933ff; text-shadow: 0 0 12px #9933ff; }
-        .cc-letter-box:nth-child(9)  { animation-delay: 5.05s; color: #ffff33; border: 2px solid #ffff33; text-shadow: 0 0 12px #ffff33; }
-        .cc-letter-box:nth-child(10) { animation-delay: 5.15s; color: #33ff33; border: 2px solid #33ff33; text-shadow: 0 0 12px #33ff33; }
-        .cc-letter-box:nth-child(11) { animation-delay: 5.25s; color: #ff3333; border: 2px solid #ff3333; text-shadow: 0 0 12px #ff3333; }
-        @keyframes ccDropBounce {
-            0% { transform: translateY(-350px) rotate(-25deg); opacity: 0; }
-            60% { transform: translateY(15px) rotate(6deg); opacity: 1; }
-            80% { transform: translateY(-8px) rotate(-3deg); }
-            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        }
-        .cc-subtitle {
-            font-family: 'Black Ops One', cursive; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #ffd700;
-            text-shadow: 0 0 18px rgba(255, 215, 0, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
-            opacity: 0; transform: translateX(-150px); animation: ccSwipeInRight 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            animation-delay: 6.0s; margin-bottom: 15px;
-        }
-        @keyframes ccSwipeInRight { to { opacity: 1; transform: translateX(0); } }
-        .cc-secure-loader-wrapper { display: flex; flex-direction: column; align-items: center; opacity: 0; animation: ccFadeInSecure 0.6s ease forwards; animation-delay: 6.6s; width: 280px; }
-        .cc-progress-bar-container { width: 100%; height: 7px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 242, 254, 0.5); border-radius: 4px; overflow: hidden; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); margin-bottom: 8px; }
-        .cc-progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe); box-shadow: 0 0 15px #00f2fe; animation: ccFillProgress 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 6.8s; }
-        @keyframes ccFillProgress { 0% { width: 0%; } 100% { width: 100%; } }
-        .cc-secure-status-text { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #00f2fe; text-shadow: 0 0 12px rgba(0, 242, 254, 0.7); }
-        @keyframes ccFadeInSecure { to { opacity: 1; } }
-        .cc-footer-tag { position: absolute; bottom: 25px; font-family: 'Orbitron', sans-serif; font-size: 11px; color: #4b5563; letter-spacing: 2px; z-index: 10; }
-    </style>
-
-    <canvas id="ccStarBubbleCanvas"></canvas>
-    <div class="cc-curtain-left"></div>
-    <div class="cc-curtain-right"></div>
-
-    <div class="cc-intro-container">
-        <div class="cc-rocket-logo-wrapper">
-            <div class="cc-rocket-ship">🚀</div>
-            <div class="cc-logo-box-container">
-                <img src="logo.jpeg" alt="Logo" class="cc-intro-logo">
-            </div>
-        </div>
-
-        <div class="cc-title-wrapper">
-            <div class="cc-word-group">
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">E</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-            <div style="width: 14px;"></div>
-            <div class="cc-word-group">
-                <div class="cc-letter-box">P</div>
-                <div class="cc-letter-box">H</div>
-                <div class="cc-letter-box">A</div>
-                <div class="cc-letter-box">N</div>
-                <div class="cc-letter-box">T</div>
-                <div class="cc-letter-box">O</div>
-                <div class="cc-letter-box">M</div>
-            </div>
-        </div>
-
-        <div class="cc-subtitle">⚡ ALWAYS WITH YOU WITH FULL SUPPORT ⚡</div>
-
-        <div class="cc-secure-loader-wrapper">
-            <div class="cc-progress-bar-container"><div class="cc-progress-bar-fill"></div></div>
-            <div class="cc-secure-status-text">INITIALIZING SECURE ACCESS</div>
-        </div>
-    </div>
-
-    <div class="cc-footer-tag">&copy; 2026 TEAM PHANTOM &bull; SECURE TERMINAL</div>
-
-    <script>
-        (function() {
-            const canvas = document.getElementById("ccStarBubbleCanvas");
-            const ctx = canvas.getContext("2d");
-            function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-            window.addEventListener("resize", resizeCanvas);
-            resizeCanvas();
-
-            const particles = [];
-            for (let i = 0; i < 90; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                    radius: Math.random() * 3 + 1, speedY: Math.random() * 0.5 + 0.25,
-                    speedX: (Math.random() - 0.5) * 0.25, opacity: Math.random() * 0.8 + 0.2, isBubble: Math.random() > 0.5
-                });
-            }
-
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
-                    p.y += p.speedY; p.x += p.speedX;
-                    if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
-                    ctx.beginPath();
-                    if (p.isBubble) {
-                        ctx.arc(p.x, p.y, p.radius * 1.3, 0, Math.PI * 2);
-                        ctx.strokeStyle = `rgba(14, 165, 233, ${p.opacity * 0.5})`; ctx.lineWidth = 1.2; ctx.stroke();
-                    } else {
-                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`; ctx.shadowBlur = 10; ctx.shadowColor = '#ffd700'; ctx.fill();
-                    }
-                });
-                requestAnimationFrame(animateParticles);
-            }
-            animateParticles();
-
-            window.addEventListener('load', () => {
-                setTimeout(() => { document.getElementById('classroomCinematicPopup').classList.add('open-cc-curtains'); }, 500);
-            });
-
-            setTimeout(() => {
-                const popup = document.getElementById('classroomCinematicPopup');
-                if (popup) {
-                    popup.style.opacity = '0';
-                    setTimeout(() => { popup.style.display = 'none'; }, 800);
-                }
-            }, 10200);
-        })();
-    </script>
-  </div>
-  <!-- ================= END OF CINEMATIC INTRO POPUP ================= -->
-
-  <!-- Blue transition overlay shown when continuing into the dashboard -->
-  <div id="phantomBlueTransition" aria-hidden="true" style="position:fixed;inset:0;z-index:999998;pointer-events:none;opacity:0;background:radial-gradient(circle at center,rgba(14,165,233,.55),rgba(2,6,23,.96));transition:opacity .45s ease;"></div>
-
   <!-- WHATSAPP UPDATE CHANNEL WELCOME POPUP MODAL -->
   <div id="phantomWhatsAppModal" class="fixed inset-0 bg-black/85 z-[999999] flex items-center justify-center p-4 backdrop-blur-md">
     <div class="armor-panel rounded-2xl max-w-md w-full p-6 sm:p-8 text-center relative page-transition border border-amber-400/60 shadow-[0_0_50px_rgba(255,215,0,0.3)]">
-      
       <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-black border-2 border-amber-400 p-1 shadow-[0_0_20px_rgba(255,215,0,0.4)] overflow-hidden flex items-center justify-center">
         <img src="logo.jpeg" alt="Team Phantom Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://via.placeholder.com/150/000000/ffd700?text=TP';">
       </div>
-
       <h2 class="font-stencil text-2xl text-amber-400 mb-2 uppercase tracking-wide">Welcome to Team Phantom!</h2>
       <p class="text-xs text-neutral-300 font-body mb-6 leading-relaxed">
         Stay updated with official defense examination notifications, class schedules, and tactical study materials. Join our official update channel.
       </p>
-
-      <div class="flex flex-col items-center justify-center my-6">
-        <div class="relative flex items-center justify-center gap-5 px-6 py-5 bg-black/80 border-2 border-amber-400 rounded-2xl shadow-[0_0_35px_rgba(255,215,0,0.4)] backdrop-blur-lg">
-          <span class="text-3xl animate-pulse" style="animation-delay: 0s;">⭐</span>
-          <span class="text-4xl text-amber-400 animate-pulse" style="animation-delay: 0.3s;">⭐</span>
-          <span class="text-3xl animate-pulse" style="animation-delay: 0.6s;">⭐</span>
-          <div class="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-transparent rounded-2xl"></div>
-        </div>
-        <span class="text-[11px] text-amber-300 font-orbitron tracking-widest uppercase mt-3 font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.5)]">DESTINATION • OFFICER_ACADEMY</span>
-      </div>
-
       <div class="space-y-3">
-        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-sky-500 hover:to-sky-400 text-black hover:text-white font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] transform hover:scale-[1.02] phantom-btn">
+        <a href="https://whatsapp.com/channel/0029VbCKwhBIXnlwyy2xyb3a" target="_blank" class="block w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(255,215,0,0.4)] phantom-btn">
           📱 JOIN UPDATES CHANNEL
         </a>
-        
         <button onclick="closePhantomModal()" class="block w-full py-3.5 px-4 rounded-xl bg-neutral-900 border border-neutral-700 hover:border-amber-400/50 text-neutral-300 hover:text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
           🚀 CONTINUE TO SITE
         </button>
@@ -955,7 +767,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD3RVHxAfzduyURhBYafmDKyUjVdUQXYtk",
@@ -969,7 +781,6 @@ window.addEventListener('DOMContentLoaded', function() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Reliable focus/watch timer, persisted in this browser.
     const FOCUS_TIMER_KEY = "phantom_daily_seconds";
     let phantomSessionSeconds = 0;
     function formatFocusTime(totalSeconds) {
@@ -1007,7 +818,7 @@ window.addEventListener('DOMContentLoaded', function() {
     let selectedFreeBatch = "";
     let selectedFreeMode = "live";
 
-    // Original cyan bubbles + larger, bright golden outline stars
+    // Small radius configuration for star-bubble canvas animation
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
     function resizeCanvas() {
@@ -1022,18 +833,18 @@ window.addEventListener('DOMContentLoaded', function() {
     resizeCanvas();
 
     const particles = [];
-    for (let i = 0; i < 140; i++) {
+    for (let i = 0; i < 120; i++) {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        radius: Math.random() * 4 + 2,
-        starRadius: Math.random() * 4.5 + 3.0,
-        speedY: Math.random() * 1.1 + 0.4,
-        speedX: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.9 + 0.3,
+        radius: Math.random() * 2.0 + 1.0,      // Reduced bubble radius
+        starRadius: Math.random() * 2.5 + 1.5,  // Reduced star radius
+        speedY: Math.random() * 0.8 + 0.3,
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.8 + 0.2,
         isBubble: Math.random() > 0.4,
         phase: Math.random() * Math.PI * 2,
-        twinkle: Math.random() * 0.045 + 0.012
+        twinkle: Math.random() * 0.04 + 0.01
       });
     }
 
@@ -1052,16 +863,13 @@ window.addEventListener('DOMContentLoaded', function() {
       }
       ctx.closePath();
       ctx.strokeStyle = `rgba(255, 205, 35, ${alpha})`;
-      ctx.lineWidth = 1.65;
-      ctx.shadowBlur = 22;
-      ctx.shadowColor = "rgba(255, 190, 0, 1)";
+      ctx.lineWidth = 1.0;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "rgba(255, 190, 0, 0.8)";
       ctx.stroke();
-      // Bright golden inner glow, while keeping the star outline unfilled
       ctx.beginPath();
-      ctx.arc(0, 0, 0.85, 0, Math.PI * 2);
+      ctx.arc(0, 0, 0.5, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255, 230, 120, ${Math.min(1, alpha + 0.15)})`;
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = "#ffd700";
       ctx.fill();
       ctx.restore();
     }
@@ -1072,93 +880,70 @@ window.addEventListener('DOMContentLoaded', function() {
         p.y += p.speedY;
         p.x += p.speedX;
         p.phase += p.twinkle;
-        if (p.y > window.innerHeight + 20) {
-          p.y = -20;
+        if (p.y > window.innerHeight + 10) {
+          p.y = -10;
           p.x = Math.random() * window.innerWidth;
         }
-        if (p.x < -20) p.x = window.innerWidth + 20;
-        if (p.x > window.innerWidth + 20) p.x = -20;
+        if (p.x < -10) p.x = window.innerWidth + 10;
+        if (p.x > window.innerWidth + 10) p.x = -10;
 
-        const alpha = Math.max(0.12, Math.min(1, p.opacity * (0.72 + Math.sin(p.phase) * 0.28)));
+        const alpha = Math.max(0.1, Math.min(1, p.opacity * (0.7 + Math.sin(p.phase) * 0.3)));
         if (p.isBubble) {
-          // Keep bubbles exactly in the original style and radius: cyan outline, no multicolour.
           ctx.save();
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius * 1.4, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.8})`;
-          ctx.lineWidth = 1.5;
-          ctx.shadowBlur = 0;
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(56, 189, 248, ${p.opacity * 0.7})`;
+          ctx.lineWidth = 1.0;
           ctx.stroke();
           ctx.restore();
         } else {
-          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.42, alpha, p.phase * 0.35);
+          drawOutlineStar(p.x, p.y, p.starRadius, p.starRadius * 0.4, alpha, p.phase * 0.3);
         }
       });
       requestAnimationFrame(animateParticles);
     }
     animateParticles();
 
-    // Master list of subjects for each squadron/exam
     const squadronSubjectsMaster = {
       "cds-math": [
-        { name: "Lectures", desc: "Comprehensive Theory & Core Concepts.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" },
-        { name: "Mock", desc: "Timed Tactical Test Papers & Drills.", image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&q=80", locked: true }
+        { name: "Lectures", desc: "Theory & Concepts.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=300&q=80" },
+        { name: "Mock", desc: "Tactical Test Papers.", image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=300&q=80", locked: true }
       ],
       "cds-kilo": [
-        { name: "Physical Geography", desc: "Geomorphology & Climatology.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Indian Geography", desc: "Drainage, Climate & Resources.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Modern History", desc: "Freedom Struggle & National Movement.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Medieval History", desc: "Sultanate, Mughal & Regional Dynasties.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Editorial", desc: "High-yield reading & analysis.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400&q=80" },
-        { name: "Ancient History", desc: "Indus Valley, Vedic & Gupta Empires.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "GS Muster", desc: "Rapid revision & core facts.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "English Grammar", desc: "Rules, Syntax & Error Detection.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80" },
-        { name: "Vocabulary", desc: "Synonyms, Antonyms & Idioms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80" },
-        { name: "Economics", desc: "Macro & Micro economic fundamentals.", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "English Practice", desc: "Sentence correction & drills.", image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" },
-        { name: "Polity", desc: "Constitution, Rights & Parliament.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Biology", desc: "Human systems & plant science.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=400&q=80" },
-        { name: "Chemistry", desc: "Elements, reactions & everyday chemistry.", image: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Physics", desc: "Mechanics, optics & electronics.", image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "English Breakfast", desc: "Daily quick vocabulary & grammar boost.", image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=400&q=80" },
-        { name: "One Pager", desc: "Concise summary revision sheets.", image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Operation Surprise", desc: "Special tactical question sets.", image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80", locked: true }
+        { name: "Physical Geo", desc: "Geomorphology.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Indian Geo", desc: "Drainage & Climate.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Modern History", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Medieval History", desc: "Mughal & Sultanate.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Editorial", desc: "Reading & Analysis.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+        { name: "Ancient History", desc: "Indus & Vedic.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "GS Muster", desc: "Rapid Revision.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "English Grammar", desc: "Rules & Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+        { name: "Vocabulary", desc: "Synonyms & Idioms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
+        { name: "Economics", desc: "Macro & Micro.", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Polity", desc: "Constitution & Parliament.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Biology", desc: "Human Systems.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=300&q=80" }
       ],
       "afcat": [
-        { name: "Math", desc: "Numerical ability & arithmetic.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=400&q=80" },
-        { name: "Math Solution", desc: "Step-by-step problem solving.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" },
-        { name: "Reasoning", desc: "Verbal & non-verbal drills.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" },
-        { name: "English Grammar", desc: "Core grammar rules.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80" },
-        { name: "Editorial", desc: "Reading comprehension practice.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400&q=80" },
-        { name: "English Vocabulary", desc: "Synonyms & idioms mastery.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80" },
-        { name: "English Practice", desc: "Speed test and error spotting.", image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" },
-        { name: "General Awareness", desc: "Static GK & defense updates.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" },
-        { name: "Current Affairs", desc: "Latest national & international events.", image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=400&q=80" }
+        { name: "Math", desc: "Numerical Ability.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=300&q=80" },
+        { name: "Reasoning", desc: "Verbal & Non-Verbal.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80" },
+        { name: "Grammar", desc: "Core Rules.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+        { name: "Editorial", desc: "Reading Comprehension.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+        { name: "Vocabulary", desc: "Idioms & Synonyms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=300&q=80" },
+        { name: "General Aw.", desc: "Static GK & Defense.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
       ],
       "capf": [
-        { name: "Physical Geography", desc: "Landforms & environmental systems.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" },
-        { name: "Indian Geography", desc: "Resources & physical setup.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Modern History", desc: "Freedom struggle & movements.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Medieval History", desc: "Sultanate & Mughal rule.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Editorial", desc: "Paper-2 essay & argument building.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400&q=80" },
-        { name: "Ancient History", desc: "Early Indian civilizations.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "English Grammar", desc: "Paper-2 grammar & syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80" },
-        { name: "Economics", desc: "Economic policies & growth.", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Polity", desc: "Governance & constitutional framework.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Biology", desc: "Core life sciences concepts.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=400&q=80" },
-        { name: "Chemistry", desc: "Basic chemical applications.", image: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Physics", desc: "Fundamental physics principles.", image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Internal Security", desc: "Border management & threats.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" },
-        { name: "International Relation", desc: "Global diplomacy & pacts.", image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Social Issues", desc: "Indian society & welfare.", image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=400&q=80" },
-        { name: "Reasoning", desc: "Analytical ability drills.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80", locked: true },
-        { name: "Math", desc: "Quantitative aptitude sets.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=400&q=80" }
+        { name: "Physical Geo", desc: "Landforms.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80" },
+        { name: "Modern Hist", desc: "Freedom Struggle.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Editorial", desc: "Paper-2 Essay.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80" },
+        { name: "Grammar", desc: "Paper-2 Syntax.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=300&q=80" },
+        { name: "Polity", desc: "Governance.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80", locked: true },
+        { name: "Security", desc: "Border Management.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" }
       ]
     };
 
     const freeVaultData = {
       "CDS": [
-        { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules (Weekend Updates).", image: "math-ima.jpeg", batchId: "cds-math" },
+        { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules.", image: "math-ima.jpeg", batchId: "cds-math" },
         { title: "CDS OTA", desc: "Complete Integrated English & General Studies Curriculum.", image: "ota-chennai.jpeg", batchId: "cds-kilo" }
       ],
       "AFCAT": [
@@ -1169,7 +954,6 @@ window.addEventListener('DOMContentLoaded', function() {
       ]
     };
 
-    // Tab Toggle feature
     window.switchFreeExamTab = function(examName) {
       if (activeFreeExamTab === examName) {
         activeFreeExamTab = "";
@@ -1180,7 +964,6 @@ window.addEventListener('DOMContentLoaded', function() {
         document.getElementById("freeExamTilesContainer").innerHTML = "";
         return;
       }
-
       activeFreeExamTab = examName;
       ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
         const btn = document.getElementById('free-tab-' + tab);
@@ -1198,13 +981,11 @@ window.addEventListener('DOMContentLoaded', function() {
     function renderFreeExamTiles() {
       const container = document.getElementById("freeExamTilesContainer");
       if (!container) return;
-
       const tiles = freeVaultData[activeFreeExamTab] || [];
       let html = "";
-
       tiles.forEach(tile => {
         html += `
-          <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition">
+          <div class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] shadow-lg page-transition w-full">
             <div>
               <div class="relative w-full h-48 overflow-hidden bg-black">
                 <img src="${tile.image}" alt="${tile.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=PHANTOM+FREE';"/>
@@ -1224,13 +1005,12 @@ window.addEventListener('DOMContentLoaded', function() {
           </div>
         `;
       });
-
       container.innerHTML = html;
     }
 
     window.openFreeModeSelection = function(batchId, batchTitle) {
       selectedFreeBatch = batchId;
-      document.getElementById("freeModeBatchBadge").innerText = batchTitle + " &bull; FREE VAULT";
+      document.getElementById("freeModeBatchBadge").innerText = batchTitle + " • FREE VAULT";
       document.getElementById("freeExamDashboardView").classList.add("hidden");
       document.getElementById("freeModeSelectionView").classList.remove("hidden");
     }
@@ -1242,12 +1022,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
     window.selectFreeModeAction = function(mode) {
       selectedFreeMode = mode;
-      document.getElementById("freeSubjectBatchBadge").innerText = selectedFreeBatch.toUpperCase() + " &bull; LIVE SQUADRON";
+      document.getElementById("freeSubjectBatchBadge").innerText = selectedFreeBatch.toUpperCase() + " • LIVE SQUADRON";
       document.getElementById("freeSubjectHeading").innerText = selectedFreeBatch.toUpperCase() + " FREE SUBJECTS";
 
       document.getElementById("freeModeSelectionView").classList.add("hidden");
       document.getElementById("freeSubjectsGridView").classList.remove("hidden");
-
       renderFreeSubjectsGrid();
     }
 
@@ -1259,19 +1038,12 @@ window.addEventListener('DOMContentLoaded', function() {
     function renderFreeSubjectsGrid() {
       const container = document.getElementById("freeSubjectsContainer");
       if (!container) return;
-
       container.innerHTML = "";
       const subjectsList = squadronSubjectsMaster[selectedFreeBatch] || squadronSubjectsMaster["cds-kilo"];
 
-      subjectsList.forEach((subj, index) => {
+      subjectsList.forEach((subj) => {
         const card = document.createElement('div');
-        
-        if (subj.locked) {
-          card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between opacity-50 grayscale border-neutral-800 transition-all duration-300 cursor-pointer group shadow-lg page-transition";
-        } else {
-          card.className = "armor-panel rounded-xl overflow-hidden flex flex-col justify-between hover:border-amber-400 hover:shadow-[0_0_35px_rgba(255,215,0,0.3)] transition-all duration-300 cursor-pointer group shadow-lg page-transition";
-        }
-        
+        card.className = subj.locked ? "subject-square-tile opacity-40 grayscale" : "subject-square-tile";
         card.onclick = () => {
           if (subj.locked) {
             alert("🔒 Yeh subject abhi start nahi hua hai! Bahut jald launch hoga.");
@@ -1280,48 +1052,28 @@ window.addEventListener('DOMContentLoaded', function() {
           loadFreeLectures(subj.name, selectedFreeBatch, selectedFreeMode);
         };
 
-        const statusLabel = subj.locked 
-          ? `<span class="text-[10px] font-mono text-red-400 font-bold">🔒 LOCKED</span>` 
-          : `<span class="text-[10px] font-mono text-emerald-400">📁 VIEW LECTURES</span>`;
-
         card.innerHTML = `
-          <div class="relative w-full h-36 sm:h-40 overflow-hidden bg-black">
-            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" loading="lazy" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
-            <div class="absolute top-2.5 left-2.5">
-              <span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-wider text-amber-400 font-bold uppercase">
-                MODULE #${(index + 1).toString().padStart(2, '0')}
-              </span>
-            </div>
-            <div class="absolute top-2.5 right-2.5">
-              <span class="w-2.5 h-2.5 rounded-full ${subj.locked ? 'bg-red-500' : 'bg-emerald-400'} animate-pulse inline-block"></span>
-            </div>
+          <div class="absolute inset-0 z-0">
+            <img src="${subj.image}" alt="${subj.name}" class="w-full h-full object-cover opacity-35 group-hover:scale-110 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#060c1e] via-[#060c1e]/80 to-transparent"></div>
           </div>
-          <div class="p-4 flex-grow flex flex-col justify-between bg-[#0a0f16]">
-            <div>
-              <h3 class="font-orbitron font-bold text-base text-white group-hover:text-amber-400 transition mb-1">${subj.name}</h3>
-              <p class="text-[11px] text-neutral-300 font-body leading-snug mb-3">${subj.desc}</p>
-            </div>
-            <div class="pt-2.5 border-t border-neutral-800 flex items-center justify-between mt-auto">
-              ${statusLabel}
-              <span class="text-xs font-bold text-neutral-300 group-hover:text-amber-400">&rarr;</span>
-            </div>
+          <div class="relative z-10 flex flex-col items-center justify-center h-full p-2">
+            <h4 class="font-orbitron font-extrabold text-sm sm:text-base text-white tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] line-clamp-2 mb-1">${subj.name}</h4>
+            <span class="text-[9px] font-mono text-amber-300 font-bold uppercase tracking-widest">${subj.locked ? 'LOCKED' : 'EXPLORE'}</span>
           </div>
         `;
         container.appendChild(card);
       });
     }
 
-    // Dynamic Free Lectures Loader from Firestore collection 'free_tactical_curriculum'
     async function loadFreeLectures(subjectName, batchId, modeVal) {
-      document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTERS & LECTURES";
+      document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTER LECTURES";
       document.getElementById("freeSubjectsGridView").classList.add("hidden");
       document.getElementById("freeLecturesView").classList.remove("hidden");
 
       const container = document.getElementById("freeLecturesListContainer");
       if (!container) return;
-
-      container.innerHTML = `<div class="col-span-full text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
+      container.innerHTML = `<div class="text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
 
       try {
         const q = query(
@@ -1331,51 +1083,61 @@ window.addEventListener('DOMContentLoaded', function() {
           where("mode", "==", modeVal)
         );
         const querySnapshot = await getDocs(q);
-
         container.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          container.innerHTML = `
-            <div class="col-span-full armor-panel rounded-2xl p-8 text-center max-w-lg mx-auto w-full">
-              <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-3xl text-amber-400 animate-pulse">⏳</div>
-              <h3 class="font-orbitron font-extrabold text-base text-white tracking-wider mb-1">It will be uploaded very soon</h3>
-              <p class="text-xs text-neutral-400 font-mono">Content dossier is currently being prepared for deployment.</p>
-            </div>
-          `;
-          return;
-        }
 
         let lectures = [];
         querySnapshot.forEach((docSnap) => {
           lectures.push({ id: docSnap.id, ...docSnap.data() });
         });
 
+        if (lectures.length === 0) {
+          lectures = [
+            { id: "demo_1", title: `${subjectName} - Orientation & Foundation Lecture`, duration: "45m", description: "Core tactical breakdown and concepts overview.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { id: "demo_2", title: `${subjectName} - Advanced Problem Solving Drill`, duration: "1h 12m", description: "High-yield previous year questions and shortcut tricks.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { id: "demo_3", title: `${subjectName} - Master Revision & Practice Set`, duration: "58m", description: "Comprehensive practice session with expert tips.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ", notesUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
+          ];
+        }
+
         lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const badgeStyles = [
+          { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" }, // Pink/Magenta
+          { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" }, // Blue
+          { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" }, // Purple
+          { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" }, // Emerald
+          { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }   // Amber
+        ];
 
         let html = "";
         lectures.forEach((lec, idx) => {
           const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
           const durationText = lec.duration || "HD Session";
-          const descText = lec.description || "";
+          const descText = lec.description || "Tactical lecture notes & video session.";
           const videoUrl = lec.url || "#";
           const notesUrl = lec.notesUrl || lec.pdfUrl || "";
 
+          const badgeIndex = idx % badgeStyles.length;
+          const currentBadge = badgeStyles[badgeIndex];
+          const classNumStr = String(idx + 1).padStart(2, '0');
+
           html += `
-            <div class="armor-panel rounded-xl overflow-hidden flex flex-col justify-between p-5 hover:border-amber-400 shadow-lg page-transition">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="px-2 py-0.5 rounded bg-black border border-neutral-700 text-amber-400 text-[10px] font-orbitron uppercase font-bold">SESSION #${(idx + 1).toString().padStart(2, '0')}</span>
-                  <span class="text-xs font-mono text-emerald-400">${durationText}</span>
+            <div class="lecture-rect-row page-transition w-full">
+              <div class="flex items-center gap-4 overflow-hidden">
+                <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
+                  ${classNumStr}
                 </div>
-                <h3 class="font-orbitron font-bold text-lg text-white mb-2">${lecTitle}</h3>
-                <p class="text-xs text-neutral-300 font-body mb-6">${descText}</p>
+                <div class="overflow-hidden">
+                  <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
+                  <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lecTitle}</h4>
+                  <p class="text-xs text-neutral-300 font-body truncate mt-0.5">${descText} &bull; <span class="text-emerald-400 font-mono">${durationText}</span></p>
+                </div>
               </div>
-              <div class="grid grid-cols-2 gap-3 mt-auto">
-                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn text-center">
-                  WATCH NOW &rarr;
+              <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
+                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
+                  ▶ Watch
                 </button>
-                <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="py-3 rounded-xl bg-neutral-900 border border-amber-400/50 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md phantom-btn text-center">
-                  📄 NOTES
+                <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+                  📄 Notes
                 </button>
               </div>
             </div>
@@ -1383,23 +1145,27 @@ window.addEventListener('DOMContentLoaded', function() {
         });
 
         container.innerHTML = html;
-
       } catch (err) {
         console.error("Error loading free lectures: ", err);
         container.innerHTML = `
-          <div class="col-span-full armor-panel rounded-2xl p-8 text-center max-w-lg mx-auto w-full">
-            <h3 class="font-orbitron font-extrabold text-base text-red-400 tracking-wider mb-1">Error Loading Content</h3>
+          <div class="armor-panel rounded-2xl p-6 text-center w-full">
+            <h3 class="font-orbitron font-extrabold text-sm text-red-400 mb-1">Error Loading Content</h3>
             <p class="text-xs text-neutral-400 font-mono">${err.message}</p>
           </div>
         `;
       }
     }
 
+    // --- ADAPTED FOR SPA MASTER LOADER ---
     window.watchFreeLectureAction = function(batchId, subjectName, lectureTitle, encodedUrl) {
       const decodedUrl = decodeURIComponent(encodedUrl);
       sessionStorage.setItem("phantom_current_video", decodedUrl);
       sessionStorage.setItem("phantom_current_title", lectureTitle + " (" + batchId.toUpperCase() + ")");
-      window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent("player.html", `batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`);
+      } else {
+        window.location.href = `player.html?batch=${encodeURIComponent(batchId)}&subject=${encodeURIComponent(subjectName)}&title=${encodeURIComponent(lectureTitle)}`;
+      }
     }
 
     window.backToFreeSubjectsGrid = function() {
@@ -1416,48 +1182,6 @@ window.addEventListener('DOMContentLoaded', function() {
     let cachedCadetData = null;
     let authStatusShouldShow = false;
 
-    function isRequestedBatchApproved(batchId, allowed) {
-      const granted = Array.isArray(allowed) ? allowed : [];
-      const allIndividualBatches = ["cds-math", "cds-kilo", "afcat", "capf"];
-      if (granted.includes("combo")) return true;
-      if (batchId === "combo") return allIndividualBatches.every(id => granted.includes(id));
-      return granted.includes(batchId);
-    }
-
-    function updatePaidAuthRequestNotice(data) {
-      const notice = document.getElementById("authPendingNotice");
-      if (!notice || !data) return;
-
-      const requestSubmitted = data.accessRequestSubmitted === true || Boolean(data.paymentSubmittedAt);
-      const requested = String(data.targetBatch || "").split(",").map(v => v.trim()).filter(Boolean);
-      if (!requestSubmitted || requested.length === 0) {
-        notice.classList.add("hidden");
-        return;
-      }
-
-      // Keep showing PENDING until allowedBatches changes after this request.
-      // The baseline is saved at submit time, so old paid access does not
-      // automatically reveal an approval/success message for a new request.
-      const baseline = Array.isArray(data.accessRequestBaselineBatches)
-        ? [...data.accessRequestBaselineBatches].sort()
-        : [...(Array.isArray(data.allowedBatches) ? data.allowedBatches : [])].sort();
-      const allowed = [...(Array.isArray(data.allowedBatches) ? data.allowedBatches : [])].sort();
-      const grantedAfterRequest = allowed.length !== baseline.length ||
-        allowed.some((batchId, index) => batchId !== baseline[index]);
-
-      if (grantedAfterRequest) {
-        notice.classList.add("hidden");
-        return;
-      }
-
-      notice.className = "mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-500 text-amber-200 space-y-2 font-body text-left";
-      notice.classList.remove("hidden");
-      const heading = notice.querySelector("div");
-      const message = notice.querySelector("p");
-      if (heading) heading.innerHTML = "<span>⏳</span> REVIEW PENDING";
-      if (message) message.innerHTML = "Your request access is pending.<br>You can edit your details and submit again.";
-    }
-
     onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
       if (docSnap.exists()) {
         cachedCadetData = docSnap.data();
@@ -1468,35 +1192,32 @@ window.addEventListener('DOMContentLoaded', function() {
 
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
-
-      if (modal && cachedCadetData) {
+      if (modal) {
         authStatusShouldShow = true;
-        const emailInput = document.getElementById('authCadetEmail');
-        if (emailInput && cachedCadetData.email) emailInput.value = cachedCadetData.email;
-
-        // Status is based on the batch(es) requested, not whether the user has any paid access at all.
-        updatePaidAuthRequestNotice(cachedCadetData);
-
-        // Prefill the latest saved request so the cadet can correct it and resubmit.
-        const nameInput = document.getElementById('authCadetName');
-        const paymentNameInput = document.getElementById('authPaymentName');
-        const dateInput = document.getElementById('authPaymentDate');
-        const utrInput = document.getElementById('authUtr');
-        if (nameInput && cachedCadetData.fullName) nameInput.value = cachedCadetData.fullName;
-        if (paymentNameInput && cachedCadetData.paymentName) paymentNameInput.value = cachedCadetData.paymentName;
-        if (dateInput && cachedCadetData.paymentDate) dateInput.value = cachedCadetData.paymentDate;
-        if (utrInput && cachedCadetData.utrNumber) utrInput.value = cachedCadetData.utrNumber;
-        const savedBatches = String(cachedCadetData.targetBatch || '').split(',').map(v => v.trim());
-        document.querySelectorAll('input[name="authBatches"]').forEach(cb => {
-          cb.checked = savedBatches.includes(cb.value);
-        });
-
+        if (cachedCadetData) {
+          const emailInput = document.getElementById('authCadetEmail');
+          if (emailInput && cachedCadetData.email) emailInput.value = cachedCadetData.email;
+          updatePaidAuthRequestNotice(cachedCadetData);
+          const nameInput = document.getElementById('authCadetName');
+          const paymentNameInput = document.getElementById('authPaymentName');
+          const dateInput = document.getElementById('authPaymentDate');
+          const utrInput = document.getElementById('authUtr');
+          if (nameInput && cachedCadetData.fullName) nameInput.value = cachedCadetData.fullName;
+          if (paymentNameInput && cachedCadetData.paymentName) paymentNameInput.value = cachedCadetData.paymentName;
+          if (dateInput && cachedCadetData.paymentDate) dateInput.value = cachedCadetData.paymentDate;
+          if (utrInput && cachedCadetData.utrNumber) utrInput.value = cachedCadetData.utrNumber;
+          const savedBatches = String(cachedCadetData.targetBatch || '').split(',').map(v => v.trim());
+          document.querySelectorAll('input[name="authBatches"]').forEach(cb => {
+            cb.checked = savedBatches.includes(cb.value);
+          });
+        }
         telegramProofClicked = false;
         const submitBtn = document.getElementById('authSubmitBtn');
-        submitBtn.disabled = true;
-        submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
-        submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
-
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
+          submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
+        }
         modal.classList.remove("hidden");
       }
     }
@@ -1512,7 +1233,6 @@ window.addEventListener('DOMContentLoaded', function() {
       const email = document.getElementById('authCadetEmail').value.trim();
       const paymentDate = document.getElementById('authPaymentDate').value;
       const utr = document.getElementById('authUtr').value.trim();
-
       const selectedCheckboxes = document.querySelectorAll('input[name="authBatches"]:checked');
       const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.parentElement.querySelector('span').innerText);
 
@@ -1532,7 +1252,6 @@ window.addEventListener('DOMContentLoaded', function() {
 
       const tgUrl = `https://t.me/Teamphantom97_bot?text=${encodeURIComponent(msg)}`;
       window.open(tgUrl, '_blank', 'noopener,noreferrer');
-
       telegramProofClicked = true;
       const submitBtn = document.getElementById('authSubmitBtn');
       submitBtn.disabled = false;
@@ -1542,18 +1261,15 @@ window.addEventListener('DOMContentLoaded', function() {
 
     window.submitPaidAuthProof = async function(event) {
       event.preventDefault();
-
       if (!telegramProofClicked) {
         alert("Please click on '1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM' first!");
         return;
       }
-
       const name = document.getElementById('authCadetName').value.trim();
       const paymentName = document.getElementById('authPaymentName').value.trim();
       const email = document.getElementById('authCadetEmail').value.trim();
       const paymentDate = document.getElementById('authPaymentDate').value;
       const utr = document.getElementById('authUtr').value.trim();
-
       const selectedCheckboxes = document.querySelectorAll('input[name="authBatches"]:checked');
       const chosenBatches = Array.from(selectedCheckboxes).map(cb => cb.value);
 
@@ -1561,22 +1277,17 @@ window.addEventListener('DOMContentLoaded', function() {
         alert("Please select at least one target batch.");
         return;
       }
-
       const alertBox = document.getElementById('authStatusAlert');
       const submitBtn = document.getElementById('authSubmitBtn');
-
       submitBtn.disabled = true;
       submitBtn.innerText = "SUBMITTING REQUEST...";
 
       try {
         const finalTargetBatch = chosenBatches.join(", ");
-        const requestBaselineBatches = Array.isArray(cachedCadetData?.allowedBatches)
-          ? [...cachedCadetData.allowedBatches]
-          : [];
+        const requestBaselineBatches = Array.isArray(cachedCadetData?.allowedBatches) ? [...cachedCadetData.allowedBatches] : [];
         const requestSubmittedAt = new Date().toISOString();
         const localUid = localStorage.getItem("phantom_uid");
         if (localUid) {
-          
           const cadetRef = doc(db, "cadets", localUid);
           await updateDoc(cadetRef, {
             fullName: name,
@@ -1589,27 +1300,18 @@ window.addEventListener('DOMContentLoaded', function() {
             accessRequestBaselineBatches: requestBaselineBatches
           });
         }
-
-        // Do not show an approval/success banner to the cadet.
-        // Show PENDING immediately after every successful submission.
         alertBox.classList.add("hidden");
         if (cachedCadetData) {
           cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: requestSubmittedAt, accessRequestSubmitted: true, accessRequestBaselineBatches: requestBaselineBatches };
         }
         authStatusShouldShow = true;
         if (cachedCadetData) updatePaidAuthRequestNotice(cachedCadetData);
-        // Keep the form open for corrections/resubmission; require Step 1 again each time.
         telegramProofClicked = false;
         submitBtn.disabled = true;
         submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
         submitBtn.innerText = "2. SUBMIT FOR ACCESS (Complete Step 1 First)";
-        setTimeout(() => alertBox.classList.add('hidden'), 5000);
-
       } catch (err) {
         console.error("Error saving payment request:", err);
-        alertBox.className = "mt-4 p-3 rounded-xl text-xs bg-red-950/90 border border-red-500/80 text-red-200 font-orbitron font-black block";
-        alertBox.innerText = "ERROR: Failed to submit request. Please try again.";
-        alertBox.classList.remove('hidden');
         submitBtn.disabled = false;
         submitBtn.innerText = "2. SUBMIT FOR ACCESS";
       }
@@ -1617,15 +1319,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
     window.closePhantomModal = function() {
       const modal = document.getElementById("phantomWhatsAppModal");
-      const blueOverlay = document.getElementById("phantomBlueTransition");
       if (modal) {
         modal.style.transition = "opacity .35s ease";
         modal.style.opacity = "0";
         setTimeout(() => { modal.style.display = "none"; }, 350);
-      }
-      if (blueOverlay) {
-        blueOverlay.style.opacity = "1";
-        setTimeout(() => { blueOverlay.style.opacity = "0"; }, 650);
       }
     };
 
@@ -1703,12 +1400,11 @@ window.addEventListener('DOMContentLoaded', function() {
           where("section", "==", currentSection)
         );
         const querySnapshot = await getDocs(q);
-        
         container.innerHTML = "";
 
         if (querySnapshot.empty) {
           let row = document.createElement("div");
-          row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
+          row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
           row.innerHTML = `
             <div>
               <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
@@ -1723,7 +1419,7 @@ window.addEventListener('DOMContentLoaded', function() {
           querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
             let row = document.createElement("div");
-            row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
+            row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
             row.innerHTML = `
               <div>
                 <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${data.title}</div>
@@ -1739,44 +1435,38 @@ window.addEventListener('DOMContentLoaded', function() {
         }
       } catch (e) {
         console.error("Error fetching tests: ", e);
-        let row = document.createElement("div");
-        row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4";
-        row.innerHTML = `
-          <div>
-            <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
-            <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
-          </div>
-          <div>
-            <span class="px-4 py-2 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-400 font-orbitron font-bold text-xs uppercase tracking-wider">Upcoming</span>
-          </div>
-        `;
-        container.innerHTML = "";
-        container.appendChild(row);
       }
     }
-
 
     let unsubscribeSnapshot = null;
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
 
     if (!localUid || !localToken) {
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') {
+        window.logoutCadetMaster();
+      } else {
+        window.location.href = window.location.pathname;
+      }
     } else {
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') {
+            window.logoutCadetMaster();
+          } else {
+            window.location.href = window.location.pathname;
+          }
           return;
         }
-
         const data = docSnap.data();
-
         if (data.activeSession && localToken && data.activeSession !== localToken) {
           if (unsubscribeSnapshot) unsubscribeSnapshot();
           alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "index.html";
+          if (typeof window.logoutCadetMaster === 'function') {
+            window.logoutCadetMaster();
+          } else {
+            window.location.href = window.location.pathname;
+          }
           return;
         }
 
@@ -1786,17 +1476,13 @@ window.addEventListener('DOMContentLoaded', function() {
 
         const allowed = data.allowedBatches || [];
         const isCombo = allowed.includes("combo") || allowed.length >= 4;
-
         const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
         let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
 
         const paidSection = document.getElementById("paidSquadronsSection");
         const telegramContainer = document.getElementById("telegramNotificationContainer");
 
-        // फ्री बैच हमेशा शो हो, इसलिए telegramContainer को हमेशा active रखेंगे
-        if (telegramContainer) {
-          telegramContainer.classList.remove("hidden");
-        }
+        if (telegramContainer) telegramContainer.classList.remove("hidden");
 
         if (hasPaidAccessAny) {
           if (paidSection) {
@@ -1814,19 +1500,15 @@ window.addEventListener('DOMContentLoaded', function() {
           }
         }
 
-        // यह फंक्शन हर यूजर के लिए रन होगा ताकि फ्री-बैच और पेड ग्रुप्स दिख सकें
         const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
         renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
-      }); // <--- यहाँ onSnapshot का ब्रैकेट सही से बंद हो रहा है
+      });
     }
-
-    // अब ये सारे फंक्शन onSnapshot के बाहर (Global Scope में) रहेंगे:
 
     function applyPaidBatchAccess(batchId, isUnlocked) {
       const card = document.getElementById("card-" + batchId);
       const statusBadge = document.getElementById("badge-" + batchId);
       const actionBtn = document.getElementById("btn-" + batchId);
-
       if (!card) return;
 
       if (isUnlocked) {
@@ -1834,7 +1516,6 @@ window.addEventListener('DOMContentLoaded', function() {
         card.classList.add("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
         statusBadge.className = "px-2.5 py-0.5 rounded bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
         statusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> UNLOCKED`;
-
         actionBtn.className = "w-full py-2.5 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow-md active:scale-[0.98] phantom-btn";
         actionBtn.innerText = "ACCESS CLASSROOM";
         actionBtn.disabled = false;
@@ -1843,8 +1524,7 @@ window.addEventListener('DOMContentLoaded', function() {
         card.classList.add("opacity-45", "grayscale", "border-neutral-800");
         card.classList.remove("border-amber-400/60", "shadow-[0_0_30px_rgba(255,215,0,0.2)]");
         statusBadge.className = "px-2.5 py-0.5 rounded bg-black/90 border border-neutral-700 text-neutral-400 font-orbitron text-[10px] tracking-wider uppercase font-bold flex items-center gap-1.5 shadow-md backdrop-blur-sm";
-        statusBadge.innerHTML = `<span>&#128274;</span> LOCKED`;
-
+        statusBadge.innerHTML = `<span>🔒</span> LOCKED`;
         actionBtn.className = "w-full py-2.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-500 font-orbitron text-xs uppercase tracking-wider cursor-not-allowed";
         actionBtn.innerText = "NOT ENROLLED";
         actionBtn.disabled = true;
@@ -1890,7 +1570,7 @@ window.addEventListener('DOMContentLoaded', function() {
         if (isAlreadyClicked) {
           groupsHtml += `
             <div class="p-3 rounded-xl bg-neutral-900/80 border border-emerald-500/30 flex items-center justify-between gap-3 opacity-60">
-              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">&#10003; ${group.name} (Visited)</span>
+              <span class="text-xs font-mono text-emerald-400 font-semibold line-through">✓ ${group.name} (Visited)</span>
               <span class="px-3 py-1.5 rounded bg-emerald-950 text-emerald-300 font-orbitron text-[10px] uppercase font-bold">CLICKED</span>
             </div>
           `;
@@ -1909,12 +1589,10 @@ window.addEventListener('DOMContentLoaded', function() {
       const remainingCount = userGroups.filter(g => !clickedGroups.includes(g.id)).length;
 
       container.innerHTML = `
-        <div id="notifBar" class="max-w-6xl mx-auto px-4 mb-6">
-          <div class="armor-panel border-amber-400/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(255,215,0,0.15)] flex flex-col md:flex-row items-center justify-between gap-4">
+        <div id="notifBar" class="w-full mb-6">
+          <div class="armor-panel border-amber-400/50 bg-amber-950/20 rounded-2xl p-4 sm:p-5 relative overflow-hidden shadow-[0_0_25px_rgba(255,215,0,0.15)] flex flex-col md:flex-row items-center justify-between gap-4 w-full">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">
-                ⚡
-              </div>
+              <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 font-bold text-lg animate-pulse">⚡</div>
               <div>
                 <h4 class="font-orbitron text-xs sm:text-sm font-bold text-amber-400 tracking-wider">MANDATORY TELEGRAM SQUADRON DISPATCH</h4>
                 <p class="text-xs text-neutral-300 font-body mt-0.5">You have <span class="text-amber-300 font-bold">${remainingCount} pending group(s)</span>. Click join on all authorized channels to clear notice.</p>
@@ -1926,7 +1604,7 @@ window.addEventListener('DOMContentLoaded', function() {
               </button>
             </div>
           </div>
-          <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-400/40 space-y-3 max-w-xl mx-auto">
+          <div id="joinDropdown" class="hidden mt-2 p-4 rounded-xl bg-black/90 border border-amber-400/40 space-y-3 w-full">
             <p class="text-[11px] text-neutral-300 font-mono text-center">CLICK TO OPEN AUTHORIZED SQUADRON CHANNELS:</p>
             ${groupsHtml}
           </div>
@@ -1942,7 +1620,6 @@ window.addEventListener('DOMContentLoaded', function() {
     window.secureRedirect = async function(groupId, userId) {
       const targetUrl = secureTgRegistry[groupId];
       if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer");
-
       try {
         const cadetRef = doc(db, "cadets", userId);
         await updateDoc(cadetRef, {
@@ -1953,15 +1630,24 @@ window.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // --- ADAPTED FOR SPA MASTER LOADER ---
     window.openBatchLectures = function(batchId) {
-      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+      if (typeof window.loadPageContent === 'function') {
+        window.loadPageContent("batch-mode.html", "batch=" + encodeURIComponent(batchId));
+      } else {
+        window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+      }
     }
 
     window.logoutCadet = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
-      window.location.href = "index.html";
+      if (typeof window.logoutCadetMaster === 'function') {
+        window.logoutCadetMaster();
+      } else {
+        window.location.href = window.location.pathname;
+      }
     };
   </script>
 </body>
