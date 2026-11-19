@@ -157,7 +157,7 @@
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
-      max-height: calc(100vh - 285px);
+      max-height: calc(100vh - 300px);
       aspect-ratio: 16 / 9;
       background: #000000;
       overflow: hidden;
@@ -173,6 +173,17 @@
       max-height: none !important;
       border-radius: 0 !important;
       background: #000 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+    }
+
+    #phantomConsoleScreen:fullscreen #playerRoot,
+    #phantomConsoleScreen:-webkit-full-screen #playerRoot {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
     }
 
     /* SECURITY OVERLAY STYLING */
@@ -190,24 +201,23 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* TOP-RIGHT TEAM PHANTO WATERMARK BADGE INSIDE FRAME */
+    /* BOX-FREE TRANSPARENT TOP-RIGHT TAG INSIDE VIDEO FRAME */
     .phantom-corner-brand {
       position: absolute;
-      top: 10px;
-      right: 12px;
+      top: 12px;
+      right: 14px;
       z-index: 45;
       pointer-events: none;
       user-select: none;
-      background: rgba(2, 6, 23, 0.72);
-      border: 1px solid rgba(255, 215, 0, 0.45);
-      color: #ffd700;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.56);
+      font-family: 'Black Ops One', cursive;
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
     }
 
     /* FULL LOCK SHIELD OVER VIDEO FRAME */
@@ -264,13 +274,26 @@
     /* BOTTOM REFERENCE CONTROL DOCK */
     .phantom-bottom-deck {
       margin-top: 8px;
-      background: rgba(9, 15, 34, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(9, 15, 34, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 55;
+    }
+
+    .phantom-bottom-deck.deck-dimmed {
+      opacity: 0.35;
+    }
+
+    #phantomConsoleScreen:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck {
+      margin-top: 0;
+      border-radius: 0;
+      background: rgba(4, 7, 15, 0.95);
     }
 
     .seek-row {
@@ -487,16 +510,16 @@
       <div id="phantomConsoleScreen">
 
         <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
-          <div class="brand-title">☠️ TEAM PHANTO☠️</div>
+          <div class="brand-title">☠️ TEAM PHANTOM☠️</div>
           <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
           <div class="trusted-text" style="color: #a3a3a3; font-size: 9px; font-family: monospace;">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
           <div class="big-play-btn mt-2"></div>
         </div>
 
-        <!-- TOP-RIGHT BRAND WATERMARK INSIDE VIDEO FRAME -->
+        <!-- BOX-FREE TRANSPARENT TOP-RIGHT WATERMARK TAG INSIDE VIDEO FRAME -->
         <div class="phantom-corner-brand">☠️ TEAM PHANTO☠️</div>
 
-        <!-- LOCK SHIELD (BLOCKS DIRECT CLICKS ON VIDEO FRAME) -->
+        <!-- LOCK SHIELD (BLOCKS DIRECT CLICKS ON VIDEO FRAME, REVEALS DECK ON INTERACTION) -->
         <div class="frame-lock-shield" title="Video frame locked — use bottom controls"></div>
 
         <div id="securityWatermark" class="phantom-watermark-layer">
@@ -510,62 +533,62 @@
 
         <div id="playerRoot" class="w-full h-full relative"></div>
 
+        <!-- BOTTOM REFERENCE PLAYER CONTROL DECK (Works in normal & fullscreen) -->
+        <div class="phantom-bottom-deck" id="phantomBottomDeck">
+          <div class="seek-row">
+            <span id="currentTimeLabel">0:00</span>
+            <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
+              <div class="tactical-progress-fill" id="trackFill"></div>
+            </div>
+            <span id="totalTimeLabel">0:00</span>
+          </div>
+
+          <div class="controls-row-main">
+            <div class="transport-group">
+              <button type="button" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
+                ↺ 10s
+              </button>
+              <button type="button" onclick="toggleVideoPlay()" id="playTrigger" class="play-pause-bold-btn">
+                ▶ PLAY
+              </button>
+              <button type="button" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
+                10s ↻
+              </button>
+            </div>
+
+            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
+              <option value="1">1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="1.75">1.75x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+
+          <div class="action-row-bottom">
+            <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
+              ⬇ Download
+            </button>
+            <button type="button" onclick="toggleTacticalFullscreen()" id="permanentFsBtn" class="fs-dock-btn">
+              ⛶ Fullscreen
+            </button>
+          </div>
+
+          <!-- IN-PAGE PORTAL DOWNLOAD PROGRESS BOX -->
+          <div id="inpageDownloadBox" class="inpage-download-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+              <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Preparing portal save...</span>
+              <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
+              <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- BOTTOM REFERENCE PLAYER CONTROL DECK -->
-      <div class="phantom-bottom-deck">
-        <div class="seek-row">
-          <span id="currentTimeLabel">0:00</span>
-          <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
-            <div class="tactical-progress-fill" id="trackFill"></div>
-          </div>
-          <span id="totalTimeLabel">0:00</span>
-        </div>
-
-        <div class="controls-row-main">
-          <div class="transport-group">
-            <button type="button" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
-              ↺ 10s
-            </button>
-            <button type="button" onclick="toggleVideoPlay()" id="playTrigger" class="play-pause-bold-btn">
-              ▶ PLAY
-            </button>
-            <button type="button" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
-              10s ↻
-            </button>
-          </div>
-
-          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
-            <option value="1">1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2x</option>
-          </select>
-        </div>
-
-        <div class="action-row-bottom">
-          <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
-            ⬇ Download
-          </button>
-          <button type="button" onclick="toggleTacticalFullscreen()" id="permanentFsBtn" class="fs-dock-btn">
-            ⛶ Fullscreen
-          </button>
-        </div>
-
-        <!-- IN-PAGE PORTAL DOWNLOAD PROGRESS BOX -->
-        <div id="inpageDownloadBox" class="inpage-download-box">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
-            <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Preparing portal save...</span>
-            <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
-          </div>
-          <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
-            <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
+      <!-- LECTURE INFO SECTION PLACED AT THE BOTTOM UNDER CONTROLS -->
       <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
         <div>
           <span class="px-1.5 py-0.2 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">TACTICAL DOSSIER</span>
@@ -593,11 +616,24 @@
     let isPlaying = false;
     let timerSync = null;
     let isArchiveVideo = false;
+    let deckIdleTimer = null;
     let currentLectureData = {
       id: "lec_" + Date.now(),
       title: "TEAM PHANTOM TACTICAL CONSOLE",
       source: ""
     };
+
+    function wakeControlDeck() {
+      const deck = document.getElementById("phantomBottomDeck");
+      if (!deck) return;
+      deck.classList.remove("deck-dimmed");
+      clearTimeout(deckIdleTimer);
+      deckIdleTimer = setTimeout(() => {
+        if (isPlaying) {
+          deck.classList.add("deck-dimmed");
+        }
+      }, 3500);
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -628,6 +664,11 @@
       if (decodedTitle.includes("(")) {
         document.getElementById("classLabelIndicator").innerText = decodedTitle.split('(')[1].replace(')', '').toUpperCase() + " • SESSION";
       }
+
+      const consoleScreen = document.getElementById("phantomConsoleScreen");
+      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach((evtName) => {
+        consoleScreen.addEventListener(evtName, wakeControlDeck);
+      });
 
       const playerRoot = document.getElementById("playerRoot");
 
@@ -707,9 +748,12 @@
                   isPlaying = true;
                   if (btn) btn.innerText = "⏸ PAUSE";
                   document.getElementById('securityOverlay').classList.add('hidden');
+                  wakeControlDeck();
                 } else {
                   isPlaying = false;
                   if (btn) btn.innerText = "▶ PLAY";
+                  const deck = document.getElementById("phantomBottomDeck");
+                  if (deck) deck.classList.remove("deck-dimmed");
                 }
               }
             }
@@ -724,10 +768,14 @@
 
     function activateStream() {
       document.getElementById('securityOverlay').classList.add('hidden');
+      wakeControlDeck();
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) {
           vid.play();
+          isPlaying = true;
+          const btn = document.getElementById("playTrigger");
+          if (btn) btn.innerText = "⏸ PAUSE";
           startTimerSync();
         }
       } else if (ytInstance && ytInstance.playVideo) {
@@ -736,6 +784,7 @@
     }
 
     function updateVideoSpeed(rate) {
+      wakeControlDeck();
       const spd = parseFloat(rate);
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
@@ -746,6 +795,7 @@
     }
 
     function toggleTacticalFullscreen() {
+      wakeControlDeck();
       const target = document.getElementById("phantomConsoleScreen");
       const fsBtn = document.getElementById("permanentFsBtn");
 
@@ -763,6 +813,7 @@
     }
 
     document.addEventListener("fullscreenchange", () => {
+      wakeControlDeck();
       const fsBtn = document.getElementById("permanentFsBtn");
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (fsBtn) fsBtn.innerText = "⛶ Fullscreen";
@@ -772,6 +823,7 @@
     });
 
     function skipSeconds(s) {
+      wakeControlDeck();
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
@@ -790,6 +842,7 @@
     }
 
     function toggleVideoPlay() {
+      wakeControlDeck();
       document.getElementById('securityOverlay').classList.add('hidden');
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
@@ -813,6 +866,7 @@
     }
 
     function seekVideoTrack(e) {
+      wakeControlDeck();
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid && vid.duration) {
@@ -884,6 +938,7 @@
     }
 
     function startPortalDownload() {
+      wakeControlDeck();
       const box = document.getElementById("inpageDownloadBox");
       const statusEl = document.getElementById("dlStatusLabel");
       const sizeEl = document.getElementById("dlSizeLabel");
