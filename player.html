@@ -189,25 +189,6 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* TOP-RIGHT ULTRA COMPACT HUD BAR */
-    .tactical-permanent-hud {
-      position: absolute; top: 6px; right: 6px; z-index: 60;
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(4, 7, 11, 0.85); border: 1px solid rgba(255, 215, 0, 0.4);
-      padding: 2px 4px; border-radius: 4px; backdrop-filter: blur(6px);
-    }
-    .fs-hud-btn { 
-      background: rgba(255, 215, 0, 0.9); 
-      color: #000; 
-      font-size: 9px; 
-      font-weight: 900; 
-      padding: 2px 4px; 
-      border-radius: 3px; 
-      cursor: pointer; 
-      border: none;
-      line-height: 1;
-    }
-
     /* DIRECT ARCHIVE VIDEO STYLING */
     .archive-box {
       position: relative;
@@ -225,17 +206,34 @@
       border: none;
     }
 
-    /* YOUTUBE ENGINE WITH CLEAN CUSTOM BAR */
-    .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
-    .tap-zone { position: absolute; top: 35px; bottom: 45px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .tap-zone-left { left: 0; } .tap-zone-right { right: 0; }
-    .skip-alert-badge { background: rgba(255, 215, 0, 0.9); color: #000; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; padding: 6px 14px; border-radius: 9999px; opacity: 0; pointer-events: none; transform: scale(0.6); transition: all 0.2s ease; }
-    .skip-alert-badge.show { opacity: 1; transform: scale(1.1); }
-    .tactical-custom-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%); padding: 6px 12px 5px 12px; display: flex; flex-direction: column; gap: 3px; z-index: 40; transition: opacity 0.35s ease; }
-    .hud-hidden { opacity: 0 !important; pointer-events: none !important; }
-    .tactical-progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; cursor: pointer; position: relative; }
-    .tactical-progress-fill { height: 100%; background: #ffd700; width: 0%; border-radius: 2px; }
+    /* YOUTUBE NATIVE PLAYER CONTAINER */
+    .yt-native-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    #ytPlayerFrame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+    }
+    /* Top bar shield to block title/channel link clicks while keeping bottom settings gear clickable */
+    .yt-top-shield {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      z-index: 25;
+      background: transparent;
+      pointer-events: auto;
+    }
+
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
     header, main, footer { position: relative; z-index: 10; width: 100%; }
@@ -303,21 +301,6 @@
           </span>
         </div>
 
-        <!-- TOP-RIGHT ULTRA COMPACT HUD -->
-        <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
-          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-black/90 text-amber-400 font-bold text-[9px] px-1 py-0.2 rounded border border-amber-500/40 outline-none cursor-pointer font-orbitron appearance-none text-center" style="width: 34px;">
-            <option value="1">1x</option>
-            <option value="1.25">1.25</option>
-            <option value="1.5">1.5</option>
-            <option value="1.75">1.75</option>
-            <option value="2">2x</option>
-          </select>
-
-          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen()" class="fs-hud-btn font-orbitron">
-            ⛶
-          </button>
-        </div>
-
         <div id="playerRoot" class="w-full h-full relative"></div>
 
       </div>
@@ -348,9 +331,6 @@
   <script>
     let ytInstance = null;
     let isYtReady = false;
-    let isPlaying = false;
-    let timerSync = null;
-    let hideControlsTimeout = null;
     let isArchiveVideo = false;
     let activeYtVideoId = 'd9wnvlbtizc';
 
@@ -379,9 +359,9 @@
         videoId: activeYtVideoId,
         playerVars: {
           autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
+          controls: 1,        // Native YouTube controls + Settings (⚙️) gear for Quality & Playback Speed
+          disablekb: 0,
+          fs: 1,
           modestbranding: 1,
           rel: 0,
           iv_load_policy: 3,
@@ -392,20 +372,10 @@
         events: {
           onReady: () => {
             isYtReady = true;
-            startTimerSync();
-            resetAutoHideTimer();
           },
           onStateChange: (e) => {
-            const btn = document.getElementById("playTrigger");
             if (e.data === YT.PlayerState.PLAYING) {
-              isPlaying = true;
-              if (btn) btn.innerText = "⏸ PAUSE";
               document.getElementById('securityOverlay').classList.add('hidden');
-              resetAutoHideTimer();
-            } else {
-              isPlaying = false;
-              if (btn) btn.innerText = "▶ PLAY";
-              showControls();
             }
           },
           onError: (e) => {
@@ -518,65 +488,13 @@
         isArchiveVideo = false;
         const resolvedVideoId = parsedYtId || 'd9wnvlbtizc';
         playerRoot.innerHTML = `
-          <div class="yt-custom-container">
+          <div class="yt-native-container">
+            <div class="yt-top-shield" oncontextmenu="return false;"></div>
             <div id="ytPlayerFrame"></div>
-
-            <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
-              <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
-            </div>
-
-            <div class="tap-zone tap-zone-right" onclick="handleTapZone('right')">
-              <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
-            </div>
-
-            <div class="tactical-custom-bar" id="ytCustomBar" onclick="event.stopPropagation()">
-              <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
-                <div class="tactical-progress-fill" id="trackFill"></div>
-              </div>
-
-              <div class="flex items-center justify-between text-xs font-mono pt-0.5">
-                <div class="flex items-center gap-1.5">
-                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-[11px] uppercase px-2.5 py-0.5 bg-amber-400 hover:bg-amber-500 rounded transition cursor-pointer">
-                    ▶ PLAY
-                  </button>
-
-                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    « 10s
-                  </button>
-
-                  <span id="timeCounter" class="text-neutral-300 font-mono text-[10px] px-1">00:00 / 00:00</span>
-
-                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    10s »
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-1">
-                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.2">
-                    <span class="text-neutral-400 text-[9px] font-orbitron">QUAL:</span>
-                    <select id="qualitySelector" onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-[10px] outline-none cursor-pointer">
-                      <option value="default" class="bg-black">Auto (Adaptive)</option>
-                      <option value="hd1080" class="bg-black">1080p HD</option>
-                      <option value="hd720" class="bg-black">720p HD</option>
-                      <option value="large" class="bg-black">480p</option>
-                      <option value="medium" class="bg-black">360p</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         `;
 
         loadYouTubeApiScript(resolvedVideoId);
-
-        const screenEl = document.getElementById("phantomConsoleScreen");
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          resetAutoHideTimer();
-        });
-
-        resetAutoHideTimer();
       }
     });
 
@@ -588,196 +506,6 @@
       } else if (ytInstance && isYtReady && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
-    }
-
-    function showControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.remove("hud-hidden");
-    }
-
-    function hideControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.add("hud-hidden");
-    }
-
-    function resetAutoHideTimer() {
-      clearTimeout(hideControlsTimeout);
-      hideControlsTimeout = setTimeout(() => {
-        hideControls();
-      }, 3000);
-    }
-
-    function updateVideoSpeed(rate) {
-      const spd = parseFloat(rate);
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) vid.playbackRate = spd;
-      } else if (ytInstance && isYtReady && ytInstance.setPlaybackRate) {
-        ytInstance.setPlaybackRate(spd);
-      }
-    }
-
-    function updateVideoQuality(quality) {
-      if (!ytInstance || !isYtReady || !ytInstance.setPlaybackQuality) return;
-      ytInstance.setPlaybackQuality(quality);
-      if (ytInstance.getCurrentTime && ytInstance.seekTo) {
-        const currentTime = ytInstance.getCurrentTime();
-        ytInstance.seekTo(currentTime, true);
-      }
-    }
-
-    function toggleTacticalFullscreen() {
-      const target = document.getElementById("phantomConsoleScreen");
-      const fsBtn = document.getElementById("permanentFsBtn");
-
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (target.requestFullscreen) {
-          target.requestFullscreen();
-        } else if (target.webkitRequestFullscreen) {
-          target.webkitRequestFullscreen();
-        } else if (target.msRequestFullscreen) {
-          target.msRequestFullscreen();
-        }
-        if (fsBtn) fsBtn.innerText = "✕";
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-        if (fsBtn) fsBtn.innerText = "⛶";
-      }
-    }
-
-    document.addEventListener("fullscreenchange", () => {
-      const fsBtn = document.getElementById("permanentFsBtn");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (fsBtn) fsBtn.innerText = "⛶";
-      } else {
-        if (fsBtn) fsBtn.innerText = "✕";
-      }
-    });
-
-    let leftTimer = null, rightTimer = null;
-    let leftClicks = 0, rightClicks = 0;
-
-    function handleTapZone(side) {
-      showControls();
-      resetAutoHideTimer();
-
-      if (isArchiveVideo) return;
-
-      if (side === 'left') {
-        leftClicks++;
-        if (leftClicks === 1) {
-          leftTimer = setTimeout(() => {
-            toggleVideoPlay();
-            leftClicks = 0;
-          }, 270);
-        } else if (leftClicks === 2) {
-          clearTimeout(leftTimer);
-          skipSeconds(-10);
-          triggerBadge('skipLeftBadge');
-          leftClicks = 0;
-        }
-      } else {
-        rightClicks++;
-        if (rightClicks === 1) {
-          rightTimer = setTimeout(() => {
-            toggleVideoPlay();
-            rightClicks = 0;
-          }, 270);
-        } else if (rightClicks === 2) {
-          clearTimeout(rightTimer);
-          skipSeconds(10);
-          triggerBadge('skipRightBadge');
-          rightClicks = 0;
-        }
-      }
-    }
-
-    function skipSeconds(s) {
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
-        return;
-      }
-      if (!ytInstance || !isYtReady || !ytInstance.getCurrentTime) return;
-      const target = Math.max(0, ytInstance.getCurrentTime() + s);
-      ytInstance.seekTo(target, true);
-    }
-
-    function triggerBadge(id) {
-      const b = document.getElementById(id);
-      if (!b) return;
-      b.classList.add('show');
-      setTimeout(() => b.classList.remove('show'), 550);
-    }
-
-    function toggleVideoPlay() {
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) {
-          if (vid.paused) vid.play();
-          else vid.pause();
-        }
-        return;
-      }
-      if (!ytInstance || !isYtReady) return;
-      if (isPlaying) ytInstance.pauseVideo();
-      else ytInstance.playVideo();
-    }
-
-    function seekVideoTrack(e) {
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid && vid.duration) {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const pos = (e.clientX - rect.left) / rect.width;
-          vid.currentTime = pos * vid.duration;
-        }
-        return;
-      }
-      if (!ytInstance || !isYtReady) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      ytInstance.seekTo(pos * ytInstance.getDuration(), true);
-    }
-
-    function startTimerSync() {
-      if (timerSync) clearInterval(timerSync);
-      timerSync = setInterval(() => {
-        if (isArchiveVideo) {
-          const vid = document.getElementById("archiveVideo");
-          if (vid && vid.duration > 0) {
-            const c = vid.currentTime;
-            const d = vid.duration;
-            const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const counter = document.getElementById("timeCounter");
-            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
-          }
-          return;
-        }
-        if (ytInstance && isYtReady && ytInstance.getCurrentTime) {
-          const c = ytInstance.getCurrentTime();
-          const d = ytInstance.getDuration();
-          if (d > 0) {
-            const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const counter = document.getElementById("timeCounter");
-            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
-          }
-        }
-      }, 500);
-    }
-
-    function formatSeconds(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
     // STUDY TIMER
