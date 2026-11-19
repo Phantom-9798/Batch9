@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | Tactical Video Console</title>
+  <title>☠️ TEAM PHANTO☠️ | Tactical Video Console</title>
 
   <script>
   (() => {
@@ -200,8 +200,8 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* FULL LOCK SHIELD OVER VIDEO FRAME (NO TOOLTIP POPUP) */
-    .frame-lock-shield {
+    /* YOUTUBE LOCK SHIELD (BLOCKS DIRECT CLICKS ON YOUTUBE FRAME) */
+    .yt-lock-shield {
       position: absolute;
       inset: 0;
       z-index: 30;
@@ -210,15 +210,34 @@
       cursor: default;
     }
 
-    /* DIRECT ARCHIVE & ZOOM STYLING */
-    .archive-box, .zoom-box {
-      position: relative;
+    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF YOUTUBE FRAME */
+    .yt-bottom-brand-tag {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      z-index: 45;
+      pointer-events: none;
+      user-select: none;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.62);
+      font-family: 'Black Ops One', cursive;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+    }
+
+    /* TEMPORARY SEPARATE CONTAINER FOR ARCHIVE / NEXASHIELD / ZOOM FRAMES */
+    #temporaryArchiveZoomSection {
       width: 100%;
       height: 100%;
+      position: relative;
       background: #000;
       overflow: hidden;
     }
-    .archive-frame, .zoom-frame {
+    .temp-media-frame {
       position: absolute;
       top: 0;
       left: 0;
@@ -251,45 +270,28 @@
     .skip-alert-badge.right { right: 16%; }
     .skip-alert-badge.show { opacity: 1; transform: translateY(-50%) scale(1.05); }
 
-    /* BOX-FREE TRANSPARENT TAG AT BOTTOM OF VIDEO AREA (ABOVE CONTROLS) */
-    .video-frame-bottom-tag {
-      position: absolute;
-      bottom: 8px;
-      right: 12px;
-      z-index: 45;
-      pointer-events: none;
-      user-select: none;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      color: rgba(255, 255, 255, 0.62);
-      font-family: 'Black Ops One', cursive;
-      font-size: 14px;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
-    }
-
-    /* BOTTOM REFERENCE CONTROL DOCK */
+    /* YOUTUBE-ONLY BOTTOM CONTROL DECK */
     .phantom-bottom-deck {
       margin-top: 8px;
       background: rgba(9, 15, 34, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 10px 12px;
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 8px;
       z-index: 55;
       transition: opacity 0.22s ease;
     }
-
+    .phantom-bottom-deck.yt-active {
+      display: flex;
+    }
     .phantom-bottom-deck.deck-quiet {
       opacity: 0.45;
     }
 
-    #phantomConsoleScreen:fullscreen .phantom-bottom-deck,
-    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck {
+    #phantomConsoleScreen:fullscreen .phantom-bottom-deck.yt-active,
+    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck.yt-active {
       display: flex !important;
       opacity: 1 !important;
       margin-top: 0;
@@ -495,7 +497,7 @@
         <div>
           <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold" id="classLabelIndicator">CLASS SESSION</div>
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase" id="playerTitle">
-            TEAM PHANTOM CONSOLE
+            ☠️ TEAM PHANTO☠️ CONSOLE
           </h1>
         </div>
       </div>
@@ -517,12 +519,6 @@
           <div class="big-play-btn mt-2"></div>
         </div>
 
-        <!-- LOCK SHIELD (BLOCKS DIRECT CLICKS ON VIDEO FRAME, NO TOOLTIP POPUP) -->
-        <div class="frame-lock-shield"></div>
-
-        <!-- BOX-FREE TRANSPARENT TAG AT BOTTOM OF VIDEO FRAME -->
-        <div class="video-frame-bottom-tag">☠️ TEAM PHANTO☠️</div>
-
         <div id="securityWatermark" class="phantom-watermark-layer">
           <span class="font-mono text-[11px] font-bold text-neutral-400 tracking-widest uppercase">
             SECURE ACCESS: <span id="traceUid">TP-2026-CADET</span>
@@ -534,59 +530,58 @@
 
         <div id="playerRoot" class="w-full h-full relative"></div>
 
-        <!-- BOTTOM REFERENCE PLAYER CONTROL DECK (ALWAYS SHOWN ON INTERACTION & FULLSCREEN) -->
-        <div class="phantom-bottom-deck" id="phantomBottomDeck">
-          <div class="seek-row">
-            <span id="currentTimeLabel">0:00</span>
-            <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
-              <div class="tactical-progress-fill" id="trackFill"></div>
-            </div>
-            <span id="totalTimeLabel">0:00</span>
-          </div>
+      </div>
 
-          <div class="controls-row-main">
-            <div class="transport-group">
-              <button type="button" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
-                ↺ 10s
-              </button>
-              <button type="button" onclick="toggleVideoPlay()" id="playTrigger" class="play-pause-bold-btn">
-                ▶ PLAY
-              </button>
-              <button type="button" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
-                10s ↻
-              </button>
-            </div>
-
-            <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
-              <option value="1">1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-              <option value="1.75">1.75x</option>
-              <option value="2">2x</option>
-            </select>
+      <!-- YOUTUBE-ONLY CONTROL DECK (Shown only for YouTube videos) -->
+      <div class="phantom-bottom-deck" id="phantomBottomDeck">
+        <div class="seek-row">
+          <span id="currentTimeLabel">0:00</span>
+          <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
+            <div class="tactical-progress-fill" id="trackFill"></div>
           </div>
-
-          <div class="action-row-bottom">
-            <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
-              ⬇ Download
-            </button>
-            <button type="button" onclick="toggleTacticalFullscreen()" id="permanentFsBtn" class="fs-dock-btn">
-              ⛶ Fullscreen
-            </button>
-          </div>
-
-          <!-- IN-PAGE PORTAL DOWNLOAD PROGRESS BOX -->
-          <div id="inpageDownloadBox" class="inpage-download-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
-              <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Preparing portal save...</span>
-              <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
-            </div>
-            <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
-              <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
-            </div>
-          </div>
+          <span id="totalTimeLabel">0:00</span>
         </div>
 
+        <div class="controls-row-main">
+          <div class="transport-group">
+            <button type="button" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
+              ↺ 10s
+            </button>
+            <button type="button" onclick="toggleVideoPlay()" id="playTrigger" class="play-pause-bold-btn">
+              ▶ PLAY
+            </button>
+            <button type="button" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
+              10s ↻
+            </button>
+          </div>
+
+          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
+            <option value="1">1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+          </select>
+        </div>
+
+        <div class="action-row-bottom">
+          <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
+            ⬇ Download
+          </button>
+          <button type="button" onclick="toggleTacticalFullscreen()" id="permanentFsBtn" class="fs-dock-btn">
+            ⛶ Fullscreen
+          </button>
+        </div>
+
+        <div id="inpageDownloadBox" class="inpage-download-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+            <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Saving to Team Phantom Portal...</span>
+            <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
+          </div>
+          <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
+            <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
+          </div>
+        </div>
       </div>
 
       <!-- LECTURE INFO SECTION DISPLAYED CLEARLY AT BOTTOM OF PANEL -->
@@ -608,58 +603,72 @@
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-amber-500/20 py-1.5 px-4 text-center shrink-0">
     <p class="text-[9px] font-mono text-amber-300 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
+      &copy; 2026 ☠️ TEAM PHANTO☠️ &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
     </p>
   </footer>
 
   <script>
-    let ytInstance = null;
-    let isPlaying = false;
-    let timerSync = null;
-    let isArchiveVideo = false;
-    let activityFadeTimer = null;
-    let currentLectureData = {
-      id: "lec_" + Date.now(),
-      title: "TEAM PHANTOM TACTICAL CONSOLE",
-      source: ""
-    };
-
-    function revealAllControlsOnActivity() {
-      const deck = document.getElementById("phantomBottomDeck");
-      if (deck) {
-        deck.style.display = "flex";
-        deck.classList.remove("deck-quiet");
-      }
-      clearTimeout(activityFadeTimer);
-      activityFadeTimer = setTimeout(() => {
-        if (isPlaying && deck) {
-          deck.classList.add("deck-quiet");
-        }
-      }, 4000);
+    function extractYouTubeId(input) {
+      if (!input) return null;
+      var trimmed = String(input).trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+      var m = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
-      const urlTitle = urlParams.get("title");
+    function extractDriveId(input) {
+      if (!input) return null;
+      var m = String(input).match(/\/d\/([^\/]+)/) || String(input).match(/[?&]id=([^&]+)/);
+      return m ? m[1] : null;
+    }
 
-      const storedVideo = sessionStorage.getItem("phantom_current_video");
-      const storedTitle = sessionStorage.getItem("phantom_current_title");
-
-      let finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TEAM PHANTOM TACTICAL CONSOLE";
-
-      if (finalVideo) {
-        try {
-          finalVideo = decodeURIComponent(finalVideo);
-        } catch (e) {}
+    var PLAYER = {
+      mode: 'youtube', // 'youtube' | 'temporary_archive_zoom'
+      ytId: null,
+      ytPlayer: null,
+      duration: 0,
+      currentTime: 0,
+      isPlaying: false,
+      isReady: false,
+      hasStarted: false,
+      tickTimer: null,
+      fsHideTimer: null,
+      isFullscreen: false,
+      lecture: {
+        id: 'lec_' + Date.now(),
+        title: '☠️ TEAM PHANTO☠️ CONSOLE',
+        source: ''
       }
+    };
 
-      const decodedTitle = decodeURIComponent(finalTitle);
-      currentLectureData = {
-        id: btoa(unescape(encodeURIComponent(decodedTitle + "_" + (finalVideo || "default")))).slice(0, 24),
+    function revealYouTubeControls() {
+      if (PLAYER.mode !== 'youtube') return;
+      var deck = document.getElementById("phantomBottomDeck");
+      if (deck) {
+        deck.classList.add("yt-active");
+        deck.classList.remove("deck-quiet");
+      }
+      clearTimeout(PLAYER.fsHideTimer);
+      PLAYER.fsHideTimer = setTimeout(function(){
+        if (PLAYER.mode === 'youtube' && PLAYER.isPlaying && deck) {
+          deck.classList.add("deck-quiet");
+        }
+      }, 3500);
+    }
+
+    document.addEventListener("DOMContentLoaded", function(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var rawVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id") || sessionStorage.getItem("phantom_current_video") || "";
+      var rawTitle = urlParams.get("title") || sessionStorage.getItem("phantom_current_title") || "☠️ TEAM PHANTO☠️ CONSOLE";
+
+      try { rawVideo = decodeURIComponent(rawVideo); } catch(e){}
+      var decodedTitle = rawTitle;
+      try { decodedTitle = decodeURIComponent(rawTitle); } catch(e){}
+
+      PLAYER.lecture = {
+        id: btoa(unescape(encodeURIComponent(decodedTitle + "_" + (rawVideo || "yt")))).slice(0, 24),
         title: decodedTitle,
-        source: finalVideo || ""
+        source: rawVideo
       };
 
       document.getElementById("playerTitle").innerText = decodedTitle;
@@ -668,144 +677,165 @@
         document.getElementById("classLabelIndicator").innerText = decodedTitle.split('(')[1].replace(')', '').toUpperCase() + " • SESSION";
       }
 
-      const consoleScreen = document.getElementById("phantomConsoleScreen");
-      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach((evtName) => {
-        consoleScreen.addEventListener(evtName, revealAllControlsOnActivity);
-        document.addEventListener(evtName, (e) => {
-          if (document.fullscreenElement || document.webkitFullscreenElement) {
-            revealAllControlsOnActivity();
+      var consoleScreen = document.getElementById("phantomConsoleScreen");
+      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
+        consoleScreen.addEventListener(evtName, revealYouTubeControls);
+        document.addEventListener(evtName, function(){
+          if (PLAYER.mode === 'youtube' && (document.fullscreenElement || document.webkitFullscreenElement)) {
+            revealYouTubeControls();
           }
         });
       });
 
-      const playerRoot = document.getElementById("playerRoot");
+      var ytId = extractYouTubeId(rawVideo);
+      var isTempArchiveOrZoom = !ytId && rawVideo && (
+        rawVideo.includes("archive.org") ||
+        rawVideo.endsWith(".mp4") ||
+        rawVideo.endsWith(".webm") ||
+        rawVideo.includes("drive.google.com") ||
+        rawVideo.includes("zoom") ||
+        rawVideo.includes("nexield") ||
+        rawVideo.startsWith("http://") ||
+        rawVideo.startsWith("https://")
+      );
 
-      // ARCHIVE / DIRECT FILE / DRIVE STREAMING PLAYER RENDERER
-      if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
-        isArchiveVideo = true;
-        playerRoot.innerHTML = `
-          <div class="archive-box">
-            <video
-              id="archiveVideo"
-              src="${finalVideo}"
-              class="archive-frame"
-              controlsList="nodownload"
-              playsinline
-              oncontextmenu="return false;">
-            </video>
-          </div>
-        `;
-      }
-      // OTHER EMBED / PROXY FRAMES (Kept intact)
-      else if (
-        (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom")) ||
-        (finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))
-      ) {
-        isArchiveVideo = true;
-        playerRoot.innerHTML = `
-          <div class="archive-box">
-            <iframe
-              id="archiveIframe"
-              src="${finalVideo}"
-              class="archive-frame"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-            </iframe>
-          </div>
-        `;
-      }
-      // ZOOM FRAME (Kept intact)
-      else if (finalVideo && finalVideo.includes("zoom")) {
-        isArchiveVideo = false;
-        playerRoot.innerHTML = `
-          <div class="zoom-box">
-            <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-          </div>
-        `;
-      }
-      // YOUTUBE PLAYER (Auto quality based on network)
-      else {
-        isArchiveVideo = false;
-        playerRoot.innerHTML = `
-          <div class="yt-custom-container">
-            <div id="ytPlayerFrame"></div>
-            <div class="skip-alert-badge left" id="skipLeftBadge">« 10s</div>
-            <div class="skip-alert-badge right" id="skipRightBadge">10s »</div>
-          </div>
-        `;
+      var playerRoot = document.getElementById("playerRoot");
+      var deck = document.getElementById("phantomBottomDeck");
 
-        window.onYouTubeIframeAPIReady = () => {
-          ytInstance = new YT.Player('ytPlayerFrame', {
-            videoId: finalVideo,
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-              disablekb: 1,
-              fs: 0,
-              modestbranding: 1,
-              rel: 0,
-              showinfo: 0,
-              iv_load_policy: 3
+      // ============================================================
+      //  TEMPORARY SEPARATE SECTION: ARCHIVE / NEXASHIELD / ZOOM
+      //  (No YouTube custom controls/bar attached here)
+      // ============================================================
+      if (isTempArchiveOrZoom) {
+        PLAYER.mode = 'temporary_archive_zoom';
+        if (deck) deck.classList.remove("yt-active");
+
+        var driveId = extractDriveId(rawVideo);
+        var embedSrc = driveId ? ('https://drive.google.com/file/d/' + driveId + '/preview') : rawVideo;
+        var isDirectFile = rawVideo.endsWith(".mp4") || rawVideo.endsWith(".webm");
+
+        playerRoot.innerHTML =
+          '<div id="temporaryArchiveZoomSection" data-temp-frame="true">' +
+            (isDirectFile
+              ? '<video id="tempArchiveVideo" src="' + embedSrc + '" class="temp-media-frame" controls controlsList="nodownload" playsinline></video>'
+              : '<iframe id="tempArchiveIframe" src="' + embedSrc + '" class="temp-media-frame" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>'
+            ) +
+          '</div>';
+        return;
+      }
+
+      // ============================================================
+      //  MAIN PERMANENT YOUTUBE PLAYER (Auto quality, locked frame,
+      //  bottom-right box-free tag, bottom control deck)
+      // ============================================================
+      PLAYER.mode = 'youtube';
+      PLAYER.ytId = ytId || rawVideo;
+      if (deck) deck.classList.add("yt-active");
+
+      playerRoot.innerHTML =
+        '<div class="yt-custom-container">' +
+          '<div id="ytPlayerFrame"></div>' +
+          '<div class="yt-lock-shield"></div>' +
+          '<div class="skip-alert-badge left" id="skipLeftBadge">« 10s</div>' +
+          '<div class="skip-alert-badge right" id="skipRightBadge">10s »</div>' +
+          '<div class="yt-bottom-brand-tag">☠️ TEAM PHANTO☠️</div>' +
+        '</div>';
+
+      window.onYouTubeIframeAPIReady = function(){
+        PLAYER.ytPlayer = new YT.Player('ytPlayerFrame', {
+          videoId: PLAYER.ytId,
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            iv_load_policy: 3,
+            playsinline: 1
+          },
+          events: {
+            onReady: function(){
+              PLAYER.isReady = true;
+              startTimerSync();
             },
-            events: {
-              onReady: () => {
-                startTimerSync();
-              },
-              onStateChange: (e) => {
-                const btn = document.getElementById("playTrigger");
-                if (e.data === YT.PlayerState.PLAYING) {
-                  isPlaying = true;
-                  if (btn) btn.innerText = "⏸ PAUSE";
-                  document.getElementById('securityOverlay').classList.add('hidden');
-                  revealAllControlsOnActivity();
-                } else {
-                  isPlaying = false;
-                  if (btn) btn.innerText = "▶ PLAY";
-                  const deck = document.getElementById("phantomBottomDeck");
-                  if (deck) deck.classList.remove("deck-quiet");
-                }
+            onStateChange: function(e){
+              var btn = document.getElementById("playTrigger");
+              if (e.data === YT.PlayerState.PLAYING) {
+                PLAYER.isPlaying = true;
+                if (btn) btn.innerText = "⏸ PAUSE";
+                document.getElementById('securityOverlay').classList.add('hidden');
+                revealYouTubeControls();
+              } else {
+                PLAYER.isPlaying = false;
+                if (btn) btn.innerText = "▶ PLAY";
+                if (deck) deck.classList.remove("deck-quiet");
               }
             }
-          });
-        };
+          }
+        });
+      };
 
-        if (window.YT && window.YT.Player) {
-          window.onYouTubeIframeAPIReady();
-        }
+      if (window.YT && window.YT.Player) {
+        window.onYouTubeIframeAPIReady();
       }
     });
 
-    function activateStream() {
+    function activateStream(){
       document.getElementById('securityOverlay').classList.add('hidden');
-      revealAllControlsOnActivity();
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) {
-          vid.play();
-          isPlaying = true;
-          const btn = document.getElementById("playTrigger");
-          if (btn) btn.innerText = "⏸ PAUSE";
-          startTimerSync();
-        }
-      } else if (ytInstance && ytInstance.playVideo) {
-        ytInstance.playVideo();
+      if (PLAYER.mode === 'temporary_archive_zoom') {
+        var vid = document.getElementById("tempArchiveVideo");
+        if (vid) vid.play();
+        return;
+      }
+      revealYouTubeControls();
+      if (PLAYER.ytPlayer && PLAYER.ytPlayer.playVideo) {
+        PLAYER.ytPlayer.playVideo();
       }
     }
 
-    function updateVideoSpeed(rate) {
-      revealAllControlsOnActivity();
-      const spd = parseFloat(rate);
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) vid.playbackRate = spd;
-      } else if (ytInstance && ytInstance.setPlaybackRate) {
-        ytInstance.setPlaybackRate(spd);
-      }
+    function toggleVideoPlay(){
+      if (PLAYER.mode !== 'youtube' || !PLAYER.ytPlayer) return;
+      document.getElementById('securityOverlay').classList.add('hidden');
+      revealYouTubeControls();
+      if (PLAYER.isPlaying) PLAYER.ytPlayer.pauseVideo();
+      else PLAYER.ytPlayer.playVideo();
     }
 
-    function toggleTacticalFullscreen() {
-      revealAllControlsOnActivity();
-      const target = document.getElementById("phantomConsoleScreen");
-      const fsBtn = document.getElementById("permanentFsBtn");
+    function skipSeconds(s){
+      if (PLAYER.mode !== 'youtube' || !PLAYER.ytPlayer || !PLAYER.ytPlayer.getCurrentTime) return;
+      revealYouTubeControls();
+      var target = Math.max(0, PLAYER.ytPlayer.getCurrentTime() + s);
+      PLAYER.ytPlayer.seekTo(target, true);
+    }
+
+    function triggerBadge(id){
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.classList.add('show');
+      setTimeout(function(){ b.classList.remove('show'); }, 550);
+    }
+
+    function updateVideoSpeed(rate){
+      if (PLAYER.mode !== 'youtube' || !PLAYER.ytPlayer || !PLAYER.ytPlayer.setPlaybackRate) return;
+      revealYouTubeControls();
+      PLAYER.ytPlayer.setPlaybackRate(parseFloat(rate));
+    }
+
+    function seekVideoTrack(e){
+      if (PLAYER.mode !== 'youtube' || !PLAYER.ytPlayer || !PLAYER.ytPlayer.getDuration) return;
+      revealYouTubeControls();
+      var rect = e.currentTarget.getBoundingClientRect();
+      var pos = (e.clientX - rect.left) / rect.width;
+      PLAYER.ytPlayer.seekTo(pos * PLAYER.ytPlayer.getDuration(), true);
+    }
+
+    function toggleTacticalFullscreen(){
+      if (PLAYER.mode !== 'youtube') return;
+      revealYouTubeControls();
+      var target = document.getElementById("phantomConsoleScreen");
+      var fsBtn = document.getElementById("permanentFsBtn");
 
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (target.requestFullscreen) target.requestFullscreen();
@@ -820,9 +850,9 @@
       }
     }
 
-    document.addEventListener("fullscreenchange", () => {
-      revealAllControlsOnActivity();
-      const fsBtn = document.getElementById("permanentFsBtn");
+    document.addEventListener("fullscreenchange", function(){
+      revealYouTubeControls();
+      var fsBtn = document.getElementById("permanentFsBtn");
       if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (fsBtn) fsBtn.innerText = "⛶ Fullscreen";
       } else {
@@ -830,231 +860,156 @@
       }
     });
 
-    function skipSeconds(s) {
-      revealAllControlsOnActivity();
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
-        return;
-      }
-      if (!ytInstance || !ytInstance.getCurrentTime) return;
-      const target = Math.max(0, ytInstance.getCurrentTime() + s);
-      ytInstance.seekTo(target, true);
-    }
-
-    function triggerBadge(id) {
-      const b = document.getElementById(id);
-      if (!b) return;
-      b.classList.add('show');
-      setTimeout(() => b.classList.remove('show'), 550);
-    }
-
-    function toggleVideoPlay() {
-      revealAllControlsOnActivity();
-      document.getElementById('securityOverlay').classList.add('hidden');
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        const btn = document.getElementById("playTrigger");
-        if (vid) {
-          if (vid.paused) {
-            vid.play();
-            isPlaying = true;
-            if (btn) btn.innerText = "⏸ PAUSE";
-          } else {
-            vid.pause();
-            isPlaying = false;
-            if (btn) btn.innerText = "▶ PLAY";
-          }
-        }
-        return;
-      }
-      if (!ytInstance) return;
-      if (isPlaying) ytInstance.pauseVideo();
-      else ytInstance.playVideo();
-    }
-
-    function seekVideoTrack(e) {
-      revealAllControlsOnActivity();
-      if (isArchiveVideo) {
-        const vid = document.getElementById("archiveVideo");
-        if (vid && vid.duration) {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const pos = (e.clientX - rect.left) / rect.width;
-          vid.currentTime = pos * vid.duration;
-        }
-        return;
-      }
-      if (!ytInstance || !ytInstance.getDuration) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      ytInstance.seekTo(pos * ytInstance.getDuration(), true);
-    }
-
-    function startTimerSync() {
-      if (timerSync) clearInterval(timerSync);
-      timerSync = setInterval(() => {
-        if (isArchiveVideo) {
-          const vid = document.getElementById("archiveVideo");
-          if (vid && vid.duration > 0) {
-            const c = vid.currentTime;
-            const d = vid.duration;
-            const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const curEl = document.getElementById("currentTimeLabel");
-            const totEl = document.getElementById("totalTimeLabel");
-            if (curEl) curEl.innerText = formatSeconds(c);
-            if (totEl) totEl.innerText = formatSeconds(d);
-          }
-          return;
-        }
-        if (ytInstance && ytInstance.getCurrentTime && ytInstance.getDuration) {
-          const c = ytInstance.getCurrentTime();
-          const d = ytInstance.getDuration();
-          if (d > 0) {
-            const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const curEl = document.getElementById("currentTimeLabel");
-            const totEl = document.getElementById("totalTimeLabel");
-            if (curEl) curEl.innerText = formatSeconds(c);
-            if (totEl) totEl.innerText = formatSeconds(d);
-          }
+    function startTimerSync(){
+      if (PLAYER.tickTimer) clearInterval(PLAYER.tickTimer);
+      PLAYER.tickTimer = setInterval(function(){
+        if (PLAYER.mode !== 'youtube' || !PLAYER.ytPlayer || !PLAYER.ytPlayer.getCurrentTime) return;
+        var c = PLAYER.ytPlayer.getCurrentTime() || 0;
+        var d = PLAYER.ytPlayer.getDuration() || 0;
+        if (d > 0) {
+          var fill = document.getElementById("trackFill");
+          if (fill) fill.style.width = ((c / d) * 100) + "%";
+          var curEl = document.getElementById("currentTimeLabel");
+          var totEl = document.getElementById("totalTimeLabel");
+          if (curEl) curEl.innerText = formatSeconds(c);
+          if (totEl) totEl.innerText = formatSeconds(d);
         }
       }, 500);
     }
 
-    function formatSeconds(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    function formatSeconds(sec){
+      var m = Math.floor(sec / 60);
+      var s = Math.floor(sec % 60);
+      return m + ":" + (s < 10 ? "0" : "") + s;
     }
 
     // PORTAL-ONLY DOWNLOAD TRACKER (IndexedDB — No device gallery/file save)
-    function saveToPortalIndexedDB(item) {
+    function saveToPortalIndexedDB(item){
       if (!window.indexedDB) return;
-      const req = indexedDB.open("TeamPhantomDownloadsDB", 1);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains("saved_lectures")) {
-          db.createObjectStore("saved_lectures", { keyPath: "id" });
+      var req = indexedDB.open("phantom_portal_downloads", 1);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains("lectures")) {
+          db.createObjectStore("lectures", { keyPath: "id" });
         }
       };
-      req.onsuccess = (e) => {
-        const db = e.target.result;
-        const tx = db.transaction("saved_lectures", "readwrite");
-        tx.objectStore("saved_lectures").put(item);
+      req.onsuccess = function(e){
+        var db = e.target.result;
+        var tx = db.transaction("lectures", "readwrite");
+        tx.objectStore("lectures").put(item);
       };
     }
 
-    function startPortalDownload() {
-      revealAllControlsOnActivity();
-      const box = document.getElementById("inpageDownloadBox");
-      const statusEl = document.getElementById("dlStatusLabel");
-      const sizeEl = document.getElementById("dlSizeLabel");
-      const barEl = document.getElementById("dlProgressBar");
-      const btnEl = document.getElementById("portalDownloadBtn");
+    function startPortalDownload(){
+      if (PLAYER.mode !== 'youtube') return;
+      revealYouTubeControls();
+      var box = document.getElementById("inpageDownloadBox");
+      var statusEl = document.getElementById("dlStatusLabel");
+      var sizeEl = document.getElementById("dlSizeLabel");
+      var barEl = document.getElementById("dlProgressBar");
+      var btnEl = document.getElementById("portalDownloadBtn");
 
       if (!box || !statusEl || !sizeEl || !barEl) return;
 
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      const totalMB = 180;
-      let downloadedMB = 0;
-      statusEl.innerText = "Saving to Team Phantom Portal...";
+      var totalMB = 180;
+      var downloadedMB = 0;
+      statusEl.innerText = "Saving to ☠️ TEAM PHANTO☠️ Portal...";
       statusEl.style.color = "#6ee7b7";
       barEl.style.width = "0%";
 
-      const timer = setInterval(() => {
+      var timer = setInterval(function(){
         downloadedMB = Math.min(totalMB, downloadedMB + 20);
-        const pct = Math.round((downloadedMB / totalMB) * 100);
+        var pct = Math.round((downloadedMB / totalMB) * 100);
         barEl.style.width = pct + "%";
-        sizeEl.innerText = `${downloadedMB} MB / ${totalMB} MB`;
+        sizeEl.innerText = downloadedMB + " MB / " + totalMB + " MB";
 
         if (downloadedMB >= totalMB) {
           clearInterval(timer);
           saveToPortalIndexedDB({
-            id: currentLectureData.id,
-            title: currentLectureData.title,
-            source: currentLectureData.source,
+            id: PLAYER.lecture.id,
+            name: PLAYER.lecture.title,
+            url: PLAYER.lecture.source,
             sizeMB: totalMB,
-            savedAt: new Date().toLocaleString()
+            savedAt: Date.now()
           });
-          statusEl.innerText = "Saved in Portal Downloads (Device gallery untouched)";
+          statusEl.innerText = "Saved in Portal Downloads (Gallery untouched)";
           if (btnEl) btnEl.disabled = false;
         }
       }, 220);
     }
 
     // STUDY TIMER
-    (function() {
-      const FOCUS_TIMER_KEY = "phantom_daily_seconds";
-      const todayStr = new Date().toDateString();
-      const lastDate = localStorage.getItem("phantom_study_date");
+    (function(){
+      var FOCUS_TIMER_KEY = "phantom_daily_seconds";
+      var todayStr = new Date().toDateString();
+      var lastDate = localStorage.getItem("phantom_study_date");
 
       if (lastDate !== todayStr) {
         localStorage.setItem("phantom_study_date", todayStr);
         localStorage.setItem("phantom_daily_seconds", "0");
       }
 
-      let totalSeconds = parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0");
-      let sessionSeconds = 0;
+      var totalSeconds = parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0");
+      var sessionSeconds = 0;
 
-      setInterval(() => {
+      setInterval(function(){
         if (!document.hidden) {
           totalSeconds++;
           sessionSeconds++;
           localStorage.setItem(FOCUS_TIMER_KEY, totalSeconds.toString());
         }
 
-        const hrs = Math.floor(totalSeconds / 3600);
-        const mins = Math.floor((totalSeconds % 3600) / 60);
-        const secs = totalSeconds % 60;
-        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-        const displayEl = document.getElementById("phantomTimerDisplay");
+        var hrs = Math.floor(totalSeconds / 3600);
+        var mins = Math.floor((totalSeconds % 3600) / 60);
+        var secs = totalSeconds % 60;
+        var displayStr = hrs.toString().padStart(2, '0') + "h " + mins.toString().padStart(2, '0') + "m " + secs.toString().padStart(2, '0') + "s";
+        var displayEl = document.getElementById("phantomTimerDisplay");
         if (displayEl) displayEl.innerText = displayStr;
 
-        const pHrs = Math.floor(sessionSeconds / 3600);
-        const pMins = Math.floor((sessionSeconds % 3600) / 60);
-        const pSecs = sessionSeconds % 60;
-        const pDisplayStr = pHrs > 0
-          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
-          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+        var pHrs = Math.floor(sessionSeconds / 3600);
+        var pMins = Math.floor((sessionSeconds % 3600) / 60);
+        var pSecs = sessionSeconds % 60;
+        var pDisplayStr = pHrs > 0
+          ? pHrs + ":" + pMins.toString().padStart(2, '0') + ":" + pSecs.toString().padStart(2, '0')
+          : pMins.toString().padStart(2, '0') + ":" + pSecs.toString().padStart(2, '0');
 
-        const autoPomoEl = document.getElementById("autoPomoDisplay");
+        var autoPomoEl = document.getElementById("autoPomoDisplay");
         if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
       }, 1000);
     })();
 
     // WATERMARK JITTER ENGINE
-    (() => {
-      const wm = document.getElementById('securityWatermark');
-      const timeStampEl = document.getElementById('wmTimestamp');
+    (function(){
+      var wm = document.getElementById('securityWatermark');
+      var timeStampEl = document.getElementById('wmTimestamp');
 
-      setInterval(() => {
-        const now = new Date();
+      setInterval(function(){
+        var now = new Date();
         if (timeStampEl) {
-          const timeStamp_text = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
-          timeStampEl.innerText = timeStamp_text;
+          timeStampEl.innerText = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
         }
       }, 1000);
 
-      setInterval(() => {
+      setInterval(function(){
         if (wm) {
-          const top = Math.floor(Math.random() * 65) + 10;
-          const left = Math.floor(Math.random() * 55) + 10;
+          var top = Math.floor(Math.random() * 65) + 10;
+          var left = Math.floor(Math.random() * 55) + 10;
           wm.style.top = top + '%';
           wm.style.left = left + '%';
         }
       }, 3000);
     })();
 
-    window.addEventListener('load', () => {
-      const audio = document.getElementById("ambientAudio");
+    window.addEventListener('load', function(){
+      var audio = document.getElementById("ambientAudio");
       if (audio) {
         audio.volume = 0.4;
-        audio.play().catch(() => {
-          document.addEventListener('click', () => {
-            audio.play().catch(() => {});
+        audio.play().catch(function(){
+          document.addEventListener('click', function(){
+            audio.play().catch(function(){});
           }, { once: true });
         });
       }
