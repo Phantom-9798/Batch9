@@ -315,23 +315,21 @@
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
     }
 
-    /* TEMPORARY CROPPED CONTAINER FOR ARCHIVE / NEXASHIELD / ZOOM FRAMES */
-    #temporaryArchiveZoomSection {
+    /* DIRECT ARCHIVE & ZOOM STYLING (From original player HTML) */
+    .archive-box, .zoom-box {
+      position: relative;
       width: 100%;
       height: 100%;
-      position: relative;
       background: #000;
       overflow: hidden;
     }
-    .temp-media-frame {
+    .archive-frame, .zoom-frame {
       position: absolute;
       top: 0;
       left: 0;
       width: 100% !important;
       height: 100% !important;
       border: none;
-      transform: scale(1.08);
-      transform-origin: center center;
     }
 
     /* YOUTUBE ENGINE */
@@ -720,12 +718,6 @@
       return m ? m[1] : null;
     }
 
-    function extractDriveId(input) {
-      if (!input) return null;
-      var m = String(input).match(/\/d\/([^\/]+)/) || String(input).match(/[?&]id=([^&]+)/);
-      return m ? m[1] : null;
-    }
-
     var PLAYER = {
       mode: 'youtube',
       ytId: null,
@@ -804,41 +796,46 @@
       });
 
       var ytId = extractYouTubeId(rawVideo);
-      var isTempArchiveOrZoom = !ytId && rawVideo && (
-        rawVideo.includes("archive.org") ||
-        rawVideo.endsWith(".mp4") ||
-        rawVideo.endsWith(".webm") ||
-        rawVideo.includes("drive.google.com") ||
-        rawVideo.includes("zoom") ||
-        rawVideo.includes("nexield") ||
-        rawVideo.includes("nexshield") ||
-        rawVideo.startsWith("http://") ||
-        rawVideo.startsWith("https://")
-      );
-
       var playerRoot = document.getElementById("playerRoot");
       var deck = document.getElementById("phantomBottomDeck");
 
-      // TEMPORARY CROPPED SECTION: ARCHIVE / NEXASHIELD / ZOOM
-      if (isTempArchiveOrZoom) {
-        PLAYER.mode = 'temporary_archive_zoom';
+      // ============================================================
+      //  TEMPORARY ARCHIVE / DIRECT VIDEO / NEXASHIELD / ZOOM
+      //  (Kept in its own separate archive/zoom box structure)
+      // ============================================================
+      if (!ytId && rawVideo && (rawVideo.includes("archive.org") || rawVideo.endsWith(".mp4") || rawVideo.endsWith(".webm") || rawVideo.includes("drive.google.com"))) {
+        PLAYER.mode = 'temporary_archive';
         if (deck) deck.classList.remove("yt-active");
-
-        var driveId = extractDriveId(rawVideo);
-        var embedSrc = driveId ? ('https://drive.google.com/file/d/' + driveId + '/preview') : rawVideo;
-        var isDirectFile = rawVideo.endsWith(".mp4") || rawVideo.endsWith(".webm");
-
         playerRoot.innerHTML =
-          '<div id="temporaryArchiveZoomSection" data-temp-frame="true">' +
-            (isDirectFile
-              ? '<video id="tempArchiveVideo" src="' + embedSrc + '" class="temp-media-frame" controls controlsList="nodownload" playsinline></video>'
-              : '<iframe id="tempArchiveIframe" src="' + embedSrc + '" class="temp-media-frame" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>'
-            ) +
+          '<div id="temporaryArchiveSection" class="archive-box">' +
+            '<video id="archiveVideo" src="' + rawVideo + '" class="archive-frame" controls controlsList="nodownload" playsinline oncontextmenu="return false;"></video>' +
           '</div>';
         return;
       }
 
-      // MAIN PERMANENT YOUTUBE PLAYER
+      if (!ytId && rawVideo && rawVideo.includes("zoom")) {
+        PLAYER.mode = 'temporary_zoom';
+        if (deck) deck.classList.remove("yt-active");
+        playerRoot.innerHTML =
+          '<div id="temporaryZoomSection" class="zoom-box">' +
+            '<iframe id="zoomIframe" src="' + rawVideo + '" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>' +
+          '</div>';
+        return;
+      }
+
+      if (!ytId && rawVideo && (rawVideo.startsWith("http://") || rawVideo.startsWith("https://"))) {
+        PLAYER.mode = 'temporary_nexashield';
+        if (deck) deck.classList.remove("yt-active");
+        playerRoot.innerHTML =
+          '<div id="temporaryNexaShieldSection" class="archive-box">' +
+            '<iframe id="archiveIframe" src="' + rawVideo + '" class="archive-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+          '</div>';
+        return;
+      }
+
+      // ============================================================
+      //  MAIN PERMANENT YOUTUBE PLAYER
+      // ============================================================
       PLAYER.mode = 'youtube';
       PLAYER.ytId = ytId || rawVideo;
       if (deck) deck.classList.add("yt-active");
@@ -896,12 +893,12 @@
 
     function activateStream(){
       document.getElementById('securityOverlay').classList.add('hidden');
-      if (PLAYER.mode === 'temporary_archive_zoom') {
-        var vid = document.getElementById("tempArchiveVideo");
-        if (vid) vid.play();
+      var vid = document.getElementById("archiveVideo");
+      if (vid) {
+        vid.play();
         return;
       }
-      if (PLAYER.ytPlayer && PLAYER.ytPlayer.playVideo) {
+      if (PLAYER.mode === 'youtube' && PLAYER.ytPlayer && PLAYER.ytPlayer.playVideo) {
         PLAYER.ytPlayer.playVideo();
       }
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
