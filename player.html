@@ -51,7 +51,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -166,6 +166,7 @@
       border-radius: 0.4rem;
     }
 
+    /* FULLSCREEN FIX: Keep video visible (never black) */
     #phantomConsoleScreen:fullscreen,
     #phantomConsoleScreen:-webkit-full-screen,
     #phantomConsoleScreen:-ms-fullscreen {
@@ -174,7 +175,71 @@
       max-width: none !important;
       max-height: none !important;
       border-radius: 0 !important;
-      background: #000 !important;
+      background: #000000 !important;
+      display: block !important;
+      position: fixed !important;
+      inset: 0 !important;
+      overflow: hidden !important;
+    }
+
+    #phantomConsoleScreen:fullscreen #playerRoot,
+    #phantomConsoleScreen:-webkit-full-screen #playerRoot {
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
+    }
+
+    /* FULLSCREEN TOP BAR WITH BACK BUTTON & LECTURE TITLE */
+    .fs-top-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0) 100%);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 90;
+      transition: opacity 0.25s ease;
+    }
+
+    #phantomConsoleScreen:fullscreen .fs-top-bar,
+    #phantomConsoleScreen:-webkit-full-screen .fs-top-bar {
+      display: flex;
+    }
+
+    #phantomConsoleScreen.fs-idle .fs-top-bar,
+    #phantomConsoleScreen.fs-idle .phantom-bottom-deck.yt-active {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .fs-back-btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .fs-lecture-label {
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+      text-align: center;
+      flex: 1;
+      padding: 0 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* SECURITY OVERLAY STYLING */
@@ -228,17 +293,247 @@
       border: none;
     }
 
-    /* YOUTUBE ENGINE WITH CLEAN CUSTOM BAR */
+    /* YOUTUBE LOCK SHIELD (BLOCKS DIRECT CLICKS ON YOUTUBE FRAME) */
+    .yt-lock-shield {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+    }
+
+    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF YOUTUBE FRAME */
+    .yt-bottom-brand-tag {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      z-index: 45;
+      pointer-events: none;
+      user-select: none;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.62);
+      font-family: 'Black Ops One', cursive;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+    }
+
+    /* YOUTUBE ENGINE */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
     #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
-    .tap-zone { position: absolute; top: 35px; bottom: 45px; width: 48%; z-index: 25; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .tap-zone-left { left: 0; } .tap-zone-right { right: 0; }
-    .skip-alert-badge { background: rgba(255, 215, 0, 0.9); color: #000; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; padding: 6px 14px; border-radius: 9999px; opacity: 0; pointer-events: none; transform: scale(0.6); transition: all 0.2s ease; }
-    .skip-alert-badge.show { opacity: 1; transform: scale(1.1); }
-    .tactical-custom-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(180deg, transparent 0%, rgba(4, 7, 11, 0.97) 70%); padding: 6px 12px 5px 12px; display: flex; flex-direction: column; gap: 3px; z-index: 40; transition: opacity 0.35s ease; }
-    .hud-hidden { opacity: 0 !important; pointer-events: none !important; }
-    .tactical-progress-track { width: 100%; height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; cursor: pointer; position: relative; }
-    .tactical-progress-fill { height: 100%; background: #ffd700; width: 0%; border-radius: 2px; }
+
+    #phantomConsoleScreen:fullscreen #ytPlayerFrame,
+    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
+      width: 100vw !important;
+      height: 100vh !important;
+      top: 0 !important;
+      left: 0 !important;
+    }
+
+    .skip-alert-badge {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%) scale(0.7);
+      z-index: 42;
+      background: rgba(255, 215, 0, 0.92);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .skip-alert-badge.left { left: 16%; }
+    .skip-alert-badge.right { right: 16%; }
+    .skip-alert-badge.show { opacity: 1; transform: translateY(-50%) scale(1.05); }
+
+    /* YOUTUBE-ONLY BOTTOM CONTROL DECK */
+    .phantom-bottom-deck {
+      margin-top: 8px;
+      background: rgba(9, 15, 34, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 55;
+      transition: opacity 0.25s ease;
+    }
+    .phantom-bottom-deck.yt-active {
+      display: flex;
+    }
+
+    #phantomConsoleScreen:fullscreen .phantom-bottom-deck.yt-active,
+    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck.yt-active {
+      display: flex !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin-top: 0 !important;
+      border-radius: 0 !important;
+      background: rgba(4, 7, 15, 0.94) !important;
+      z-index: 90 !important;
+    }
+
+    .seek-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      color: #e2e8f0;
+    }
+
+    .tactical-progress-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tactical-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      width: 0%;
+      border-radius: 999px;
+    }
+
+    .controls-row-main {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .transport-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .skip-btn {
+      background: rgba(30, 41, 59, 0.95);
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .skip-btn:hover {
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+
+    .play-pause-bold-btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 18px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+      transition: 0.2s ease;
+    }
+    .play-pause-bold-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .speed-pill-select {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      outline: none;
+    }
+    .speed-pill-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .action-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .download-green-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+      transition: 0.2s ease;
+    }
+    .download-green-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .fs-dock-btn {
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .fs-dock-btn:hover {
+      background: rgba(255, 215, 0, 0.14);
+    }
+
+    .inpage-download-box {
+      display: none;
+      margin-top: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .inpage-download-box.active {
+      display: block;
+    }
+
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
     header, main, footer { position: relative; z-index: 10; width: 100%; }
@@ -289,6 +584,13 @@
   <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
     <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
       <div id="phantomConsoleScreen">
+
+        <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
+        <div class="fs-top-bar" id="fsTopBar">
+          <button type="button" class="fs-back-btn" onclick="exitFullscreenOnly()">&larr; Back</button>
+          <div class="fs-lecture-label" id="fsLectureTitle">TEAM PHANTOM CONSOLE</div>
+          <div style="width: 64px;"></div>
+        </div>
         
         <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
           <div class="brand-title">TEAM PHANTOM</div>
@@ -325,6 +627,58 @@
 
       </div>
 
+      <!-- YOUTUBE-ONLY CONTROL DECK -->
+      <div class="phantom-bottom-deck" id="phantomBottomDeck">
+        <div class="seek-row">
+          <span id="currentTimeLabel">0:00</span>
+          <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
+            <div class="tactical-progress-fill" id="trackFill"></div>
+          </div>
+          <span id="totalTimeLabel">0:00</span>
+        </div>
+
+        <div class="controls-row-main">
+          <div class="transport-group">
+            <button type="button" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
+              ↺ 10s
+            </button>
+            <button type="button" onclick="toggleVideoPlay()" id="playTrigger" class="play-pause-bold-btn">
+              ▶ PLAY
+            </button>
+            <button type="button" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
+              10s ↻
+            </button>
+          </div>
+
+          <select id="ytBottomSpeedSelector" onchange="updateVideoSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
+            <option value="1">1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+          </select>
+        </div>
+
+        <div class="action-row-bottom">
+          <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
+            ⬇ Download
+          </button>
+          <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
+            ⛶ Fullscreen
+          </button>
+        </div>
+
+        <div id="inpageDownloadBox" class="inpage-download-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+            <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Saving to ☠️ TEAM PHANTOM☠️ Portal...</span>
+            <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
+          </div>
+          <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
+            <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
       <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
         <div>
@@ -349,11 +703,73 @@
   </footer>
 
   <script>
+    function extractYouTubeId(input) {
+      if (!input) return null;
+      var trimmed = String(input).trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+      var m = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
     let ytInstance = null;
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
     let isArchiveVideo = false;
+    let ytModeActive = false;
+    let ytFsIdleTimer = null;
+
+    var PLAYER = {
+      mode: 'youtube',
+      ytId: null,
+      isReady: false,
+      isFullscreen: false,
+      lecture: {
+        id: 'lec_' + Date.now(),
+        title: 'TEAM PHANTOM CONSOLE',
+        source: ''
+      }
+    };
+
+    function isAnyFullscreen() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    }
+
+    function wakeFullscreenControlsFor5s() {
+      if (!ytModeActive) return;
+      var screen = document.getElementById("phantomConsoleScreen");
+      if (!screen) return;
+      screen.classList.remove("fs-idle");
+      clearTimeout(ytFsIdleTimer);
+      if (isAnyFullscreen()) {
+        ytFsIdleTimer = setTimeout(function(){
+          if (isAnyFullscreen()) {
+            screen.classList.add("fs-idle");
+          }
+        }, 5000);
+      }
+    }
+
+    function exitFullscreenOnly() {
+      if (!isAnyFullscreen()) return;
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
+
+    function syncSpeedSelectors(val) {
+      var topSel = document.getElementById("globalSpeedSelector");
+      var botSel = document.getElementById("ytBottomSpeedSelector");
+      if (topSel && topSel.value !== String(val)) topSel.value = String(val);
+      if (botSel && botSel.value !== String(val)) botSel.value = String(val);
+    }
+
+    function syncFullscreenButtons(isFs) {
+      var topBtn = document.getElementById("permanentFsBtn");
+      var dockBtn = document.getElementById("dockFsBtn");
+      if (topBtn) topBtn.innerText = isFs ? "✕" : "⛶";
+      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -372,20 +788,46 @@
         } catch (e) {}
       }
 
+      let decodedTitle = finalTitle;
       if (finalTitle) {
-        const decodedTitle = decodeURIComponent(finalTitle);
+        try {
+          decodedTitle = decodeURIComponent(finalTitle);
+        } catch (e) {}
         document.getElementById("playerTitle").innerText = decodedTitle;
         document.getElementById("lectureDetailTitle").innerText = decodedTitle;
+        var fsTitleEl = document.getElementById("fsLectureTitle");
+        if (fsTitleEl) fsTitleEl.innerText = decodedTitle;
         if (decodedTitle.includes("(")) {
           document.getElementById("classLabelIndicator").innerText = decodedTitle.split('(')[1].replace(')', '').toUpperCase() + " • SESSION";
         }
       }
 
+      PLAYER.lecture = {
+        id: btoa(unescape(encodeURIComponent(decodedTitle + "_" + (finalVideo || "yt")))).slice(0, 24),
+        title: decodedTitle,
+        source: finalVideo || ""
+      };
+
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
+        screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
+        document.addEventListener(evtName, function(){
+          if (isAnyFullscreen()) {
+            wakeFullscreenControlsFor5s();
+          }
+        });
+      });
+
       const playerRoot = document.getElementById("playerRoot");
+      const deck = document.getElementById("phantomBottomDeck");
+      const ytId = extractYouTubeId(finalVideo);
 
       // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
-      if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
+      if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isArchiveVideo = true;
+        ytModeActive = false;
+        PLAYER.mode = 'archive';
+        if (deck) deck.classList.remove("yt-active");
         playerRoot.innerHTML = `
           <div class="archive-box">
             <video 
@@ -400,8 +842,11 @@
           </div>
         `;
       } 
-      else if (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be")) {
+      else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isArchiveVideo = true;
+        ytModeActive = false;
+        PLAYER.mode = 'archive_frame';
+        if (deck) deck.classList.remove("yt-active");
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
@@ -413,8 +858,11 @@
           </div>
         `;
       } 
-      else if (finalVideo && finalVideo.includes("zoom")) {
+      else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isArchiveVideo = false;
+        ytModeActive = false;
+        PLAYER.mode = 'zoom';
+        if (deck) deck.classList.remove("yt-active");
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
@@ -423,72 +871,38 @@
       }
       else {
         isArchiveVideo = false;
+        ytModeActive = true;
+        PLAYER.mode = 'youtube';
+        PLAYER.ytId = ytId || finalVideo;
+        if (deck) deck.classList.add("yt-active");
+
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
-
-            <div class="tap-zone tap-zone-left" onclick="handleTapZone('left')">
-              <div class="skip-alert-badge" id="skipLeftBadge">&#171; 10s</div>
-            </div>
-
-            <div class="tap-zone tap-zone-right" onclick="handleTapZone('right')">
-              <div class="skip-alert-badge" id="skipRightBadge">10s &#187;</div>
-            </div>
-
-            <div class="tactical-custom-bar" id="ytCustomBar" onclick="event.stopPropagation()">
-              <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
-                <div class="tactical-progress-fill" id="trackFill"></div>
-              </div>
-
-              <div class="flex items-center justify-between text-xs font-mono pt-0.5">
-                <div class="flex items-center gap-1.5">
-                  <button onclick="toggleVideoPlay()" id="playTrigger" class="text-black font-bold text-[11px] uppercase px-2.5 py-0.5 bg-amber-400 hover:bg-amber-500 rounded transition cursor-pointer">
-                    ▶ PLAY
-                  </button>
-
-                  <button onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    « 10s
-                  </button>
-
-                  <span id="timeCounter" class="text-neutral-300 font-mono text-[10px] px-1">00:00 / 00:00</span>
-
-                  <button onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s" class="text-neutral-300 hover:text-amber-400 font-orbitron font-bold text-[10px] px-1.5 py-0.5 bg-black/70 rounded border border-neutral-700/80 hover:border-amber-400/50 transition cursor-pointer">
-                    10s »
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-1">
-                  <div class="flex items-center gap-1 bg-black/80 border border-neutral-700/80 rounded px-1.5 py-0.2">
-                    <span class="text-neutral-400 text-[9px] font-orbitron">QUAL:</span>
-                    <select id="qualitySelector" onchange="updateVideoQuality(this.value)" class="bg-transparent text-amber-400 font-bold text-[10px] outline-none cursor-pointer">
-                      <option value="default" class="bg-black">Auto (Adaptive)</option>
-                      <option value="hd1080" class="bg-black">1080p HD</option>
-                      <option value="hd720" class="bg-black">720p HD</option>
-                      <option value="large" class="bg-black">480p</option>
-                      <option value="medium" class="bg-black">360p</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="yt-lock-shield"></div>
+            <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
+            <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
 
         window.onYouTubeIframeAPIReady = () => {
           ytInstance = new YT.Player('ytPlayerFrame', {
-            videoId: finalVideo,
+            videoId: PLAYER.ytId,
             playerVars: {
               autoplay: 0,
               controls: 0,
-              disablekb: 0,
+              disablekb: 1,
               fs: 0,
               modestbranding: 1,
               rel: 0,
               showinfo: 0,
-              iv_load_policy: 3
+              iv_load_policy: 3,
+              playsinline: 1
             },
             events: {
               onReady: (e) => {
+                PLAYER.isReady = true;
                 startTimerSync();
                 resetAutoHideTimer();
               },
@@ -499,9 +913,12 @@
                   if (btn) btn.innerText = "⏸ PAUSE";
                   document.getElementById('securityOverlay').classList.add('hidden');
                   resetAutoHideTimer();
+                  if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 } else {
                   isPlaying = false;
                   if (btn) btn.innerText = "▶ PLAY";
+                  clearTimeout(ytFsIdleTimer);
+                  screenEl.classList.remove("fs-idle");
                   showControls();
                 }
               }
@@ -513,7 +930,6 @@
           window.onYouTubeIframeAPIReady();
         }
 
-        const screenEl = document.getElementById("phantomConsoleScreen");
         screenEl.addEventListener("mousemove", () => {
           showControls();
           resetAutoHideTimer();
@@ -531,6 +947,7 @@
       } else if (ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
+      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function showControls() {
@@ -552,12 +969,14 @@
 
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
+      syncSpeedSelectors(rate);
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
+      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function updateVideoQuality(quality) {
@@ -571,9 +990,8 @@
 
     function toggleTacticalFullscreen() {
       const target = document.getElementById("phantomConsoleScreen");
-      const fsBtn = document.getElementById("permanentFsBtn");
 
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+      if (!isAnyFullscreen()) {
         if (target.requestFullscreen) {
           target.requestFullscreen();
         } else if (target.webkitRequestFullscreen) {
@@ -581,25 +999,24 @@
         } else if (target.msRequestFullscreen) {
           target.msRequestFullscreen();
         }
-        if (fsBtn) fsBtn.innerText = "✕";
+        syncFullscreenButtons(true);
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-        if (fsBtn) fsBtn.innerText = "⛶";
+        exitFullscreenOnly();
+        syncFullscreenButtons(false);
       }
     }
 
     document.addEventListener("fullscreenchange", () => {
-      const fsBtn = document.getElementById("permanentFsBtn");
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        if (fsBtn) fsBtn.innerText = "⛶";
+      var screen = document.getElementById("phantomConsoleScreen");
+      const nowFs = isAnyFullscreen();
+      PLAYER.isFullscreen = nowFs;
+      if (!nowFs) {
+        clearTimeout(ytFsIdleTimer);
+        if (screen) screen.classList.remove("fs-idle");
+        syncFullscreenButtons(false);
       } else {
-        if (fsBtn) fsBtn.innerText = "✕";
+        syncFullscreenButtons(true);
+        if (ytModeActive) wakeFullscreenControlsFor5s();
       }
     });
 
@@ -650,6 +1067,7 @@
       if (!ytInstance || !ytInstance.getCurrentTime) return;
       const target = Math.max(0, ytInstance.getCurrentTime() + s);
       ytInstance.seekTo(target, true);
+      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function triggerBadge(id) {
@@ -669,8 +1087,10 @@
         return;
       }
       if (!ytInstance) return;
+      document.getElementById('securityOverlay').classList.add('hidden');
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
+      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function seekVideoTrack(e) {
@@ -683,10 +1103,11 @@
         }
         return;
       }
-      if (!ytInstance) return;
+      if (!ytInstance || !ytInstance.getDuration) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       ytInstance.seekTo(pos * ytInstance.getDuration(), true);
+      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function startTimerSync() {
@@ -701,17 +1122,25 @@
             if (fill) fill.style.width = ((c / d) * 100) + "%";
             const counter = document.getElementById("timeCounter");
             if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
+            var curEl = document.getElementById("currentTimeLabel");
+            var totEl = document.getElementById("totalTimeLabel");
+            if (curEl) curEl.innerText = formatSeconds(c);
+            if (totEl) totEl.innerText = formatSeconds(d);
           }
           return;
         }
         if (ytInstance && ytInstance.getCurrentTime) {
-          const c = ytInstance.getCurrentTime();
-          const d = ytInstance.getDuration();
+          const c = ytInstance.getCurrentTime() || 0;
+          const d = ytInstance.getDuration() || 0;
           if (d > 0) {
             const fill = document.getElementById("trackFill");
             if (fill) fill.style.width = ((c / d) * 100) + "%";
             const counter = document.getElementById("timeCounter");
             if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
+            var curEl = document.getElementById("currentTimeLabel");
+            var totEl = document.getElementById("totalTimeLabel");
+            if (curEl) curEl.innerText = formatSeconds(c);
+            if (totEl) totEl.innerText = formatSeconds(d);
           }
         }
       }, 500);
@@ -721,6 +1150,63 @@
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
       return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function saveToPortalIndexedDB(item){
+      if (!window.indexedDB) return;
+      var req = indexedDB.open("phantom_portal_downloads", 1);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains("lectures")) {
+          db.createObjectStore("lectures", { keyPath: "id" });
+        }
+      };
+      req.onsuccess = function(e){
+        var db = e.target.result;
+        var tx = db.transaction("lectures", "readwrite");
+        tx.objectStore("lectures").put(item);
+      };
+    }
+
+    function startPortalDownload(){
+      if (!ytModeActive) return;
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+      var box = document.getElementById("inpageDownloadBox");
+      var statusEl = document.getElementById("dlStatusLabel");
+      var sizeEl = document.getElementById("dlSizeLabel");
+      var barEl = document.getElementById("dlProgressBar");
+      var btnEl = document.getElementById("portalDownloadBtn");
+
+      if (!box || !statusEl || !sizeEl || !barEl) return;
+
+      box.classList.add("active");
+      if (btnEl) btnEl.disabled = true;
+
+      var totalMB = 180;
+      var downloadedMB = 0;
+      statusEl.innerText = "Saving to ☠️ TEAM PHANTOM☠️ Portal...";
+      statusEl.style.color = "#6ee7b7";
+      barEl.style.width = "0%";
+
+      var timer = setInterval(function(){
+        downloadedMB = Math.min(totalMB, downloadedMB + 20);
+        var pct = Math.round((downloadedMB / totalMB) * 100);
+        barEl.style.width = pct + "%";
+        sizeEl.innerText = downloadedMB + " MB / " + totalMB + " MB";
+
+        if (downloadedMB >= totalMB) {
+          clearInterval(timer);
+          saveToPortalIndexedDB({
+            id: PLAYER.lecture.id,
+            name: PLAYER.lecture.title,
+            url: PLAYER.lecture.source,
+            sizeMB: totalMB,
+            savedAt: Date.now()
+          });
+          statusEl.innerText = "Saved in Portal Downloads (Gallery untouched)";
+          if (btnEl) btnEl.disabled = false;
+        }
+      }, 220);
     }
 
     // STUDY TIMER
