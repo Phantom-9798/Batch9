@@ -4,6 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEAM PHANTOM | Cadet Tactical Dashboard</title>
+  <script>
+  (() => {
+    let securityTriggered = false;
+
+    function autoLogoutOnThreat(reason) {
+      if (securityTriggered) return;
+      securityTriggered = true;
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {}
+      document.body.innerHTML =
+        '<div style="background:#020617;color:#ef4444;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;text-align:center;padding:20px;">' +
+        '<h2 style="font-size:20px;margin-bottom:8px;">SECURITY ALERT: ' + String(reason || 'RESTRICTED ACCESS') + '</h2>' +
+        '<p style="color:#cbd5e1;font-size:13px;">Session terminated. Logging out...</p>' +
+        '</div>';
+      setTimeout(() => {
+        try { window.location.replace(window.location.pathname); } catch (e) { window.location.reload(); }
+      }, 900);
+    }
+
+    // 1. Right Click Disable
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
+    document.addEventListener('keydown', e => {
+      const key = (e.key || '').toUpperCase();
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(key)) ||
+        (e.ctrlKey && ['U', 'S', 'P'].includes(key))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        autoLogoutOnThreat('DEVTOOLS SHORTCUT DETECTED');
+        return false;
+      }
+    });
+
+    // 3. DevTools & 1DM / Downloader Trap -> Auto Logout
+    setInterval(() => {
+      if (securityTriggered) return;
+
+      const idmInjected = document.querySelector('[id*="idm" i], [class*="idm" i], [data-idm]');
+      if (idmInjected) {
+        autoLogoutOnThreat('1DM / DOWNLOADER DETECTED');
+        return;
+      }
+
+      const start = performance.now();
+      debugger;
+      const end = performance.now();
+      if (end - start > 100) {
+        autoLogoutOnThreat('DEVELOPER TOOLS DETECTED');
+      }
+    }, 1500);
+
+    // 4. Console Auto Clear
+    setInterval(() => {
+      if (!securityTriggered) {
+        try { console.clear(); } catch (e) {}
+      }
+    }, 2000);
+  })();
+  </script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
