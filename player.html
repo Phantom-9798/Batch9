@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEAM PHANTOM | Tactical Video Console</title>
-  
+  <title>☠️ TEAM PHANTOM☠️ | Tactical Video Console</title>
+
   <script>
   (() => {
     // 1. Right Click Disable
@@ -41,7 +41,7 @@
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -51,7 +51,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-- {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -159,7 +159,7 @@
     #phantomConsoleScreen {
       position: relative;
       width: 100%;
-      max-height: calc(100vh - 220px); /* Strictly limited so it fits single screen */
+      max-height: calc(100vh - 295px);
       aspect-ratio: 16 / 9;
       background: #000000;
       overflow: hidden;
@@ -209,8 +209,9 @@
       display: flex;
     }
 
+    /* SYNCHRONIZED AUTO-HIDE FOR BOTH TOP & BOTTOM BARS IN FULLSCREEN */
     #phantomConsoleScreen.fs-idle .fs-top-bar,
-    #phantomConsoleScreen.fs-idle .phantom-bottom-deck.yt-active {
+    #phantomConsoleScreen.fs-idle .phantom-bottom-deck.deck-active {
       opacity: 0 !important;
       pointer-events: none !important;
     }
@@ -257,42 +258,6 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* TOP-RIGHT ULTRA COMPACT HUD BAR */
-    .tactical-permanent-hud {
-      position: absolute; top: 6px; right: 6px; z-index: 60;
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(4, 7, 11, 0.85); border: 1px solid rgba(255, 215, 0, 0.4);
-      padding: 2px 4px; border-radius: 4px; backdrop-filter: blur(6px);
-    }
-    .fs-hud-btn { 
-      background: rgba(255, 215, 0, 0.9); 
-      color: #000; 
-      font-size: 9px; 
-      font-weight: 900; 
-      padding: 2px 4px; 
-      border-radius: 3px; 
-      cursor: pointer; 
-      border: none;
-      line-height: 1;
-    }
-
-    /* DIRECT ARCHIVE VIDEO STYLING */
-    .archive-box {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-    }
-    .archive-frame {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100% !important;
-      height: 100% !important;
-      border: none;
-    }
-
     /* YOUTUBE LOCK SHIELD (BLOCKS DIRECT CLICKS ON YOUTUBE FRAME) */
     .yt-lock-shield {
       position: absolute;
@@ -320,6 +285,23 @@
       font-size: 14px;
       letter-spacing: 2px;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+    }
+
+    /* DIRECT ARCHIVE & ZOOM STYLING */
+    .archive-box, .zoom-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    .archive-frame, .zoom-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
     }
 
     /* YOUTUBE ENGINE */
@@ -354,7 +336,7 @@
     .skip-alert-badge.right { right: 16%; }
     .skip-alert-badge.show { opacity: 1; transform: translateY(-50%) scale(1.05); }
 
-    /* YOUTUBE-ONLY BOTTOM CONTROL DECK */
+    /* SHARED BOTTOM CONTROL DECK (Shown for YouTube, Archive/NexaShield, and Zoom) */
     .phantom-bottom-deck {
       margin-top: 8px;
       background: rgba(9, 15, 34, 0.96);
@@ -367,12 +349,12 @@
       z-index: 55;
       transition: opacity 0.25s ease;
     }
-    .phantom-bottom-deck.yt-active {
+    .phantom-bottom-deck.deck-active {
       display: flex;
     }
 
-    #phantomConsoleScreen:fullscreen .phantom-bottom-deck.yt-active,
-    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck.yt-active {
+    #phantomConsoleScreen:fullscreen .phantom-bottom-deck.deck-active,
+    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck.deck-active {
       display: flex !important;
       position: fixed !important;
       bottom: 0 !important;
@@ -500,9 +482,18 @@
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
       transition: 0.2s ease;
     }
-    .download-green-btn:hover {
+    .download-green-btn:hover:not(:disabled) {
       filter: brightness(1.08);
       transform: translateY(-1px);
+    }
+    .download-green-btn:disabled,
+    .download-green-btn.is-disabled {
+      opacity: 0.38 !important;
+      cursor: not-allowed !important;
+      filter: grayscale(0.6) !important;
+      box-shadow: none !important;
+      transform: none !important;
+      pointer-events: none;
     }
 
     .fs-dock-btn {
@@ -570,7 +561,7 @@
         <div>
           <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold" id="classLabelIndicator">CLASS SESSION</div>
           <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase" id="playerTitle">
-            TEAM PHANTOM CONSOLE
+            ☠️ TEAM PHANTOM☠️ CONSOLE
           </h1>
         </div>
       </div>
@@ -580,7 +571,7 @@
     </div>
   </header>
 
-  <!-- MAIN VIDEO VIEWPORT (Single-screen fit with lecture name displayed right below) -->
+  <!-- MAIN VIDEO VIEWPORT -->
   <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
     <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
       <div id="phantomConsoleScreen">
@@ -588,12 +579,12 @@
         <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
         <div class="fs-top-bar" id="fsTopBar">
           <button type="button" class="fs-back-btn" onclick="exitFullscreenOnly()">&larr; Back</button>
-          <div class="fs-lecture-label" id="fsLectureTitle">TEAM PHANTOM CONSOLE</div>
+          <div class="fs-lecture-label" id="fsLectureTitle">☠️ TEAM PHANTOM☠️ CONSOLE</div>
           <div style="width: 64px;"></div>
         </div>
-        
+
         <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
-          <div class="brand-title">TEAM PHANTOM</div>
+          <div class="brand-title">☠️ TEAM PHANTOM☠️</div>
           <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
           <div class="trusted-text" style="color: #a3a3a3; font-size: 9px; font-family: monospace;">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
           <div class="big-play-btn mt-2"></div>
@@ -608,27 +599,12 @@
           </span>
         </div>
 
-        <!-- TOP-RIGHT ULTRA COMPACT HUD -->
-        <div id="topPermanentHud" class="tactical-permanent-hud" onclick="event.stopPropagation()">
-          <select id="globalSpeedSelector" onchange="updateVideoSpeed(this.value)" class="bg-black/90 text-amber-400 font-bold text-[9px] px-1 py-0.2 rounded border border-amber-500/40 outline-none cursor-pointer font-orbitron appearance-none text-center" style="width: 34px;">
-            <option value="1">1x</option>
-            <option value="1.25">1.25</option>
-            <option value="1.5">1.5</option>
-            <option value="1.75">1.75</option>
-            <option value="2">2x</option>
-          </select>
-
-          <button id="permanentFsBtn" onclick="toggleTacticalFullscreen()" class="fs-hud-btn font-orbitron">
-            ⛶
-          </button>
-        </div>
-
         <div id="playerRoot" class="w-full h-full relative"></div>
 
       </div>
 
-      <!-- YOUTUBE-ONLY CONTROL DECK -->
-      <div class="phantom-bottom-deck" id="phantomBottomDeck">
+      <!-- SHARED BOTTOM CONTROL DECK (YouTube, Archive/NexaShield, Zoom) -->
+      <div class="phantom-bottom-deck deck-active" id="phantomBottomDeck">
         <div class="seek-row">
           <span id="currentTimeLabel">0:00</span>
           <div class="tactical-progress-track" onclick="seekVideoTrack(event)">
@@ -698,7 +674,7 @@
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-amber-500/20 py-1.5 px-4 text-center shrink-0">
     <p class="text-[9px] font-mono text-amber-300 tracking-wider">
-      &copy; 2026 TEAM PHANTOM &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
+      &copy; 2026 ☠️ TEAM PHANTOM☠️ &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
     </p>
   </footer>
 
@@ -714,10 +690,9 @@
     let ytInstance = null;
     let isPlaying = false;
     let timerSync = null;
-    let hideControlsTimeout = null;
     let isArchiveVideo = false;
-    let ytModeActive = false;
-    let ytFsIdleTimer = null;
+    let isYouTubeSource = false;
+    let fsIdleTimer = null;
 
     var PLAYER = {
       mode: 'youtube',
@@ -726,7 +701,7 @@
       isFullscreen: false,
       lecture: {
         id: 'lec_' + Date.now(),
-        title: 'TEAM PHANTOM CONSOLE',
+        title: '☠️ TEAM PHANTOM☠️ CONSOLE',
         source: ''
       }
     };
@@ -736,13 +711,12 @@
     }
 
     function wakeFullscreenControlsFor5s() {
-      if (!ytModeActive) return;
       var screen = document.getElementById("phantomConsoleScreen");
       if (!screen) return;
       screen.classList.remove("fs-idle");
-      clearTimeout(ytFsIdleTimer);
+      clearTimeout(fsIdleTimer);
       if (isAnyFullscreen()) {
-        ytFsIdleTimer = setTimeout(function(){
+        fsIdleTimer = setTimeout(function(){
           if (isAnyFullscreen()) {
             screen.classList.add("fs-idle");
           }
@@ -757,18 +731,21 @@
       else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
-    function syncSpeedSelectors(val) {
-      var topSel = document.getElementById("globalSpeedSelector");
-      var botSel = document.getElementById("ytBottomSpeedSelector");
-      if (topSel && topSel.value !== String(val)) topSel.value = String(val);
-      if (botSel && botSel.value !== String(val)) botSel.value = String(val);
+    function syncFullscreenButtons(isFs) {
+      var dockBtn = document.getElementById("dockFsBtn");
+      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
-    function syncFullscreenButtons(isFs) {
-      var topBtn = document.getElementById("permanentFsBtn");
-      var dockBtn = document.getElementById("dockFsBtn");
-      if (topBtn) topBtn.innerText = isFs ? "✕" : "⛶";
-      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+    function setDownloadAvailability(canDownload) {
+      var dlBtn = document.getElementById("portalDownloadBtn");
+      if (!dlBtn) return;
+      if (canDownload) {
+        dlBtn.disabled = false;
+        dlBtn.classList.remove("is-disabled");
+      } else {
+        dlBtn.disabled = true;
+        dlBtn.classList.add("is-disabled");
+      }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -780,7 +757,7 @@
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
       let finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "TEAM PHANTOM TACTICAL CONSOLE";
+      const finalTitle = urlTitle || storedTitle || "☠️ TEAM PHANTOM☠️ CONSOLE";
 
       if (finalVideo) {
         try {
@@ -819,34 +796,39 @@
       });
 
       const playerRoot = document.getElementById("playerRoot");
-      const deck = document.getElementById("phantomBottomDeck");
       const ytId = extractYouTubeId(finalVideo);
 
-      // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
+      // ARCHIVE / DIRECT VIDEO PLAYER RENDERER (Download disabled)
       if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isArchiveVideo = true;
-        ytModeActive = false;
+        isYouTubeSource = false;
         PLAYER.mode = 'archive';
-        if (deck) deck.classList.remove("yt-active");
+        setDownloadAvailability(false);
         playerRoot.innerHTML = `
           <div class="archive-box">
             <video 
               id="archiveVideo" 
               src="${finalVideo}" 
               class="archive-frame" 
-              controls 
               controlsList="nodownload" 
               playsinline
               oncontextmenu="return false;">
             </video>
           </div>
         `;
-      } 
+        var vidEl = document.getElementById("archiveVideo");
+        if (vidEl) {
+          vidEl.addEventListener("play", () => { isPlaying = true; updatePlayLabel(); });
+          vidEl.addEventListener("pause", () => { isPlaying = false; updatePlayLabel(); });
+        }
+        startTimerSync();
+      }
+      // ARCHIVE / NEXASHIELD IFRAME RENDERER (Download disabled)
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isArchiveVideo = true;
-        ytModeActive = false;
+        isYouTubeSource = false;
         PLAYER.mode = 'archive_frame';
-        if (deck) deck.classList.remove("yt-active");
+        setDownloadAvailability(false);
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
@@ -857,24 +839,26 @@
             </iframe>
           </div>
         `;
-      } 
+      }
+      // ZOOM IFRAME RENDERER (Download disabled)
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isArchiveVideo = false;
-        ytModeActive = false;
+        isYouTubeSource = false;
         PLAYER.mode = 'zoom';
-        if (deck) deck.classList.remove("yt-active");
+        setDownloadAvailability(false);
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
           </div>
         `;
       }
+      // YOUTUBE PLAYER (Download enabled ONLY here)
       else {
         isArchiveVideo = false;
-        ytModeActive = true;
+        isYouTubeSource = true;
         PLAYER.mode = 'youtube';
         PLAYER.ytId = ytId || finalVideo;
-        if (deck) deck.classList.add("yt-active");
+        setDownloadAvailability(true);
 
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -901,25 +885,21 @@
               playsinline: 1
             },
             events: {
-              onReady: (e) => {
+              onReady: () => {
                 PLAYER.isReady = true;
                 startTimerSync();
-                resetAutoHideTimer();
               },
               onStateChange: (e) => {
-                const btn = document.getElementById("playTrigger");
                 if (e.data === YT.PlayerState.PLAYING) {
                   isPlaying = true;
-                  if (btn) btn.innerText = "⏸ PAUSE";
+                  updatePlayLabel();
                   document.getElementById('securityOverlay').classList.add('hidden');
-                  resetAutoHideTimer();
                   if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 } else {
                   isPlaying = false;
-                  if (btn) btn.innerText = "▶ PLAY";
-                  clearTimeout(ytFsIdleTimer);
+                  updatePlayLabel();
+                  clearTimeout(fsIdleTimer);
                   screenEl.classList.remove("fs-idle");
-                  showControls();
                 }
               }
             }
@@ -929,63 +909,38 @@
         if (window.YT && window.YT.Player) {
           window.onYouTubeIframeAPIReady();
         }
-
-        screenEl.addEventListener("mousemove", () => {
-          showControls();
-          resetAutoHideTimer();
-        });
-
-        resetAutoHideTimer();
       }
     });
+
+    function updatePlayLabel() {
+      const btn = document.getElementById("playTrigger");
+      if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
+    }
 
     function activateStream() {
       document.getElementById('securityOverlay').classList.add('hidden');
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
-        if (vid) vid.play();
+        if (vid) {
+          vid.play();
+          isPlaying = true;
+          updatePlayLabel();
+        }
       } else if (ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
-      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
-    }
-
-    function showControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.remove("hud-hidden");
-    }
-
-    function hideControls() {
-      const ytBar = document.getElementById("ytCustomBar");
-      if (ytBar) ytBar.classList.add("hud-hidden");
-    }
-
-    function resetAutoHideTimer() {
-      clearTimeout(hideControlsTimeout);
-      hideControlsTimeout = setTimeout(() => {
-        hideControls();
-      }, 3000);
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
-      syncSpeedSelectors(rate);
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
       } else if (ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
-      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
-    }
-
-    function updateVideoQuality(quality) {
-      if (!ytInstance || !ytInstance.setPlaybackQuality) return;
-      ytInstance.setPlaybackQuality(quality);
-      if (ytInstance.getCurrentTime && ytInstance.seekTo) {
-        const currentTime = ytInstance.getCurrentTime();
-        ytInstance.seekTo(currentTime, true);
-      }
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function toggleTacticalFullscreen() {
@@ -1011,63 +966,26 @@
       const nowFs = isAnyFullscreen();
       PLAYER.isFullscreen = nowFs;
       if (!nowFs) {
-        clearTimeout(ytFsIdleTimer);
+        clearTimeout(fsIdleTimer);
         if (screen) screen.classList.remove("fs-idle");
         syncFullscreenButtons(false);
       } else {
         syncFullscreenButtons(true);
-        if (ytModeActive) wakeFullscreenControlsFor5s();
+        wakeFullscreenControlsFor5s();
       }
     });
-
-    let leftTimer = null, rightTimer = null;
-    let leftClicks = 0, rightClicks = 0;
-
-    function handleTapZone(side) {
-      showControls();
-      resetAutoHideTimer();
-
-      if (isArchiveVideo) return;
-
-      if (side === 'left') {
-        leftClicks++;
-        if (leftClicks === 1) {
-          leftTimer = setTimeout(() => {
-            toggleVideoPlay();
-            leftClicks = 0;
-          }, 270);
-        } else if (leftClicks === 2) {
-          clearTimeout(leftTimer);
-          skipSeconds(-10);
-          triggerBadge('skipLeftBadge');
-          leftClicks = 0;
-        }
-      } else {
-        rightClicks++;
-        if (rightClicks === 1) {
-          rightTimer = setTimeout(() => {
-            toggleVideoPlay();
-            rightClicks = 0;
-          }, 270);
-        } else if (rightClicks === 2) {
-          clearTimeout(rightTimer);
-          skipSeconds(10);
-          triggerBadge('skipRightBadge');
-          rightClicks = 0;
-        }
-      }
-    }
 
     function skipSeconds(s) {
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
       if (!ytInstance || !ytInstance.getCurrentTime) return;
       const target = Math.max(0, ytInstance.getCurrentTime() + s);
       ytInstance.seekTo(target, true);
-      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function triggerBadge(id) {
@@ -1078,19 +996,26 @@
     }
 
     function toggleVideoPlay() {
+      document.getElementById('securityOverlay').classList.add('hidden');
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) {
-          if (vid.paused) vid.play();
-          else vid.pause();
+          if (vid.paused) {
+            vid.play();
+            isPlaying = true;
+          } else {
+            vid.pause();
+            isPlaying = false;
+          }
+          updatePlayLabel();
         }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
       if (!ytInstance) return;
-      document.getElementById('securityOverlay').classList.add('hidden');
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
-      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function seekVideoTrack(e) {
@@ -1101,13 +1026,14 @@
           const pos = (e.clientX - rect.left) / rect.width;
           vid.currentTime = pos * vid.duration;
         }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
       if (!ytInstance || !ytInstance.getDuration) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       ytInstance.seekTo(pos * ytInstance.getDuration(), true);
-      if (ytModeActive && isAnyFullscreen()) wakeFullscreenControlsFor5s();
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function startTimerSync() {
@@ -1120,8 +1046,6 @@
             const d = vid.duration;
             const fill = document.getElementById("trackFill");
             if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const counter = document.getElementById("timeCounter");
-            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
             var curEl = document.getElementById("currentTimeLabel");
             var totEl = document.getElementById("totalTimeLabel");
             if (curEl) curEl.innerText = formatSeconds(c);
@@ -1135,8 +1059,6 @@
           if (d > 0) {
             const fill = document.getElementById("trackFill");
             if (fill) fill.style.width = ((c / d) * 100) + "%";
-            const counter = document.getElementById("timeCounter");
-            if (counter) counter.innerText = `${formatSeconds(c)} / ${formatSeconds(d)}`;
             var curEl = document.getElementById("currentTimeLabel");
             var totEl = document.getElementById("totalTimeLabel");
             if (curEl) curEl.innerText = formatSeconds(c);
@@ -1169,7 +1091,7 @@
     }
 
     function startPortalDownload(){
-      if (!ytModeActive) return;
+      if (!isYouTubeSource) return;
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
       var box = document.getElementById("inpageDownloadBox");
       var statusEl = document.getElementById("dlStatusLabel");
