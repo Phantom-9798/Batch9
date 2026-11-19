@@ -248,6 +248,16 @@
       width: 100%;
     }
 
+    /* IN-PAGE MY DOWNLOADS TAB PANEL */
+    #myDownloadsTabPanel {
+      display: none;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+    #myDownloadsTabPanel.open {
+      display: block;
+    }
+
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 </head>
@@ -292,7 +302,10 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-wrap">
+        <button type="button" onclick="toggleMyDownloadsTab()" id="myDownloadsTopBtn" class="bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-400/70 text-emerald-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+          📥 MY DOWNLOADS (<span id="savedDownloadsCount">0</span>)
+        </button>
         <button onclick="window.location.href='classroom.html'" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           &larr; CHANGE SQUADRON
         </button>
@@ -305,77 +318,100 @@
 
   <!-- MAIN DEPLOYMENT SELECTION (Full Width & Balanced Screen Fit) -->
   <main class="w-full max-w-5xl mx-auto px-6 py-8 flex-grow flex flex-col justify-center items-center">
-    
-    <div class="text-center mb-8 w-full">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-2" id="batchBadge">
-        OPERATIONAL BRIEFING
-      </div>
-      <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wider uppercase mb-1" id="batchTitle">
-        SELECT SQUADRON MODE
-      </h2>
-      <p class="text-neutral-300 text-xs font-body max-w-md mx-auto">
-        Choose your learning stream: attend the ongoing live syllabus batch or access complete recorded archives.
-      </p>
-    </div>
 
-    <!-- DUAL CARDS GRID (Full Width Balanced Fit) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-      
-      <!-- FOLDER 1: LIVE BATCH -->
-      <div onclick="window.selectMode('live')" class="armor-panel-compact hover:border-emerald-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
-        
+    <!-- IN-PAGE MY DOWNLOADS TAB SECTION -->
+    <section id="myDownloadsTabPanel" class="armor-panel-compact">
+      <div class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/25">
         <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 transition duration-300">
-              ⚡
-            </div>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              LIVE STREAM
-            </span>
-          </div>
-
-          <h3 class="font-orbitron text-xl font-black text-white group-hover:text-emerald-400 transition mb-2">
-            LIVE BATCH
+          <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-orbitron font-bold tracking-widest uppercase">
+            PORTAL OFFLINE VAULT
+          </span>
+          <h3 class="font-orbitron text-lg sm:text-xl text-white uppercase mt-1">
+            MY DOWNLOADS
           </h3>
-          <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
-            Access daily operational classes, real-time curriculum progression, daily assignments, and current syllabus walkthroughs.
-          </p>
         </div>
-
-        <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-emerald-600 border border-emerald-500/40 group-hover:border-emerald-400 text-emerald-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
-          ENTER LIVE SQUADRON &rarr;
+        <button type="button" onclick="closeMyDownloadsTab()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider cursor-pointer">
+          ✕ CLOSE TAB
         </button>
       </div>
 
-      <!-- FOLDER 2: RECORDED BATCH -->
-      <div onclick="window.selectMode('recorded')" class="armor-panel-compact hover:border-amber-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-xl group-hover:bg-amber-400/20 transition"></div>
-        
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-11 h-11 rounded-xl bg-amber-400/10 border border-amber-500/40 flex items-center justify-center text-2xl text-amber-400 group-hover:scale-110 transition duration-300">
-              📁
-            </div>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/60 text-amber-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
-              FULL VAULT
-            </span>
-          </div>
+      <div id="myDownloadsTabList" class="grid grid-cols-1 gap-3">
+        <p class="text-neutral-400 text-sm">Loading saved lectures...</p>
+      </div>
+    </section>
 
-          <h3 class="font-orbitron text-xl font-black text-white group-hover:text-amber-400 transition mb-2">
-            RECORDED BATCH
-          </h3>
-          <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
-            Comprehensive archive of pre-recorded full syllabus lectures, high-speed revision sessions, and chapter dossiers.
-          </p>
+    <div id="batchModesContainer" class="w-full">
+      <div class="text-center mb-8 w-full">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-orbitron font-bold tracking-widest uppercase mb-2" id="batchBadge">
+          OPERATIONAL BRIEFING
         </div>
-
-        <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 group-hover:border-amber-400 text-amber-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
-          ACCESS COMPLETE VAULT &rarr;
-        </button>
+        <h2 class="font-stencil text-2xl sm:text-3xl text-white tracking-wider uppercase mb-1" id="batchTitle">
+          SELECT SQUADRON MODE
+        </h2>
+        <p class="text-neutral-300 text-xs font-body max-w-md mx-auto">
+          Choose your learning stream: attend the ongoing live syllabus batch or access complete recorded archives.
+        </p>
       </div>
 
+      <!-- DUAL CARDS GRID (Full Width Balanced Fit) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        
+        <!-- FOLDER 1: LIVE BATCH -->
+        <div onclick="window.selectMode('live')" class="armor-panel-compact hover:border-emerald-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-2xl text-emerald-400 group-hover:scale-110 transition duration-300">
+                ⚡
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                LIVE STREAM
+              </span>
+            </div>
+
+            <h3 class="font-orbitron text-xl font-black text-white group-hover:text-emerald-400 transition mb-2">
+              LIVE BATCH
+            </h3>
+            <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
+              Access daily operational classes, real-time curriculum progression, daily assignments, and current syllabus walkthroughs.
+            </p>
+          </div>
+
+          <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-emerald-600 border border-emerald-500/40 group-hover:border-emerald-400 text-emerald-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
+            ENTER LIVE SQUADRON &rarr;
+          </button>
+        </div>
+
+        <!-- FOLDER 2: RECORDED BATCH -->
+        <div onclick="window.selectMode('recorded')" class="armor-panel-compact hover:border-amber-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-xl group-hover:bg-amber-400/20 transition"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-11 h-11 rounded-xl bg-amber-400/10 border border-amber-500/40 flex items-center justify-center text-2xl text-amber-400 group-hover:scale-110 transition duration-300">
+                📁
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/60 text-amber-300 text-[10px] font-orbitron font-bold tracking-wider uppercase">
+                FULL VAULT
+              </span>
+            </div>
+
+            <h3 class="font-orbitron text-xl font-black text-white group-hover:text-amber-400 transition mb-2">
+              RECORDED BATCH
+            </h3>
+            <p class="text-[11px] text-neutral-300 font-body leading-relaxed mb-5">
+              Comprehensive archive of pre-recorded full syllabus lectures, high-speed revision sessions, and chapter dossiers.
+            </p>
+          </div>
+
+          <button class="w-full py-2.5 bg-neutral-900 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-yellow-400 border border-amber-500/40 group-hover:border-amber-400 text-amber-300 group-hover:text-black font-orbitron font-extrabold text-[11px] rounded-lg uppercase tracking-wider transition duration-300 phantom-btn">
+            ACCESS COMPLETE VAULT &rarr;
+          </button>
+        </div>
+
+      </div>
     </div>
 
   </main>
@@ -386,6 +422,130 @@
       &copy; 2026 TEAM PHANTOM. MILITARY PRECISION PROTOCOL.
     </p>
   </footer>
+
+  <script>
+    // --- IN-PAGE MY DOWNLOADS TAB (Reads from phantom_portal_downloads IndexedDB) ---
+    function openPortalDownloadsDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
+        const req = indexedDB.open("phantom_portal_downloads", 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains("lectures")) {
+            db.createObjectStore("lectures", { keyPath: "id" });
+          }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function getAllPortalDownloads() {
+      try {
+        const db = await openPortalDownloadsDB();
+        return await new Promise((resolve) => {
+          const tx = db.transaction("lectures", "readonly");
+          const req = tx.objectStore("lectures").getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function deletePortalDownloadItem(id) {
+      try {
+        const db = await openPortalDownloadsDB();
+        await new Promise((resolve) => {
+          const tx = db.transaction("lectures", "readwrite");
+          tx.objectStore("lectures").delete(String(id));
+          tx.oncomplete = () => resolve();
+        });
+        await renderMyDownloadsTab();
+      } catch (e) {}
+    }
+
+    function watchDownloadedLectureInPage(encodedUrl, encodedTitle) {
+      const videoVal = decodeURIComponent(encodedUrl || "");
+      const titleVal = decodeURIComponent(encodedTitle || "Saved Lecture");
+      try {
+        sessionStorage.setItem("phantom_current_video", videoVal);
+        sessionStorage.setItem("phantom_current_title", titleVal);
+      } catch (e) {}
+      window.location.href = `player.html?video=${encodeURIComponent(videoVal)}&title=${encodeURIComponent(titleVal)}&offline=1`;
+    }
+
+    async function renderMyDownloadsTab() {
+      const items = await getAllPortalDownloads();
+      const countEl = document.getElementById("savedDownloadsCount");
+      const listEl = document.getElementById("myDownloadsTabList");
+
+      if (countEl) countEl.innerText = String(items.length);
+      if (!listEl) return;
+
+      if (!items.length) {
+        listEl.innerHTML = `
+          <div class="p-6 rounded-xl bg-black/40 border border-neutral-800 text-center">
+            <p class="text-neutral-300 font-orbitron text-sm">No downloaded videos saved in your portal yet.</p>
+            <p class="text-neutral-500 text-xs mt-1">Lectures saved from the player's Download button appear here for offline watching.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = items.map((item) => {
+        const safeName = String(item.name || "Saved Lecture").replace(/[<>&"]/g, "");
+        const dateStr = item.savedAt ? new Date(item.savedAt).toLocaleString() : "Saved";
+        const sizeStr = item.sizeMB ? `${item.sizeMB} MB` : "Portal Saved";
+        const encUrl = encodeURIComponent(item.url || "");
+        const encTitle = encodeURIComponent(item.name || "Saved Lecture");
+        const safeId = encodeURIComponent(String(item.id));
+
+        return `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-black/50 border border-amber-500/25">
+            <div>
+              <div class="font-orbitron text-sm text-white">${safeName}</div>
+              <div class="text-xs text-emerald-400 mt-0.5">Portal Offline Save • ${sizeStr} • ${dateStr}</div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="watchDownloadedLectureInPage('${encUrl}', '${encTitle}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron text-xs font-extrabold uppercase cursor-pointer">
+                ▶ Watch Now
+              </button>
+              <button type="button" onclick="deletePortalDownloadItem(decodeURIComponent('${safeId}'))" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-red-950 text-neutral-300 hover:text-red-300 border border-neutral-700 font-orbitron text-xs cursor-pointer">
+                Remove
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function toggleMyDownloadsTab() {
+      const panel = document.getElementById("myDownloadsTabPanel");
+      const modesBox = document.getElementById("batchModesContainer");
+      if (!panel) return;
+      const willOpen = !panel.classList.contains("open");
+      if (willOpen) {
+        panel.classList.add("open");
+        if (modesBox) modesBox.style.display = "none";
+        renderMyDownloadsTab();
+      } else {
+        closeMyDownloadsTab();
+      }
+    }
+
+    function closeMyDownloadsTab() {
+      const panel = document.getElementById("myDownloadsTabPanel");
+      const modesBox = document.getElementById("batchModesContainer");
+      if (panel) panel.classList.remove("open");
+      if (modesBox) modesBox.style.display = "block";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMyDownloadsTab();
+    });
+  </script>
 
   <script>
     // --- CANVAS PARTICLES ANIMATION (Smaller Radius) ---
