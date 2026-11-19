@@ -41,9 +41,6 @@
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
 
   <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,7 +48,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -350,10 +347,94 @@
 
   <script>
     let ytInstance = null;
+    let isYtReady = false;
     let isPlaying = false;
     let timerSync = null;
     let hideControlsTimeout = null;
     let isArchiveVideo = false;
+    let activeYtVideoId = 'd9wnvlbtizc';
+
+    const currentOrigin = (window.location.origin && window.location.origin !== "null")
+      ? window.location.origin
+      : "https://www.youtube.com";
+
+    function extractYouTubeId(input) {
+      if (!input) return null;
+      const trimmed = input.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+      const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
+
+    function initNewYouTubePlayer(videoId) {
+      activeYtVideoId = videoId || 'd9wnvlbtizc';
+      isYtReady = false;
+
+      if (ytInstance && typeof ytInstance.destroy === 'function') {
+        ytInstance.destroy();
+        ytInstance = null;
+      }
+
+      ytInstance = new YT.Player('ytPlayerFrame', {
+        videoId: activeYtVideoId,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          rel: 0,
+          iv_load_policy: 3,
+          playsinline: 1,
+          enablejsapi: 1,
+          origin: currentOrigin
+        },
+        events: {
+          onReady: () => {
+            isYtReady = true;
+            startTimerSync();
+            resetAutoHideTimer();
+          },
+          onStateChange: (e) => {
+            const btn = document.getElementById("playTrigger");
+            if (e.data === YT.PlayerState.PLAYING) {
+              isPlaying = true;
+              if (btn) btn.innerText = "⏸ PAUSE";
+              document.getElementById('securityOverlay').classList.add('hidden');
+              resetAutoHideTimer();
+            } else {
+              isPlaying = false;
+              if (btn) btn.innerText = "▶ PLAY";
+              showControls();
+            }
+          },
+          onError: (e) => {
+            isYtReady = false;
+            const detailEl = document.getElementById("lectureDetailTitle");
+            if (detailEl) {
+              detailEl.innerText = `Player Config Error (${e.data}) — Run via local server or hosted domain`;
+            }
+          }
+        }
+      });
+    }
+
+    function loadYouTubeApiScript(videoId) {
+      activeYtVideoId = videoId || 'd9wnvlbtizc';
+      window.onYouTubeIframeAPIReady = () => {
+        initNewYouTubePlayer(activeYtVideoId);
+      };
+
+      if (window.YT && typeof window.YT.Player === 'function') {
+        initNewYouTubePlayer(activeYtVideoId);
+      } else if (!document.getElementById("phantom-yt-iframe-api")) {
+        const tag = document.createElement('script');
+        tag.id = "phantom-yt-iframe-api";
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -382,9 +463,21 @@
       }
 
       const playerRoot = document.getElementById("playerRoot");
+      const parsedYtId = extractYouTubeId(finalVideo);
+
+      const isDirectMedia = finalVideo && !parsedYtId && (
+        finalVideo.includes("archive.org") ||
+        finalVideo.endsWith(".mp4") ||
+        finalVideo.endsWith(".webm") ||
+        finalVideo.includes("drive.google.com")
+      );
+
+      const isGenericEmbedUrl = finalVideo && !parsedYtId && !isDirectMedia &&
+        !finalVideo.includes("zoom") &&
+        (finalVideo.startsWith("http://") || finalVideo.startsWith("https://"));
 
       // INTERNET ARCHIVE DIRECT STREAMING PLAYER RENDERER
-      if (finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
+      if (isDirectMedia) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
           <div class="archive-box">
@@ -400,7 +493,7 @@
           </div>
         `;
       } 
-      else if (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be")) {
+      else if (isGenericEmbedUrl) {
         isArchiveVideo = true;
         playerRoot.innerHTML = `
           <div class="archive-box">
@@ -423,6 +516,7 @@
       }
       else {
         isArchiveVideo = false;
+        const resolvedVideoId = parsedYtId || 'd9wnvlbtizc';
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
@@ -474,44 +568,7 @@
           </div>
         `;
 
-        window.onYouTubeIframeAPIReady = () => {
-          ytInstance = new YT.Player('ytPlayerFrame', {
-            videoId: finalVideo,
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-              disablekb: 0,
-              fs: 0,
-              modestbranding: 1,
-              rel: 0,
-              showinfo: 0,
-              iv_load_policy: 3
-            },
-            events: {
-              onReady: (e) => {
-                startTimerSync();
-                resetAutoHideTimer();
-              },
-              onStateChange: (e) => {
-                const btn = document.getElementById("playTrigger");
-                if (e.data === YT.PlayerState.PLAYING) {
-                  isPlaying = true;
-                  if (btn) btn.innerText = "⏸ PAUSE";
-                  document.getElementById('securityOverlay').classList.add('hidden');
-                  resetAutoHideTimer();
-                } else {
-                  isPlaying = false;
-                  if (btn) btn.innerText = "▶ PLAY";
-                  showControls();
-                }
-              }
-            }
-          });
-        };
-
-        if (window.YT && window.YT.Player) {
-          window.onYouTubeIframeAPIReady();
-        }
+        loadYouTubeApiScript(resolvedVideoId);
 
         const screenEl = document.getElementById("phantomConsoleScreen");
         screenEl.addEventListener("mousemove", () => {
@@ -528,7 +585,7 @@
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.play();
-      } else if (ytInstance && ytInstance.playVideo) {
+      } else if (ytInstance && isYtReady && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
     }
@@ -555,13 +612,13 @@
       if (isArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
-      } else if (ytInstance && ytInstance.setPlaybackRate) {
+      } else if (ytInstance && isYtReady && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
     }
 
     function updateVideoQuality(quality) {
-      if (!ytInstance || !ytInstance.setPlaybackQuality) return;
+      if (!ytInstance || !isYtReady || !ytInstance.setPlaybackQuality) return;
       ytInstance.setPlaybackQuality(quality);
       if (ytInstance.getCurrentTime && ytInstance.seekTo) {
         const currentTime = ytInstance.getCurrentTime();
@@ -647,7 +704,7 @@
         if (vid) vid.currentTime = Math.max(0, vid.currentTime + s);
         return;
       }
-      if (!ytInstance || !ytInstance.getCurrentTime) return;
+      if (!ytInstance || !isYtReady || !ytInstance.getCurrentTime) return;
       const target = Math.max(0, ytInstance.getCurrentTime() + s);
       ytInstance.seekTo(target, true);
     }
@@ -668,7 +725,7 @@
         }
         return;
       }
-      if (!ytInstance) return;
+      if (!ytInstance || !isYtReady) return;
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
     }
@@ -683,7 +740,7 @@
         }
         return;
       }
-      if (!ytInstance) return;
+      if (!ytInstance || !isYtReady) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       ytInstance.seekTo(pos * ytInstance.getDuration(), true);
@@ -704,7 +761,7 @@
           }
           return;
         }
-        if (ytInstance && ytInstance.getCurrentTime) {
+        if (ytInstance && isYtReady && ytInstance.getCurrentTime) {
           const c = ytInstance.getCurrentTime();
           const d = ytInstance.getDuration();
           if (d > 0) {
