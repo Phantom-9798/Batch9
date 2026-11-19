@@ -325,7 +325,7 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* YOUTUBE LOCK SHIELD (BLOCKS DIRECT CLICKS ON YOUTUBE FRAME & WAKES CONTROLS ON TAP/CLICK) */
+    /* TRANSPARENT INTERACTION SHIELD (BLOCKS DIRECT CLICKS ON VIDEO/IFRAME & WAKES CONTROLS) */
     .yt-lock-shield {
       position: absolute;
       inset: 0;
@@ -335,19 +335,19 @@
       cursor: pointer;
     }
 
-    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF YOUTUBE FRAME */
+    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF ALL PLAYERS (YT, ARCHIVE, NEXASHIELD, ZOOM) */
     .yt-bottom-brand-tag {
       position: absolute;
       bottom: 8px;
       right: 12px;
-      z-index: 45;
+      z-index: 48;
       pointer-events: none;
       user-select: none;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
       padding: 0 !important;
-      color: rgba(255, 255, 255, 0.62);
+      color: rgba(255, 255, 255, 0.65);
       font-family: 'Black Ops One', cursive;
       font-size: 14px;
       letter-spacing: 2px;
@@ -537,7 +537,7 @@
       transform: translateY(-1px);
     }
 
-    /* DISABLED STATE FOR NON-YOUTUBE CONTROLS */
+    /* DISABLED STATE */
     button:disabled,
     .is-disabled {
       opacity: 0.35 !important;
@@ -627,7 +627,7 @@
   <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
     <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
 
-      <!-- UNIFIED FULLSCREEN CONTAINER (VIDEO + TOP BAR + BOTTOM DECK ALL INSIDE) -->
+      <!-- UNIFIED FULLSCREEN CONTAINER -->
       <div id="phantomConsoleScreen">
 
         <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
@@ -657,7 +657,7 @@
           <div id="playerRoot" class="w-full h-full relative"></div>
         </div>
 
-        <!-- BOTTOM CONTROL DECK (Inside #phantomConsoleScreen so it overlays in Fullscreen too!) -->
+        <!-- BOTTOM CONTROL DECK -->
         <div class="phantom-bottom-deck" id="phantomBottomDeck">
           <div class="seek-row">
             <span id="currentTimeLabel">0:00</span>
@@ -690,7 +690,7 @@
           </div>
 
           <div class="action-row-bottom">
-            <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn">
+            <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn" disabled>
               ⬇ Download
             </button>
             <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
@@ -701,7 +701,7 @@
           <div id="inpageDownloadBox" class="inpage-download-box">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
               <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Saving to ☠️ TEAM PHANTOM☠️ Portal...</span>
-              <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 180 MB</span>
+              <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 0 MB</span>
             </div>
             <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
               <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
@@ -743,10 +743,21 @@
       return m ? m[1] : null;
     }
 
+    function normalizeArchiveDirectUrl(url) {
+      if (!url) return url;
+      var u = String(url).trim();
+      var detailsMatch = u.match(/archive\.org\/(?:details|embed)\/([^\/?#]+)/i);
+      if (detailsMatch && !/\.(mp4|webm|ogg)(\?|$)/i.test(u)) {
+        var itemId = detailsMatch[1];
+        return 'https://archive.org/download/' + itemId + '/' + itemId + '.mp4';
+      }
+      return u;
+    }
+
     let ytInstance = null;
     let isPlaying = false;
     let timerSync = null;
-    let isArchiveVideo = false;
+    let isDirectArchiveVideo = false;
     let isYouTubeSource = false;
     let fsIdleTimer = null;
 
@@ -766,7 +777,6 @@
       return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
     }
 
-    // YouTube-style Fullscreen Popup & Auto-Hide (5s) for BOTH Top Bar & Bottom Control Deck together
     function wakeFullscreenControlsFor5s() {
       var screen = document.getElementById("phantomConsoleScreen");
       if (!screen) return;
@@ -793,24 +803,36 @@
       if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
-    // Enable all buttons ONLY for YouTube; disable -10s, Play/Pause, +10s, Download for NexaShield/Archive/Zoom
-    function applySourceButtonPermissions(isYt) {
+    // Configure control permissions per source:
+    // - YouTube: Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED
+    // - Internet Archive (Direct Video): Custom Playback/Seek/Speed/Fullscreen ACTIVE (native controls removed); Download ACTIVE (Blob -> IndexedDB)
+    // - NexaShield / Zoom: Playback/Seek/Download DISABLED; Speed & Fullscreen ACTIVE
+    function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
       var fwBtn = document.getElementById("btnForward10");
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
 
-      [rwBtn, ppBtn, fwBtn, dlBtn].forEach(function(btn){
+      var canControlPlayback = (mode === 'youtube' || mode === 'archive');
+      var canDownload = (mode === 'archive');
+
+      [rwBtn, ppBtn, fwBtn].forEach(function(btn){
         if (!btn) return;
-        btn.disabled = !isYt;
-        if (isYt) btn.classList.remove("is-disabled");
+        btn.disabled = !canControlPlayback;
+        if (canControlPlayback) btn.classList.remove("is-disabled");
         else btn.classList.add("is-disabled");
       });
 
+      if (dlBtn) {
+        dlBtn.disabled = !canDownload;
+        if (canDownload) dlBtn.classList.remove("is-disabled");
+        else dlBtn.classList.add("is-disabled");
+      }
+
       if (seekBar) {
-        seekBar.style.pointerEvents = isYt ? "auto" : "none";
-        seekBar.style.opacity = isYt ? "1" : "0.45";
+        seekBar.style.pointerEvents = canControlPlayback ? "auto" : "none";
+        seekBar.style.opacity = canControlPlayback ? "1" : "0.45";
       }
     }
 
@@ -818,6 +840,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
       const urlTitle = urlParams.get("title");
+      const isOfflineMode = urlParams.get("offline") === "1";
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
@@ -864,33 +887,66 @@
       const playerRoot = document.getElementById("playerRoot");
       const ytId = extractYouTubeId(finalVideo);
 
-      // ARCHIVE / DIRECT VIDEO PLAYER (-10s, Pause, +10s, Download DISABLED; Speed & Fullscreen ACTIVE)
+      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Native controls removed; custom controls + transparent brand tag active)
       if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
-        isArchiveVideo = true;
+        isDirectArchiveVideo = true;
         isYouTubeSource = false;
         PLAYER.mode = 'archive';
-        applySourceButtonPermissions(false);
+        applySourceButtonPermissions('archive');
+
+        var directArchiveSrc = normalizeArchiveDirectUrl(finalVideo);
+        PLAYER.lecture.source = directArchiveSrc;
+
         playerRoot.innerHTML = `
           <div class="archive-box">
             <video 
               id="archiveVideo" 
-              src="${finalVideo}" 
+              src="${directArchiveSrc}" 
               class="archive-frame" 
-              controls 
-              controlsList="nodownload" 
+              controlsList="nodownload nofullscreen noremoteplayback" 
+              disablePictureInPicture
               playsinline
               oncontextmenu="return false;">
             </video>
+            <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
+            <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
+            <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
+
+        var archVid = document.getElementById("archiveVideo");
+        if (archVid) {
+          archVid.controls = false;
+          archVid.addEventListener("play", () => {
+            isPlaying = true;
+            updatePlayLabel();
+            document.getElementById('securityOverlay').classList.add('hidden');
+            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+          });
+          archVid.addEventListener("pause", () => {
+            isPlaying = false;
+            updatePlayLabel();
+            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+          });
+          archVid.addEventListener("ended", () => {
+            isPlaying = false;
+            updatePlayLabel();
+          });
+
+          // If opened in offline mode, load cached Blob from IndexedDB if available
+          if (isOfflineMode) {
+            loadOfflineBlobIntoVideo(PLAYER.lecture.id, archVid);
+          }
+        }
         startTimerSync();
       }
-      // ARCHIVE / NEXASHIELD IFRAME (-10s, Pause, +10s, Download DISABLED; Speed & Fullscreen ACTIVE)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
-        isArchiveVideo = true;
+        isDirectArchiveVideo = false;
         isYouTubeSource = false;
-        PLAYER.mode = 'archive_frame';
-        applySourceButtonPermissions(false);
+        PLAYER.mode = 'nexashield';
+        applySourceButtonPermissions('nexashield');
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
@@ -899,28 +955,30 @@
               class="archive-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
+            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
       }
-      // ZOOM IFRAME (-10s, Pause, +10s, Download DISABLED; Speed & Fullscreen ACTIVE)
+      // 3. ZOOM IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
-        isArchiveVideo = false;
+        isDirectArchiveVideo = false;
         isYouTubeSource = false;
         PLAYER.mode = 'zoom';
-        applySourceButtonPermissions(false);
+        applySourceButtonPermissions('zoom');
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
       }
-      // YOUTUBE PLAYER (ALL BUTTONS ACTIVE)
+      // 4. YOUTUBE PLAYER (Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED; transparent brand tag active)
       else {
-        isArchiveVideo = false;
+        isDirectArchiveVideo = false;
         isYouTubeSource = true;
         PLAYER.mode = 'youtube';
         PLAYER.ytId = ytId || finalVideo;
-        applySourceButtonPermissions(true);
+        applySourceButtonPermissions('youtube');
 
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
@@ -980,10 +1038,10 @@
 
     function activateStream() {
       document.getElementById('securityOverlay').classList.add('hidden');
-      if (isArchiveVideo) {
+      if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.play();
-      } else if (ytInstance && ytInstance.playVideo) {
+      } else if (isYouTubeSource && ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
       }
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
@@ -991,10 +1049,10 @@
 
     function updateVideoSpeed(rate) {
       const spd = parseFloat(rate);
-      if (isArchiveVideo) {
+      if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
-      } else if (ytInstance && ytInstance.setPlaybackRate) {
+      } else if (isYouTubeSource && ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
@@ -1033,15 +1091,20 @@
     });
 
     function skipSeconds(s) {
-      if (!isYouTubeSource) return;
-      if (!ytInstance || !ytInstance.getCurrentTime) return;
+      if (isDirectArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
+        if (vid) vid.currentTime = Math.max(0, (vid.currentTime || 0) + s);
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
+      if (!isYouTubeSource || !ytInstance || !ytInstance.getCurrentTime) return;
       const target = Math.max(0, ytInstance.getCurrentTime() + s);
       ytInstance.seekTo(target, true);
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function triggerBadge(id) {
-      if (!isYouTubeSource) return;
+      if (!isYouTubeSource && !isDirectArchiveVideo) return;
       const b = document.getElementById(id);
       if (!b) return;
       b.classList.add('show');
@@ -1049,19 +1112,36 @@
     }
 
     function toggleVideoPlay() {
-      if (!isYouTubeSource) return;
       document.getElementById('securityOverlay').classList.add('hidden');
-      if (!ytInstance) return;
+      if (isDirectArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
+        if (vid) {
+          if (vid.paused) vid.play();
+          else vid.pause();
+        }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
+      if (!isYouTubeSource || !ytInstance) return;
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function seekVideoTrack(e) {
-      if (!isYouTubeSource) return;
-      if (!ytInstance || !ytInstance.getDuration) return;
+      if (isDirectArchiveVideo) {
+        const vid = document.getElementById("archiveVideo");
+        if (vid && vid.duration) {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          vid.currentTime = pos * vid.duration;
+        }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
+      if (!isYouTubeSource || !ytInstance || !ytInstance.getDuration) return;
       const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       ytInstance.seekTo(pos * ytInstance.getDuration(), true);
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
@@ -1069,11 +1149,11 @@
     function startTimerSync() {
       if (timerSync) clearInterval(timerSync);
       timerSync = setInterval(() => {
-        if (isArchiveVideo) {
+        if (isDirectArchiveVideo) {
           const vid = document.getElementById("archiveVideo");
           if (vid && vid.duration > 0) {
-            const c = vid.currentTime;
-            const d = vid.duration;
+            const c = vid.currentTime || 0;
+            const d = vid.duration || 0;
             const fill = document.getElementById("trackFill");
             if (fill) fill.style.width = ((c / d) * 100) + "%";
             var curEl = document.getElementById("currentTimeLabel");
@@ -1083,7 +1163,7 @@
           }
           return;
         }
-        if (ytInstance && ytInstance.getCurrentTime) {
+        if (isYouTubeSource && ytInstance && ytInstance.getCurrentTime) {
           const c = ytInstance.getCurrentTime() || 0;
           const d = ytInstance.getDuration() || 0;
           if (d > 0) {
@@ -1095,7 +1175,7 @@
             if (totEl) totEl.innerText = formatSeconds(d);
           }
         }
-      }, 500);
+      }, 400);
     }
 
     function formatSeconds(sec) {
@@ -1104,6 +1184,7 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
+    // PORTAL INDEXEDDB BLOB STORAGE FOR INTERNET ARCHIVE MP4
     function saveToPortalIndexedDB(item){
       if (!window.indexedDB) return;
       var req = indexedDB.open("phantom_portal_downloads", 1);
@@ -1120,8 +1201,25 @@
       };
     }
 
-    function startPortalDownload(){
-      if (!isYouTubeSource) return;
+    function loadOfflineBlobIntoVideo(id, videoEl){
+      if (!window.indexedDB || !videoEl) return;
+      var req = indexedDB.open("phantom_portal_downloads", 1);
+      req.onsuccess = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains("lectures")) return;
+        var tx = db.transaction("lectures", "readonly");
+        var getReq = tx.objectStore("lectures").get(String(id));
+        getReq.onsuccess = function(){
+          var rec = getReq.result;
+          if (rec && rec.blob) {
+            videoEl.src = URL.createObjectURL(rec.blob);
+          }
+        };
+      };
+    }
+
+    async function startPortalDownload(){
+      if (!isDirectArchiveVideo) return;
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
       var box = document.getElementById("inpageDownloadBox");
       var statusEl = document.getElementById("dlStatusLabel");
@@ -1134,31 +1232,62 @@
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      var totalMB = 180;
-      var downloadedMB = 0;
-      statusEl.innerText = "Saving to ☠️ TEAM PHANTOM☠️ Portal...";
+      statusEl.innerText = "Downloading Offline Blob to ☠️ TEAM PHANTOM☠️ Portal...";
       statusEl.style.color = "#6ee7b7";
       barEl.style.width = "0%";
 
-      var timer = setInterval(function(){
-        downloadedMB = Math.min(totalMB, downloadedMB + 20);
-        var pct = Math.round((downloadedMB / totalMB) * 100);
-        barEl.style.width = pct + "%";
-        sizeEl.innerText = downloadedMB + " MB / " + totalMB + " MB";
+      try {
+        var res = await fetch(PLAYER.lecture.source);
+        if (!res.ok) throw new Error("Stream fetch failed (" + res.status + ")");
+        var contentLength = parseInt(res.headers.get("content-length") || "0", 10);
+        var reader = res.body && res.body.getReader ? res.body.getReader() : null;
+        var chunks = [];
+        var received = 0;
 
-        if (downloadedMB >= totalMB) {
-          clearInterval(timer);
-          saveToPortalIndexedDB({
-            id: PLAYER.lecture.id,
-            name: PLAYER.lecture.title,
-            url: PLAYER.lecture.source,
-            sizeMB: totalMB,
-            savedAt: Date.now()
-          });
-          statusEl.innerText = "Saved in Portal Downloads (Gallery untouched)";
-          if (btnEl) btnEl.disabled = false;
+        if (reader) {
+          while (true) {
+            var step = await reader.read();
+            if (step.done) break;
+            chunks.push(step.value);
+            received += step.value.length;
+            var recMB = (received / (1024 * 1024)).toFixed(1);
+            if (contentLength > 0) {
+              var totMB = (contentLength / (1024 * 1024)).toFixed(1);
+              var pct = Math.min(99, Math.round((received / contentLength) * 100));
+              barEl.style.width = pct + "%";
+              sizeEl.innerText = recMB + " MB / " + totMB + " MB";
+            } else {
+              barEl.style.width = "65%";
+              sizeEl.innerText = recMB + " MB";
+            }
+          }
+        } else {
+          var singleBlob = await res.blob();
+          chunks.push(singleBlob);
+          received = singleBlob.size;
         }
-      }, 220);
+
+        var finalBlob = new Blob(chunks, { type: "video/mp4" });
+        var finalMB = Math.max(1, Math.round(finalBlob.size / (1024 * 1024)));
+
+        saveToPortalIndexedDB({
+          id: PLAYER.lecture.id,
+          name: PLAYER.lecture.title,
+          url: PLAYER.lecture.source,
+          blob: finalBlob,
+          sizeMB: finalMB,
+          savedAt: Date.now()
+        });
+
+        barEl.style.width = "100%";
+        sizeEl.innerText = finalMB + " MB / " + finalMB + " MB";
+        statusEl.innerText = "Saved Offline in Portal Downloads (Gallery untouched)";
+      } catch (err) {
+        statusEl.style.color = "#f87171";
+        statusEl.innerText = "Offline fetch blocked by server CORS — use direct CORS-enabled MP4.";
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
     }
 
     // STUDY TIMER
