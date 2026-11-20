@@ -325,7 +325,7 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* SCREEN LOCK SHIELD (ACTIVE FOR YOUTUBE & INTERNET ARCHIVE; OFF FOR GOOGLE DRIVE, ZOOM & NEXASHIELD) */
+    /* SCREEN LOCK SHIELD */
     .video-screen-lock-shield {
       display: none;
       position: absolute;
@@ -342,6 +342,58 @@
     }
     .video-screen-lock-shield.lock-enabled {
       display: block;
+    }
+
+    /* GOOGLE DRIVE SELECTIVE LOCK: Locks pop-out & top/bottom bars while leaving center play button clickable */
+    .gdrive-selective-lock {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 46;
+      pointer-events: none;
+    }
+    .gdrive-selective-lock.active {
+      display: block;
+    }
+    .gdrive-lock-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+    }
+    .gdrive-lock-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+    }
+    .gdrive-lock-left {
+      position: absolute;
+      top: 68px;
+      bottom: 64px;
+      left: 0;
+      width: 34%;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+    }
+    .gdrive-lock-right {
+      position: absolute;
+      top: 68px;
+      bottom: 64px;
+      right: 0;
+      width: 34%;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
     }
 
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
@@ -680,8 +732,16 @@
 
           <div id="playerRoot" class="w-full h-full relative"></div>
 
-          <!-- SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE; OFF FOR GOOGLE DRIVE, ZOOM & NEXASHIELD -->
+          <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
+
+          <!-- SELECTIVE LOCK FOR GOOGLE DRIVE: BLOCKS POP-OUT & EDGES WHILE KEEPING CENTER PLAY BUTTON ACTIVE -->
+          <div class="gdrive-selective-lock" id="gdriveSelectiveLock" oncontextmenu="return false;">
+            <div class="gdrive-lock-top"></div>
+            <div class="gdrive-lock-bottom"></div>
+            <div class="gdrive-lock-left"></div>
+            <div class="gdrive-lock-right"></div>
+          </div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
@@ -850,12 +910,20 @@
 
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
-      if (!lockShield) return;
-      var shouldLockScreen = (mode === 'youtube' || mode === 'archive');
-      if (shouldLockScreen) {
-        lockShield.classList.add("lock-enabled");
-      } else {
-        lockShield.classList.remove("lock-enabled");
+      var gdriveLock = document.getElementById("gdriveSelectiveLock");
+      if (lockShield) {
+        if (mode === 'youtube' || mode === 'archive') {
+          lockShield.classList.add("lock-enabled");
+        } else {
+          lockShield.classList.remove("lock-enabled");
+        }
+      }
+      if (gdriveLock) {
+        if (mode === 'gdrive') {
+          gdriveLock.classList.add("active");
+        } else {
+          gdriveLock.classList.remove("active");
+        }
       }
     }
 
@@ -940,6 +1008,21 @@
         });
       }
 
+      const gdriveLock = document.getElementById("gdriveSelectiveLock");
+      if (gdriveLock) {
+        gdriveLock.querySelectorAll("div").forEach(function(zone) {
+          ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+            zone.addEventListener(ev, function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (isAnyFullscreen()) {
+                wakeFullscreenControlsFor5s();
+              }
+            }, { passive: false });
+          });
+        });
+      }
+
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
         screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
@@ -954,7 +1037,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER
+      // 0. GOOGLE DRIVE EMBED PLAYER (Center play button active; pop-out & outer zones locked)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -980,7 +1063,7 @@
           </div>
         `;
       }
-      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Screen lock ON)
+      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Screen lock ON + full custom controls)
       else if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm"))) {
         isDirectArchiveVideo = true;
         isGDriveEmbed = false;
