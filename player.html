@@ -325,33 +325,49 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* TRANSPARENT INTERACTION SHIELD (BLOCKS DIRECT CLICKS ON VIDEO/IFRAME & WAKES CONTROLS) */
-    .yt-lock-shield {
+    /* COMPLETE VIDEO SCREEN LOCK SHIELD (NO CLICK ACTIONS, NO HOVER BUTTONS, NO PAUSE/RESUME POPUPS) */
+    .video-screen-lock-shield {
       position: absolute;
       inset: 0;
-      z-index: 35;
+      width: 100%;
+      height: 100%;
+      z-index: 45;
       background: transparent;
       pointer-events: auto;
-      cursor: pointer;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
-    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF ALL PLAYERS (YT, ARCHIVE, NEXASHIELD, ZOOM) */
-    .yt-bottom-brand-tag {
+    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
+    .frame-locked-brand-tag {
       position: absolute;
-      bottom: 8px;
-      right: 12px;
-      z-index: 48;
+      bottom: 10px;
+      right: 14px;
+      z-index: 50;
       pointer-events: none;
       user-select: none;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
       padding: 0 !important;
-      color: rgba(255, 255, 255, 0.65);
+      color: rgba(255, 255, 255, 0.75);
       font-family: 'Black Ops One', cursive;
       font-size: 14px;
       letter-spacing: 2px;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+      transition: bottom 0.28s ease;
+    }
+
+    /* Keep logo cleanly positioned above bottom deck in fullscreen without leaving the video frame */
+    #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
+    #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
+      bottom: 112px;
+      right: 18px;
+    }
+    #phantomConsoleScreen.fs-idle .frame-locked-brand-tag {
+      bottom: 16px;
     }
 
     /* DIRECT ARCHIVE & ZOOM STYLING */
@@ -369,11 +385,12 @@
       width: 100% !important;
       height: 100% !important;
       border: none;
+      pointer-events: none !important;
     }
 
     /* YOUTUBE ENGINE */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
+    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none !important; }
 
     #phantomConsoleScreen:fullscreen #ytPlayerFrame,
     #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
@@ -387,7 +404,7 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%) scale(0.7);
-      z-index: 42;
+      z-index: 48;
       background: rgba(255, 215, 0, 0.92);
       color: #000;
       font-family: 'Orbitron', sans-serif;
@@ -577,7 +594,7 @@
       display: block;
     }
 
-    .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
+    .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
@@ -637,7 +654,8 @@
           <div style="width: 64px;"></div>
         </div>
 
-        <div class="video-viewport-box">
+        <!-- VIDEO FRAME BOX -->
+        <div class="video-viewport-box" id="videoViewportBox">
           <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
             <div class="brand-title">☠️ TEAM PHANTOM☠️</div>
             <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
@@ -655,6 +673,12 @@
           </div>
 
           <div id="playerRoot" class="w-full h-full relative"></div>
+
+          <!-- COMPLETE SCREEN LOCK SHIELD: BLOCKS ALL CLICKS/ACTIONS ON VIDEO FRAME -->
+          <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
+
+          <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
+          <div class="frame-locked-brand-tag">☠️ TEAM PHANTOM☠️</div>
         </div>
 
         <!-- BOTTOM CONTROL DECK -->
@@ -803,10 +827,7 @@
       if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
-    // Configure control permissions per source:
-    // - YouTube: Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED
-    // - Internet Archive (Direct Video): Custom Playback/Seek/Speed/Fullscreen ACTIVE (native controls removed); Download ACTIVE (Blob -> IndexedDB)
-    // - NexaShield / Zoom: Playback/Seek/Download DISABLED; Speed & Fullscreen ACTIVE
+    // Configure control permissions per source
     function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
@@ -874,6 +895,20 @@
         source: finalVideo || ""
       };
 
+      // Lock screen shield intercepts all pointer events so video screen never shows buttons or pauses on click
+      const lockShield = document.getElementById("videoScreenLockShield");
+      if (lockShield) {
+        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+          lockShield.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isAnyFullscreen()) {
+              wakeFullscreenControlsFor5s();
+            }
+          }, { passive: false });
+        });
+      }
+
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
         screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
@@ -887,7 +922,7 @@
       const playerRoot = document.getElementById("playerRoot");
       const ytId = extractYouTubeId(finalVideo);
 
-      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Native controls removed; custom controls + transparent brand tag active)
+      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER
       if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isDirectArchiveVideo = true;
         isYouTubeSource = false;
@@ -904,14 +939,12 @@
               src="${directArchiveSrc}" 
               class="archive-frame" 
               controlsList="nodownload nofullscreen noremoteplayback" 
-              disablePictureInPicture
+              disablePictureInPicture 
               playsinline
               oncontextmenu="return false;">
             </video>
-            <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
-            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
 
@@ -934,14 +967,13 @@
             updatePlayLabel();
           });
 
-          // If opened in offline mode, load cached Blob from IndexedDB if available
           if (isOfflineMode) {
             loadOfflineBlobIntoVideo(PLAYER.lecture.id, archVid);
           }
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isYouTubeSource = false;
@@ -955,11 +987,10 @@
               class="archive-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
       }
-      // 3. ZOOM IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
+      // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isDirectArchiveVideo = false;
         isYouTubeSource = false;
@@ -968,11 +999,10 @@
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
       }
-      // 4. YOUTUBE PLAYER (Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED; transparent brand tag active)
+      // 4. YOUTUBE PLAYER
       else {
         isDirectArchiveVideo = false;
         isYouTubeSource = true;
@@ -983,10 +1013,8 @@
         playerRoot.innerHTML = `
           <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
-            <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
-            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
 
@@ -1322,7 +1350,7 @@
         const pMins = Math.floor((sessionSeconds % 3600) / 60);
         const pSecs = sessionSeconds % 60;
         const pDisplayStr = pHrs > 0 
-          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`
+          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}` 
           : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
         
         const autoPomoEl = document.getElementById("autoPomoDisplay");
