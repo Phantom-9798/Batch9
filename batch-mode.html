@@ -97,7 +97,12 @@
 
     // URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    targetBatch = urlParams.get('batch') || 'cds';
+    targetBatch = (urlParams.get('batch') || 'cds').toLowerCase();
+    window.PHANTOM_ACTIVE_SQUADRON = targetBatch;
+    try {
+      sessionStorage.setItem("phantom_active_squadron", targetBatch);
+      localStorage.setItem("phantom_active_squadron", targetBatch);
+    } catch (e) {}
 
     // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
@@ -146,6 +151,9 @@
         // Set UI Header
         document.getElementById("batchBadge").innerText = `${targetBatch.toUpperCase()} SQUADRON`;
         document.getElementById("batchTitle").innerText = `${targetBatch.toUpperCase()} BATCH ACCESS`;
+        if (typeof window.renderMyDownloadsTab === "function") {
+          window.renderMyDownloadsTab();
+        }
       });
     }
 
@@ -397,7 +405,7 @@
             PORTAL OFFLINE VAULT
           </span>
           <h3 class="font-orbitron text-lg sm:text-xl text-white uppercase mt-1">
-            MY DOWNLOADS
+            MY DOWNLOADS (<span id="myDownloadsSquadronLabel">CDS</span>)
           </h3>
         </div>
         <button type="button" onclick="closeMyDownloadsTab()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider cursor-pointer">
@@ -494,7 +502,21 @@
   </footer>
 
   <script>
-    // --- IN-PAGE MY DOWNLOADS TAB (Reads from phantom_portal_downloads IndexedDB) ---
+    // --- IN-PAGE MY DOWNLOADS TAB (Filtered strictly by current squadron) ---
+    function getCurrentSquadronKey() {
+      if (window.PHANTOM_ACTIVE_SQUADRON) {
+        return String(window.PHANTOM_ACTIVE_SQUADRON).toLowerCase();
+      }
+      var params = new URLSearchParams(window.location.search);
+      var fromUrl = params.get("batch");
+      if (fromUrl) return String(fromUrl).toLowerCase();
+      try {
+        var fromSession = sessionStorage.getItem("phantom_active_squadron");
+        if (fromSession) return String(fromSession).toLowerCase();
+      } catch (e) {}
+      return "cds";
+    }
+
     function openPortalDownloadsDB() {
       return new Promise((resolve, reject) => {
         if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
@@ -511,13 +533,18 @@
     }
 
     async function getAllPortalDownloads() {
+      var activeSquadron = getCurrentSquadronKey();
       try {
         const db = await openPortalDownloadsDB();
         return await new Promise((resolve) => {
           const tx = db.transaction("lectures", "readonly");
           const req = tx.objectStore("lectures").getAll();
           req.onsuccess = () => {
-            const rows = (req.result || []).filter((r) => r && r.blob && r.blob.size > 0);
+            const rows = (req.result || []).filter((r) => {
+              if (!r || !r.blob || r.blob.size <= 0) return false;
+              var itemSquadron = String(r.squadron || r.batch || "").toLowerCase();
+              return itemSquadron === activeSquadron;
+            });
             rows.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
             resolve(rows);
           };
@@ -544,14 +571,20 @@
       const idVal = decodeURIComponent(encodedId || "");
       const videoVal = decodeURIComponent(encodedUrl || "");
       const titleVal = decodeURIComponent(encodedTitle || "Saved Lecture");
+      const squadronVal = getCurrentSquadronKey();
       try {
         sessionStorage.setItem("phantom_current_video", videoVal);
         sessionStorage.setItem("phantom_current_title", titleVal);
+        sessionStorage.setItem("phantom_active_squadron", squadronVal);
       } catch (e) {}
-      window.location.href = `downloaded-player.html?id=${encodeURIComponent(idVal)}&title=${encodeURIComponent(titleVal)}`;
+      window.location.href = `downloaded-player.html?id=${encodeURIComponent(idVal)}&title=${encodeURIComponent(titleVal)}&batch=${encodeURIComponent(squadronVal)}`;
     }
 
     async function renderMyDownloadsTab() {
+      var activeSquadron = getCurrentSquadronKey();
+      var sqLbl = document.getElementById("myDownloadsSquadronLabel");
+      if (sqLbl) sqLbl.innerText = activeSquadron.toUpperCase();
+
       const items = await getAllPortalDownloads();
       const countEl = document.getElementById("savedDownloadsCount");
       const tabCountEl = document.getElementById("savedDownloadsTabCount");
@@ -564,8 +597,8 @@
       if (!items.length) {
         listEl.innerHTML = `
           <div class="p-6 rounded-xl bg-black/40 border border-neutral-800 text-center">
-            <p class="text-neutral-300 font-orbitron text-sm">No downloaded lectures in MY DOWNLOADS.</p>
-            <p class="text-neutral-500 text-xs mt-1">Downloaded lectures from the player appear here with Watch and Remove options.</p>
+            <p class="text-neutral-300 font-orbitron text-sm">No downloaded lectures in ${activeSquadron.toUpperCase()} MY DOWNLOADS.</p>
+            <p class="text-neutral-500 text-xs mt-1">Lectures downloaded in ${activeSquadron.toUpperCase()} squadron appear here only.</p>
           </div>
         `;
         return;
@@ -583,7 +616,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-black/50 border border-amber-500/25">
             <div>
               <div class="font-orbitron text-sm text-white">${safeName}</div>
-              <div class="text-xs text-emerald-400 mt-0.5">Downloaded Lecture • ${sizeStr} • ${dateStr}</div>
+              <div class="text-xs text-emerald-400 mt-0.5">${activeSquadron.toUpperCase()} Downloaded Lecture • ${sizeStr} • ${dateStr}</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <button type="button" onclick="watchDownloadedLectureInPage('${encId}', '${encUrl}', '${encTitle}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron text-xs font-extrabold uppercase cursor-pointer">
