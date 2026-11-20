@@ -1388,9 +1388,10 @@
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      statusEl.innerText = "Downloading via Proxy to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
+      barEl.style.width = "12%";
+      sizeEl.innerText = "0 MB / -- MB";
       statusEl.style.color = "#6ee7b7";
-      barEl.style.width = "10%";
+      statusEl.innerText = "Download started — connecting to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ stream...";
 
       var fetchTargetUrl = PLAYER.lecture.source;
       if (isGDriveEmbed && PLAYER.gdriveId) {
@@ -1405,6 +1406,8 @@
         var reader = res.body && res.body.getReader ? res.body.getReader() : null;
         var chunks = [];
         var received = 0;
+
+        statusEl.innerText = "Downloading to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
 
         if (reader) {
           while (true) {
@@ -1446,21 +1449,15 @@
         statusEl.style.color = "#6ee7b7";
         statusEl.innerText = "Saved Offline in Portal Downloads (Gallery untouched)";
       } catch (err) {
+        barEl.style.width = "100%";
         if (isGDriveEmbed && window.location.protocol === "https:" && fetchTargetUrl.startsWith("http://")) {
-          var a = document.createElement("a");
-          a.href = fetchTargetUrl;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          barEl.style.width = "100%";
-          sizeEl.innerText = "Proxy Tab";
+          sizeEl.innerText = "Blocked (Mixed Content)";
           statusEl.style.color = "#fbbf24";
-          statusEl.innerText = "Opened proxy stream (HTTPS->HTTP mixed content fallback).";
+          statusEl.innerText = "Download blocked: HTTPS portal cannot fetch HTTP proxy directly.";
         } else {
+          sizeEl.innerText = "Failed";
           statusEl.style.color = "#f87171";
-          statusEl.innerText = "Download failed: ensure Bot.py proxy is running & Drive file is public.";
+          statusEl.innerText = "Download failed: check Bot.py status or Drive public sharing.";
         }
       } finally {
         if (btnEl) btnEl.disabled = false;
