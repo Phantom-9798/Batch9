@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ | Downloaded Lecture Player</title>
+
+  <script>
+  (() => {
+    let securityTriggered = false;
+
+    function autoLogoutOnThreat(reason) {
+      if (securityTriggered) return;
+      securityTriggered = true;
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {}
+      document.body.innerHTML =
+        '<div style="background:#020617;color:#ef4444;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;text-align:center;padding:20px;">' +
+        '<h2 style="font-size:20px;margin-bottom:8px;">SECURITY ALERT: ' + String(reason || 'RESTRICTED ACCESS') + '</h2>' +
+        '<p style="color:#cbd5e1;font-size:13px;">Session terminated. Logging out...</p>' +
+        '</div>';
+      setTimeout(() => {
+        try { window.location.replace(window.location.pathname); } catch (e) { window.location.reload(); }
+      }, 900);
+    }
+
+    // 1. Right Click Disable
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
+    document.addEventListener('keydown', e => {
+      const key = (e.key || '').toUpperCase();
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(key)) ||
+        (e.ctrlKey && ['U', 'S', 'P'].includes(key))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        autoLogoutOnThreat('DEVTOOLS SHORTCUT DETECTED');
+        return false;
+      }
+    });
+
+    // 3. DevTools & 1DM / Downloader Trap -> Auto Logout
+    setInterval(() => {
+      if (securityTriggered) return;
+
+      const idmInjected = document.querySelector('[id*="idm" i], [class*="idm" i], [data-idm]');
+      if (idmInjected) {
+        autoLogoutOnThreat('1DM / DOWNLOADER DETECTED');
+        return;
+      }
+
+      const start = performance.now();
+      debugger;
+      const end = performance.now();
+      if (end - start > 100) {
+        autoLogoutOnThreat('DEVELOPER TOOLS DETECTED');
+      }
+    }, 1500);
+
+    // 4. Console Auto Clear
+    setInterval(() => {
+      if (!securityTriggered) {
+        try { console.clear(); } catch (e) {}
+      }
+    }, 2000);
+  })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Military Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+    }
+
+    html, body {
+      background-color: #020617 !important;
+      background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
+      color: #f8fafc !important;
+      height: 100vh;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .font-stencil { font-family: 'Black Ops One', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; font-weight: 900; }
+    .font-body { font-family: 'Inter', sans-serif; font-weight: 700; }
+
+    .phantom-btn {
+      transition: all 0.3s ease-in-out;
+      position: relative;
+    }
+    .phantom-btn:hover {
+      background-color: #0ea5e9 !important;
+      color: #ffffff !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px #0ea5e9, 0 0 50px #38bdf8, inset 0 0 15px rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .phantom-btn:active { transform: scale(0.96); }
+
+    /* 1. Corner Live Time Tracker Widget */
+    #phantomStudyTimerWidget {
+      position: fixed;
+      bottom: 8px;
+      right: 15px;
+      z-index: 99999;
+      background: rgba(4, 7, 13, 0.95);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+    #phantomStudyTimerWidget .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #ffd700;
+      border-radius: 50%;
+      animation: phantomPulse 1.5s infinite;
+    }
+    @keyframes phantomPulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px #ffd700; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* 2. Floating Focus Status Dock (Bottom Center) */
+    #phantomFocusDock {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99998;
+      background: rgba(6, 12, 30, 0.96);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Orbitron', sans-serif;
+      backdrop-filter: blur(10px);
+      font-size: 9px;
+      color: #ffd700;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .armor-panel {
+      background: rgba(6, 12, 30, 0.96);
+      border: 2px solid rgba(255, 215, 0, 0.7);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    #phantomConsoleScreen {
+      position: relative;
+      width: 100%;
+      background: #000000;
+      overflow: hidden;
+      border-radius: 0.4rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-viewport-box {
+      position: relative;
+      width: 100%;
+      max-height: calc(100vh - 305px);
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      overflow: hidden;
+    }
+
+    #phantomConsoleScreen:fullscreen,
+    #phantomConsoleScreen:-webkit-full-screen,
+    #phantomConsoleScreen:-ms-fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+      display: block !important;
+      position: fixed !important;
+      inset: 0 !important;
+      overflow: hidden !important;
+    }
+
+    #phantomConsoleScreen:fullscreen .video-viewport-box,
+    #phantomConsoleScreen:-webkit-full-screen .video-viewport-box {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      position: absolute !important;
+      inset: 0 !important;
+    }
+
+    .fs-top-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0) 100%);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 95;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+
+    #phantomConsoleScreen:fullscreen .fs-top-bar,
+    #phantomConsoleScreen:-webkit-full-screen .fs-top-bar {
+      display: flex;
+    }
+
+    #phantomConsoleScreen.fs-idle .fs-top-bar {
+      opacity: 0 !important;
+      transform: translateY(-12px);
+      pointer-events: none !important;
+    }
+
+    #phantomConsoleScreen:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck {
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin-top: 0 !important;
+      border-radius: 0 !important;
+      background: linear-gradient(0deg, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.85) 80%, rgba(2, 6, 23, 0) 100%) !important;
+      border: none !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+      z-index: 95 !important;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+
+    #phantomConsoleScreen.fs-idle .phantom-bottom-deck {
+      opacity: 0 !important;
+      transform: translateY(14px);
+      pointer-events: none !important;
+    }
+
+    .fs-back-btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .fs-lecture-label {
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+      text-align: center;
+      flex: 1;
+      padding: 0 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* SECURITY OVERLAY STYLING */
+    .security-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(0,0,0,0.88), rgba(20,0,0,0.95)), url('logo.jpeg');
+      background-size: cover; background-blend-mode: overlay;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 60; cursor: pointer; transition: opacity 0.3s ease;
+    }
+    .security-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; }
+    .brand-title { color: #ff2222; font-family: 'Black Ops One', cursive; font-size: 22px; text-shadow: 0 0 15px rgba(255,0,0,0.85); margin-bottom: 2px; }
+    .lecture-subtitle { color: #ffbb00; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; margin-bottom: 2px; }
+    .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
+    .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
+
+    /* SCREEN LOCK SHIELD */
+    .video-screen-lock-shield {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 45;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT */
+    .frame-locked-brand-tag {
+      position: absolute;
+      bottom: 10px;
+      right: 14px;
+      z-index: 50;
+      pointer-events: none;
+      user-select: none;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.75);
+      font-family: 'Black Ops One', cursive;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+      transition: bottom 0.28s ease;
+    }
+
+    #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
+    #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
+      bottom: 112px;
+      right: 18px;
+    }
+    #phantomConsoleScreen.fs-idle .frame-locked-brand-tag {
+      bottom: 16px;
+    }
+
+    .offline-video-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    .offline-video-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+      pointer-events: none !important;
+    }
+
+    .skip-alert-badge {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%) scale(0.7);
+      z-index: 48;
+      background: rgba(255, 215, 0, 0.92);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .skip-alert-badge.left { left: 16%; }
+    .skip-alert-badge.right { right: 16%; }
+    .skip-alert-badge.show { opacity: 1; transform: translateY(-50%) scale(1.05); }
+
+    /* BOTTOM CONTROL DECK */
+    .phantom-bottom-deck {
+      margin-top: 8px;
+      background: rgba(9, 15, 34, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 55;
+    }
+
+    .seek-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      color: #e2e8f0;
+    }
+
+    .tactical-progress-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tactical-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      width: 0%;
+      border-radius: 999px;
+    }
+
+    .controls-row-main {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .transport-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .skip-btn {
+      background: rgba(30, 41, 59, 0.95);
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .skip-btn:hover:not(:disabled) {
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+
+    .play-pause-bold-btn {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 18px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+      transition: 0.2s ease;
+    }
+    .play-pause-bold-btn:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .speed-pill-select {
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      outline: none;
+    }
+    .speed-pill-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .action-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .fs-dock-btn {
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .fs-dock-btn:hover {
+      background: rgba(255, 215, 0, 0.14);
+    }
+
+    .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
+
+    header, main, footer { position: relative; z-index: 10; width: 100%; }
+  </style>
+</head>
+
+<body class="text-white h-screen max-h-screen flex flex-col justify-between w-full overflow-hidden" oncontextmenu="return false;">
+
+  <!-- STUDY TIMER WIDGET -->
+  <div id="phantomStudyTimerWidget">
+    <div class="pulse-dot"></div>
+    <div style="font-size: 7px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 1px;">Focus:</div>
+    <div id="phantomTimerDisplay" style="font-size: 9px; font-weight: bold; color: #ffd700;">00h 00m 00s</div>
+  </div>
+
+  <!-- FOCUS STATUS DOCK -->
+  <div id="phantomFocusDock">
+    <span>🛡️ MISSION MODE: ACTIVE</span>
+    <span>|</span>
+    <span>⏳ SESSION: <span id="autoPomoDisplay">00:00</span></span>
+    <span>|</span>
+    <span>🎵 AUDIO: ON</span>
+  </div>
+
+  <audio id="ambientAudio" autoplay loop>
+    <source src="https://actions.google.com/sounds/v1/weather/rain_heavy.ogg" type="audio/ogg">
+  </audio>
+
+  <!-- TOP HEADER -->
+  <header class="w-full pt-2 pb-2 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md z-50 shrink-0">
+    <div class="w-full flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.jpeg" alt="Logo" class="h-7 w-7 object-cover rounded-lg border border-amber-400 shadow-sm">
+        <div>
+          <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold" id="classLabelIndicator">DOWNLOADED LECTURE • OFFLINE</div>
+          <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase" id="playerTitle">
+            ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ DOWNLOADED PLAYER
+          </h1>
+        </div>
+      </div>
+      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-orbitron font-bold px-2.5 py-1 rounded-md uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-1">
+        &larr; Back
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN VIDEO VIEWPORT -->
+  <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
+    <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
+
+      <!-- UNIFIED FULLSCREEN CONTAINER -->
+      <div id="phantomConsoleScreen">
+
+        <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
+        <div class="fs-top-bar" id="fsTopBar">
+          <button type="button" class="fs-back-btn" onclick="exitFullscreenOnly()">&larr; Back</button>
+          <div class="fs-lecture-label" id="fsLectureTitle">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ DOWNLOADED PLAYER</div>
+          <div style="width: 64px;"></div>
+        </div>
+
+        <!-- VIDEO FRAME BOX -->
+        <div class="video-viewport-box" id="videoViewportBox">
+          <div class="security-overlay" id="securityOverlay" onclick="activateDownloadedStream()">
+            <div class="brand-title">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
+            <div class="lecture-subtitle">⚡ DOWNLOADED LECTURE ⚡</div>
+            <div class="trusted-text" style="color: #a3a3a3; font-size: 9px; font-family: monospace;">OFFLINE VAULT • VERIFIED • PROTECTED</div>
+            <div class="big-play-btn mt-2"></div>
+          </div>
+
+          <div id="securityWatermark" class="phantom-watermark-layer">
+            <span class="font-mono text-[11px] font-bold text-neutral-400 tracking-widest uppercase">
+              SECURE ACCESS: <span id="traceUid">TP-2026-CADET</span>
+            </span>
+            <span class="text-[9px] font-mono text-neutral-500 tracking-tighter" id="wmTimestamp">
+              OFFLINE SESSION ACTIVE
+            </span>
+          </div>
+
+          <div id="playerRoot" class="w-full h-full relative"></div>
+
+          <!-- SCREEN LOCK SHIELD -->
+          <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
+
+          <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
+          <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
+        </div>
+
+        <!-- BOTTOM CONTROL DECK -->
+        <div class="phantom-bottom-deck" id="phantomBottomDeck">
+          <div class="seek-row">
+            <span id="currentTimeLabel">0:00</span>
+            <div class="tactical-progress-track" id="seekTrackBar" onclick="seekDownloadedTrack(event)">
+              <div class="tactical-progress-fill" id="trackFill"></div>
+            </div>
+            <span id="totalTimeLabel">0:00</span>
+          </div>
+
+          <div class="controls-row-main">
+            <div class="transport-group">
+              <button type="button" id="btnRewind10" onclick="skipDownloadedSeconds(-10); triggerBadge('skipLeftBadge')" class="skip-btn">
+                ↺ 10s
+              </button>
+              <button type="button" id="playTrigger" onclick="toggleDownloadedPlay()" class="play-pause-bold-btn">
+                ▶ PLAY
+              </button>
+              <button type="button" id="btnForward10" onclick="skipDownloadedSeconds(10); triggerBadge('skipRightBadge')" class="skip-btn">
+                10s ↻
+              </button>
+            </div>
+
+            <select id="ytBottomSpeedSelector" onchange="updateDownloadedSpeed(this.value)" class="speed-pill-select" title="Playback Speed">
+              <option value="1">1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="1.75">1.75x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+
+          <div class="action-row-bottom">
+            <span class="text-[11px] font-orbitron text-sky-300 uppercase tracking-wider">
+              ✓ DOWNLOADED LECTURE (OFFLINE BLOB)
+            </span>
+            <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
+              ⛶ Fullscreen
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
+      <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
+        <div>
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span class="px-1.5 py-0.2 rounded bg-sky-500/20 border border-sky-400/50 text-sky-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">DOWNLOADED LECTURE</span>
+          </div>
+          <h3 class="font-orbitron font-bold text-xs sm:text-sm text-white mt-0.5" id="lectureDetailTitle">Loading Downloaded Lecture...</h3>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950 border border-sky-500/60 text-sky-300 text-[10px] font-orbitron uppercase font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> DOWNLOADED LECTURE
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-black/95 border-t border-amber-500/20 py-1.5 px-4 text-center shrink-0">
+    <p class="text-[9px] font-mono text-amber-300 tracking-wider">
+      &copy; 2026 ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ &bull; teamphantom.vercel.app &bull; DOWNLOADED LECTURE CONSOLE
+    </p>
+  </footer>
+
+  <script>
+    let isPlaying = false;
+    let timerSync = null;
+    let fsIdleTimer = null;
+    let activeBlobUrl = null;
+
+    function openPhantomDownloadsDB() {
+      return new Promise(function(resolve, reject) {
+        if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
+        var req = indexedDB.open("phantom_portal_downloads", 1);
+        req.onupgradeneeded = function(e) {
+          var db = e.target.result;
+          if (!db.objectStoreNames.contains("lectures")) {
+            db.createObjectStore("lectures", { keyPath: "id" });
+          }
+        };
+        req.onsuccess = function(e) { resolve(e.target.result); };
+        req.onerror = function() { reject(new Error("IndexedDB open error")); };
+      });
+    }
+
+    async function fetchDownloadedRecord(targetId, fallbackTitle) {
+      try {
+        var db = await openPhantomDownloadsDB();
+        return await new Promise(function(resolve) {
+          var tx = db.transaction("lectures", "readonly");
+          var store = tx.objectStore("lectures");
+          if (targetId) {
+            var gReq = store.get(String(targetId));
+            gReq.onsuccess = function() {
+              var rec = gReq.result;
+              if (rec && rec.blob && rec.blob.size > 0) {
+                resolve(rec);
+                return;
+              }
+              var allReq = store.getAll();
+              allReq.onsuccess = function() {
+                var rows = (allReq.result || []).filter(function(r) { return r && r.blob && r.blob.size > 0; });
+                var matchByTitle = fallbackTitle
+                  ? rows.find(function(r) { return r.name === fallbackTitle; })
+                  : null;
+                resolve(matchByTitle || rows[0] || null);
+              };
+              allReq.onerror = function() { resolve(null); };
+            };
+            gReq.onerror = function() { resolve(null); };
+          } else {
+            var allReq2 = store.getAll();
+            allReq2.onsuccess = function() {
+              var rows2 = (allReq2.result || []).filter(function(r) { return r && r.blob && r.blob.size > 0; });
+              rows2.sort(function(a, b) { return (b.savedAt || 0) - (a.savedAt || 0); });
+              var match2 = fallbackTitle
+                ? rows2.find(function(r) { return r.name === fallbackTitle; })
+                : null;
+              resolve(match2 || rows2[0] || null);
+            };
+            allReq2.onerror = function() { resolve(null); };
+          }
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setLectureTitles(titleText) {
+      var clean = titleText || "Downloaded Lecture";
+      document.getElementById("playerTitle").innerText = clean;
+      document.getElementById("lectureDetailTitle").innerText = clean;
+      var fsTitleEl = document.getElementById("fsLectureTitle");
+      if (fsTitleEl) fsTitleEl.innerText = clean;
+    }
+
+    function renderUnavailableState(messageText) {
+      setLectureTitles("Downloaded Lecture Unavailable");
+      var playerRoot = document.getElementById("playerRoot");
+      if (playerRoot) {
+        playerRoot.innerHTML = `
+          <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#020617;color:#f8fafc;padding:20px;text-align:center;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:13px;color:#38bdf8;margin-bottom:6px;">DOWNLOADED LECTURE</div>
+            <div style="font-size:13px;color:#cbd5e1;">${messageText}</div>
+          </div>
+        `;
+      }
+      var ov = document.getElementById("securityOverlay");
+      if (ov) {
+        ov.classList.add("hidden");
+        ov.style.display = "none";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      var params = new URLSearchParams(window.location.search);
+      var reqId = params.get("id") || params.get("lecture_id") || "";
+      var reqTitle = params.get("title") || sessionStorage.getItem("phantom_current_title") || "";
+      if (reqTitle) {
+        try { reqTitle = decodeURIComponent(reqTitle); } catch (e) {}
+      }
+
+      const lockShield = document.getElementById("videoScreenLockShield");
+      if (lockShield) {
+        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+          lockShield.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isAnyFullscreen()) {
+              wakeFullscreenControlsFor5s();
+            }
+          }, { passive: false });
+        });
+      }
+
+      const screenEl = document.getElementById("phantomConsoleScreen");
+      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
+        screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
+        document.addEventListener(evtName, function(){
+          if (isAnyFullscreen()) {
+            wakeFullscreenControlsFor5s();
+          }
+        });
+      });
+
+      var record = await fetchDownloadedRecord(reqId, reqTitle);
+      if (!record || !record.blob) {
+        renderUnavailableState("No downloaded video found in browser storage for this lecture.");
+        return;
+      }
+
+      setLectureTitles(record.name || reqTitle || "Downloaded Lecture");
+
+      if (activeBlobUrl) {
+        try { URL.revokeObjectURL(activeBlobUrl); } catch (e) {}
+      }
+      activeBlobUrl = URL.createObjectURL(record.blob);
+
+      var playerRoot = document.getElementById("playerRoot");
+      playerRoot.innerHTML = `
+        <div class="offline-video-box">
+          <video
+            id="downloadedVideo"
+            src="${activeBlobUrl}"
+            class="offline-video-frame"
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
+            playsinline
+            oncontextmenu="return false;">
+          </video>
+          <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
+          <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+        </div>
+      `;
+
+      var vid = document.getElementById("downloadedVideo");
+      if (vid) {
+        vid.controls = false;
+        vid.addEventListener("play", () => {
+          isPlaying = true;
+          updatePlayLabel();
+          var ov = document.getElementById("securityOverlay");
+          if (ov) {
+            ov.classList.add("hidden");
+            ov.style.display = "none";
+          }
+          if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        });
+        vid.addEventListener("pause", () => {
+          isPlaying = false;
+          updatePlayLabel();
+          if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        });
+        vid.addEventListener("ended", () => {
+          isPlaying = false;
+          updatePlayLabel();
+        });
+      }
+
+      startDownloadedTimerSync();
+    });
+
+    function isAnyFullscreen() {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    }
+
+    function wakeFullscreenControlsFor5s() {
+      var screen = document.getElementById("phantomConsoleScreen");
+      if (!screen) return;
+      screen.classList.remove("fs-idle");
+      clearTimeout(fsIdleTimer);
+      if (isAnyFullscreen()) {
+        fsIdleTimer = setTimeout(function(){
+          if (isAnyFullscreen()) {
+            screen.classList.add("fs-idle");
+          }
+        }, 5000);
+      }
+    }
+
+    function exitFullscreenOnly() {
+      if (!isAnyFullscreen()) return;
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
+
+    function syncFullscreenButtons(isFs) {
+      var dockBtn = document.getElementById("dockFsBtn");
+      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+    }
+
+    function toggleTacticalFullscreen() {
+      const target = document.getElementById("phantomConsoleScreen");
+      if (!isAnyFullscreen()) {
+        if (target.requestFullscreen) target.requestFullscreen();
+        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+        else if (target.msRequestFullscreen) target.msRequestFullscreen();
+        syncFullscreenButtons(true);
+      } else {
+        exitFullscreenOnly();
+        syncFullscreenButtons(false);
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      var screen = document.getElementById("phantomConsoleScreen");
+      const nowFs = isAnyFullscreen();
+      if (!nowFs) {
+        clearTimeout(fsIdleTimer);
+        if (screen) screen.classList.remove("fs-idle");
+        syncFullscreenButtons(false);
+      } else {
+        syncFullscreenButtons(true);
+        wakeFullscreenControlsFor5s();
+      }
+    });
+
+    function updatePlayLabel() {
+      const btn = document.getElementById("playTrigger");
+      if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
+    }
+
+    function activateDownloadedStream() {
+      var ov = document.getElementById("securityOverlay");
+      if (ov) {
+        ov.classList.add("hidden");
+        ov.style.display = "none";
+      }
+      var vid = document.getElementById("downloadedVideo");
+      if (vid) vid.play().catch(() => {});
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function toggleDownloadedPlay() {
+      var ov = document.getElementById("securityOverlay");
+      if (ov) {
+        ov.classList.add("hidden");
+        ov.style.display = "none";
+      }
+      var vid = document.getElementById("downloadedVideo");
+      if (!vid) return;
+      if (vid.paused) vid.play().catch(() => {});
+      else vid.pause();
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function skipDownloadedSeconds(s) {
+      var vid = document.getElementById("downloadedVideo");
+      if (!vid) return;
+      vid.currentTime = Math.max(0, (vid.currentTime || 0) + s);
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function triggerBadge(id) {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 550);
+    }
+
+    function updateDownloadedSpeed(rate) {
+      var vid = document.getElementById("downloadedVideo");
+      if (vid) vid.playbackRate = parseFloat(rate);
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function seekDownloadedTrack(e) {
+      var vid = document.getElementById("downloadedVideo");
+      if (!vid || !vid.duration) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      vid.currentTime = pos * vid.duration;
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function startDownloadedTimerSync() {
+      if (timerSync) clearInterval(timerSync);
+      timerSync = setInterval(() => {
+        var vid = document.getElementById("downloadedVideo");
+        if (vid && vid.duration > 0) {
+          const c = vid.currentTime || 0;
+          const d = vid.duration || 0;
+          const fill = document.getElementById("trackFill");
+          if (fill) fill.style.width = ((c / d) * 100) + "%";
+          var curEl = document.getElementById("currentTimeLabel");
+          var totEl = document.getElementById("totalTimeLabel");
+          if (curEl) curEl.innerText = formatSeconds(c);
+          if (totEl) totEl.innerText = formatSeconds(d);
+        }
+      }, 400);
+    }
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // STUDY TIMER
+    (function() {
+      const FOCUS_TIMER_KEY = "phantom_daily_seconds";
+      const todayStr = new Date().toDateString();
+      const lastDate = localStorage.getItem("phantom_study_date");
+      
+      if (lastDate !== todayStr) {
+        localStorage.setItem("phantom_study_date", todayStr);
+        localStorage.setItem("phantom_daily_seconds", "0");
+      }
+
+      let totalSeconds = parseInt(localStorage.getItem(FOCUS_TIMER_KEY) || "0");
+      let sessionSeconds = 0;
+
+      setInterval(() => {
+        if (!document.hidden) {
+          totalSeconds++;
+          sessionSeconds++;
+          localStorage.setItem(FOCUS_TIMER_KEY, totalSeconds.toString());
+        }
+
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const displayStr = `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+        const displayEl = document.getElementById("phantomTimerDisplay");
+        if (displayEl) displayEl.innerText = displayStr;
+
+        const pHrs = Math.floor(sessionSeconds / 3600);
+        const pMins = Math.floor((sessionSeconds % 3600) / 60);
+        const pSecs = sessionSeconds % 60;
+        const pDisplayStr = pHrs > 0 
+          ? `${pHrs}:${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}` 
+          : `${pMins.toString().padStart(2, '0')}:${pSecs.toString().padStart(2, '0')}`;
+        
+        const autoPomoEl = document.getElementById("autoPomoDisplay");
+        if (autoPomoEl) autoPomoEl.innerText = pDisplayStr;
+      }, 1000);
+    })();
+
+    // WATERMARK JITTER ENGINE
+    (() => {
+      const wm = document.getElementById('securityWatermark');
+      const timeStampEl = document.getElementById('wmTimestamp');
+      
+      setInterval(() => {
+        const now = new Date();
+        if (timeStampEl) {
+          const timeStamp_text = 'REC-ID: ' + now.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC';
+          timeStampEl.innerText = timeStamp_text;
+        }
+      }, 1000);
+
+      setInterval(() => {
+        if (wm) {
+          const top = Math.floor(Math.random() * 65) + 10;
+          const left = Math.floor(Math.random() * 55) + 10;
+          wm.style.top = top + '%';
+          wm.style.left = left + '%';
+        }
+      }, 3000);
+    })();
+
+    window.addEventListener('load', () => {
+      const audio = document.getElementById("ambientAudio");
+      if (audio) {
+        audio.volume = 0.4;
+        audio.play().catch(() => {
+          document.addEventListener('click', () => {
+            audio.play().catch(() => {});
+          }, { once: true });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
