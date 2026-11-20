@@ -279,6 +279,35 @@
       width: 100%;
     }
 
+    .mode-switch-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .mode-tab-btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      background: rgba(15, 23, 42, 0.9);
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .mode-tab-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #eab308);
+      color: #020617;
+      border-color: #fde047;
+    }
+
     /* IN-PAGE MY DOWNLOADS TAB PANEL */
     #myDownloadsTabPanel {
       display: none;
@@ -334,7 +363,7 @@
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
-        <button type="button" onclick="toggleMyDownloadsTab()" id="myDownloadsTopBtn" class="bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-400/70 text-emerald-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
+        <button type="button" onclick="openMyDownloadsTab()" id="myDownloadsTopBtn" class="bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-400/70 text-emerald-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
           📥 MY DOWNLOADS (<span id="savedDownloadsCount">0</span>)
         </button>
         <button onclick="window.location.href='classroom.html'" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition cursor-pointer phantom-btn">
@@ -350,6 +379,16 @@
   <!-- MAIN DEPLOYMENT SELECTION (Full Width & Balanced Screen Fit) -->
   <main class="w-full max-w-5xl mx-auto px-6 py-8 flex-grow flex flex-col justify-center items-center">
 
+    <!-- TAB SWITCH BAR -->
+    <div class="mode-switch-bar">
+      <button type="button" id="tabBtnDeployment" onclick="closeMyDownloadsTab()" class="mode-tab-btn active">
+        ⚡ SQUADRON MODES
+      </button>
+      <button type="button" id="tabBtnDownloads" onclick="openMyDownloadsTab()" class="mode-tab-btn">
+        📥 MY DOWNLOADS (<span id="savedDownloadsTabCount">0</span>)
+      </button>
+    </div>
+
     <!-- IN-PAGE MY DOWNLOADS TAB SECTION -->
     <section id="myDownloadsTabPanel" class="armor-panel-compact">
       <div class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/25">
@@ -362,7 +401,7 @@
           </h3>
         </div>
         <button type="button" onclick="closeMyDownloadsTab()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-orbitron font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider cursor-pointer">
-          ✕ CLOSE TAB
+          &larr; BACK TO MODES
         </button>
       </div>
 
@@ -477,7 +516,11 @@
         return await new Promise((resolve) => {
           const tx = db.transaction("lectures", "readonly");
           const req = tx.objectStore("lectures").getAll();
-          req.onsuccess = () => resolve(req.result || []);
+          req.onsuccess = () => {
+            const rows = (req.result || []).filter((r) => r && r.blob && r.blob.size > 0);
+            rows.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+            resolve(rows);
+          };
           req.onerror = () => resolve([]);
         });
       } catch (e) {
@@ -497,29 +540,32 @@
       } catch (e) {}
     }
 
-    function watchDownloadedLectureInPage(encodedUrl, encodedTitle) {
+    function watchDownloadedLectureInPage(encodedId, encodedUrl, encodedTitle) {
+      const idVal = decodeURIComponent(encodedId || "");
       const videoVal = decodeURIComponent(encodedUrl || "");
       const titleVal = decodeURIComponent(encodedTitle || "Saved Lecture");
       try {
         sessionStorage.setItem("phantom_current_video", videoVal);
         sessionStorage.setItem("phantom_current_title", titleVal);
       } catch (e) {}
-      window.location.href = `player.html?video=${encodeURIComponent(videoVal)}&title=${encodeURIComponent(titleVal)}&offline=1`;
+      window.location.href = `player.html?id=${encodeURIComponent(idVal)}&video=${encodeURIComponent(videoVal)}&title=${encodeURIComponent(titleVal)}&offline=1`;
     }
 
     async function renderMyDownloadsTab() {
       const items = await getAllPortalDownloads();
       const countEl = document.getElementById("savedDownloadsCount");
+      const tabCountEl = document.getElementById("savedDownloadsTabCount");
       const listEl = document.getElementById("myDownloadsTabList");
 
       if (countEl) countEl.innerText = String(items.length);
+      if (tabCountEl) tabCountEl.innerText = String(items.length);
       if (!listEl) return;
 
       if (!items.length) {
         listEl.innerHTML = `
           <div class="p-6 rounded-xl bg-black/40 border border-neutral-800 text-center">
-            <p class="text-neutral-300 font-orbitron text-sm">No downloaded videos saved in your portal yet.</p>
-            <p class="text-neutral-500 text-xs mt-1">Lectures saved from the player's Download button appear here for offline watching.</p>
+            <p class="text-neutral-300 font-orbitron text-sm">No downloaded lectures in MY DOWNLOADS.</p>
+            <p class="text-neutral-500 text-xs mt-1">Downloaded lectures from the player appear here with Watch and Remove options.</p>
           </div>
         `;
         return;
@@ -528,22 +574,22 @@
       listEl.innerHTML = items.map((item) => {
         const safeName = String(item.name || "Saved Lecture").replace(/[<>&"]/g, "");
         const dateStr = item.savedAt ? new Date(item.savedAt).toLocaleString() : "Saved";
-        const sizeStr = item.sizeMB ? `${item.sizeMB} MB` : "Portal Saved";
+        const sizeStr = item.sizeMB ? `${item.sizeMB} MB` : `${(item.blob.size / (1024 * 1024)).toFixed(1)} MB`;
+        const encId = encodeURIComponent(String(item.id || ""));
         const encUrl = encodeURIComponent(item.url || "");
         const encTitle = encodeURIComponent(item.name || "Saved Lecture");
-        const safeId = encodeURIComponent(String(item.id));
 
         return `
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-black/50 border border-amber-500/25">
             <div>
               <div class="font-orbitron text-sm text-white">${safeName}</div>
-              <div class="text-xs text-emerald-400 mt-0.5">Portal Offline Save • ${sizeStr} • ${dateStr}</div>
+              <div class="text-xs text-emerald-400 mt-0.5">Downloaded Lecture • ${sizeStr} • ${dateStr}</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button type="button" onclick="watchDownloadedLectureInPage('${encUrl}', '${encTitle}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron text-xs font-extrabold uppercase cursor-pointer">
-                ▶ Watch Now
+              <button type="button" onclick="watchDownloadedLectureInPage('${encId}', '${encUrl}', '${encTitle}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron text-xs font-extrabold uppercase cursor-pointer">
+                Watch
               </button>
-              <button type="button" onclick="deletePortalDownloadItem(decodeURIComponent('${safeId}'))" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-red-950 text-neutral-300 hover:text-red-300 border border-neutral-700 font-orbitron text-xs cursor-pointer">
+              <button type="button" onclick="deletePortalDownloadItem(decodeURIComponent('${encId}'))" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-red-950 text-neutral-300 hover:text-red-300 border border-neutral-700 font-orbitron text-xs uppercase cursor-pointer">
                 Remove
               </button>
             </div>
@@ -552,25 +598,27 @@
       }).join("");
     }
 
-    function toggleMyDownloadsTab() {
+    function openMyDownloadsTab() {
       const panel = document.getElementById("myDownloadsTabPanel");
       const modesBox = document.getElementById("batchModesContainer");
-      if (!panel) return;
-      const willOpen = !panel.classList.contains("open");
-      if (willOpen) {
-        panel.classList.add("open");
-        if (modesBox) modesBox.style.display = "none";
-        renderMyDownloadsTab();
-      } else {
-        closeMyDownloadsTab();
-      }
+      const btnDeploy = document.getElementById("tabBtnDeployment");
+      const btnDl = document.getElementById("tabBtnDownloads");
+      if (panel) panel.classList.add("open");
+      if (modesBox) modesBox.style.display = "none";
+      if (btnDeploy) btnDeploy.classList.remove("active");
+      if (btnDl) btnDl.classList.add("active");
+      renderMyDownloadsTab();
     }
 
     function closeMyDownloadsTab() {
       const panel = document.getElementById("myDownloadsTabPanel");
       const modesBox = document.getElementById("batchModesContainer");
+      const btnDeploy = document.getElementById("tabBtnDeployment");
+      const btnDl = document.getElementById("tabBtnDownloads");
       if (panel) panel.classList.remove("open");
       if (modesBox) modesBox.style.display = "block";
+      if (btnDeploy) btnDeploy.classList.add("active");
+      if (btnDl) btnDl.classList.remove("active");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -594,8 +642,8 @@
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 2 + 1,       // Much smaller bubble radius
-        starRadius: Math.random() * 2.5 + 1.2, // Much smaller star radius
+        radius: Math.random() * 2 + 1,
+        starRadius: Math.random() * 2.5 + 1.2,
         speedY: Math.random() * 0.7 + 0.2,
         speedX: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.8 + 0.3,
