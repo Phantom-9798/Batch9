@@ -319,7 +319,7 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       z-index: 60; cursor: pointer; transition: opacity 0.3s ease;
     }
-    .security-overlay.hidden { opacity: 0; pointer-events: none; }
+    .security-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; }
     .brand-title { color: #ff2222; font-family: 'Black Ops One', cursive; font-size: 22px; text-shadow: 0 0 15px rgba(255,0,0,0.85); margin-bottom: 2px; }
     .lecture-subtitle { color: #ffbb00; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; margin-bottom: 2px; }
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
@@ -390,7 +390,7 @@
       height: 100% !important;
       border: none;
     }
-    .archive-frame.locked-media, .gdrive-frame.locked-media {
+    .archive-frame.locked-media {
       pointer-events: none !important;
     }
 
@@ -848,7 +848,6 @@
       if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
-    // Enable screen lock shield for YouTube, Internet Archive & Google Drive; keep Zoom and NexaShield unlocked
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
       if (!lockShield) return;
@@ -860,7 +859,6 @@
       }
     }
 
-    // Configure control permissions per source
     function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
@@ -928,7 +926,6 @@
         source: finalVideo || ""
       };
 
-      // Lock screen shield intercepts all pointer events for YouTube, Archive & Google Drive
       const lockShield = document.getElementById("videoScreenLockShield");
       if (lockShield) {
         ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
@@ -957,7 +954,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (Screen lock ON, Pop-out/external open blocked, Download button enabled)
+      // 0. GOOGLE DRIVE EMBED PLAYER (Full embed compatibility + screen lock shield)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -975,10 +972,9 @@
             <iframe
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
-              class="gdrive-frame locked-media"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              allow="autoplay; encrypted-media"
-              referrerpolicy="no-referrer"
+              class="gdrive-frame"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
           </div>
@@ -1135,7 +1131,11 @@
     }
 
     function activateStream() {
-      document.getElementById('securityOverlay').classList.add('hidden');
+      var ov = document.getElementById('securityOverlay');
+      if (ov) {
+        ov.classList.add('hidden');
+        ov.style.display = 'none';
+      }
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.play();
@@ -1210,7 +1210,11 @@
     }
 
     function toggleVideoPlay() {
-      document.getElementById('securityOverlay').classList.add('hidden');
+      var ov = document.getElementById('securityOverlay');
+      if (ov) {
+        ov.classList.add('hidden');
+        ov.style.display = 'none';
+      }
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) {
