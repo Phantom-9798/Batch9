@@ -548,7 +548,7 @@
         sessionStorage.setItem("phantom_current_video", videoVal);
         sessionStorage.setItem("phantom_current_title", titleVal);
       } catch (e) {}
-      window.location.href = `player.html?id=${encodeURIComponent(idVal)}&video=${encodeURIComponent(videoVal)}&title=${encodeURIComponent(titleVal)}&offline=1`;
+      window.location.href = `downloaded-player.html?id=${encodeURIComponent(idVal)}&title=${encodeURIComponent(titleVal)}`;
     }
 
     async function renderMyDownloadsTab() {
