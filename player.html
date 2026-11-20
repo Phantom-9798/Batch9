@@ -877,6 +877,23 @@
   <script>
     const PHANTOM_PROXY_BASE = "https://p53j8b.bot-keep.xyz";
 
+    function getCurrentPlayerSquadron() {
+      var fromUrl = new URLSearchParams(window.location.search).get("batch");
+      if (fromUrl) {
+        var cleanUrlBatch = String(fromUrl).toLowerCase();
+        try {
+          sessionStorage.setItem("phantom_active_squadron", cleanUrlBatch);
+          localStorage.setItem("phantom_active_squadron", cleanUrlBatch);
+        } catch (e) {}
+        return cleanUrlBatch;
+      }
+      try {
+        var storedBatch = sessionStorage.getItem("phantom_active_squadron") || localStorage.getItem("phantom_active_squadron");
+        if (storedBatch) return String(storedBatch).toLowerCase();
+      } catch (e) {}
+      return "cds";
+    }
+
     function extractYouTubeId(input) {
       if (!input) return null;
       var trimmed = String(input).trim();
@@ -931,7 +948,8 @@
       lecture: {
         id: 'lec_' + Date.now(),
         title: '☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ CONSOLE',
-        source: ''
+        source: '',
+        squadron: getCurrentPlayerSquadron()
       }
     };
 
@@ -1105,6 +1123,7 @@
       const urlTitle = urlParams.get("title");
       const urlLectureId = urlParams.get("id") || urlParams.get("lecture_id");
       const isOfflineMode = urlParams.get("offline") === "1";
+      const activeSquadron = getCurrentPlayerSquadron();
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
       const storedTitle = sessionStorage.getItem("phantom_current_title");
@@ -1133,9 +1152,10 @@
       }
 
       PLAYER.lecture = {
-        id: urlLectureId ? String(urlLectureId) : btoa(unescape(encodeURIComponent(decodedTitle + "_" + (finalVideo || "yt")))).slice(0, 24),
+        id: urlLectureId ? String(urlLectureId) : btoa(unescape(encodeURIComponent(activeSquadron + "_" + decodedTitle + "_" + (finalVideo || "yt")))).slice(0, 24),
         title: decodedTitle,
-        source: finalVideo || ""
+        source: finalVideo || "",
+        squadron: activeSquadron
       };
 
       isWatchingDownloadedLecture = !!isOfflineMode;
@@ -1676,6 +1696,7 @@
       statusEl.innerText = "Download started — connecting to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ stream...";
 
       var fetchTargetUrl = PLAYER.lecture.source;
+      var currentSquadron = getCurrentPlayerSquadron();
       if (isGDriveEmbed && PLAYER.gdriveId) {
         var rawDriveUrl = "https://drive.google.com/file/d/" + encodeURIComponent(PLAYER.gdriveId) + "/view";
         fetchTargetUrl = PHANTOM_PROXY_BASE + "/api/proxy-download?url=" + encodeURIComponent(rawDriveUrl);
@@ -1724,6 +1745,7 @@
           id: PLAYER.lecture.id,
           name: PLAYER.lecture.title,
           url: fetchTargetUrl,
+          squadron: currentSquadron,
           blob: finalBlob,
           sizeMB: finalMB,
           savedAt: Date.now()
