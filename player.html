@@ -325,7 +325,7 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* SCREEN LOCK SHIELD */
+    /* FULL SCREEN LOCK SHIELD */
     .video-screen-lock-shield {
       display: none;
       position: absolute;
@@ -344,56 +344,21 @@
       display: block;
     }
 
-    /* GOOGLE DRIVE SELECTIVE LOCK: Locks pop-out & top/bottom bars while leaving center play button clickable */
-    .gdrive-selective-lock {
+    /* GOOGLE DRIVE POP-OUT CORNER LOCK ONLY: Keeps native player & controls usable while blocking pop-out button */
+    .gdrive-popout-lock {
       display: none;
       position: absolute;
-      inset: 0;
-      z-index: 46;
-      pointer-events: none;
-    }
-    .gdrive-selective-lock.active {
-      display: block;
-    }
-    .gdrive-lock-top {
-      position: absolute;
       top: 0;
-      left: 0;
       right: 0;
-      height: 68px;
+      width: 78px;
+      height: 78px;
+      z-index: 47;
       background: transparent;
       pointer-events: auto;
       cursor: default;
     }
-    .gdrive-lock-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 64px;
-      background: transparent;
-      pointer-events: auto;
-      cursor: default;
-    }
-    .gdrive-lock-left {
-      position: absolute;
-      top: 68px;
-      bottom: 64px;
-      left: 0;
-      width: 34%;
-      background: transparent;
-      pointer-events: auto;
-      cursor: default;
-    }
-    .gdrive-lock-right {
-      position: absolute;
-      top: 68px;
-      bottom: 64px;
-      right: 0;
-      width: 34%;
-      background: transparent;
-      pointer-events: auto;
-      cursor: default;
+    .gdrive-popout-lock.active {
+      display: block;
     }
 
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
@@ -614,6 +579,7 @@
 
     /* DISABLED STATE */
     button:disabled,
+    select:disabled,
     .is-disabled {
       opacity: 0.35 !important;
       cursor: not-allowed !important;
@@ -735,13 +701,8 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- SELECTIVE LOCK FOR GOOGLE DRIVE: BLOCKS POP-OUT & EDGES WHILE KEEPING CENTER PLAY BUTTON ACTIVE -->
-          <div class="gdrive-selective-lock" id="gdriveSelectiveLock" oncontextmenu="return false;">
-            <div class="gdrive-lock-top"></div>
-            <div class="gdrive-lock-bottom"></div>
-            <div class="gdrive-lock-left"></div>
-            <div class="gdrive-lock-right"></div>
-          </div>
+          <!-- GOOGLE DRIVE POP-OUT CORNER LOCK ONLY -->
+          <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
@@ -910,7 +871,8 @@
 
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
-      var gdriveLock = document.getElementById("gdriveSelectiveLock");
+      var popoutLock = document.getElementById("gdrivePopoutLock");
+
       if (lockShield) {
         if (mode === 'youtube' || mode === 'archive') {
           lockShield.classList.add("lock-enabled");
@@ -918,23 +880,26 @@
           lockShield.classList.remove("lock-enabled");
         }
       }
-      if (gdriveLock) {
+
+      if (popoutLock) {
         if (mode === 'gdrive') {
-          gdriveLock.classList.add("active");
+          popoutLock.classList.add("active");
         } else {
-          gdriveLock.classList.remove("active");
+          popoutLock.classList.remove("active");
         }
       }
     }
 
+    // For Google Drive: disable custom playback/seek/speed buttons, keep ONLY Download active (Fullscreen stays usable)
     function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
       var fwBtn = document.getElementById("btnForward10");
+      var speedSel = document.getElementById("ytBottomSpeedSelector");
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
 
-      var canControlPlayback = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
+      var canControlPlayback = (mode === 'youtube' || mode === 'archive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
 
       [rwBtn, ppBtn, fwBtn].forEach(function(btn){
@@ -944,6 +909,12 @@
         else btn.classList.add("is-disabled");
       });
 
+      if (speedSel) {
+        speedSel.disabled = !canControlPlayback;
+        if (canControlPlayback) speedSel.classList.remove("is-disabled");
+        else speedSel.classList.add("is-disabled");
+      }
+
       if (dlBtn) {
         dlBtn.disabled = !canDownload;
         if (canDownload) dlBtn.classList.remove("is-disabled");
@@ -952,7 +923,7 @@
 
       if (seekBar) {
         seekBar.style.pointerEvents = canControlPlayback ? "auto" : "none";
-        seekBar.style.opacity = canControlPlayback ? "1" : "0.45";
+        seekBar.style.opacity = canControlPlayback ? "1" : "0.35";
       }
     }
 
@@ -1008,18 +979,13 @@
         });
       }
 
-      const gdriveLock = document.getElementById("gdriveSelectiveLock");
-      if (gdriveLock) {
-        gdriveLock.querySelectorAll("div").forEach(function(zone) {
-          ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
-            zone.addEventListener(ev, function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              if (isAnyFullscreen()) {
-                wakeFullscreenControlsFor5s();
-              }
-            }, { passive: false });
-          });
+      const popoutLock = document.getElementById("gdrivePopoutLock");
+      if (popoutLock) {
+        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+          popoutLock.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }, { passive: false });
         });
       }
 
@@ -1037,7 +1003,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (Center play button active; pop-out & outer zones locked)
+      // 0. GOOGLE DRIVE EMBED PLAYER (Native controls usable; top-right pop-out locked; custom playback/speed disabled; Download enabled)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1229,6 +1195,7 @@
     }
 
     function updateVideoSpeed(rate) {
+      if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
@@ -1272,6 +1239,7 @@
     });
 
     function skipSeconds(s) {
+      if (isGDriveEmbed) return;
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.currentTime = Math.max(0, (vid.currentTime || 0) + s);
@@ -1285,7 +1253,7 @@
     }
 
     function triggerBadge(id) {
-      if (!isYouTubeSource && !isDirectArchiveVideo && !isGDriveEmbed) return;
+      if (!isYouTubeSource && !isDirectArchiveVideo) return;
       const b = document.getElementById(id);
       if (!b) return;
       b.classList.add('show');
@@ -1293,6 +1261,7 @@
     }
 
     function toggleVideoPlay() {
+      if (isGDriveEmbed) return;
       var ov = document.getElementById('securityOverlay');
       if (ov) {
         ov.classList.add('hidden');
@@ -1307,12 +1276,6 @@
         if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
-      if (isGDriveEmbed) {
-        isPlaying = !isPlaying;
-        updatePlayLabel();
-        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
-        return;
-      }
       if (!isYouTubeSource || !ytInstance) return;
       if (isPlaying) ytInstance.pauseVideo();
       else ytInstance.playVideo();
@@ -1320,6 +1283,7 @@
     }
 
     function seekVideoTrack(e) {
+      if (isGDriveEmbed) return;
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid && vid.duration) {
@@ -1423,16 +1387,47 @@
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      statusEl.innerText = "Downloading Offline Blob to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
+      statusEl.innerText = "Preparing Download for ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
       statusEl.style.color = "#6ee7b7";
-      barEl.style.width = "0%";
+      barEl.style.width = "15%";
 
-      if (isGDriveEmbed) {
-        barEl.style.width = "100%";
-        sizeEl.innerText = "Drive Frame";
-        statusEl.style.color = "#fbbf24";
-        statusEl.innerText = "Google Drive preview does not allow direct browser Blob fetch (CORS).";
-        if (btnEl) btnEl.disabled = false;
+      if (isGDriveEmbed && PLAYER.gdriveId) {
+        var driveDownloadUrl = "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(PLAYER.gdriveId);
+        try {
+          var res = await fetch(driveDownloadUrl, { mode: "cors", credentials: "omit" });
+          if (!res.ok) throw new Error("Drive direct fetch blocked (" + res.status + ")");
+          var blob = await res.blob();
+          if (!blob || blob.size === 0) throw new Error("Empty Drive response");
+          var dlMB = Math.max(1, Math.round(blob.size / (1024 * 1024)));
+          saveToPortalIndexedDB({
+            id: PLAYER.lecture.id,
+            name: PLAYER.lecture.title,
+            url: driveDownloadUrl,
+            blob: blob,
+            sizeMB: dlMB,
+            savedAt: Date.now()
+          });
+          var objectUrl = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = objectUrl;
+          a.download = (PLAYER.lecture.title || "lecture") + ".mp4";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function(){ URL.revokeObjectURL(objectUrl); }, 2000);
+
+          barEl.style.width = "100%";
+          sizeEl.innerText = dlMB + " MB";
+          statusEl.style.color = "#6ee7b7";
+          statusEl.innerText = "Download started & saved in Portal Downloads.";
+        } catch (err) {
+          barEl.style.width = "100%";
+          sizeEl.innerText = "Drive Blocked";
+          statusEl.style.color = "#f87171";
+          statusEl.innerText = "Google Drive blocked browser download (CORS / file restriction).";
+        } finally {
+          if (btnEl) btnEl.disabled = false;
+        }
         return;
       }
 
