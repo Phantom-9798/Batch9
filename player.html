@@ -325,7 +325,7 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* SCREEN LOCK SHIELD (ACTIVE FOR YOUTUBE, INTERNET ARCHIVE & GOOGLE DRIVE; OFF FOR ZOOM & NEXASHIELD) */
+    /* SCREEN LOCK SHIELD (ACTIVE FOR YOUTUBE & INTERNET ARCHIVE; OFF FOR GOOGLE DRIVE, ZOOM & NEXASHIELD) */
     .video-screen-lock-shield {
       display: none;
       position: absolute;
@@ -680,7 +680,7 @@
 
           <div id="playerRoot" class="w-full h-full relative"></div>
 
-          <!-- SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE, INTERNET ARCHIVE & GOOGLE DRIVE; OFF FOR ZOOM & NEXASHIELD -->
+          <!-- SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE; OFF FOR GOOGLE DRIVE, ZOOM & NEXASHIELD -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
@@ -851,7 +851,7 @@
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
       if (!lockShield) return;
-      var shouldLockScreen = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
+      var shouldLockScreen = (mode === 'youtube' || mode === 'archive');
       if (shouldLockScreen) {
         lockShield.classList.add("lock-enabled");
       } else {
@@ -866,7 +866,7 @@
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
 
-      var canControlPlayback = (mode === 'youtube' || mode === 'archive');
+      var canControlPlayback = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
 
       [rwBtn, ppBtn, fwBtn].forEach(function(btn){
@@ -954,7 +954,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (Full embed compatibility + screen lock shield)
+      // 0. GOOGLE DRIVE EMBED PLAYER
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1033,7 +1033,7 @@
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (Screen lock OFF so native settings work; custom button rules preserved)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1052,7 +1052,7 @@
           </div>
         `;
       }
-      // 3. ZOOM IFRAME PLAYER (Screen lock OFF so native settings work; custom button rules preserved)
+      // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1202,7 +1202,7 @@
     }
 
     function triggerBadge(id) {
-      if (!isYouTubeSource && !isDirectArchiveVideo) return;
+      if (!isYouTubeSource && !isDirectArchiveVideo && !isGDriveEmbed) return;
       const b = document.getElementById(id);
       if (!b) return;
       b.classList.add('show');
@@ -1221,6 +1221,12 @@
           if (vid.paused) vid.play();
           else vid.pause();
         }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
+      if (isGDriveEmbed) {
+        isPlaying = !isPlaying;
+        updatePlayLabel();
         if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
