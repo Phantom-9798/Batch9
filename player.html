@@ -76,10 +76,10 @@
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
 
-  <!-- Military & Stylish Fonts -->
+  <!-- Military Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Cinzel+Decorative:wght@700;900&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -199,40 +199,13 @@
     .video-viewport-box {
       position: relative;
       width: 100%;
-      max-height: calc(100vh - 320px);
+      max-height: calc(100vh - 305px);
       aspect-ratio: 16 / 9;
       background: #000000;
       overflow: hidden;
     }
 
-    /* CLASS FRAME BOTTOM STRIP (Directly below class frame, above control deck) */
-    .class-frame-footer-strip {
-      width: 100%;
-      background: #000000;
-      padding: 4px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      z-index: 52;
-      pointer-events: none;
-      user-select: none;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .yt-bottom-brand-tag {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      color: rgba(255, 255, 255, 0.85);
-      font-family: 'Cinzel Decorative', 'Black Ops One', cursive;
-      font-weight: 900;
-      font-size: 14px;
-      letter-spacing: 1.5px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
-    }
-
-    /* FULLSCREEN MODE: Class frame + bottom tag + bottom deck stay aligned */
+    /* FULLSCREEN MODE: Video fills 100vw x 100vh; Top bar & Bottom deck overlay smoothly */
     #phantomConsoleScreen:fullscreen,
     #phantomConsoleScreen:-webkit-full-screen,
     #phantomConsoleScreen:-ms-fullscreen {
@@ -242,9 +215,7 @@
       max-height: none !important;
       border-radius: 0 !important;
       background: #000000 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: center !important;
+      display: block !important;
       position: fixed !important;
       inset: 0 !important;
       overflow: hidden !important;
@@ -253,26 +224,11 @@
     #phantomConsoleScreen:fullscreen .video-viewport-box,
     #phantomConsoleScreen:-webkit-full-screen .video-viewport-box {
       width: 100vw !important;
-      height: auto !important;
-      max-height: calc(100vh - 140px) !important;
-      aspect-ratio: 16 / 9 !important;
-      position: relative !important;
-      margin: 0 auto !important;
-    }
-
-    #phantomConsoleScreen:fullscreen .class-frame-footer-strip,
-    #phantomConsoleScreen:-webkit-full-screen .class-frame-footer-strip {
-      position: relative !important;
-      width: 100vw !important;
-      background: #000000 !important;
-      z-index: 95 !important;
-      opacity: 1;
-      transition: opacity 0.28s ease;
-    }
-
-    #phantomConsoleScreen.fs-idle .class-frame-footer-strip {
-      opacity: 0 !important;
-      pointer-events: none !important;
+      height: 100vh !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      position: absolute !important;
+      inset: 0 !important;
     }
 
     /* FULLSCREEN TOP BAR WITH BACK BUTTON & LECTURE TITLE */
@@ -306,11 +262,13 @@
 
     #phantomConsoleScreen:fullscreen .phantom-bottom-deck,
     #phantomConsoleScreen:-webkit-full-screen .phantom-bottom-deck {
-      position: relative !important;
-      width: 100vw !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
       margin-top: 0 !important;
       border-radius: 0 !important;
-      background: rgba(9, 15, 34, 0.96) !important;
+      background: linear-gradient(0deg, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.85) 80%, rgba(2, 6, 23, 0) 100%) !important;
       border: none !important;
       border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
       z-index: 95 !important;
@@ -367,14 +325,33 @@
     .big-play-btn { width: 56px; height: 56px; background-color: #ff0000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,0,0,0.95); }
     .big-play-btn::after { content: ''; width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 14px solid #ffffff; margin-left: 2px; }
 
-    /* SILENT LOCK SHIELD OVER VIDEO CONTAINER: BLOCKS DIRECT VIDEO CLICKS/OVERLAYS WITHOUT CROPPING */
+    /* TRANSPARENT INTERACTION SHIELD (BLOCKS DIRECT CLICKS ON VIDEO/IFRAME & WAKES CONTROLS) */
     .yt-lock-shield {
       position: absolute;
       inset: 0;
-      z-index: 42;
+      z-index: 35;
       background: transparent;
       pointer-events: auto;
-      cursor: default;
+      cursor: pointer;
+    }
+
+    /* BOX-FREE TRANSPARENT BRAND TAG AT BOTTOM OF ALL PLAYERS (YT, ARCHIVE, NEXASHIELD, ZOOM) */
+    .yt-bottom-brand-tag {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      z-index: 48;
+      pointer-events: none;
+      user-select: none;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.65);
+      font-family: 'Black Ops One', cursive;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
     }
 
     /* DIRECT ARCHIVE & ZOOM STYLING */
@@ -394,21 +371,14 @@
       border: none;
     }
 
-    /* YOUTUBE ENGINE (Uncropped full frame; all controls driven from bottom deck) */
+    /* YOUTUBE ENGINE */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame {
-      position: absolute;
-      width: 100% !important;
-      height: 100% !important;
-      top: 0 !important;
-      left: 0 !important;
-      pointer-events: none;
-    }
+    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none; }
 
     #phantomConsoleScreen:fullscreen #ytPlayerFrame,
     #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
-      width: 100% !important;
-      height: 100% !important;
+      width: 100vw !important;
+      height: 100vh !important;
       top: 0 !important;
       left: 0 !important;
     }
@@ -417,7 +387,7 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%) scale(0.7);
-      z-index: 46;
+      z-index: 42;
       background: rgba(255, 215, 0, 0.92);
       color: #000;
       font-family: 'Orbitron', sans-serif;
@@ -435,10 +405,10 @@
 
     /* BOTTOM CONTROL DECK */
     .phantom-bottom-deck {
-      margin-top: 0;
+      margin-top: 8px;
       background: rgba(9, 15, 34, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 0 0 12px 12px;
+      border-radius: 12px;
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
@@ -607,7 +577,7 @@
       display: block;
     }
 
-    .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 45; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
+    .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 55; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
@@ -663,13 +633,13 @@
         <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
         <div class="fs-top-bar" id="fsTopBar">
           <button type="button" class="fs-back-btn" onclick="exitFullscreenOnly()">&larr; Back</button>
-          <div class="fs-lecture-label" id="fsLectureTitle">☠️ 𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒 ☠️ CONSOLE</div>
+          <div class="fs-lecture-label" id="fsLectureTitle">☠️ TEAM PHANTOM☠️ CONSOLE</div>
           <div style="width: 64px;"></div>
         </div>
 
         <div class="video-viewport-box">
           <div class="security-overlay" id="securityOverlay" onclick="activateStream()">
-            <div class="brand-title">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
+            <div class="brand-title">☠️ TEAM PHANTOM☠️</div>
             <div class="lecture-subtitle">⚡ PREMIUM LECTURE ⚡</div>
             <div class="trusted-text" style="color: #a3a3a3; font-size: 9px; font-family: monospace;">SECURE • VERIFIED • TRUSTED • PROTECTED • RESTRICTED</div>
             <div class="big-play-btn mt-2"></div>
@@ -685,11 +655,6 @@
           </div>
 
           <div id="playerRoot" class="w-full h-full relative"></div>
-        </div>
-
-        <!-- CLASS FRAME BOTTOM STRIP (Directly below class frame, above control deck) -->
-        <div class="class-frame-footer-strip">
-          <span class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</span>
         </div>
 
         <!-- BOTTOM CONTROL DECK -->
@@ -735,7 +700,7 @@
 
           <div id="inpageDownloadBox" class="inpage-download-box">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
-              <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Saving to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...</span>
+              <span id="dlStatusLabel" style="font-weight:700; color:#6ee7b7;">Saving to ☠️ TEAM PHANTOM☠️ Portal...</span>
               <span id="dlSizeLabel" style="font-family:monospace; color:#cbd5e1;">0 MB / 0 MB</span>
             </div>
             <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
@@ -765,7 +730,7 @@
   <!-- FOOTER -->
   <footer class="w-full bg-black/95 border-t border-amber-500/20 py-1.5 px-4 text-center shrink-0">
     <p class="text-[9px] font-mono text-amber-300 tracking-wider">
-      &copy; 2026 ☠️ 𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒 ☠️ &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
+      &copy; 2026 ☠️ TEAM PHANTOM☠️ &bull; teamphantom.vercel.app &bull; SECURE TERMINAL
     </p>
   </footer>
 
@@ -838,6 +803,10 @@
       if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
+    // Configure control permissions per source:
+    // - YouTube: Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED
+    // - Internet Archive (Direct Video): Custom Playback/Seek/Speed/Fullscreen ACTIVE (native controls removed); Download ACTIVE (Blob -> IndexedDB)
+    // - NexaShield / Zoom: Playback/Seek/Download DISABLED; Speed & Fullscreen ACTIVE
     function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
@@ -877,7 +846,7 @@
       const storedTitle = sessionStorage.getItem("phantom_current_title");
 
       let finalVideo = urlVideo || storedVideo;
-      const finalTitle = urlTitle || storedTitle || "☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ CONSOLE";
+      const finalTitle = urlTitle || storedTitle || "☠️ TEAM PHANTOM☠️ CONSOLE";
 
       if (finalVideo) {
         try {
@@ -918,7 +887,7 @@
       const playerRoot = document.getElementById("playerRoot");
       const ytId = extractYouTubeId(finalVideo);
 
-      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER
+      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Native controls removed; custom controls + transparent brand tag active)
       if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.includes("drive.google.com"))) {
         isDirectArchiveVideo = true;
         isYouTubeSource = false;
@@ -942,6 +911,7 @@
             <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+            <div class="yt-bottom-brand-tag">☠️ TEAM PHANTOM☠️</div>
           </div>
         `;
 
@@ -964,13 +934,14 @@
             updatePlayLabel();
           });
 
+          // If opened in offline mode, load cached Blob from IndexedDB if available
           if (isOfflineMode) {
             loadOfflineBlobIntoVideo(PLAYER.lecture.id, archVid);
           }
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isYouTubeSource = false;
@@ -984,11 +955,11 @@
               class="archive-frame" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
+            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
       }
-      // 3. ZOOM IFRAME PLAYER
+      // 3. ZOOM IFRAME PLAYER (Custom playback/download disabled; transparent brand tag active)
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isDirectArchiveVideo = false;
         isYouTubeSource = false;
@@ -997,11 +968,11 @@
         playerRoot.innerHTML = `
           <div class="zoom-box">
             <iframe id="zoomIframe" src="${finalVideo}" class="zoom-frame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-            <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
+            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
       }
-      // 4. YOUTUBE PLAYER (Uncropped video container; shield blocks native clicks/overlays; bottom deck controls everything)
+      // 4. YOUTUBE PLAYER (Playback/Seek/Speed/Fullscreen ACTIVE; Download DISABLED; transparent brand tag active)
       else {
         isDirectArchiveVideo = false;
         isYouTubeSource = true;
@@ -1015,6 +986,7 @@
             <div class="yt-lock-shield" onclick="wakeFullscreenControlsFor5s()" ontouchstart="wakeFullscreenControlsFor5s()"></div>
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+            <div class="yt-bottom-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
           </div>
         `;
 
@@ -1030,7 +1002,6 @@
               rel: 0,
               showinfo: 0,
               iv_load_policy: 3,
-              cc_load_policy: 0,
               playsinline: 1
             },
             events: {
@@ -1213,6 +1184,7 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
+    // PORTAL INDEXEDDB BLOB STORAGE FOR INTERNET ARCHIVE MP4
     function saveToPortalIndexedDB(item){
       if (!window.indexedDB) return;
       var req = indexedDB.open("phantom_portal_downloads", 1);
@@ -1260,7 +1232,7 @@
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      statusEl.innerText = "Downloading Offline Blob to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
+      statusEl.innerText = "Downloading Offline Blob to ☠️ TEAM PHANTOM☠️ Portal...";
       statusEl.style.color = "#6ee7b7";
       barEl.style.width = "0%";
 
