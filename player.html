@@ -576,6 +576,10 @@
       filter: brightness(1.08);
       transform: translateY(-1px);
     }
+    .download-green-btn.is-downloaded {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      box-shadow: 0 0 15px rgba(37, 99, 235, 0.35);
+    }
 
     /* DISABLED STATE */
     button:disabled,
@@ -616,6 +620,25 @@
     }
     .inpage-download-box.active {
       display: block;
+    }
+
+    .downloaded-mode-badge {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(2, 132, 199, 0.22);
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      color: #7dd3fc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    .downloaded-mode-badge.active {
+      display: inline-flex;
     }
 
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
@@ -741,9 +764,14 @@
           </div>
 
           <div class="action-row-bottom">
-            <button type="button" onclick="startPortalDownload()" id="portalDownloadBtn" class="download-green-btn" disabled>
-              ⬇ Download
-            </button>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <button type="button" onclick="handleDownloadAction()" id="portalDownloadBtn" class="download-green-btn" disabled>
+                ⬇ Download
+              </button>
+              <button type="button" onclick="deleteCurrentDownloadedLecture()" id="deleteDownloadedBtn" style="display:none; background:rgba(220,38,38,0.2); color:#fca5a5; border:1px solid rgba(248,113,113,0.45); border-radius:10px; padding:8px 12px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:900; cursor:pointer;">
+                🗑 Delete
+              </button>
+            </div>
             <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
               ⛶ Fullscreen
             </button>
@@ -765,11 +793,14 @@
       <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
       <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
         <div>
-          <span class="px-1.5 py-0.2 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">TACTICAL DOSSIER</span>
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span class="px-1.5 py-0.2 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">TACTICAL DOSSIER</span>
+            <span id="downloadedLectureIndicator" class="downloaded-mode-badge">✓ DOWNLOADED LECTURE</span>
+          </div>
           <h3 class="font-orbitron font-bold text-xs sm:text-sm text-white mt-0.5" id="lectureDetailTitle">Loading Session Details...</h3>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">
+          <span id="streamModePill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE STREAM
           </span>
         </div>
@@ -786,7 +817,7 @@
   </footer>
 
   <script>
-   const PHANTOM_PROXY_BASE = "https://p53j8b.bot-keep.xyz";
+    const PHANTOM_PROXY_BASE = "https://p53j8b.bot-keep.xyz";
 
     function extractYouTubeId(input) {
       if (!input) return null;
@@ -827,6 +858,8 @@
     let isGDriveEmbed = false;
     let isYouTubeSource = false;
     let fsIdleTimer = null;
+    let isCurrentLectureDownloaded = false;
+    let isWatchingDownloadedLecture = false;
 
     var PLAYER = {
       mode: 'youtube',
@@ -840,6 +873,30 @@
         source: ''
       }
     };
+
+    function syncDownloadedLectureLabels() {
+      var indicator = document.getElementById("downloadedLectureIndicator");
+      var classLbl = document.getElementById("classLabelIndicator");
+      var pillEl = document.getElementById("streamModePill");
+
+      if (indicator) {
+        if (isWatchingDownloadedLecture) indicator.classList.add("active");
+        else indicator.classList.remove("active");
+      }
+
+      if (isWatchingDownloadedLecture) {
+        if (classLbl) classLbl.innerText = "DOWNLOADED LECTURE • OFFLINE";
+        if (pillEl) {
+          pillEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> DOWNLOADED LECTURE';
+          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950 border border-sky-500/60 text-sky-300 text-[10px] font-orbitron uppercase font-bold";
+        }
+      } else {
+        if (pillEl) {
+          pillEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE STREAM';
+          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold";
+        }
+      }
+    }
 
     function isAnyFullscreen() {
       return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
@@ -926,12 +983,15 @@
         seekBar.style.pointerEvents = canControlPlayback ? "auto" : "none";
         seekBar.style.opacity = canControlPlayback ? "1" : "0.35";
       }
+
+      refreshCurrentDownloadButtonState();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
       let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
       const urlTitle = urlParams.get("title");
+      const urlLectureId = urlParams.get("id") || urlParams.get("lecture_id");
       const isOfflineMode = urlParams.get("offline") === "1";
 
       const storedVideo = sessionStorage.getItem("phantom_current_video");
@@ -961,10 +1021,13 @@
       }
 
       PLAYER.lecture = {
-        id: btoa(unescape(encodeURIComponent(decodedTitle + "_" + (finalVideo || "yt")))).slice(0, 24),
+        id: urlLectureId ? String(urlLectureId) : btoa(unescape(encodeURIComponent(decodedTitle + "_" + (finalVideo || "yt")))).slice(0, 24),
         title: decodedTitle,
         source: finalVideo || ""
       };
+
+      isWatchingDownloadedLecture = !!isOfflineMode;
+      syncDownloadedLectureLabels();
 
       const lockShield = document.getElementById("videoScreenLockShield");
       if (lockShield) {
@@ -1031,7 +1094,7 @@
         `;
       }
       // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER
-      else if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm"))) {
+      else if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.startsWith("blob:"))) {
         isDirectArchiveVideo = true;
         isGDriveEmbed = false;
         isYouTubeSource = false;
@@ -1173,6 +1236,8 @@
           window.onYouTubeIframeAPIReady();
         }
       }
+
+      refreshCurrentDownloadButtonState();
     });
 
     function updatePlayLabel() {
@@ -1340,38 +1405,135 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // PORTAL INDEXEDDB BLOB STORAGE
-    function saveToPortalIndexedDB(item){
-      if (!window.indexedDB) return;
-      var req = indexedDB.open("phantom_portal_downloads", 1);
-      req.onupgradeneeded = function(e){
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains("lectures")) {
-          db.createObjectStore("lectures", { keyPath: "id" });
+    // PORTAL INDEXEDDB BLOB STORAGE + DOWNLOADED STATE
+    function openPhantomDB() {
+      return new Promise(function(resolve, reject) {
+        if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
+        var req = indexedDB.open("phantom_portal_downloads", 1);
+        req.onupgradeneeded = function(e) {
+          var db = e.target.result;
+          if (!db.objectStoreNames.contains("lectures")) {
+            db.createObjectStore("lectures", { keyPath: "id" });
+          }
+        };
+        req.onsuccess = function(e) { resolve(e.target.result); };
+        req.onerror = function() { reject(new Error("IndexedDB open error")); };
+      });
+    }
+
+    async function saveToPortalIndexedDB(item) {
+      try {
+        var db = await openPhantomDB();
+        await new Promise(function(resolve, reject) {
+          var tx = db.transaction("lectures", "readwrite");
+          tx.objectStore("lectures").put(item);
+          tx.oncomplete = function() { resolve(); };
+          tx.onerror = function() { reject(new Error("IndexedDB write error")); };
+        });
+      } catch (e) {}
+    }
+
+    async function getDownloadedLectureById(id) {
+      try {
+        var db = await openPhantomDB();
+        return await new Promise(function(resolve) {
+          var tx = db.transaction("lectures", "readonly");
+          var getReq = tx.objectStore("lectures").get(String(id));
+          getReq.onsuccess = function() {
+            var rec = getReq.result;
+            resolve(rec && rec.blob && rec.blob.size > 0 ? rec : null);
+          };
+          getReq.onerror = function() { resolve(null); };
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function deleteDownloadedLectureById(id) {
+      try {
+        var db = await openPhantomDB();
+        await new Promise(function(resolve) {
+          var tx = db.transaction("lectures", "readwrite");
+          tx.objectStore("lectures").delete(String(id));
+          tx.oncomplete = function() { resolve(); };
+          tx.onerror = function() { resolve(); };
+        });
+      } catch (e) {}
+    }
+
+    async function refreshCurrentDownloadButtonState() {
+      var dlBtn = document.getElementById("portalDownloadBtn");
+      var delBtn = document.getElementById("deleteDownloadedBtn");
+      if (!dlBtn) return;
+
+      var canDownload = (isDirectArchiveVideo || isGDriveEmbed);
+      if (!canDownload) {
+        isCurrentLectureDownloaded = false;
+        dlBtn.disabled = true;
+        dlBtn.classList.add("is-disabled");
+        dlBtn.classList.remove("is-downloaded");
+        dlBtn.innerText = "⬇ Download";
+        if (delBtn) delBtn.style.display = "none";
+        return;
+      }
+
+      var existing = await getDownloadedLectureById(PLAYER.lecture.id);
+      isCurrentLectureDownloaded = !!existing;
+      if (isCurrentLectureDownloaded) {
+        isWatchingDownloadedLecture = true;
+      }
+      syncDownloadedLectureLabels();
+
+      dlBtn.disabled = false;
+      dlBtn.classList.remove("is-disabled");
+
+      if (isCurrentLectureDownloaded) {
+        dlBtn.classList.add("is-downloaded");
+        dlBtn.innerText = "✓ Downloaded";
+        if (delBtn) delBtn.style.display = "inline-block";
+      } else {
+        dlBtn.classList.remove("is-downloaded");
+        dlBtn.innerText = "⬇ Download";
+        if (delBtn) delBtn.style.display = "none";
+      }
+    }
+
+    async function deleteCurrentDownloadedLecture() {
+      await deleteDownloadedLectureById(PLAYER.lecture.id);
+      isWatchingDownloadedLecture = false;
+      syncDownloadedLectureLabels();
+      var box = document.getElementById("inpageDownloadBox");
+      if (box) box.classList.remove("active");
+      await refreshCurrentDownloadButtonState();
+    }
+
+    async function handleDownloadAction() {
+      if (isCurrentLectureDownloaded) {
+        var rec = await getDownloadedLectureById(PLAYER.lecture.id);
+        if (rec && rec.blob && isDirectArchiveVideo) {
+          var vid = document.getElementById("archiveVideo");
+          if (vid) {
+            vid.src = URL.createObjectURL(rec.blob);
+            isWatchingDownloadedLecture = true;
+            syncDownloadedLectureLabels();
+            vid.play().catch(() => {});
+          }
         }
-      };
-      req.onsuccess = function(e){
-        var db = e.target.result;
-        var tx = db.transaction("lectures", "readwrite");
-        tx.objectStore("lectures").put(item);
-      };
+        return;
+      }
+      await startPortalDownload();
     }
 
     function loadOfflineBlobIntoVideo(id, videoEl){
       if (!window.indexedDB || !videoEl) return;
-      var req = indexedDB.open("phantom_portal_downloads", 1);
-      req.onsuccess = function(e){
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains("lectures")) return;
-        var tx = db.transaction("lectures", "readonly");
-        var getReq = tx.objectStore("lectures").get(String(id));
-        getReq.onsuccess = function(){
-          var rec = getReq.result;
-          if (rec && rec.blob) {
-            videoEl.src = URL.createObjectURL(rec.blob);
-          }
-        };
-      };
+      getDownloadedLectureById(id).then(function(rec) {
+        if (rec && rec.blob) {
+          videoEl.src = URL.createObjectURL(rec.blob);
+          isWatchingDownloadedLecture = true;
+          syncDownloadedLectureLabels();
+        }
+      });
     }
 
     async function startPortalDownload(){
@@ -1386,7 +1548,10 @@
       if (!box || !statusEl || !sizeEl || !barEl) return;
 
       box.classList.add("active");
-      if (btnEl) btnEl.disabled = true;
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerText = "⬇ Downloading...";
+      }
 
       barEl.style.width = "12%";
       sizeEl.innerText = "0 MB / -- MB";
@@ -1433,9 +1598,12 @@
         }
 
         var finalBlob = new Blob(chunks, { type: "video/mp4" });
+        if (!finalBlob || finalBlob.size === 0) {
+          throw new Error("Empty video data");
+        }
         var finalMB = Math.max(1, Math.round(finalBlob.size / (1024 * 1024)));
 
-        saveToPortalIndexedDB({
+        await saveToPortalIndexedDB({
           id: PLAYER.lecture.id,
           name: PLAYER.lecture.title,
           url: fetchTargetUrl,
@@ -1447,7 +1615,10 @@
         barEl.style.width = "100%";
         sizeEl.innerText = finalMB + " MB / " + finalMB + " MB";
         statusEl.style.color = "#6ee7b7";
-        statusEl.innerText = "Saved Offline in Portal Downloads (Gallery untouched)";
+        statusEl.innerText = "Downloaded & Saved Offline in Portal";
+
+        isWatchingDownloadedLecture = true;
+        await refreshCurrentDownloadButtonState();
       } catch (err) {
         barEl.style.width = "100%";
         if (isGDriveEmbed && window.location.protocol === "https:" && fetchTargetUrl.startsWith("http://")) {
@@ -1459,8 +1630,7 @@
           statusEl.style.color = "#f87171";
           statusEl.innerText = "Download failed: check bot.py status or Drive public sharing.";
         }
-      } finally {
-        if (btnEl) btnEl.disabled = false;
+        await refreshCurrentDownloadButtonState();
       }
     }
 
