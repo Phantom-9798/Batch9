@@ -407,7 +407,7 @@
       height: 100% !important;
       border: none;
     }
-    .archive-frame.locked-media {
+    .archive-frame.locked-media, .gdrive-frame.locked-media {
       pointer-events: none !important;
     }
 
@@ -786,6 +786,8 @@
   </footer>
 
   <script>
+    const PHANTOM_PROXY_BASE = "http://node6.botkeep.cloud:45580";
+
     function extractYouTubeId(input) {
       if (!input) return null;
       var trimmed = String(input).trim();
@@ -890,7 +892,6 @@
       }
     }
 
-    // For Google Drive: disable custom playback/seek/speed buttons, keep ONLY Download active (Fullscreen stays usable)
     function applySourceButtonPermissions(mode) {
       var rwBtn = document.getElementById("btnRewind10");
       var ppBtn = document.getElementById("playTrigger");
@@ -1003,7 +1004,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (Native controls usable; top-right pop-out locked; custom playback/speed disabled; Download enabled)
+      // 0. GOOGLE DRIVE EMBED PLAYER
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1029,7 +1030,7 @@
           </div>
         `;
       }
-      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER (Screen lock ON + full custom controls)
+      // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER
       else if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm"))) {
         isDirectArchiveVideo = true;
         isGDriveEmbed = false;
@@ -1115,7 +1116,7 @@
           </div>
         `;
       }
-      // 4. YOUTUBE PLAYER (Screen lock ON)
+      // 4. YOUTUBE PLAYER
       else {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1339,7 +1340,7 @@
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // PORTAL INDEXEDDB BLOB STORAGE FOR DIRECT MP4
+    // PORTAL INDEXEDDB BLOB STORAGE
     function saveToPortalIndexedDB(item){
       if (!window.indexedDB) return;
       var req = indexedDB.open("phantom_portal_downloads", 1);
@@ -1387,53 +1388,19 @@
       box.classList.add("active");
       if (btnEl) btnEl.disabled = true;
 
-      statusEl.innerText = "Preparing Download for ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
+      statusEl.innerText = "Downloading via Proxy to ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ Portal...";
       statusEl.style.color = "#6ee7b7";
-      barEl.style.width = "15%";
+      barEl.style.width = "10%";
 
+      var fetchTargetUrl = PLAYER.lecture.source;
       if (isGDriveEmbed && PLAYER.gdriveId) {
-        var driveDownloadUrl = "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(PLAYER.gdriveId);
-        try {
-          var res = await fetch(driveDownloadUrl, { mode: "cors", credentials: "omit" });
-          if (!res.ok) throw new Error("Drive direct fetch blocked (" + res.status + ")");
-          var blob = await res.blob();
-          if (!blob || blob.size === 0) throw new Error("Empty Drive response");
-          var dlMB = Math.max(1, Math.round(blob.size / (1024 * 1024)));
-          saveToPortalIndexedDB({
-            id: PLAYER.lecture.id,
-            name: PLAYER.lecture.title,
-            url: driveDownloadUrl,
-            blob: blob,
-            sizeMB: dlMB,
-            savedAt: Date.now()
-          });
-          var objectUrl = URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = objectUrl;
-          a.download = (PLAYER.lecture.title || "lecture") + ".mp4";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(function(){ URL.revokeObjectURL(objectUrl); }, 2000);
-
-          barEl.style.width = "100%";
-          sizeEl.innerText = dlMB + " MB";
-          statusEl.style.color = "#6ee7b7";
-          statusEl.innerText = "Download started & saved in Portal Downloads.";
-        } catch (err) {
-          barEl.style.width = "100%";
-          sizeEl.innerText = "Drive Blocked";
-          statusEl.style.color = "#f87171";
-          statusEl.innerText = "Google Drive blocked browser download (CORS / file restriction).";
-        } finally {
-          if (btnEl) btnEl.disabled = false;
-        }
-        return;
+        var rawDriveUrl = "https://drive.google.com/file/d/" + encodeURIComponent(PLAYER.gdriveId) + "/view";
+        fetchTargetUrl = PHANTOM_PROXY_BASE + "/api/proxy-download?url=" + encodeURIComponent(rawDriveUrl);
       }
 
       try {
-        var res = await fetch(PLAYER.lecture.source);
-        if (!res.ok) throw new Error("Stream fetch failed (" + res.status + ")");
+        var res = await fetch(fetchTargetUrl);
+        if (!res.ok) throw new Error("Proxy fetch failed (" + res.status + ")");
         var contentLength = parseInt(res.headers.get("content-length") || "0", 10);
         var reader = res.body && res.body.getReader ? res.body.getReader() : null;
         var chunks = [];
@@ -1468,7 +1435,7 @@
         saveToPortalIndexedDB({
           id: PLAYER.lecture.id,
           name: PLAYER.lecture.title,
-          url: PLAYER.lecture.source,
+          url: fetchTargetUrl,
           blob: finalBlob,
           sizeMB: finalMB,
           savedAt: Date.now()
@@ -1476,10 +1443,25 @@
 
         barEl.style.width = "100%";
         sizeEl.innerText = finalMB + " MB / " + finalMB + " MB";
+        statusEl.style.color = "#6ee7b7";
         statusEl.innerText = "Saved Offline in Portal Downloads (Gallery untouched)";
       } catch (err) {
-        statusEl.style.color = "#f87171";
-        statusEl.innerText = "Offline fetch blocked by server CORS — use direct CORS-enabled MP4.";
+        if (isGDriveEmbed && window.location.protocol === "https:" && fetchTargetUrl.startsWith("http://")) {
+          var a = document.createElement("a");
+          a.href = fetchTargetUrl;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          barEl.style.width = "100%";
+          sizeEl.innerText = "Proxy Tab";
+          statusEl.style.color = "#fbbf24";
+          statusEl.innerText = "Opened proxy stream (HTTPS->HTTP mixed content fallback).";
+        } else {
+          statusEl.style.color = "#f87171";
+          statusEl.innerText = "Download failed: ensure Bot.py proxy is running & Drive file is public.";
+        }
       } finally {
         if (btnEl) btnEl.disabled = false;
       }
