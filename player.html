@@ -214,9 +214,17 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      min-height: 215px;
+      min-height: 210px;
       background: #000000;
       overflow: hidden;
+    }
+
+    @media (max-width: 900px) and (orientation: landscape) {
+      .video-viewport-box {
+        max-height: 62vh;
+        width: 100%;
+        aspect-ratio: auto;
+      }
     }
 
     @media (min-width: 1024px) {
@@ -370,8 +378,8 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       z-index: 65;
       background: transparent;
       pointer-events: auto;
@@ -1297,8 +1305,8 @@
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
