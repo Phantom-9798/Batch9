@@ -623,20 +623,12 @@
       pointer-events: none !important;
     }
 
+    /* CUSTOM FULLSCREEN BUTTON DISABLED */
     .fs-dock-btn {
-      background: rgba(30, 41, 59, 0.95);
-      color: #ffd700;
-      border: 1px solid rgba(255, 215, 0, 0.45);
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      font-weight: 900;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-    .fs-dock-btn:hover {
-      background: rgba(255, 215, 0, 0.14);
+      display: none !important;
+      pointer-events: none !important;
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
     }
 
     .inpage-download-box {
@@ -786,7 +778,7 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (KEEPS BOTTOM-RIGHT SETTINGS BUTTON FREE) -->
+          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (KEEPS NATIVE DRIVE CONTROLS & FULLSCREEN FREE) -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
@@ -834,7 +826,7 @@
                 🗑 Delete
               </button>
             </div>
-            <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
+            <button type="button" id="dockFsBtn" class="fs-dock-btn is-disabled" disabled aria-disabled="true" tabindex="-1">
               ⛶ Fullscreen
             </button>
           </div>
@@ -1064,7 +1056,11 @@
 
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+      if (dockBtn) {
+        dockBtn.disabled = true;
+        dockBtn.classList.add("is-disabled");
+        dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+      }
     }
 
     function applyScreenLockForMode(mode) {
@@ -1095,6 +1091,7 @@
       var speedSel = document.getElementById("ytBottomSpeedSelector");
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
+      var dockBtn = document.getElementById("dockFsBtn");
 
       var canControlPlayback = (mode === 'youtube' || mode === 'archive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
@@ -1116,6 +1113,11 @@
         dlBtn.disabled = !canDownload;
         if (canDownload) dlBtn.classList.remove("is-disabled");
         else dlBtn.classList.add("is-disabled");
+      }
+
+      if (dockBtn) {
+        dockBtn.disabled = true;
+        dockBtn.classList.add("is-disabled");
       }
 
       if (seekBar) {
@@ -1211,7 +1213,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (POP-OUT DISABLED, SETTINGS ENABLED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (POP-OUT DISABLED, CUSTOM FULLSCREEN DISABLED, NATIVE DRIVE FULLSCREEN ENABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1417,21 +1419,8 @@
     }
 
     function toggleTacticalFullscreen() {
-      const target = document.getElementById("phantomConsoleScreen");
-
-      if (!isAnyFullscreen()) {
-        if (target.requestFullscreen) {
-          target.requestFullscreen();
-        } else if (target.webkitRequestFullscreen) {
-          target.webkitRequestFullscreen();
-        } else if (target.msRequestFullscreen) {
-          target.msRequestFullscreen();
-        }
-        syncFullscreenButtons(true);
-      } else {
-        exitFullscreenOnly();
-        syncFullscreenButtons(false);
-      }
+      // Custom console fullscreen disabled; Drive native fullscreen handles fullscreen on Drive embeds
+      return false;
     }
 
     document.addEventListener("fullscreenchange", () => {
