@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -94,24 +94,16 @@
       background-color: #020617 !important;
       background-image: linear-gradient(135deg, #020617 0%, #081229 50%, #0b1d45 100%) !important;
       color: #f8fafc !important;
-      min-height: 100vh;
+      height: 100vh;
+      max-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden;
       position: relative;
       -webkit-user-select: none;
       user-select: none;
-    }
-
-    @media (min-width: 1024px) {
-      html, body {
-        height: 100vh;
-        max-height: 100vh;
-        overflow: hidden;
-      }
     }
 
     .font-stencil { font-family: 'Black Ops One', cursive; }
@@ -135,7 +127,7 @@
     #phantomStudyTimerWidget {
       position: fixed;
       bottom: 8px;
-      right: 12px;
+      right: 15px;
       z-index: 99999;
       background: rgba(4, 7, 13, 0.95);
       border: 1px solid rgba(255, 215, 0, 0.5);
@@ -173,7 +165,7 @@
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
       padding: 4px 12px;
       border-radius: 9999px;
-      display: none;
+      display: flex;
       align-items: center;
       gap: 8px;
       font-family: 'Orbitron', sans-serif;
@@ -182,12 +174,6 @@
       color: #ffd700;
       font-weight: bold;
       letter-spacing: 1px;
-      white-space: nowrap;
-    }
-    @media (min-width: 640px) {
-      #phantomFocusDock {
-        display: flex;
-      }
     }
 
     .armor-panel {
@@ -213,24 +199,10 @@
     .video-viewport-box {
       position: relative;
       width: 100%;
+      max-height: calc(100vh - 305px);
       aspect-ratio: 16 / 9;
-      min-height: 225px;
       background: #000000;
       overflow: hidden;
-    }
-
-    @media (max-width: 900px) and (orientation: landscape) {
-      .video-viewport-box {
-        max-height: 62vh;
-        width: 100%;
-        aspect-ratio: auto;
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .video-viewport-box {
-        max-height: calc(100vh - 305px);
-      }
     }
 
     /* FULLSCREEN MODE: Video fills 100vw x 100vh; Top bar & Bottom deck overlay smoothly */
@@ -378,19 +350,12 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 66px;
-      height: 66px;
-      z-index: 70;
+      width: 78px;
+      height: 78px;
+      z-index: 47;
       background: transparent;
       pointer-events: auto;
       cursor: default;
-      touch-action: none;
-    }
-    @media (min-width: 768px) {
-      .gdrive-popout-lock {
-        width: 78px;
-        height: 78px;
-      }
     }
     .gdrive-popout-lock.active {
       display: block;
@@ -399,8 +364,8 @@
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
     .frame-locked-brand-tag {
       position: absolute;
-      bottom: 8px;
-      right: 10px;
+      bottom: 10px;
+      right: 14px;
       z-index: 50;
       pointer-events: none;
       user-select: none;
@@ -410,18 +375,10 @@
       padding: 0 !important;
       color: rgba(255, 255, 255, 0.75);
       font-family: 'Black Ops One', cursive;
-      font-size: 12px;
-      letter-spacing: 1.5px;
+      font-size: 14px;
+      letter-spacing: 2px;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
       transition: bottom 0.28s ease;
-    }
-    @media (min-width: 640px) {
-      .frame-locked-brand-tag {
-        bottom: 10px;
-        right: 14px;
-        font-size: 14px;
-        letter-spacing: 2px;
-      }
     }
 
     /* Keep logo cleanly positioned above bottom deck in fullscreen without leaving the video frame */
@@ -449,7 +406,6 @@
       width: 100% !important;
       height: 100% !important;
       border: none;
-      display: block;
     }
     .archive-frame.locked-media, .gdrive-frame.locked-media {
       pointer-events: none !important;
@@ -493,17 +449,11 @@
       background: rgba(9, 15, 34, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
-      padding: 9px 10px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 8px;
       z-index: 55;
-    }
-    @media (min-width: 640px) {
-      .phantom-bottom-deck {
-        padding: 10px 12px;
-        gap: 8px;
-      }
     }
 
     .seek-row {
@@ -537,18 +487,13 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
     }
 
     .transport-group {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-    @media (min-width: 640px) {
-      .transport-group {
-        gap: 8px;
-      }
+      gap: 8px;
     }
 
     .skip-btn {
@@ -556,18 +501,12 @@
       color: #f8fafc;
       border: 1px solid rgba(148, 163, 184, 0.35);
       border-radius: 10px;
-      padding: 6px 10px;
+      padding: 7px 12px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
       cursor: pointer;
       transition: 0.2s ease;
-    }
-    @media (min-width: 640px) {
-      .skip-btn {
-        padding: 7px 12px;
-        font-size: 11px;
-      }
     }
     .skip-btn:hover:not(:disabled) {
       border-color: #fbbf24;
@@ -579,20 +518,14 @@
       color: #ffffff;
       border: none;
       border-radius: 10px;
-      padding: 6px 14px;
+      padding: 7px 18px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 900;
       letter-spacing: 0.6px;
       cursor: pointer;
       box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
       transition: 0.2s ease;
-    }
-    @media (min-width: 640px) {
-      .play-pause-bold-btn {
-        padding: 7px 18px;
-        font-size: 11px;
-      }
     }
     .play-pause-bold-btn:hover:not(:disabled) {
       filter: brightness(1.08);
@@ -604,18 +537,12 @@
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.25);
       border-radius: 10px;
-      padding: 6px 10px;
+      padding: 7px 12px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 900;
       cursor: pointer;
       outline: none;
-    }
-    @media (min-width: 640px) {
-      .speed-pill-select {
-        padding: 7px 12px;
-        font-size: 11px;
-      }
     }
     .speed-pill-select option {
       background: #0f172a;
@@ -624,10 +551,9 @@
 
     .action-row-bottom {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
       padding-top: 4px;
       border-top: 1px solid rgba(255, 255, 255, 0.07);
     }
@@ -637,20 +563,14 @@
       color: #ffffff;
       border: none;
       border-radius: 10px;
-      padding: 7px 12px;
+      padding: 8px 16px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 900;
       letter-spacing: 0.6px;
       cursor: pointer;
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
       transition: 0.2s ease;
-    }
-    @media (min-width: 640px) {
-      .download-green-btn {
-        padding: 8px 16px;
-        font-size: 11px;
-      }
     }
     .download-green-btn:hover:not(:disabled) {
       filter: brightness(1.08);
@@ -699,18 +619,12 @@
       color: #ffd700;
       border: 1px solid rgba(255, 215, 0, 0.45);
       border-radius: 10px;
-      padding: 7px 12px;
+      padding: 8px 14px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 900;
       cursor: pointer;
       transition: 0.2s ease;
-    }
-    @media (min-width: 640px) {
-      .fs-dock-btn {
-        padding: 8px 14px;
-        font-size: 11px;
-      }
     }
     .fs-dock-btn:hover {
       background: rgba(255, 215, 0, 0.14);
@@ -776,7 +690,7 @@
   </style>
 </head>
 
-<body class="text-white min-h-screen lg:h-screen lg:max-h-screen flex flex-col justify-between w-full overflow-x-hidden lg:overflow-hidden" oncontextmenu="return false;">
+<body class="text-white h-screen max-h-screen flex flex-col justify-between w-full overflow-hidden" oncontextmenu="return false;">
 
   <!-- CENTER POPUP DURING DOWNLOAD -->
   <div id="downloadStayPopup" class="download-stay-popup">
@@ -809,25 +723,25 @@
   </audio>
 
   <!-- TOP HEADER -->
-  <header class="w-full pt-2 pb-2 px-3 sm:px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md z-50 shrink-0">
-    <div class="w-full flex items-center justify-between gap-2 sm:gap-4">
-      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
-        <img src="logo.jpeg" alt="Logo" class="h-7 w-7 object-cover rounded-lg border border-amber-400 shadow-sm shrink-0">
-        <div class="min-w-0">
-          <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold truncate" id="classLabelIndicator">CLASS SESSION</div>
-          <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase truncate" id="playerTitle">
+  <header class="w-full pt-2 pb-2 px-6 border-b border-amber-500/20 bg-black/60 backdrop-blur-md z-50 shrink-0">
+    <div class="w-full flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.jpeg" alt="Logo" class="h-7 w-7 object-cover rounded-lg border border-amber-400 shadow-sm">
+        <div>
+          <div class="text-[8px] font-orbitron text-amber-400 tracking-widest uppercase font-bold" id="classLabelIndicator">CLASS SESSION</div>
+          <h1 class="font-orbitron font-bold text-xs sm:text-sm tracking-wider text-white uppercase" id="playerTitle">
             ☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️ CONSOLE
           </h1>
         </div>
       </div>
-      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-[10px] sm:text-[11px] font-orbitron font-bold px-2.5 py-1 rounded-md uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-1 shrink-0">
+      <button onclick="window.history.back()" class="bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-[11px] font-orbitron font-bold px-2.5 py-1 rounded-md uppercase tracking-wider transition cursor-pointer phantom-btn flex items-center gap-1">
         &larr; Back to Classes
       </button>
     </div>
   </header>
 
   <!-- MAIN VIDEO VIEWPORT -->
-  <main class="w-full max-w-5xl mx-auto px-2.5 sm:px-4 py-2 lg:py-1.5 flex-grow flex flex-col items-center justify-center pb-12 sm:pb-8 lg:pb-1.5">
+  <main class="w-full max-w-5xl mx-auto px-4 py-1.5 flex-grow flex flex-col items-center justify-center overflow-hidden">
     <div class="w-full armor-panel rounded-xl p-2 overflow-hidden shadow-xl relative">
 
       <!-- UNIFIED FULLSCREEN CONTAINER -->
@@ -907,7 +821,7 @@
               <button type="button" onclick="handleDownloadAction()" id="portalDownloadBtn" class="download-green-btn" disabled>
                 ⬇ Download
               </button>
-              <button type="button" onclick="deleteCurrentDownloadedLecture()" id="deleteDownloadedBtn" style="display:none; background:rgba(220,38,38,0.2); color:#fca5a5; border:1px solid rgba(248,113,113,0.45); border-radius:10px; padding:7px 11px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:900; cursor:pointer;">
+              <button type="button" onclick="deleteCurrentDownloadedLecture()" id="deleteDownloadedBtn" style="display:none; background:rgba(220,38,38,0.2); color:#fca5a5; border:1px solid rgba(248,113,113,0.45); border-radius:10px; padding:8px 12px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:900; cursor:pointer;">
                 🗑 Delete
               </button>
             </div>
@@ -936,15 +850,15 @@
 
       <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
       <div class="mt-2 pt-2 border-t border-amber-500/20 flex items-center justify-between gap-2">
-        <div class="min-w-0">
+        <div>
           <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
             <span class="px-1.5 py-0.2 rounded bg-amber-400/20 border border-amber-400/40 text-amber-300 font-orbitron text-[9px] uppercase font-bold tracking-wider">TACTICAL DOSSIER</span>
             <span id="downloadedLectureIndicator" class="downloaded-mode-badge">✓ DOWNLOADED LECTURE</span>
           </div>
-          <h3 class="font-orbitron font-bold text-xs sm:text-sm text-white mt-0.5 truncate" id="lectureDetailTitle">Loading Session Details...</h3>
+          <h3 class="font-orbitron font-bold text-xs sm:text-sm text-white mt-0.5" id="lectureDetailTitle">Loading Session Details...</h3>
         </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <span id="streamModePill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[9px] sm:text-[10px] font-orbitron uppercase font-bold">
+        <div class="flex items-center gap-1.5">
+          <span id="streamModePill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE STREAM
           </span>
         </div>
@@ -1104,12 +1018,12 @@
         if (classLbl) classLbl.innerText = "DOWNLOADED LECTURE • OFFLINE";
         if (pillEl) {
           pillEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> DOWNLOADED LECTURE';
-          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950 border border-sky-500/60 text-sky-300 text-[9px] sm:text-[10px] font-orbitron uppercase font-bold";
+          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950 border border-sky-500/60 text-sky-300 text-[10px] font-orbitron uppercase font-bold";
         }
       } else {
         if (pillEl) {
           pillEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE STREAM';
-          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[9px] sm:text-[10px] font-orbitron uppercase font-bold";
+          pillEl.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-[10px] font-orbitron uppercase font-bold";
         }
       }
     }
@@ -1267,7 +1181,6 @@
           popoutLock.addEventListener(ev, function(e) {
             e.preventDefault();
             e.stopPropagation();
-            return false;
           }, { passive: false });
         });
       }
@@ -1306,7 +1219,6 @@
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              allowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
