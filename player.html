@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-- {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -344,7 +344,7 @@
       display: block;
     }
 
-    /* GOOGLE DRIVE POP-OUT CORNER LOCK ONLY: Keeps native player & controls usable while blocking pop-out button */
+    /* GOOGLE DRIVE POP-OUT (TOP-RIGHT) & NATIVE FULLSCREEN (BOTTOM-RIGHT) CORNER LOCKS */
     .gdrive-popout-lock {
       display: none;
       position: absolute;
@@ -358,6 +358,22 @@
       cursor: default;
     }
     .gdrive-popout-lock.active {
+      display: block;
+    }
+
+    .gdrive-fullscreen-lock {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 66px;
+      height: 66px;
+      z-index: 47;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+    }
+    .gdrive-fullscreen-lock.active {
       display: block;
     }
 
@@ -780,6 +796,9 @@
           <!-- GOOGLE DRIVE POP-OUT CORNER LOCK ONLY -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
 
+          <!-- GOOGLE DRIVE NATIVE FULLSCREEN CORNER LOCK -->
+          <div class="gdrive-fullscreen-lock" id="gdriveFullscreenLock" oncontextmenu="return false;"></div>
+
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
         </div>
@@ -1061,6 +1080,7 @@
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
       var popoutLock = document.getElementById("gdrivePopoutLock");
+      var fsLock = document.getElementById("gdriveFullscreenLock");
 
       if (lockShield) {
         if (mode === 'youtube' || mode === 'archive') {
@@ -1075,6 +1095,14 @@
           popoutLock.classList.add("active");
         } else {
           popoutLock.classList.remove("active");
+        }
+      }
+
+      if (fsLock) {
+        if (mode === 'gdrive') {
+          fsLock.classList.add("active");
+        } else {
+          fsLock.classList.remove("active");
         }
       }
     }
@@ -1185,6 +1213,16 @@
         });
       }
 
+      const gdriveFsLock = document.getElementById("gdriveFullscreenLock");
+      if (gdriveFsLock) {
+        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+          gdriveFsLock.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }, { passive: false });
+        });
+      }
+
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
         screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
@@ -1199,7 +1237,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER
+      // 0. GOOGLE DRIVE EMBED PLAYER (NATIVE FULLSCREEN DISABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1218,7 +1256,7 @@
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allow="autoplay; encrypted-media; picture-in-picture"
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
