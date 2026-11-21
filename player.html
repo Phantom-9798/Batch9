@@ -370,11 +370,37 @@
       pointer-events: auto !important;
     }
 
+    /* GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN BUTTON LOCK (LEAVES SETTINGS GEAR BUTTON FREE) */
+    .gdrive-fullscreen-lock {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 44px;
+      height: 44px;
+      z-index: 96;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .gdrive-fullscreen-lock.active {
+      display: block;
+    }
+
+    #phantomConsoleScreen:fullscreen .gdrive-fullscreen-lock.active,
+    #phantomConsoleScreen:-webkit-full-screen .gdrive-fullscreen-lock.active {
+      display: block !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
     .frame-locked-brand-tag {
       position: absolute;
       bottom: 10px;
-      right: 14px;
+      right: 54px;
       z-index: 50;
       pointer-events: none;
       user-select: none;
@@ -394,7 +420,7 @@
     #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
       bottom: 112px;
-      right: 18px;
+      right: 58px;
     }
     #phantomConsoleScreen.fs-idle .frame-locked-brand-tag {
       bottom: 16px;
@@ -623,12 +649,20 @@
       pointer-events: none !important;
     }
 
-    /* CUSTOM FULLSCREEN BUTTON DISABLED */
     .fs-dock-btn {
-      display: none !important;
-      pointer-events: none !important;
-      opacity: 0.35 !important;
-      cursor: not-allowed !important;
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.45);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .fs-dock-btn:hover {
+      background: rgba(255, 215, 0, 0.14);
     }
 
     .inpage-download-box {
@@ -778,8 +812,11 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (KEEPS NATIVE DRIVE CONTROLS & FULLSCREEN FREE) -->
+          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
+
+          <!-- GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN LOCK (KEEPS SETTINGS BUTTON FREE) -->
+          <div class="gdrive-fullscreen-lock" id="gdriveFullscreenLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
@@ -826,7 +863,7 @@
                 🗑 Delete
               </button>
             </div>
-            <button type="button" id="dockFsBtn" class="fs-dock-btn is-disabled" disabled aria-disabled="true" tabindex="-1">
+            <button type="button" onclick="toggleTacticalFullscreen()" id="dockFsBtn" class="fs-dock-btn">
               ⛶ Fullscreen
             </button>
           </div>
@@ -1056,16 +1093,13 @@
 
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      if (dockBtn) {
-        dockBtn.disabled = true;
-        dockBtn.classList.add("is-disabled");
-        dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
-      }
+      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
       var popoutLock = document.getElementById("gdrivePopoutLock");
+      var driveFsLock = document.getElementById("gdriveFullscreenLock");
 
       if (lockShield) {
         if (mode === 'youtube' || mode === 'archive') {
@@ -1082,6 +1116,14 @@
           popoutLock.classList.remove("active");
         }
       }
+
+      if (driveFsLock) {
+        if (mode === 'gdrive') {
+          driveFsLock.classList.add("active");
+        } else {
+          driveFsLock.classList.remove("active");
+        }
+      }
     }
 
     function applySourceButtonPermissions(mode) {
@@ -1091,7 +1133,6 @@
       var speedSel = document.getElementById("ytBottomSpeedSelector");
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
-      var dockBtn = document.getElementById("dockFsBtn");
 
       var canControlPlayback = (mode === 'youtube' || mode === 'archive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
@@ -1113,11 +1154,6 @@
         dlBtn.disabled = !canDownload;
         if (canDownload) dlBtn.classList.remove("is-disabled");
         else dlBtn.classList.add("is-disabled");
-      }
-
-      if (dockBtn) {
-        dockBtn.disabled = true;
-        dockBtn.classList.add("is-disabled");
       }
 
       if (seekBar) {
@@ -1199,6 +1235,19 @@
         });
       }
 
+      const driveFsLock = document.getElementById("gdriveFullscreenLock");
+      if (driveFsLock) {
+        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+          driveFsLock.addEventListener(ev, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isAnyFullscreen()) {
+              wakeFullscreenControlsFor5s();
+            }
+          }, { passive: false });
+        });
+      }
+
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
         screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
@@ -1213,7 +1262,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (POP-OUT DISABLED, CUSTOM FULLSCREEN DISABLED, NATIVE DRIVE FULLSCREEN ENABLED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (POP-OUT & NATIVE FULLSCREEN/EXIT DISABLED, SETTINGS ENABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1232,7 +1281,7 @@
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allow="autoplay; encrypted-media; picture-in-picture"
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
@@ -1419,8 +1468,21 @@
     }
 
     function toggleTacticalFullscreen() {
-      // Custom console fullscreen disabled; Drive native fullscreen handles fullscreen on Drive embeds
-      return false;
+      const target = document.getElementById("phantomConsoleScreen");
+
+      if (!isAnyFullscreen()) {
+        if (target.requestFullscreen) {
+          target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        } else if (target.msRequestFullscreen) {
+          target.msRequestFullscreen();
+        }
+        syncFullscreenButtons(true);
+      } else {
+        exitFullscreenOnly();
+        syncFullscreenButtons(false);
+      }
     }
 
     document.addEventListener("fullscreenchange", () => {
