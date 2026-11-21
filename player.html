@@ -344,37 +344,30 @@
       display: block;
     }
 
-    /* GOOGLE DRIVE POP-OUT (TOP-RIGHT) & NATIVE FULLSCREEN (BOTTOM-RIGHT) CORNER LOCKS */
+    /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ACTIVE IN BOTH NORMAL & FULLSCREEN) */
     .gdrive-popout-lock {
       display: none;
       position: absolute;
       top: 0;
       right: 0;
-      width: 78px;
-      height: 78px;
-      z-index: 47;
+      width: 96px;
+      height: 84px;
+      z-index: 96;
       background: transparent;
       pointer-events: auto;
       cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .gdrive-popout-lock.active {
       display: block;
     }
 
-    .gdrive-fullscreen-lock {
-      display: none;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 66px;
-      height: 66px;
-      z-index: 47;
-      background: transparent;
-      pointer-events: auto;
-      cursor: default;
-    }
-    .gdrive-fullscreen-lock.active {
-      display: block;
+    #phantomConsoleScreen:fullscreen .gdrive-popout-lock.active,
+    #phantomConsoleScreen:-webkit-full-screen .gdrive-popout-lock.active {
+      display: block !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
     }
 
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
@@ -793,11 +786,8 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE POP-OUT CORNER LOCK ONLY -->
+          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (KEEPS BOTTOM-RIGHT SETTINGS BUTTON FREE) -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
-
-          <!-- GOOGLE DRIVE NATIVE FULLSCREEN CORNER LOCK -->
-          <div class="gdrive-fullscreen-lock" id="gdriveFullscreenLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
@@ -1080,7 +1070,6 @@
     function applyScreenLockForMode(mode) {
       var lockShield = document.getElementById("videoScreenLockShield");
       var popoutLock = document.getElementById("gdrivePopoutLock");
-      var fsLock = document.getElementById("gdriveFullscreenLock");
 
       if (lockShield) {
         if (mode === 'youtube' || mode === 'archive') {
@@ -1095,14 +1084,6 @@
           popoutLock.classList.add("active");
         } else {
           popoutLock.classList.remove("active");
-        }
-      }
-
-      if (fsLock) {
-        if (mode === 'gdrive') {
-          fsLock.classList.add("active");
-        } else {
-          fsLock.classList.remove("active");
         }
       }
     }
@@ -1209,16 +1190,9 @@
           popoutLock.addEventListener(ev, function(e) {
             e.preventDefault();
             e.stopPropagation();
-          }, { passive: false });
-        });
-      }
-
-      const gdriveFsLock = document.getElementById("gdriveFullscreenLock");
-      if (gdriveFsLock) {
-        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
-          gdriveFsLock.addEventListener(ev, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            if (isAnyFullscreen()) {
+              wakeFullscreenControlsFor5s();
+            }
           }, { passive: false });
         });
       }
@@ -1237,7 +1211,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (NATIVE FULLSCREEN DISABLED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (POP-OUT DISABLED, SETTINGS ENABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1256,7 +1230,7 @@
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
-              allow="autoplay; encrypted-media; picture-in-picture"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
