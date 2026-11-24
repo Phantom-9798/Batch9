@@ -254,7 +254,9 @@
     }
 
     /* SYNCHRONIZED YOUTUBE-STYLE AUTO-HIDE & POPUP IN FULLSCREEN */
-    #phantomConsoleScreen.fs-idle .fs-top-bar {
+    #phantomConsoleScreen.fs-idle .fs-top-bar,
+    #phantomConsoleScreen.gdrive-mode:fullscreen .fs-top-bar,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .fs-top-bar {
       opacity: 0 !important;
       transform: translateY(-12px);
       pointer-events: none !important;
@@ -277,7 +279,9 @@
       transition: opacity 0.28s ease, transform 0.28s ease;
     }
 
-    #phantomConsoleScreen.fs-idle .phantom-bottom-deck {
+    #phantomConsoleScreen.fs-idle .phantom-bottom-deck,
+    #phantomConsoleScreen.gdrive-mode:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .phantom-bottom-deck {
       opacity: 0 !important;
       transform: translateY(14px);
       pointer-events: none !important;
@@ -438,7 +442,9 @@
       bottom: 112px;
       right: 58px;
     }
-    #phantomConsoleScreen.fs-idle .frame-locked-brand-tag {
+    #phantomConsoleScreen.fs-idle .frame-locked-brand-tag,
+    #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
       bottom: 16px;
     }
 
@@ -1090,11 +1096,15 @@
     function wakeFullscreenControlsFor5s() {
       var screen = document.getElementById("phantomConsoleScreen");
       if (!screen) return;
+      if (isGDriveEmbed) {
+        screen.classList.add("fs-idle");
+        return;
+      }
       screen.classList.remove("fs-idle");
       clearTimeout(fsIdleTimer);
       if (isAnyFullscreen()) {
         fsIdleTimer = setTimeout(function(){
-          if (isAnyFullscreen()) {
+          if (isAnyFullscreen() && !isGDriveEmbed) {
             screen.classList.add("fs-idle");
           }
         }, 5000);
@@ -1114,9 +1124,20 @@
     }
 
     function applyScreenLockForMode(mode) {
+      var screen = document.getElementById("phantomConsoleScreen");
       var lockShield = document.getElementById("videoScreenLockShield");
       var popoutLock = document.getElementById("gdrivePopoutLock");
       var driveFsLock = document.getElementById("gdriveFullscreenLock");
+
+      if (screen) {
+        if (mode === 'gdrive') {
+          screen.classList.add("gdrive-mode");
+          screen.classList.add("fs-idle");
+        } else {
+          screen.classList.remove("gdrive-mode");
+          screen.classList.remove("fs-idle");
+        }
+      }
 
       if (lockShield) {
         if (mode === 'youtube' || mode === 'archive') {
@@ -1151,13 +1172,13 @@
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
 
-      var canControlPlayback = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
+      var canSkipButtons = (mode === 'youtube' || mode === 'archive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
 
       [rwBtn, fwBtn].forEach(function(btn){
         if (!btn) return;
-        btn.disabled = !canControlPlayback;
-        if (canControlPlayback) btn.classList.remove("is-disabled");
+        btn.disabled = !canSkipButtons;
+        if (canSkipButtons) btn.classList.remove("is-disabled");
         else btn.classList.add("is-disabled");
       });
 
