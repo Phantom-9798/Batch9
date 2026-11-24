@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-- {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -254,9 +254,7 @@
     }
 
     /* SYNCHRONIZED YOUTUBE-STYLE AUTO-HIDE & POPUP IN FULLSCREEN */
-    #phantomConsoleScreen.fs-idle .fs-top-bar,
-    #phantomConsoleScreen.gdrive-mode:fullscreen .fs-top-bar,
-    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .fs-top-bar {
+    #phantomConsoleScreen.fs-idle .fs-top-bar {
       opacity: 0 !important;
       transform: translateY(-12px);
       pointer-events: none !important;
@@ -279,11 +277,18 @@
       transition: opacity 0.28s ease, transform 0.28s ease;
     }
 
-    #phantomConsoleScreen.fs-idle .phantom-bottom-deck,
-    #phantomConsoleScreen.gdrive-mode:fullscreen .phantom-bottom-deck,
-    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .phantom-bottom-deck {
+    #phantomConsoleScreen.fs-idle .phantom-bottom-deck {
       opacity: 0 !important;
       transform: translateY(14px);
+      pointer-events: none !important;
+    }
+
+    /* ONLY IN FULLSCREEN + GOOGLE DRIVE: KEEP CUSTOM DECK & TOP BAR PERMANENTLY HIDDEN EVEN ON ACTIVITY */
+    #phantomConsoleScreen.gdrive-mode:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .phantom-bottom-deck,
+    #phantomConsoleScreen.gdrive-mode:fullscreen .fs-top-bar,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .fs-top-bar {
+      opacity: 0 !important;
       pointer-events: none !important;
     }
 
@@ -1096,7 +1101,7 @@
     function wakeFullscreenControlsFor5s() {
       var screen = document.getElementById("phantomConsoleScreen");
       if (!screen) return;
-      if (isGDriveEmbed) {
+      if (isGDriveEmbed && isAnyFullscreen()) {
         screen.classList.add("fs-idle");
         return;
       }
@@ -1132,11 +1137,10 @@
       if (screen) {
         if (mode === 'gdrive') {
           screen.classList.add("gdrive-mode");
-          screen.classList.add("fs-idle");
         } else {
           screen.classList.remove("gdrive-mode");
-          screen.classList.remove("fs-idle");
         }
+        screen.classList.remove("fs-idle");
       }
 
       if (lockShield) {
@@ -1650,7 +1654,11 @@
         syncFullscreenButtons(false);
       } else {
         syncFullscreenButtons(true);
-        wakeFullscreenControlsFor5s();
+        if (isGDriveEmbed) {
+          if (screen) screen.classList.add("fs-idle");
+        } else {
+          wakeFullscreenControlsFor5s();
+        }
       }
     });
 
