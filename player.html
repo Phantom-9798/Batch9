@@ -353,12 +353,12 @@
       display: block;
     }
 
-    /* GOOGLE DRIVE LEFT & RIGHT EDGE DOUBLE-TAP ZONES (CENTER PLAY BUTTON & BOTTOM CONTROLS STAY 100% CLICKABLE) */
+    /* GOOGLE DRIVE LEFT & RIGHT EDGE DOUBLE-TAP ZONES (CENTER PLAY BUTTON & TIMELINE STAY 100% ACCESSIBLE) */
     .gdrive-edge-tap-zone {
       position: absolute;
       top: 56px;
-      bottom: 58px;
-      width: 28%;
+      bottom: 72px;
+      width: 24%;
       z-index: 44;
       background: transparent;
       pointer-events: auto;
@@ -1261,13 +1261,19 @@
     function bindGDriveEdgeDoubleTap(zoneEl, side) {
       if (!zoneEl) return;
       var lastTapTime = 0;
+      var passThroughTimer = null;
 
-      // Single click passes through to Drive iframe so user can still tap/click normally
-      zoneEl.addEventListener("click", function() {
+      function temporarilyPassPointer() {
         zoneEl.style.pointerEvents = "none";
-        setTimeout(function() {
+        clearTimeout(passThroughTimer);
+        passThroughTimer = setTimeout(function() {
           if (zoneEl) zoneEl.style.pointerEvents = "auto";
-        }, 280);
+        }, 320);
+      }
+
+      // Let pointer moves and single clicks reach Google Drive iframe/timeline without hiding controls
+      ["pointermove", "mousemove", "click"].forEach(function(evName) {
+        zoneEl.addEventListener(evName, temporarilyPassPointer);
       });
 
       zoneEl.addEventListener("dblclick", function(e) {
@@ -1287,10 +1293,7 @@
           lastTapTime = 0;
         } else {
           lastTapTime = now;
-          zoneEl.style.pointerEvents = "none";
-          setTimeout(function() {
-            if (zoneEl) zoneEl.style.pointerEvents = "auto";
-          }, 280);
+          temporarilyPassPointer();
         }
       }, { passive: false });
     }
