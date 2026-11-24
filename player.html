@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -342,6 +342,21 @@
     }
     .video-screen-lock-shield.lock-enabled {
       display: block;
+    }
+
+    /* GOOGLE DRIVE DOUBLE-TAP GESTURE ZONE (LEAVES BOTTOM NATIVE CONTROLS COMPLETELY FREE) */
+    .gdrive-tap-gesture-zone {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 54px;
+      z-index: 44;
+      background: transparent;
+      pointer-events: auto;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ACTIVE IN BOTH NORMAL & FULLSCREEN) */
@@ -976,6 +991,7 @@
     let activeDownloadController = null;
     let downloadPopupInterval = null;
     let downloadPopupHideTimer = null;
+    let gdriveSeekOffset = 0;
 
     var PLAYER = {
       mode: 'youtube',
@@ -1164,6 +1180,53 @@
       refreshCurrentDownloadButtonState();
     }
 
+    // DOUBLE-TAP + KEYBOARD SEEK HELPER FOR YOUTUBE & GOOGLE DRIVE FRAMES
+    function handleFrameDoubleTapSeek(clientX, containerEl) {
+      if (!isYouTubeSource && !isGDriveEmbed) return;
+      var rect = containerEl.getBoundingClientRect();
+      var isLeftSide = (clientX - rect.left) < (rect.width / 2);
+      if (isLeftSide) {
+        skipSeconds(-10);
+        triggerBadge('skipLeftBadge');
+      } else {
+        skipSeconds(10);
+        triggerBadge('skipRightBadge');
+      }
+    }
+
+    function bindDoubleTapGesture(el) {
+      if (!el) return;
+      var lastTapTime = 0;
+      var lastTapX = 0;
+
+      el.addEventListener("dblclick", function(e) {
+        if (!isYouTubeSource && !isGDriveEmbed) return;
+        e.preventDefault();
+        e.stopPropagation();
+        handleFrameDoubleTapSeek(e.clientX, el);
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+      });
+
+      el.addEventListener("touchend", function(e) {
+        if (!isYouTubeSource && !isGDriveEmbed) return;
+        var touch = e.changedTouches && e.changedTouches[0];
+        if (!touch) return;
+        var now = Date.now();
+        var timeDiff = now - lastTapTime;
+        var distDiff = Math.abs(touch.clientX - lastTapX);
+        if (timeDiff > 40 && timeDiff < 320 && distDiff < 70) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleFrameDoubleTapSeek(touch.clientX, el);
+          lastTapTime = 0;
+          if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        } else {
+          lastTapTime = now;
+          lastTapX = touch.clientX;
+        }
+      }, { passive: false });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
       let urlVideo = urlParams.get("video") || urlParams.get("v") || urlParams.get("stream") || urlParams.get("link") || urlParams.get("file_id");
@@ -1220,6 +1283,7 @@
             }
           }, { passive: false });
         });
+        bindDoubleTapGesture(lockShield);
       }
 
       const popoutLock = document.getElementById("gdrivePopoutLock");
@@ -1258,6 +1322,38 @@
         });
       });
 
+      // KEYBOARD SHORTCUTS FOR YOUTUBE & GOOGLE DRIVE FRAMES (10s SEEK + PLAY/PAUSE)
+      document.addEventListener("keydown", function(e) {
+        if (!isYouTubeSource && !isGDriveEmbed) return;
+        var tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        var key = (e.key || "").toLowerCase();
+        if (e.key === "ArrowLeft" || key === "j") {
+          e.preventDefault();
+          skipSeconds(-10);
+          triggerBadge("skipLeftBadge");
+        } else if (e.key === "ArrowRight" || key === "l") {
+          e.preventDefault();
+          skipSeconds(10);
+          triggerBadge("skipRightBadge");
+        } else if (e.key === " " || key === "k") {
+          e.preventDefault();
+          if (isYouTubeSource) {
+            toggleVideoPlay();
+          } else if (isGDriveEmbed) {
+            var gdFrame = document.getElementById("gdriveIframe");
+            if (gdFrame && gdFrame.contentWindow) {
+              try {
+                gdFrame.focus();
+                gdFrame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playPause" }), "*");
+              } catch (err) {}
+            }
+          }
+        }
+      });
+
       const playerRoot = document.getElementById("playerRoot");
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
@@ -1285,8 +1381,22 @@
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
+            <div class="gdrive-tap-gesture-zone" id="gdriveTapGestureZone" oncontextmenu="return false;"></div>
+            <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
+            <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
           </div>
         `;
+
+        var gdriveTapZone = document.getElementById("gdriveTapGestureZone");
+        if (gdriveTapZone) {
+          bindDoubleTapGesture(gdriveTapZone);
+          gdriveTapZone.addEventListener("click", function() {
+            var gdFrame = document.getElementById("gdriveIframe");
+            if (gdFrame) {
+              try { gdFrame.focus(); } catch (e) {}
+            }
+          });
+        }
       }
       // 1. INTERNET ARCHIVE / DIRECT MP4 PLAYER
       else if (!ytId && finalVideo && (finalVideo.includes("archive.org") || finalVideo.endsWith(".mp4") || finalVideo.endsWith(".webm") || finalVideo.startsWith("blob:"))) {
@@ -1451,6 +1561,11 @@
         if (vid) vid.play();
       } else if (isYouTubeSource && ytInstance && ytInstance.playVideo) {
         ytInstance.playVideo();
+      } else if (isGDriveEmbed) {
+        const gdFrame = document.getElementById("gdriveIframe");
+        if (gdFrame) {
+          try { gdFrame.focus(); } catch (e) {}
+        }
       }
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
@@ -1500,7 +1615,20 @@
     });
 
     function skipSeconds(s) {
-      if (isGDriveEmbed) return;
+      if (isGDriveEmbed && PLAYER.gdriveId) {
+        gdriveSeekOffset = Math.max(0, gdriveSeekOffset + s);
+        const gdFrame = document.getElementById("gdriveIframe");
+        if (gdFrame) {
+          try {
+            gdFrame.focus();
+            if (gdFrame.contentWindow) {
+              gdFrame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "seekBy", args: [s] }), "*");
+            }
+          } catch (e) {}
+        }
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.currentTime = Math.max(0, (vid.currentTime || 0) + s);
@@ -1514,7 +1642,7 @@
     }
 
     function triggerBadge(id) {
-      if (!isYouTubeSource && !isDirectArchiveVideo) return;
+      if (!isYouTubeSource && !isDirectArchiveVideo && !isGDriveEmbed) return;
       const b = document.getElementById(id);
       if (!b) return;
       b.classList.add('show');
