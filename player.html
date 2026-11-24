@@ -992,6 +992,7 @@
     let activeDownloadController = null;
     let downloadPopupInterval = null;
     let downloadPopupHideTimer = null;
+    let gdriveVirtualSeekSec = 0;
 
     var PLAYER = {
       mode: 'youtube',
@@ -1150,19 +1151,27 @@
       var dlBtn = document.getElementById("portalDownloadBtn");
       var seekBar = document.getElementById("seekTrackBar");
 
-      var canControlPlayback = (mode === 'youtube' || mode === 'archive');
+      var canControlPlayback = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
       var canDownload = (mode === 'archive' || mode === 'gdrive');
 
-      [rwBtn, ppBtn, fwBtn].forEach(function(btn){
+      [rwBtn, fwBtn].forEach(function(btn){
         if (!btn) return;
         btn.disabled = !canControlPlayback;
         if (canControlPlayback) btn.classList.remove("is-disabled");
         else btn.classList.add("is-disabled");
       });
 
+      if (ppBtn) {
+        var canTogglePlay = (mode === 'youtube' || mode === 'archive');
+        ppBtn.disabled = !canTogglePlay;
+        if (canTogglePlay) ppBtn.classList.remove("is-disabled");
+        else ppBtn.classList.add("is-disabled");
+      }
+
       if (speedSel) {
-        speedSel.disabled = !canControlPlayback;
-        if (canControlPlayback) speedSel.classList.remove("is-disabled");
+        var canSpeed = (mode === 'youtube' || mode === 'archive');
+        speedSel.disabled = !canSpeed;
+        if (canSpeed) speedSel.classList.remove("is-disabled");
         else speedSel.classList.add("is-disabled");
       }
 
@@ -1173,8 +1182,9 @@
       }
 
       if (seekBar) {
-        seekBar.style.pointerEvents = canControlPlayback ? "auto" : "none";
-        seekBar.style.opacity = canControlPlayback ? "1" : "0.35";
+        var canSeekBar = (mode === 'youtube' || mode === 'archive');
+        seekBar.style.pointerEvents = canSeekBar ? "auto" : "none";
+        seekBar.style.opacity = canSeekBar ? "1" : "0.35";
       }
 
       refreshCurrentDownloadButtonState();
@@ -1625,15 +1635,20 @@
 
     function skipSeconds(s) {
       if (isGDriveEmbed && PLAYER.gdriveId) {
+        gdriveVirtualSeekSec = Math.max(0, gdriveVirtualSeekSec + s);
         const gdFrame = document.getElementById("gdriveIframe");
         if (gdFrame) {
           try {
-            gdFrame.focus();
             if (gdFrame.contentWindow) {
               gdFrame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "seekBy", args: [s] }), "*");
             }
           } catch (e) {}
         }
+        try {
+          window.dispatchEvent(new CustomEvent("phantom:gdriveSeek10", {
+            detail: { delta: s, virtualSec: gdriveVirtualSeekSec, fileId: PLAYER.gdriveId }
+          }));
+        } catch (e) {}
         if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
         return;
       }
