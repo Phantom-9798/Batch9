@@ -478,6 +478,13 @@
         font-size: 15px;
       }
     }
+    #phantomConsoleScreen.gdrive-iframe-fs .frame-locked-brand-tag {
+      position: fixed !important;
+      bottom: 54px !important;
+      right: 18px !important;
+      font-size: 16px !important;
+      z-index: 2147483647 !important;
+    }
 
     /* DIRECT ARCHIVE, GOOGLE DRIVE & ZOOM STYLING */
     .archive-box, .zoom-box, .gdrive-box {
@@ -1706,24 +1713,17 @@
     function handleUnifiedFullscreenChange() {
       var screen = document.getElementById("phantomConsoleScreen");
       var fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+      const nowFs = isAnyFullscreen();
+      PLAYER.isFullscreen = nowFs;
 
-      // If Google Drive's internal fullscreen button put ONLY the iframe into fullscreen,
-      // promote fullscreen to #phantomConsoleScreen so the Team Phantom logo & pop-out lock stay visible on top!
-      if (fsEl && fsEl.id === "gdriveIframe" && screen) {
-        var exitFn = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-        var reqFn = screen.requestFullscreen || screen.webkitRequestFullscreen || screen.msRequestFullscreen;
-        if (exitFn && reqFn) {
-          try {
-            Promise.resolve(exitFn.call(document)).then(function() {
-              try { reqFn.call(screen); } catch (e) {}
-            }).catch(function() {});
-          } catch (e) {}
-          return;
+      if (screen) {
+        if (nowFs && fsEl && fsEl.id === "gdriveIframe") {
+          screen.classList.add("gdrive-iframe-fs");
+        } else {
+          screen.classList.remove("gdrive-iframe-fs");
         }
       }
 
-      const nowFs = isAnyFullscreen();
-      PLAYER.isFullscreen = nowFs;
       if (!nowFs) {
         clearTimeout(fsIdleTimer);
         if (screen) screen.classList.remove("fs-idle");
