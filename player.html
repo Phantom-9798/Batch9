@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -203,6 +203,14 @@
       aspect-ratio: 16 / 9;
       background: #000000;
       overflow: hidden;
+    }
+
+    /* MOBILE: GIVE GOOGLE DRIVE FRAME ENOUGH HEIGHT SO ALL NATIVE BUTTONS (FULLSCREEN, SETTINGS, TIMELINE, PLAY) SHOW CLEARLY */
+    @media (max-width: 640px) {
+      #phantomConsoleScreen.gdrive-mode .video-viewport-box {
+        min-height: 235px;
+        max-height: calc(100vh - 265px);
+      }
     }
 
     /* FULLSCREEN MODE: Video fills 100vw x 100vh; Top bar & Bottom deck overlay smoothly */
@@ -369,6 +377,14 @@
     .gdrive-edge-tap-zone.left { left: 0; }
     .gdrive-edge-tap-zone.right { right: 0; }
 
+    /* ON MOBILE TOUCH SCREENS, LET GOOGLE DRIVE HANDLE ALL NATIVE TOUCHES & CONTROLS DIRECTLY */
+    @media (hover: none) and (pointer: coarse), (max-width: 768px) {
+      .gdrive-edge-tap-zone {
+        display: none !important;
+        pointer-events: none !important;
+      }
+    }
+
     /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ALWAYS ACTIVE IN NORMAL & FULLSCREEN) */
     .gdrive-popout-lock {
       display: none;
@@ -384,6 +400,12 @@
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
+    }
+    @media (max-width: 768px) {
+      .gdrive-popout-lock {
+        width: 64px;
+        height: 56px;
+      }
     }
     .gdrive-popout-lock.active,
     #phantomConsoleScreen.gdrive-mode .gdrive-popout-lock.active,
@@ -415,6 +437,17 @@
       transition: bottom 0.28s ease;
     }
 
+    @media (max-width: 768px) {
+      #phantomConsoleScreen.gdrive-mode .frame-locked-brand-tag {
+        top: 10px;
+        left: 12px;
+        bottom: auto;
+        right: auto;
+        font-size: 11px;
+        opacity: 0.7;
+      }
+    }
+
     /* Keep logo cleanly positioned above bottom deck in fullscreen without leaving the video frame */
     #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
@@ -442,6 +475,8 @@
       width: 100% !important;
       height: 100% !important;
       border: none;
+      pointer-events: auto !important;
+      touch-action: auto !important;
     }
     .archive-frame.locked-media, .gdrive-frame.locked-media {
       pointer-events: none !important;
@@ -1245,6 +1280,12 @@
 
     function bindGDriveEdgeDoubleTap(zoneEl, side) {
       if (!zoneEl) return;
+      var isCoarseTouch = window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+      if (isCoarseTouch || window.innerWidth <= 768) {
+        zoneEl.style.display = "none";
+        zoneEl.style.pointerEvents = "none";
+        return;
+      }
       var lastTapTime = 0;
       var passThroughTimer = null;
 
@@ -1378,7 +1419,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED; ONLY TOP-RIGHT POP-OUT LOCKED; CUSTOM FS & SPEED DISABLED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED ON DESKTOP & MOBILE; ONLY TOP-RIGHT POP-OUT LOCKED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1399,6 +1440,8 @@
               class="gdrive-frame"
               allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
               allowfullscreen
+              webkitallowfullscreen
+              mozallowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
