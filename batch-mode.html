@@ -113,58 +113,112 @@
       localStorage.setItem("phantom_active_squadron", targetBatch);
     } catch (e) {}
 
-    // --- CUSTOM EMAIL OTP SESSION VALIDATION ---
+    // --- SESSION STORAGE CACHE HELPERS ---
+    const PHANTOM_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes per tab session
+
+    function readSessionCache(key, allowExpired = false) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || !("ts" in parsed)) return null;
+        const age = Date.now() - Number(parsed.ts || 0);
+        if (!allowExpired && age > PHANTOM_CACHE_TTL_MS) return null;
+        return parsed.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeSessionCache(key, data) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) {}
+    }
+
+    function applyCadetModeAccess(data, localToken) {
+      if (!data) {
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      // Status verification
+      if (data.status !== "active") {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("Notice: Cadet account is currently not active.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      // Single Device Guard
+      if (data.activeSession && localToken && data.activeSession !== localToken) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      // Batch Enrollment Check (Strict Combo Rule: only 'combo' unlocks all)
+      const allowedBatches = Array.isArray(data.allowedBatches)
+        ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+        : [];
+      const isCombo = allowedBatches.includes('combo');
+      if (!isCombo && !allowedBatches.includes(targetBatch)) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
+        window.location.href = "classroom.html";
+        return false;
+      }
+
+      // Set UI Header
+      const displayLabel = BATCH_DISPLAY_NAMES[targetBatch] || targetBatch.toUpperCase();
+      document.getElementById("batchBadge").innerText = `${displayLabel} SQUADRON`;
+      document.getElementById("batchTitle").innerText = `${displayLabel} BATCH ACCESS`;
+      if (typeof window.renderMyDownloadsTab === "function") {
+        window.renderMyDownloadsTab();
+      }
+      return true;
+    }
+
+    // --- CUSTOM EMAIL OTP SESSION VALIDATION (WITH SESSION STORAGE CACHE) ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
+    let modeRenderedOnce = false;
 
     if (!localUid || !localToken) {
       window.location.href = "intro.html";
     } else {
+      const cadetCacheKey = "phantom_cadet_cache_" + localUid;
+      const cachedCadet = readSessionCache(cadetCacheKey, false);
+
+      if (cachedCadet && applyCadetModeAccess(cachedCadet, localToken)) {
+        modeRenderedOnce = true;
+      }
+
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
+          try { sessionStorage.removeItem(cadetCacheKey); } catch (e) {}
           window.location.href = "intro.html";
           return;
         }
 
         const data = docSnap.data();
+        writeSessionCache(cadetCacheKey, data);
 
-        // Status verification
-        if (data.status !== "active") {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("Notice: Cadet account is currently not active.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
+        if (!applyCadetModeAccess(data, localToken)) {
           return;
         }
 
-        // Single Device Guard
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
-          return;
-        }
-
-        // Batch Enrollment Check (Strict Combo Rule: only 'combo' unlocks all)
-        const allowedBatches = Array.isArray(data.allowedBatches)
-          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
-          : [];
-        const isCombo = allowedBatches.includes('combo');
-        if (!isCombo && !allowedBatches.includes(targetBatch)) {
-          alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
-          window.location.href = "classroom.html";
-          return;
-        }
-
-        // Set UI Header
-        const displayLabel = BATCH_DISPLAY_NAMES[targetBatch] || targetBatch.toUpperCase();
-        document.getElementById("batchBadge").innerText = `${displayLabel} SQUADRON`;
-        document.getElementById("batchTitle").innerText = `${displayLabel} BATCH ACCESS`;
-        if (typeof window.renderMyDownloadsTab === "function") {
-          window.renderMyDownloadsTab();
+        modeRenderedOnce = true;
+      }, (err) => {
+        console.warn("Cadet snapshot fallback:", err);
+        const staleCadet = readSessionCache(cadetCacheKey, true);
+        if (staleCadet && !modeRenderedOnce) {
+          applyCadetModeAccess(staleCadet, localToken);
         }
       });
     }
@@ -177,6 +231,7 @@
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
+      sessionStorage.clear();
       window.location.href = "intro.html";
     };
   </script>
