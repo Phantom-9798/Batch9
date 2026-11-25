@@ -98,32 +98,79 @@
       label: "NDA (NATIONAL DEFENCE ACADEMY)"
     };
 
+    // 1. SESSION STORAGE CACHE HELPERS (placed right below squadron config)
+    const PHANTOM_CACHE_TTL_MS = 10 * 60 * 1000;
 
-    // --- SECURE SESSION VALIDATION ---
+    function readSessionCache(key, allowExpired = false) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || !("ts" in parsed)) return null;
+        const age = Date.now() - Number(parsed.ts || 0);
+        if (!allowExpired && age > PHANTOM_CACHE_TTL_MS) return null;
+        return parsed.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeSessionCache(key, data) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) {}
+    }
+
+    function applyCadetSessionCheck(data, localToken) {
+      if (!data) {
+        window.location.href = "intro.html";
+        return false;
+      }
+      if (data.activeSession && localToken && data.activeSession !== localToken) {
+        alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+      return true;
+    }
+
+
+    // 2. SECURE SESSION VALIDATION BLOCK (with sessionStorage cache)
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
+    let lecturesRenderedOnce = false;
 
     if (!localUid || !localToken) {
       window.location.href = "intro.html";
     } else {
+      const cadetCacheKey = "phantom_cadet_cache_" + localUid;
+      const cachedCadet = readSessionCache(cadetCacheKey, false);
+
+      if (cachedCadet && applyCadetSessionCheck(cachedCadet, localToken)) {
+        lecturesRenderedOnce = true;
+        renderLecturesList();
+      }
+
       onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
+          try { sessionStorage.removeItem(cadetCacheKey); } catch (e) {}
           window.location.href = "intro.html";
           return;
         }
 
         const data = docSnap.data();
+        writeSessionCache(cadetCacheKey, data);
 
-        // Single Device Guard
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
+        if (!applyCadetSessionCheck(data, localToken)) {
           return;
         }
 
-        renderLecturesList();
+        if (!lecturesRenderedOnce) {
+          lecturesRenderedOnce = true;
+          renderLecturesList();
+        }
       });
     }
 
@@ -140,20 +187,15 @@
 
       const staticLectures = [];
 
-      // 🔥 DIRECT SUBJECT QUERY
-      const q = query(
-        collection(db, "tactical_curriculum"),
-        where("squadron", "==", currentBatch.toLowerCase().trim()),
-        where("mode", "==", mode),
-        where("subject", "==", currentSubject.trim())
-      );
+      // 3. TACTICAL CURRICULUM QUERY BLOCK (with sessionStorage cache)
+      const lectureCacheKey = `phantom_lectures_v1_${currentBatch.toLowerCase().trim()}_${mode}_${currentSubject.trim().toLowerCase()}`;
+      const cachedLectures = readSessionCache(lectureCacheKey, false);
 
-      onSnapshot(q, (snapshot) => {
+      function buildAndRenderFromDocs(rawDocsList) {
         const dynamicLectures = [];
         const seenVideos = new Set();
 
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
+        rawDocsList.forEach(d => {
           const vUrl = (d.url || d.videoUrl || "").trim();
           const cleanTitle = (d.title || "").trim().toLowerCase();
           const uniqueKey = vUrl || cleanTitle;
@@ -180,9 +222,35 @@
         });
 
         displayLectures(combined, currentSubject, mode);
+      }
+
+      if (Array.isArray(cachedLectures)) {
+        buildAndRenderFromDocs(cachedLectures);
+        return;
+      }
+
+      const q = query(
+        collection(db, "tactical_curriculum"),
+        where("squadron", "==", currentBatch.toLowerCase().trim()),
+        where("mode", "==", mode),
+        where("subject", "==", currentSubject.trim())
+      );
+
+      onSnapshot(q, (snapshot) => {
+        const rawDocs = [];
+        snapshot.forEach(docSnap => {
+          rawDocs.push(docSnap.data());
+        });
+        writeSessionCache(lectureCacheKey, rawDocs);
+        buildAndRenderFromDocs(rawDocs);
       }, (err) => {
         console.warn("Curriculum sync fallback:", err);
-        displayLectures(staticLectures, currentSubject, mode);
+        const staleDocs = readSessionCache(lectureCacheKey, true);
+        if (Array.isArray(staleDocs)) {
+          buildAndRenderFromDocs(staleDocs);
+        } else {
+          displayLectures(staticLectures, currentSubject, mode);
+        }
       });
     }
 
