@@ -94,6 +94,15 @@
     let currentBatch = "capf";
     let currentSubject = "Mentor Session";
 
+    const BATCH_DISPLAY_NAMES = {
+      "cds-math": "CDS MATHEMATICS",
+      "cds-kilo": "CDS OTA",
+      "nda": "NDA (NATIONAL DEFENCE ACADEMY)",
+      "afcat": "AFCAT",
+      "capf": "CAPF",
+      "cds": "CDS"
+    };
+
     // --- SECURE SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
@@ -118,26 +127,39 @@
           return;
         }
 
+        const allowedBatches = Array.isArray(data.allowedBatches)
+          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+          : [];
+        const isCombo = allowedBatches.includes("combo");
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedBatch = (urlParams.get('batch') || urlParams.get('squadron') || 'capf').toLowerCase().trim();
+        if (!isCombo && !allowedBatches.includes(requestedBatch)) {
+          alert("ACCESS DENIED: You are not enrolled in this squadron.");
+          window.location.href = "classroom.html";
+          return;
+        }
+
         renderLecturesList();
       });
     }
 
     function renderLecturesList() {
       const urlParams = new URLSearchParams(window.location.search);
-      currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
+      currentBatch = (urlParams.get('batch') || urlParams.get('squadron') || 'capf').toLowerCase().trim();
       currentSubject = urlParams.get('subject') || 'General Awareness';
-      const mode = urlParams.get('mode') || 'live';
+      const mode = (urlParams.get('mode') || 'live').toLowerCase().trim();
 
       const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-      document.getElementById('badgeIndicator').innerText = `${currentBatch.toUpperCase()} • ${modeBadge}`;
+      const batchLabel = BATCH_DISPLAY_NAMES[currentBatch] || currentBatch.toUpperCase();
+      document.getElementById('badgeIndicator').innerText = `${batchLabel} • ${modeBadge}`;
       document.getElementById('chapterHeading').innerText = currentSubject;
 
       const staticLectures = [];
 
-      // 🔥 DIRECT SUBJECT QUERY
+      // 🔥 DIRECT SUBJECT QUERY (queries tactical_curriculum by squadron='nda', mode, and subject)
       const q = query(
         collection(db, "tactical_curriculum"),
-        where("squadron", "==", currentBatch.toLowerCase().trim()),
+        where("squadron", "==", currentBatch),
         where("mode", "==", mode),
         where("subject", "==", currentSubject.trim())
       );
@@ -224,7 +246,7 @@
         const currentBadge = badgeStyles[badgeIndex];
         const classNumStr = String(idx + 1).padStart(2, '0');
         const durationText = lec.duration ? `• ⏱ ${lec.duration}` : '';
-        const safeTitle = (lec.title || "TACTICAL SESSION").replace(/'/g, "\\'");
+        const safeTitle = (lec.title || "TACTICAL SESSION").replace(/'/g, "\'");
 
         html += `
           <div class="lecture-rect-row page-transition">
@@ -273,8 +295,8 @@
 
     window.navigateBackToSubjects = function() {
       const urlParams = new URLSearchParams(window.location.search);
-      const batch = urlParams.get('batch') || 'cds-kilo';
-      const mode = urlParams.get('mode') || 'live';
+      const batch = (urlParams.get('batch') || 'cds-kilo').toLowerCase().trim();
+      const mode = (urlParams.get('mode') || 'live').toLowerCase().trim();
       window.location.href = `subjects.html?batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
     };
 
@@ -287,7 +309,7 @@
   </script>
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
