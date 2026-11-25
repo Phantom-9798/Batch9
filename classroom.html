@@ -84,7 +84,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -1269,7 +1269,7 @@
                 </div>
               </div>
               <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
-                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
+                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
                   ▶ Watch
                 </button>
                 <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
@@ -1372,13 +1372,22 @@
         return;
       }
 
-      const msg = `🛡️ *PAID AUTHORIZATION PROOF* 🛡️\n\n` +
-                  `• *Cadet Name:* ${name}\n` +
-                  `• *Payment Name:* ${paymentName}\n` +
-                  `• *Email:* ${email}\n` +
-                  `• *Selected Batches:* ${chosenBatches.join(", ")}\n` +
-                  `• *Payment Date:* ${paymentDate}\n` +
-                  `• *UTR Number:* ${utr}\n\n` +
+      const msg = `🛡️ *PAID AUTHORIZATION PROOF* 🛡️
+
+` +
+                  `• *Cadet Name:* ${name}
+` +
+                  `• *Payment Name:* ${paymentName}
+` +
+                  `• *Email:* ${email}
+` +
+                  `• *Selected Batches:* ${chosenBatches.join(", ")}
+` +
+                  `• *Payment Date:* ${paymentDate}
+` +
+                  `• *UTR Number:* ${utr}
+
+` +
                   `_Attached: Payment Screenshot_`;
 
       const tgUrl = `https://t.me/Teamphantom97_bot?text=${encodeURIComponent(msg)}`;
@@ -1595,8 +1604,11 @@
         document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
         document.getElementById('sidebarProfileEmail').innerText = data.email || "";
 
-        const allowed = data.allowedBatches || [];
-        const isCombo = allowed.includes("combo") || allowed.length >= 4;
+        const allowed = Array.isArray(data.allowedBatches)
+          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+          : [];
+        // Strict combo check: only true when "combo" is explicitly present in allowedBatches
+        const isCombo = allowed.includes("combo");
         const batchesList = ["cds-math", "cds-kilo", "nda", "afcat", "capf"];
         let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
 
@@ -1658,7 +1670,7 @@
       "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
       "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
       "nda": "-",
-      "Free-batch": "https://t.me/+E2hXFyRiHLwwODFl",
+      "free-batch": "https://t.me/+E2hXFyRiHLwwODFl",
       "capf": "https://t.me/+JmGvA3F25WY1YjA9"
     };
 
@@ -1671,11 +1683,11 @@
         { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
         { id: "cds-kilo", name: "CDS OTA SQUADRON" },
         { id: "nda", name: "NDA SQUADRON GROUP" },
-        { id: "Free-batch", name: "FREE BATCH SQUADRON" },
+        { id: "free-batch", name: "FREE BATCH SQUADRON" },
         { id: "capf", name: "CAPF SQUADRON" }
       ];
 
-      let userGroups = allGroups.filter(g => g.id === "Free-batch" || isCombo || allowed.includes(g.id));
+      let userGroups = allGroups.filter(g => allowed.includes(g.id) || (g.id === "free-batch" && isCombo));
       if (userGroups.length === 0) {
         container.innerHTML = "";
         return;
