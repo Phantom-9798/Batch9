@@ -156,7 +156,7 @@
 
       const staticLectures = [];
 
-      // 🔥 DIRECT SUBJECT QUERY (queries tactical_curriculum by squadron='nda', mode, and subject)
+      // 🔥 DIRECT SUBJECT QUERY (queries tactical_curriculum by squadron, mode, and subject)
       const q = query(
         collection(db, "tactical_curriculum"),
         where("squadron", "==", currentBatch),
@@ -234,7 +234,8 @@
 
       let html = "";
       lectures.forEach((lec, idx) => {
-        let embedSrc = lec.videoId;
+        let rawVideo = String(lec.videoId || "").trim();
+        let embedSrc = rawVideo;
         if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
           const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
           if (match && match[1]) {
@@ -246,7 +247,9 @@
         const currentBadge = badgeStyles[badgeIndex];
         const classNumStr = String(idx + 1).padStart(2, '0');
         const durationText = lec.duration ? `• ⏱ ${lec.duration}` : '';
-        const safeTitle = (lec.title || "TACTICAL SESSION").replace(/'/g, "\'");
+        const encodedVideo = encodeURIComponent(embedSrc);
+        const encodedTitle = encodeURIComponent(String(lec.title || "TACTICAL SESSION"));
+        const encodedPdf = encodeURIComponent(String(lec.pdfUrl || "#"));
 
         html += `
           <div class="lecture-rect-row page-transition">
@@ -261,10 +264,10 @@
               </div>
             </div>
             <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
-              <button onclick="window.playLectureVideo('${embedSrc}', '${safeTitle}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+              <button type="button" onclick="window.playLectureVideo(decodeURIComponent('${encodedVideo}'), decodeURIComponent('${encodedTitle}'))" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
                 ▶ Watch
               </button>
-              <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+              <button type="button" onclick="window.openClassNotes(decodeURIComponent('${encodedPdf}'))" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
                 📄 Notes
               </button>
             </div>
@@ -275,22 +278,38 @@
     }
 
     window.playLectureVideo = function(videoId, title) {
-      if (!videoId || videoId === "#" || videoId === "") {
+      const cleanId = String(videoId || "").trim();
+      if (!cleanId || cleanId === "#" || cleanId.toLowerCase() === "undefined" || cleanId.toLowerCase() === "null") {
         alert("It will be uploaded very soon.");
         return;
       }
-      const cleanTitle = title || "TACTICAL SESSION";
-      sessionStorage.setItem("phantom_current_video", videoId);
-      sessionStorage.setItem("phantom_current_title", cleanTitle);
-      window.location.href = "player.html";
+      const cleanTitle = String(title || "TACTICAL SESSION").trim() || "TACTICAL SESSION";
+      const urlParams = new URLSearchParams(window.location.search);
+      const batchParam = (urlParams.get('batch') || urlParams.get('squadron') || currentBatch || 'capf').toLowerCase().trim();
+      const subjectParam = urlParams.get('subject') || currentSubject || 'General Awareness';
+      const modeParam = (urlParams.get('mode') || 'live').toLowerCase().trim();
+
+      try {
+        sessionStorage.setItem("phantom_current_video", cleanId);
+        sessionStorage.setItem("phantom_current_title", cleanTitle);
+        sessionStorage.setItem("phantom_active_squadron", batchParam);
+      } catch (e) {}
+
+      const targetPlayerUrl = `player.html?batch=${encodeURIComponent(batchParam)}&subject=${encodeURIComponent(subjectParam)}&mode=${encodeURIComponent(modeParam)}&title=${encodeURIComponent(cleanTitle)}`;
+      try {
+        window.location.assign(targetPlayerUrl);
+      } catch (e) {
+        window.location.href = targetPlayerUrl;
+      }
     };
 
     window.openClassNotes = function(url) {
-      if (!url || url === "#" || url === "") {
+      const cleanUrl = String(url || "").trim();
+      if (!cleanUrl || cleanUrl === "#" || cleanUrl.toLowerCase() === "undefined" || cleanUrl.toLowerCase() === "null") {
         alert("Notes dossier: It will be uploaded very soon.");
         return;
       }
-      window.open(url, "_blank");
+      window.open(cleanUrl, "_blank", "noopener,noreferrer");
     };
 
     window.navigateBackToSubjects = function() {
