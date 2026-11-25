@@ -419,19 +419,24 @@
       z-index: 99999 !important;
     }
 
-    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
+    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (ALWAYS VISIBLE IN NORMAL & FULLSCREEN) */
     .frame-locked-brand-tag {
       position: absolute;
-      bottom: 10px;
+      bottom: 12px;
       right: 54px;
-      z-index: 50;
-      pointer-events: none;
+      top: auto !important;
+      left: auto !important;
+      z-index: 99998 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 0.85 !important;
+      pointer-events: none !important;
       user-select: none;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
       padding: 0 !important;
-      color: rgba(255, 255, 255, 0.75);
+      color: rgba(255, 255, 255, 0.85);
       font-family: 'Black Ops One', cursive;
       font-size: 14px;
       letter-spacing: 2px;
@@ -440,26 +445,35 @@
     }
 
     @media (max-width: 768px) {
+      .frame-locked-brand-tag,
       #phantomConsoleScreen.gdrive-mode .frame-locked-brand-tag {
-        bottom: 6px;
-        left: 12px;
-        top: auto;
-        right: auto;
+        bottom: 44px;
+        right: 12px;
+        top: auto !important;
+        left: auto !important;
         font-size: 11px;
-        opacity: 0.78;
+        opacity: 0.82 !important;
       }
     }
 
-    /* Keep logo cleanly positioned above bottom deck in fullscreen without leaving the video frame */
+    /* Keep logo cleanly positioned in bottom-right in fullscreen too (both container fullscreen & native iframe fullscreen) */
     #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
       bottom: 112px;
-      right: 58px;
+      right: 54px;
     }
     #phantomConsoleScreen.fs-idle .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
-      bottom: 16px;
+      bottom: 18px;
+      right: 54px;
+    }
+    @media (max-width: 768px) {
+      #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
+      #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
+        bottom: 48px;
+        right: 14px;
+      }
     }
 
     /* DIRECT ARCHIVE, GOOGLE DRIVE & ZOOM STYLING */
