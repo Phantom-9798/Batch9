@@ -866,6 +866,30 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // --- SESSION STORAGE CACHE HELPERS ---
+    const PHANTOM_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour for dashboard/cadet profile
+    const PHANTOM_FREE_LECTURE_TTL_MS = 60 * 60 * 1000; // 1 hour for free lectures list
+
+    function readSessionCache(key, ttlMs = PHANTOM_CACHE_TTL_MS, allowExpired = false) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || !("ts" in parsed)) return null;
+        const age = Date.now() - Number(parsed.ts || 0);
+        if (!allowExpired && age > ttlMs) return null;
+        return parsed.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeSessionCache(key, data) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) {}
+    }
+
     const FOCUS_TIMER_KEY = "phantom_daily_seconds";
     let phantomSessionSeconds = 0;
     function formatFocusTime(totalSeconds) {
@@ -1202,6 +1226,55 @@
       });
     }
 
+    function renderFreeLecturesListItems(container, lectures, subjectName, batchId) {
+      container.innerHTML = "";
+      const badgeStyles = [
+        { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" },
+        { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" },
+        { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" },
+        { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" },
+        { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }
+      ];
+
+      let html = "";
+      lectures.forEach((lec, idx) => {
+        const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
+        const durationText = lec.duration || "HD Session";
+        const descText = lec.description || "Tactical lecture notes & video session.";
+        const videoUrl = lec.url || "#";
+        const notesUrl = lec.notesUrl || lec.pdfUrl || "";
+
+        const badgeIndex = idx % badgeStyles.length;
+        const currentBadge = badgeStyles[badgeIndex];
+        const classNumStr = String(idx + 1).padStart(2, '0');
+
+        html += `
+          <div class="lecture-rect-row page-transition w-full">
+            <div class="flex items-center gap-4 overflow-hidden">
+              <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
+                ${classNumStr}
+              </div>
+              <div class="overflow-hidden">
+                <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
+                <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lecTitle}</h4>
+                <p class="text-xs text-neutral-300 font-body truncate mt-0.5">${descText} &bull; <span class="text-emerald-400 font-mono">${durationText}</span></p>
+              </div>
+            </div>
+            <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
+              <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
+                ▶ Watch
+              </button>
+              <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
+                📄 Notes
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
     async function loadFreeLectures(subjectName, batchId, modeVal) {
       document.getElementById("selectedFreeSubjectTitle").innerText = subjectName.toUpperCase() + " | CHAPTER LECTURES";
       document.getElementById("freeSubjectsGridView").classList.add("hidden");
@@ -1209,6 +1282,14 @@
 
       const container = document.getElementById("freeLecturesListContainer");
       if (!container) return;
+
+      const freeLecCacheKey = `phantom_free_lectures_v1_${String(batchId).toLowerCase().trim()}_${String(modeVal).toLowerCase().trim()}_${subjectName.trim().toLowerCase()}`;
+      const cachedFreeLectures = readSessionCache(freeLecCacheKey, PHANTOM_FREE_LECTURE_TTL_MS, false);
+      if (Array.isArray(cachedFreeLectures)) {
+        renderFreeLecturesListItems(container, cachedFreeLectures, subjectName, batchId);
+        return;
+      }
+
       container.innerHTML = `<div class="text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
 
       try {
@@ -1219,7 +1300,6 @@
           where("mode", "==", modeVal)
         );
         const querySnapshot = await getDocs(q);
-        container.innerHTML = "";
 
         let lectures = [];
         querySnapshot.forEach((docSnap) => {
@@ -1235,54 +1315,15 @@
         }
 
         lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        const badgeStyles = [
-          { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" },
-          { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" },
-          { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" },
-          { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" },
-          { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }
-        ];
-
-        let html = "";
-        lectures.forEach((lec, idx) => {
-          const lecTitle = lec.title || `${subjectName} Lecture #${idx + 1}`;
-          const durationText = lec.duration || "HD Session";
-          const descText = lec.description || "Tactical lecture notes & video session.";
-          const videoUrl = lec.url || "#";
-          const notesUrl = lec.notesUrl || lec.pdfUrl || "";
-
-          const badgeIndex = idx % badgeStyles.length;
-          const currentBadge = badgeStyles[badgeIndex];
-          const classNumStr = String(idx + 1).padStart(2, '0');
-
-          html += `
-            <div class="lecture-rect-row page-transition w-full">
-              <div class="flex items-center gap-4 overflow-hidden">
-                <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 font-orbitron font-extrabold text-white text-sm shadow-md" style="background: ${currentBadge.bg}; box-shadow: 0 0 15px ${currentBadge.shadow};">
-                  ${classNumStr}
-                </div>
-                <div class="overflow-hidden">
-                  <div class="text-[10px] font-orbitron text-neutral-400 uppercase tracking-widest mb-0.5">CLASS ${idx + 1}</div>
-                  <h4 class="font-orbitron font-bold text-sm sm:text-base text-white truncate">${lecTitle}</h4>
-                  <p class="text-xs text-neutral-300 font-body truncate mt-0.5">${descText} &bull; <span class="text-emerald-400 font-mono">${durationText}</span></p>
-                </div>
-              </div>
-              <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
-                <button onclick="window.watchFreeLectureAction('${batchId}', '${subjectName}', '${lecTitle.replace(/'/g, "\'")}', '${encodeURIComponent(videoUrl)}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer shadow cursor-pointer phantom-btn">
-                  ▶ Watch
-                </button>
-                <button onclick="${notesUrl ? `window.open('${notesUrl}', '_blank')` : `alert('Notes will be uploaded soon!')`}" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition cursor-pointer phantom-btn">
-                  📄 Notes
-                </button>
-              </div>
-            </div>
-          `;
-        });
-
-        container.innerHTML = html;
+        writeSessionCache(freeLecCacheKey, lectures);
+        renderFreeLecturesListItems(container, lectures, subjectName, batchId);
       } catch (err) {
         console.error("Error loading free lectures: ", err);
+        const staleFree = readSessionCache(freeLecCacheKey, PHANTOM_FREE_LECTURE_TTL_MS, true);
+        if (Array.isArray(staleFree)) {
+          renderFreeLecturesListItems(container, staleFree, subjectName, batchId);
+          return;
+        }
         container.innerHTML = `
           <div class="armor-panel rounded-2xl p-6 text-center w-full">
             <h3 class="font-orbitron font-extrabold text-sm text-red-400 mb-1">Error Loading Content</h3>
@@ -1313,14 +1354,6 @@
     let cachedCadetData = null;
     let authStatusShouldShow = false;
 
-    onSnapshot(doc(db, "cadets", localStorage.getItem("phantom_uid") || " "), (docSnap) => {
-      if (docSnap.exists()) {
-        cachedCadetData = docSnap.data();
-        const modal = document.getElementById("paidAuthModal");
-        if (authStatusShouldShow && modal && !modal.classList.contains("hidden")) updatePaidAuthRequestNotice(cachedCadetData);
-      }
-    });
-
     window.showPaidAuthModal = function() {
       const modal = document.getElementById("paidAuthModal");
       if (modal) {
@@ -1328,7 +1361,7 @@
         if (cachedCadetData) {
           const emailInput = document.getElementById('authCadetEmail');
           if (emailInput && cachedCadetData.email) emailInput.value = cachedCadetData.email;
-          updatePaidAuthRequestNotice(cachedCadetData);
+          if (typeof updatePaidAuthRequestNotice === "function") updatePaidAuthRequestNotice(cachedCadetData);
           const nameInput = document.getElementById('authCadetName');
           const paymentNameInput = document.getElementById('authPaymentName');
           const dateInput = document.getElementById('authPaymentDate');
@@ -1426,9 +1459,9 @@
         const finalTargetBatch = chosenBatches.join(", ");
         const requestBaselineBatches = Array.isArray(cachedCadetData?.allowedBatches) ? [...cachedCadetData.allowedBatches] : [];
         const requestSubmittedAt = new Date().toISOString();
-        const localUid = localStorage.getItem("phantom_uid");
-        if (localUid) {
-          const cadetRef = doc(db, "cadets", localUid);
+        const uid = localStorage.getItem("phantom_uid");
+        if (uid) {
+          const cadetRef = doc(db, "cadets", uid);
           await updateDoc(cadetRef, {
             fullName: name,
             targetBatch: finalTargetBatch,
@@ -1443,9 +1476,10 @@
         alertBox.classList.add("hidden");
         if (cachedCadetData) {
           cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: requestSubmittedAt, accessRequestSubmitted: true, accessRequestBaselineBatches: requestBaselineBatches };
+          if (uid) writeSessionCache("phantom_cadet_cache_" + uid, cachedCadetData);
         }
         authStatusShouldShow = true;
-        if (cachedCadetData) updatePaidAuthRequestNotice(cachedCadetData);
+        if (cachedCadetData && typeof updatePaidAuthRequestNotice === "function") updatePaidAuthRequestNotice(cachedCadetData);
         telegramProofClicked = false;
         submitBtn.disabled = true;
         submitBtn.className = "w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition";
@@ -1524,6 +1558,41 @@
       document.getElementById("testSectionView").classList.remove("hidden");
     }
 
+    function renderMockItemsList(container, items) {
+      container.innerHTML = "";
+      if (!Array.isArray(items) || items.length === 0) {
+        let row = document.createElement("div");
+        row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
+            <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
+          </div>
+          <div>
+            <span class="px-4 py-2 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-400 font-orbitron font-bold text-xs uppercase tracking-wider">Upcoming</span>
+          </div>
+        `;
+        container.appendChild(row);
+        return;
+      }
+
+      items.forEach((data) => {
+        let row = document.createElement("div");
+        row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${data.title}</div>
+            <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Start Now</a>
+            <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Analysis</a>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
     window.openMockList = async function(sectionName) {
       currentSection = sectionName;
       document.getElementById("selectedSectionTitle").innerText = currentExam + " - " + sectionName;
@@ -1531,6 +1600,13 @@
       document.getElementById("mockListView").classList.remove("hidden");
 
       let container = document.getElementById("mockItemsContainer");
+      const testsCacheKey = `phantom_tests_v1_${String(currentExam).toLowerCase().trim()}_${String(currentSection).toLowerCase().trim()}`;
+      const cachedTests = readSessionCache(testsCacheKey, PHANTOM_CACHE_TTL_MS, false);
+      if (Array.isArray(cachedTests)) {
+        renderMockItemsList(container, cachedTests);
+        return;
+      }
+
       container.innerHTML = `<div style="text-align:center; color: #94a3b8; padding: 20px;" class="font-orbitron">Loading tests...</div>`;
 
       try {
@@ -1540,42 +1616,77 @@
           where("section", "==", currentSection)
         );
         const querySnapshot = await getDocs(q);
-        container.innerHTML = "";
-
-        if (querySnapshot.empty) {
-          let row = document.createElement("div");
-          row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
-          row.innerHTML = `
-            <div>
-              <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">It will be uploaded soon</div>
-              <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
-            </div>
-            <div>
-              <span class="px-4 py-2 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-400 font-orbitron font-bold text-xs uppercase tracking-wider">Upcoming</span>
-            </div>
-          `;
-          container.appendChild(row);
-        } else {
-          querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            let row = document.createElement("div");
-            row.className = "armor-panel rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 w-full";
-            row.innerHTML = `
-              <div>
-                <div style="font-weight: bold; font-size: 16px; color: #f8fafc;" class="font-orbitron">${data.title}</div>
-                <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">CBT Format • Bilingual (EN/HI) • Negative Marking Enabled</div>
-              </div>
-              <div style="display: flex; gap: 10px;">
-                <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Start Now</a>
-                <a href="${data.link}" target="_blank" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-sky-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center phantom-btn">Analysis</a>
-              </div>
-            `;
-            container.appendChild(row);
-          });
-        }
+        const fetchedItems = [];
+        querySnapshot.forEach((docSnap) => {
+          fetchedItems.push(docSnap.data());
+        });
+        writeSessionCache(testsCacheKey, fetchedItems);
+        renderMockItemsList(container, fetchedItems);
       } catch (e) {
         console.error("Error fetching tests: ", e);
+        const staleTests = readSessionCache(testsCacheKey, PHANTOM_CACHE_TTL_MS, true);
+        if (Array.isArray(staleTests)) {
+          renderMockItemsList(container, staleTests);
+        }
       }
+    }
+
+    function applyDashboardCadetState(data, localUid, localToken) {
+      if (!data) {
+        window.location.href = "intro.html";
+        return false;
+      }
+      if (data.activeSession && localToken && data.activeSession !== localToken) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      cachedCadetData = data;
+      const modal = document.getElementById("paidAuthModal");
+      if (authStatusShouldShow && modal && !modal.classList.contains("hidden") && typeof updatePaidAuthRequestNotice === "function") {
+        updatePaidAuthRequestNotice(cachedCadetData);
+      }
+
+      document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
+      document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
+      document.getElementById('sidebarProfileEmail').innerText = data.email || "";
+
+      const allowed = Array.isArray(data.allowedBatches)
+        ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+        : [];
+      // Strict combo check: only true when "combo" is explicitly present in allowedBatches
+      const isCombo = allowed.includes("combo");
+      const batchesList = ["cds-math", "cds-kilo", "nda", "afcat", "capf"];
+      let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
+
+      const paidSection = document.getElementById("paidSquadronsSection");
+      const telegramContainer = document.getElementById("telegramNotificationContainer");
+
+      if (telegramContainer) telegramContainer.classList.remove("hidden");
+
+      if (hasPaidAccessAny) {
+        if (paidSection) {
+          paidSection.classList.remove("hidden");
+          paidSection.style.display = "block";
+        }
+        batchesList.forEach(batchId => {
+          const hasAccess = isCombo || allowed.includes(batchId);
+          applyPaidBatchAccess(batchId, hasAccess);
+        });
+      } else {
+        if (paidSection) {
+          paidSection.classList.add("hidden");
+          paidSection.style.display = "none";
+        }
+      }
+
+      const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
+      renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
+      return true;
     }
 
     let unsubscribeSnapshot = null;
@@ -1585,56 +1696,27 @@
     if (!localUid || !localToken) {
       window.location.href = "intro.html";
     } else {
+      const cadetCacheKey = "phantom_cadet_cache_" + localUid;
+      const cachedCadet = readSessionCache(cadetCacheKey, PHANTOM_CACHE_TTL_MS, false);
+      if (cachedCadet) {
+        applyDashboardCadetState(cachedCadet, localUid, localToken);
+      }
+
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
+          try { sessionStorage.removeItem(cadetCacheKey); } catch (e) {}
           window.location.href = "intro.html";
           return;
         }
         const data = docSnap.data();
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
-          return;
+        writeSessionCache(cadetCacheKey, data);
+        applyDashboardCadetState(data, localUid, localToken);
+      }, (err) => {
+        console.warn("Cadet dashboard snapshot fallback:", err);
+        const staleCadet = readSessionCache(cadetCacheKey, PHANTOM_CACHE_TTL_MS, true);
+        if (staleCadet) {
+          applyDashboardCadetState(staleCadet, localUid, localToken);
         }
-
-        document.getElementById('cadetNameDisplay').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileName').innerText = data.name || "Cadet";
-        document.getElementById('sidebarProfileEmail').innerText = data.email || "";
-
-        const allowed = Array.isArray(data.allowedBatches)
-          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
-          : [];
-        // Strict combo check: only true when "combo" is explicitly present in allowedBatches
-        const isCombo = allowed.includes("combo");
-        const batchesList = ["cds-math", "cds-kilo", "nda", "afcat", "capf"];
-        let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
-
-        const paidSection = document.getElementById("paidSquadronsSection");
-        const telegramContainer = document.getElementById("telegramNotificationContainer");
-
-        if (telegramContainer) telegramContainer.classList.remove("hidden");
-
-        if (hasPaidAccessAny) {
-          if (paidSection) {
-            paidSection.classList.remove("hidden");
-            paidSection.style.display = "block";
-          }
-          batchesList.forEach(batchId => {
-            const hasAccess = isCombo || allowed.includes(batchId);
-            applyPaidBatchAccess(batchId, hasAccess);
-          });
-        } else {
-          if (paidSection) {
-            paidSection.classList.add("hidden");
-            paidSection.style.display = "none";
-          }
-        }
-
-        const clickedGroups = Array.isArray(data.clickedGroups) ? data.clickedGroups : [];
-        renderTelegramNotification(allowed, isCombo, localUid, clickedGroups);
       });
     }
 
@@ -1773,6 +1855,7 @@
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
+      sessionStorage.clear();
       window.location.href = "intro.html";
     };
   </script>
