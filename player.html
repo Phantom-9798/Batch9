@@ -372,7 +372,7 @@
     /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ALWAYS ACTIVE IN NORMAL & FULLSCREEN) */
     .gdrive-popout-lock {
       display: none;
-      position: fixed;
+      position: absolute;
       top: 0;
       right: 0;
       width: 104px;
@@ -385,16 +385,14 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
     }
-    .gdrive-popout-lock.active {
+    .gdrive-popout-lock.active,
+    #phantomConsoleScreen.gdrive-mode .gdrive-popout-lock.active,
+    #phantomConsoleScreen.gdrive-mode:fullscreen .gdrive-popout-lock.active,
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .gdrive-popout-lock.active {
       display: block !important;
       opacity: 1 !important;
       pointer-events: auto !important;
-    }
-
-    #phantomConsoleScreen:not(.gdrive-mode) .gdrive-popout-lock,
-    #phantomConsoleScreen:not(.gdrive-mode) .gdrive-popout-lock.active {
-      display: none !important;
-      pointer-events: none !important;
+      z-index: 99999 !important;
     }
 
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
@@ -815,9 +813,6 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ONLY POP-OUT BUTTON LOCKED; NATIVE BUTTONS & FULLSCREEN FREE) -->
-          <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
-
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
         </div>
@@ -1113,7 +1108,16 @@
 
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      if (dockBtn) dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+      if (!dockBtn) return;
+      if (isGDriveEmbed) {
+        dockBtn.disabled = true;
+        dockBtn.classList.add("is-disabled");
+        dockBtn.innerText = "⛶ Fullscreen";
+        return;
+      }
+      dockBtn.disabled = false;
+      dockBtn.classList.remove("is-disabled");
+      dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
     function applyScreenLockForMode(mode) {
@@ -1173,11 +1177,13 @@
       }
 
       if (speedSel) {
-        var canSpeed = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
+        var canSpeed = (mode === 'youtube' || mode === 'archive');
         speedSel.disabled = !canSpeed;
         if (canSpeed) speedSel.classList.remove("is-disabled");
         else speedSel.classList.add("is-disabled");
       }
+
+      syncFullscreenButtons(isAnyFullscreen());
 
       if (dlBtn) {
         dlBtn.disabled = !canDownload;
@@ -1338,19 +1344,6 @@
         bindYouTubeDoubleTap(lockShield);
       }
 
-      const popoutLock = document.getElementById("gdrivePopoutLock");
-      if (popoutLock) {
-        ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
-          popoutLock.addEventListener(ev, function(e) {
-            if (!isGDriveEmbed || !popoutLock.classList.contains("active")) return;
-            e.preventDefault();
-            e.stopPropagation();
-            if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-            return false;
-          }, { passive: false, capture: true });
-        });
-      }
-
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
         screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
@@ -1385,7 +1378,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED; ONLY TOP-RIGHT POP-OUT LOCKED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED; ONLY TOP-RIGHT POP-OUT LOCKED; CUSTOM FS & SPEED DISABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1409,12 +1402,25 @@
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
+            <div class="gdrive-popout-lock active" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
             <div class="gdrive-edge-tap-zone left" id="gdriveLeftTapZone" oncontextmenu="return false;"></div>
             <div class="gdrive-edge-tap-zone right" id="gdriveRightTapZone" oncontextmenu="return false;"></div>
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
           </div>
         `;
+
+        const popoutLock = document.getElementById("gdrivePopoutLock");
+        if (popoutLock) {
+          ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
+            popoutLock.addEventListener(ev, function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+              return false;
+            }, { passive: false, capture: true });
+          });
+        }
 
         bindGDriveEdgeDoubleTap(document.getElementById("gdriveLeftTapZone"), "left");
         bindGDriveEdgeDoubleTap(document.getElementById("gdriveRightTapZone"), "right");
@@ -1605,12 +1611,8 @@
     }
 
     function updateVideoSpeed(rate) {
+      if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
-      if (isGDriveEmbed) {
-        applyCustomGDriveSpeed(spd);
-        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
-        return;
-      }
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
@@ -1621,6 +1623,7 @@
     }
 
     function toggleTacticalFullscreen() {
+      if (isGDriveEmbed) return;
       const target = document.getElementById("phantomConsoleScreen");
 
       if (!isAnyFullscreen()) {
