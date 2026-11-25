@@ -206,10 +206,12 @@
     }
 
     /* MOBILE: GIVE GOOGLE DRIVE FRAME ENOUGH HEIGHT SO ALL NATIVE BUTTONS (FULLSCREEN, SETTINGS, TIMELINE, PLAY) SHOW CLEARLY */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       #phantomConsoleScreen.gdrive-mode .video-viewport-box {
-        min-height: 235px;
-        max-height: calc(100vh - 265px);
+        height: 295px !important;
+        min-height: 295px !important;
+        max-height: 46vh !important;
+        aspect-ratio: auto !important;
       }
     }
 
@@ -439,12 +441,12 @@
 
     @media (max-width: 768px) {
       #phantomConsoleScreen.gdrive-mode .frame-locked-brand-tag {
-        top: 10px;
+        bottom: 6px;
         left: 12px;
-        bottom: auto;
+        top: auto;
         right: auto;
         font-size: 11px;
-        opacity: 0.7;
+        opacity: 0.78;
       }
     }
 
