@@ -419,60 +419,63 @@
       z-index: 99999 !important;
     }
 
-    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (ALWAYS VISIBLE IN NORMAL & FULLSCREEN) */
+    /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (LARGER & ALWAYS VISIBLE IN NORMAL & FULLSCREEN) */
     .frame-locked-brand-tag {
       position: absolute;
-      bottom: 12px;
-      right: 54px;
+      bottom: 14px;
+      right: 56px;
       top: auto !important;
       left: auto !important;
-      z-index: 99998 !important;
+      z-index: 2147483647 !important;
       display: block !important;
       visibility: visible !important;
-      opacity: 0.85 !important;
+      opacity: 0.92 !important;
       pointer-events: none !important;
       user-select: none;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
       padding: 0 !important;
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(255, 255, 255, 0.92);
       font-family: 'Black Ops One', cursive;
-      font-size: 14px;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+      font-size: 18px;
+      letter-spacing: 2.2px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.98), 0 0 6px rgba(0, 0, 0, 0.9);
       transition: bottom 0.28s ease;
     }
 
     @media (max-width: 768px) {
       .frame-locked-brand-tag,
       #phantomConsoleScreen.gdrive-mode .frame-locked-brand-tag {
-        bottom: 44px;
-        right: 12px;
+        bottom: 48px;
+        right: 14px;
         top: auto !important;
         left: auto !important;
-        font-size: 11px;
-        opacity: 0.82 !important;
+        font-size: 14px;
+        opacity: 0.9 !important;
       }
     }
 
-    /* Keep logo cleanly positioned in bottom-right in fullscreen too (both container fullscreen & native iframe fullscreen) */
+    /* Keep logo cleanly positioned in bottom-right in fullscreen too */
     #phantomConsoleScreen:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen:-webkit-full-screen .frame-locked-brand-tag {
       bottom: 112px;
-      right: 54px;
+      right: 56px;
+      font-size: 20px;
     }
     #phantomConsoleScreen.fs-idle .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
-      bottom: 18px;
-      right: 54px;
+      bottom: 22px;
+      right: 56px;
+      font-size: 20px;
     }
     @media (max-width: 768px) {
       #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
       #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
-        bottom: 48px;
-        right: 14px;
+        bottom: 52px;
+        right: 16px;
+        font-size: 15px;
       }
     }
 
@@ -1700,8 +1703,25 @@
       }
     }
 
-    document.addEventListener("fullscreenchange", () => {
+    function handleUnifiedFullscreenChange() {
       var screen = document.getElementById("phantomConsoleScreen");
+      var fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+
+      // If Google Drive's internal fullscreen button put ONLY the iframe into fullscreen,
+      // promote fullscreen to #phantomConsoleScreen so the Team Phantom logo & pop-out lock stay visible on top!
+      if (fsEl && fsEl.id === "gdriveIframe" && screen) {
+        var exitFn = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        var reqFn = screen.requestFullscreen || screen.webkitRequestFullscreen || screen.msRequestFullscreen;
+        if (exitFn && reqFn) {
+          try {
+            Promise.resolve(exitFn.call(document)).then(function() {
+              try { reqFn.call(screen); } catch (e) {}
+            }).catch(function() {});
+          } catch (e) {}
+          return;
+        }
+      }
+
       const nowFs = isAnyFullscreen();
       PLAYER.isFullscreen = nowFs;
       if (!nowFs) {
@@ -1716,7 +1736,10 @@
           wakeFullscreenControlsFor5s();
         }
       }
-    });
+    }
+
+    document.addEventListener("fullscreenchange", handleUnifiedFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleUnifiedFullscreenChange);
 
     function skipSeconds(s) {
       if (isGDriveEmbed && PLAYER.gdriveId) {
