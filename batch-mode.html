@@ -95,9 +95,18 @@
     let unsubscribeSnapshot = null;
     let targetBatch = "cds";
 
+    const BATCH_DISPLAY_NAMES = {
+      "cds-math": "CDS MATHEMATICS",
+      "cds-kilo": "CDS OTA",
+      "nda": "NDA (NATIONAL DEFENCE ACADEMY)",
+      "afcat": "AFCAT",
+      "capf": "CAPF",
+      "cds": "CDS"
+    };
+
     // URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    targetBatch = (urlParams.get('batch') || 'cds').toLowerCase();
+    targetBatch = (urlParams.get('batch') || 'cds').toLowerCase().trim();
     window.PHANTOM_ACTIVE_SQUADRON = targetBatch;
     try {
       sessionStorage.setItem("phantom_active_squadron", targetBatch);
@@ -139,9 +148,11 @@
           return;
         }
 
-        // Batch Enrollment Check
-        const allowedBatches = data.allowedBatches || [];
-        const isCombo = allowedBatches.includes('combo') || allowedBatches.includes('all') || allowedBatches.length >= 4;
+        // Batch Enrollment Check (Strict Combo Rule: only 'combo' unlocks all)
+        const allowedBatches = Array.isArray(data.allowedBatches)
+          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+          : [];
+        const isCombo = allowedBatches.includes('combo');
         if (!isCombo && !allowedBatches.includes(targetBatch)) {
           alert("ACCESS RESTRICTED: You are not enrolled in this squadron.");
           window.location.href = "classroom.html";
@@ -149,8 +160,9 @@
         }
 
         // Set UI Header
-        document.getElementById("batchBadge").innerText = `${targetBatch.toUpperCase()} SQUADRON`;
-        document.getElementById("batchTitle").innerText = `${targetBatch.toUpperCase()} BATCH ACCESS`;
+        const displayLabel = BATCH_DISPLAY_NAMES[targetBatch] || targetBatch.toUpperCase();
+        document.getElementById("batchBadge").innerText = `${displayLabel} SQUADRON`;
+        document.getElementById("batchTitle").innerText = `${displayLabel} BATCH ACCESS`;
         if (typeof window.renderMyDownloadsTab === "function") {
           window.renderMyDownloadsTab();
         }
@@ -170,7 +182,7 @@
   </script>
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
