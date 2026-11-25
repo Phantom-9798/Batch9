@@ -559,7 +559,7 @@
     let currentModeParam = "live";
 
     // --- SESSION STORAGE CACHE HELPERS ---
-    const PHANTOM_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes per tab session
+    const PHANTOM_CACHE_TTL_MS = 60 * 60 * 1000; // 60 minutes per tab session
 
     function readSessionCache(key, allowExpired = false) {
       try {
