@@ -558,40 +558,111 @@
     let currentBatchParam = "cds-kilo";
     let currentModeParam = "live";
 
-    // --- SECURE SESSION VALIDATION ---
+    // --- SESSION STORAGE CACHE HELPERS ---
+    const PHANTOM_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes per tab session
+
+    function readSessionCache(key, allowExpired = false) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || !("ts" in parsed)) return null;
+        const age = Date.now() - Number(parsed.ts || 0);
+        if (!allowExpired && age > PHANTOM_CACHE_TTL_MS) return null;
+        return parsed.data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function writeSessionCache(key, data) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (e) {}
+    }
+
+    function evaluateCadetAccess(data, localToken) {
+      if (!data) {
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      if (data.status !== "active") {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("Notice: Cadet account is currently not active or pending verification.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      if (data.activeSession && localToken && data.activeSession !== localToken) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
+        localStorage.removeItem("phantom_session_token");
+        localStorage.removeItem("phantom_uid");
+        window.location.href = "intro.html";
+        return false;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const batchToCheck = (urlParams.get('batch') || 'cds-kilo').toLowerCase().trim();
+      const normalizedAllowed = Array.isArray(data.allowedBatches)
+        ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
+        : [];
+      // Strict Combo Rule: only 'combo' unlocks all batches
+      const isCombo = normalizedAllowed.includes('combo');
+      if (!isCombo && !normalizedAllowed.includes(batchToCheck)) {
+        if (unsubscribeSnapshot) unsubscribeSnapshot();
+        alert("ACCESS DENIED: You are not authorized for this specific squadron.");
+        window.location.href = "classroom.html";
+        return false;
+      }
+
+      return true;
+    }
+
+    // --- SECURE SESSION VALIDATION (WITH SESSION STORAGE CACHE) ---
     const localUid = localStorage.getItem("phantom_uid");
     const localToken = localStorage.getItem("phantom_session_token");
+    let curriculumRenderedOnce = false;
 
     if (!localUid || !localToken) {
       window.location.href = "intro.html";
     } else {
+      const cadetCacheKey = "phantom_cadet_cache_" + localUid;
+      const cachedCadet = readSessionCache(cadetCacheKey, false);
+
+      if (cachedCadet && evaluateCadetAccess(cachedCadet, localToken)) {
+        curriculumRenderedOnce = true;
+        renderBatchCurriculum(cachedCadet.allowedBatches || []);
+      }
+
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
+          try { sessionStorage.removeItem(cadetCacheKey); } catch (e) {}
           window.location.href = "intro.html";
           return;
         }
 
         const data = docSnap.data();
+        writeSessionCache(cadetCacheKey, data);
 
-        if (data.status !== "active") {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("Notice: Cadet account is currently not active or pending verification.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
+        if (!evaluateCadetAccess(data, localToken)) {
           return;
         }
 
-        if (data.activeSession && localToken && data.activeSession !== localToken) {
-          if (unsubscribeSnapshot) unsubscribeSnapshot();
-          alert("SECURITY PROTOCOL: Active session detected on another terminal. Logging out.");
-          localStorage.removeItem("phantom_session_token");
-          localStorage.removeItem("phantom_uid");
-          window.location.href = "intro.html";
-          return;
+        if (!curriculumRenderedOnce) {
+          curriculumRenderedOnce = true;
+          renderBatchCurriculum(data.allowedBatches || []);
         }
-
-        renderBatchCurriculum(data.allowedBatches || []);
+      }, (err) => {
+        console.warn("Cadet snapshot fallback:", err);
+        const staleCadet = readSessionCache(cadetCacheKey, true);
+        if (staleCadet && evaluateCadetAccess(staleCadet, localToken) && !curriculumRenderedOnce) {
+          curriculumRenderedOnce = true;
+          renderBatchCurriculum(staleCadet.allowedBatches || []);
+        }
       });
     }
 
@@ -670,6 +741,7 @@
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       localStorage.removeItem("phantom_session_token");
       localStorage.removeItem("phantom_uid");
+      sessionStorage.clear();
       window.location.href = "intro.html";
     };
   </script>
