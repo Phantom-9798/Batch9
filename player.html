@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -842,7 +842,7 @@
           <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN LOCK (KEEPS SETTINGS BUTTON FREE) -->
+          <!-- GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN LOCK (LEAVES SETTINGS BUTTON FREE) -->
           <div class="gdrive-fullscreen-lock" id="gdriveFullscreenLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
@@ -942,10 +942,24 @@
   <script>
     const PHANTOM_PROXY_BASE = "https://p53j8b.bot-keep.xyz";
 
+    const SQUADRON_DISPLAY_NAMES = {
+      "nda": "NDA (NATIONAL DEFENCE ACADEMY)",
+      "cds": "CDS",
+      "cds-math": "CDS MATHEMATICS",
+      "cds-kilo": "CDS OTA",
+      "afcat": "AFCAT",
+      "capf": "CAPF"
+    };
+
+    function formatSquadronDisplayName(sq) {
+      var k = String(sq || "").toLowerCase().trim();
+      return SQUADRON_DISPLAY_NAMES[k] || k.toUpperCase();
+    }
+
     function getCurrentPlayerSquadron() {
-      var fromUrl = new URLSearchParams(window.location.search).get("batch");
+      var fromUrl = new URLSearchParams(window.location.search).get("batch") || new URLSearchParams(window.location.search).get("squadron");
       if (fromUrl) {
-        var cleanUrlBatch = String(fromUrl).toLowerCase();
+        var cleanUrlBatch = String(fromUrl).toLowerCase().trim();
         try {
           sessionStorage.setItem("phantom_active_squadron", cleanUrlBatch);
           localStorage.setItem("phantom_active_squadron", cleanUrlBatch);
@@ -954,7 +968,7 @@
       }
       try {
         var storedBatch = sessionStorage.getItem("phantom_active_squadron") || localStorage.getItem("phantom_active_squadron");
-        if (storedBatch) return String(storedBatch).toLowerCase();
+        if (storedBatch) return String(storedBatch).toLowerCase().trim();
       } catch (e) {}
       return "cds";
     }
@@ -1004,6 +1018,7 @@
     let downloadPopupInterval = null;
     let downloadPopupHideTimer = null;
     let gdriveVirtualSeekSec = 0;
+    let gdriveSpeedRate = 1;
 
     var PLAYER = {
       mode: 'youtube',
@@ -1194,7 +1209,8 @@
       }
 
       if (speedSel) {
-        var canSpeed = (mode === 'youtube' || mode === 'archive');
+        // Enable custom speed selector for YouTube, Archive, and Google Drive
+        var canSpeed = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
         speedSel.disabled = !canSpeed;
         if (canSpeed) speedSel.classList.remove("is-disabled");
         else speedSel.classList.add("is-disabled");
@@ -1328,7 +1344,10 @@
         var fsTitleEl = document.getElementById("fsLectureTitle");
         if (fsTitleEl) fsTitleEl.innerText = decodedTitle;
         if (decodedTitle.includes("(")) {
-          document.getElementById("classLabelIndicator").innerText = decodedTitle.split('(')[1].replace(')', '').toUpperCase() + " • SESSION";
+          var rawBatchTag = decodedTitle.split('(')[1].replace(')', '').trim().toLowerCase();
+          document.getElementById("classLabelIndicator").innerText = formatSquadronDisplayName(rawBatchTag) + " • SESSION";
+        } else if (activeSquadron === "nda") {
+          document.getElementById("classLabelIndicator").innerText = formatSquadronDisplayName("nda") + " • SESSION";
         }
       }
 
@@ -1417,7 +1436,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (CENTER PLAY BUTTON & ALL NATIVE CONTROLS UNBLOCKED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (CENTER PLAY BUTTON & ALL NATIVE CONTROLS UNBLOCKED + CUSTOM SPEED ENABLED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1617,9 +1636,31 @@
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
+    function applyCustomGDriveSpeed(spd) {
+      gdriveSpeedRate = spd;
+      const gdFrame = document.getElementById("gdriveIframe");
+      if (gdFrame) {
+        try {
+          if (gdFrame.contentWindow) {
+            gdFrame.contentWindow.postMessage(JSON.stringify({ event: "command", func: "setPlaybackRate", args: [spd] }), "*");
+            gdFrame.contentWindow.postMessage({ type: "phantom_gdrive_speed", rate: spd }, "*");
+          }
+        } catch (e) {}
+      }
+      try {
+        window.dispatchEvent(new CustomEvent("phantom:gdriveSpeedChange", {
+          detail: { rate: spd, fileId: PLAYER.gdriveId }
+        }));
+      } catch (e) {}
+    }
+
     function updateVideoSpeed(rate) {
-      if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
+      if (isGDriveEmbed) {
+        applyCustomGDriveSpeed(spd);
+        if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+        return;
+      }
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
