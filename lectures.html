@@ -93,15 +93,11 @@
     
     let currentBatch = "capf";
     let currentSubject = "Mentor Session";
-
-    const BATCH_DISPLAY_NAMES = {
-      "cds-math": "CDS MATHEMATICS",
-      "cds-kilo": "CDS OTA",
-      "nda": "NDA (NATIONAL DEFENCE ACADEMY)",
-      "afcat": "AFCAT",
-      "capf": "CAPF",
-      "cds": "CDS"
+    const ndaSquadronConfig = {
+      key: "nda",
+      label: "NDA (NATIONAL DEFENCE ACADEMY)"
     };
+
 
     // --- SECURE SESSION VALIDATION ---
     const localUid = localStorage.getItem("phantom_uid");
@@ -127,39 +123,27 @@
           return;
         }
 
-        const allowedBatches = Array.isArray(data.allowedBatches)
-          ? data.allowedBatches.map(b => String(b).toLowerCase().trim())
-          : [];
-        const isCombo = allowedBatches.includes("combo");
-        const urlParams = new URLSearchParams(window.location.search);
-        const requestedBatch = (urlParams.get('batch') || urlParams.get('squadron') || 'capf').toLowerCase().trim();
-        if (!isCombo && !allowedBatches.includes(requestedBatch)) {
-          alert("ACCESS DENIED: You are not enrolled in this squadron.");
-          window.location.href = "classroom.html";
-          return;
-        }
-
         renderLecturesList();
       });
     }
 
     function renderLecturesList() {
       const urlParams = new URLSearchParams(window.location.search);
-      currentBatch = (urlParams.get('batch') || urlParams.get('squadron') || 'capf').toLowerCase().trim();
+      currentBatch = urlParams.get('batch') || urlParams.get('squadron') || 'capf';
       currentSubject = urlParams.get('subject') || 'General Awareness';
-      const mode = (urlParams.get('mode') || 'live').toLowerCase().trim();
+      const mode = urlParams.get('mode') || 'live';
 
       const modeBadge = mode === 'recorded' ? 'RECORDED VAULT' : 'LIVE SQUADRON';
-      const batchLabel = BATCH_DISPLAY_NAMES[currentBatch] || currentBatch.toUpperCase();
-      document.getElementById('badgeIndicator').innerText = `${batchLabel} • ${modeBadge}`;
+      const batchTitleText = (currentBatch.toLowerCase().trim() === ndaSquadronConfig.key) ? ndaSquadronConfig.label : currentBatch.toUpperCase();
+      document.getElementById('badgeIndicator').innerText = `${batchTitleText} • ${modeBadge}`;
       document.getElementById('chapterHeading').innerText = currentSubject;
 
       const staticLectures = [];
 
-      // 🔥 DIRECT SUBJECT QUERY (queries tactical_curriculum by squadron, mode, and subject)
+      // 🔥 DIRECT SUBJECT QUERY
       const q = query(
         collection(db, "tactical_curriculum"),
-        where("squadron", "==", currentBatch),
+        where("squadron", "==", currentBatch.toLowerCase().trim()),
         where("mode", "==", mode),
         where("subject", "==", currentSubject.trim())
       );
@@ -234,8 +218,7 @@
 
       let html = "";
       lectures.forEach((lec, idx) => {
-        let rawVideo = String(lec.videoId || "").trim();
-        let embedSrc = rawVideo;
+        let embedSrc = lec.videoId;
         if (embedSrc.includes("youtu.be/") || embedSrc.includes("youtube.com/")) {
           const match = embedSrc.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
           if (match && match[1]) {
@@ -247,9 +230,7 @@
         const currentBadge = badgeStyles[badgeIndex];
         const classNumStr = String(idx + 1).padStart(2, '0');
         const durationText = lec.duration ? `• ⏱ ${lec.duration}` : '';
-        const encodedVideo = encodeURIComponent(embedSrc);
-        const encodedTitle = encodeURIComponent(String(lec.title || "TACTICAL SESSION"));
-        const encodedPdf = encodeURIComponent(String(lec.pdfUrl || "#"));
+        const safeTitle = (lec.title || "TACTICAL SESSION").replace(/'/g, "\'");
 
         html += `
           <div class="lecture-rect-row page-transition">
@@ -264,10 +245,10 @@
               </div>
             </div>
             <div class="lecture-rect-actions flex items-center gap-2.5 shrink-0">
-              <button type="button" onclick="window.playLectureVideo(decodeURIComponent('${encodedVideo}'), decodeURIComponent('${encodedTitle}'))" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+              <button onclick="window.playLectureVideo('${embedSrc}', '${safeTitle}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
                 ▶ Watch
               </button>
-              <button type="button" onclick="window.openClassNotes(decodeURIComponent('${encodedPdf}'))" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
+              <button onclick="window.openClassNotes('${lec.pdfUrl}')" class="px-4 py-2.5 rounded-xl bg-neutral-900 border border-amber-400/40 hover:bg-amber-400/10 text-amber-300 font-orbitron font-extrabold text-xs uppercase tracking-wider transition shadow cursor-pointer phantom-btn">
                 📄 Notes
               </button>
             </div>
@@ -278,44 +259,28 @@
     }
 
     window.playLectureVideo = function(videoId, title) {
-      const cleanId = String(videoId || "").trim();
-      if (!cleanId || cleanId === "#" || cleanId.toLowerCase() === "undefined" || cleanId.toLowerCase() === "null") {
+      if (!videoId || videoId === "#" || videoId === "") {
         alert("It will be uploaded very soon.");
         return;
       }
-      const cleanTitle = String(title || "TACTICAL SESSION").trim() || "TACTICAL SESSION";
-      const urlParams = new URLSearchParams(window.location.search);
-      const batchParam = (urlParams.get('batch') || urlParams.get('squadron') || currentBatch || 'capf').toLowerCase().trim();
-      const subjectParam = urlParams.get('subject') || currentSubject || 'General Awareness';
-      const modeParam = (urlParams.get('mode') || 'live').toLowerCase().trim();
-
-      try {
-        sessionStorage.setItem("phantom_current_video", cleanId);
-        sessionStorage.setItem("phantom_current_title", cleanTitle);
-        sessionStorage.setItem("phantom_active_squadron", batchParam);
-      } catch (e) {}
-
-      const targetPlayerUrl = `player.html?batch=${encodeURIComponent(batchParam)}&subject=${encodeURIComponent(subjectParam)}&mode=${encodeURIComponent(modeParam)}&title=${encodeURIComponent(cleanTitle)}`;
-      try {
-        window.location.assign(targetPlayerUrl);
-      } catch (e) {
-        window.location.href = targetPlayerUrl;
-      }
+      const cleanTitle = title || "TACTICAL SESSION";
+      sessionStorage.setItem("phantom_current_video", videoId);
+      sessionStorage.setItem("phantom_current_title", cleanTitle);
+      window.location.href = "player.html";
     };
 
     window.openClassNotes = function(url) {
-      const cleanUrl = String(url || "").trim();
-      if (!cleanUrl || cleanUrl === "#" || cleanUrl.toLowerCase() === "undefined" || cleanUrl.toLowerCase() === "null") {
+      if (!url || url === "#" || url === "") {
         alert("Notes dossier: It will be uploaded very soon.");
         return;
       }
-      window.open(cleanUrl, "_blank", "noopener,noreferrer");
+      window.open(url, "_blank");
     };
 
     window.navigateBackToSubjects = function() {
       const urlParams = new URLSearchParams(window.location.search);
-      const batch = (urlParams.get('batch') || 'cds-kilo').toLowerCase().trim();
-      const mode = (urlParams.get('mode') || 'live').toLowerCase().trim();
+      const batch = urlParams.get('batch') || 'cds-kilo';
+      const mode = urlParams.get('mode') || 'live';
       window.location.href = `subjects.html?batch=${encodeURIComponent(batch)}&mode=${encodeURIComponent(mode)}`;
     };
 
