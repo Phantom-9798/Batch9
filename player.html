@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-- {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -369,56 +369,32 @@
     .gdrive-edge-tap-zone.left { left: 0; }
     .gdrive-edge-tap-zone.right { right: 0; }
 
-    /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ACTIVE IN BOTH NORMAL & FULLSCREEN) */
+    /* GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ALWAYS ACTIVE IN NORMAL & FULLSCREEN) */
     .gdrive-popout-lock {
       display: none;
-      position: absolute;
+      position: fixed;
       top: 0;
       right: 0;
-      width: 96px;
-      height: 84px;
-      z-index: 96;
+      width: 104px;
+      height: 92px;
+      z-index: 99999;
       background: transparent;
       pointer-events: auto;
-      cursor: default;
+      cursor: not-allowed;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
     .gdrive-popout-lock.active {
-      display: block;
-    }
-
-    #phantomConsoleScreen:fullscreen .gdrive-popout-lock.active,
-    #phantomConsoleScreen:-webkit-full-screen .gdrive-popout-lock.active {
       display: block !important;
       opacity: 1 !important;
       pointer-events: auto !important;
     }
 
-    /* GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN BUTTON LOCK (LEAVES SETTINGS GEAR BUTTON FREE) */
-    .gdrive-fullscreen-lock {
-      display: none;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 44px;
-      height: 44px;
-      z-index: 96;
-      background: transparent;
-      pointer-events: auto;
-      cursor: default;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .gdrive-fullscreen-lock.active {
-      display: block;
-    }
-
-    #phantomConsoleScreen:fullscreen .gdrive-fullscreen-lock.active,
-    #phantomConsoleScreen:-webkit-full-screen .gdrive-fullscreen-lock.active {
-      display: block !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
+    #phantomConsoleScreen:not(.gdrive-mode) .gdrive-popout-lock,
+    #phantomConsoleScreen:not(.gdrive-mode) .gdrive-popout-lock.active {
+      display: none !important;
+      pointer-events: none !important;
     }
 
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (NEVER DROPS BELOW FRAME) */
@@ -839,11 +815,8 @@
           <!-- FULL SCREEN LOCK SHIELD: ACTIVE FOR YOUTUBE & INTERNET ARCHIVE -->
           <div class="video-screen-lock-shield" id="videoScreenLockShield" oncontextmenu="return false;"></div>
 
-          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK -->
+          <!-- GOOGLE DRIVE TOP-RIGHT POP-OUT LOCK (ONLY POP-OUT BUTTON LOCKED; NATIVE BUTTONS & FULLSCREEN FREE) -->
           <div class="gdrive-popout-lock" id="gdrivePopoutLock" oncontextmenu="return false;"></div>
-
-          <!-- GOOGLE DRIVE NATIVE FULLSCREEN / EXIT-FULLSCREEN LOCK (LEAVES SETTINGS BUTTON FREE) -->
-          <div class="gdrive-fullscreen-lock" id="gdriveFullscreenLock" oncontextmenu="return false;"></div>
 
           <!-- FIXED TEAM PHANTOM BRAND TAG LOCKED INSIDE VIDEO FRAME BOTTOM -->
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
@@ -1147,7 +1120,6 @@
       var screen = document.getElementById("phantomConsoleScreen");
       var lockShield = document.getElementById("videoScreenLockShield");
       var popoutLock = document.getElementById("gdrivePopoutLock");
-      var driveFsLock = document.getElementById("gdriveFullscreenLock");
 
       if (screen) {
         if (mode === 'gdrive') {
@@ -1171,14 +1143,6 @@
           popoutLock.classList.add("active");
         } else {
           popoutLock.classList.remove("active");
-        }
-      }
-
-      if (driveFsLock) {
-        if (mode === 'gdrive') {
-          driveFsLock.classList.add("active");
-        } else {
-          driveFsLock.classList.remove("active");
         }
       }
     }
@@ -1209,7 +1173,6 @@
       }
 
       if (speedSel) {
-        // Enable custom speed selector for YouTube, Archive, and Google Drive
         var canSpeed = (mode === 'youtube' || mode === 'archive' || mode === 'gdrive');
         speedSel.disabled = !canSpeed;
         if (canSpeed) speedSel.classList.remove("is-disabled");
@@ -1287,7 +1250,6 @@
         }, 320);
       }
 
-      // Let pointer moves and single clicks reach Google Drive iframe/timeline without hiding controls
       ["pointermove", "mousemove", "click"].forEach(function(evName) {
         zoneEl.addEventListener(evName, temporarilyPassPointer);
       });
@@ -1378,27 +1340,14 @@
 
       const popoutLock = document.getElementById("gdrivePopoutLock");
       if (popoutLock) {
-        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+        ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
           popoutLock.addEventListener(ev, function(e) {
+            if (!isGDriveEmbed || !popoutLock.classList.contains("active")) return;
             e.preventDefault();
             e.stopPropagation();
-            if (isAnyFullscreen()) {
-              wakeFullscreenControlsFor5s();
-            }
-          }, { passive: false });
-        });
-      }
-
-      const driveFsLock = document.getElementById("gdriveFullscreenLock");
-      if (driveFsLock) {
-        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
-          driveFsLock.addEventListener(ev, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (isAnyFullscreen()) {
-              wakeFullscreenControlsFor5s();
-            }
-          }, { passive: false });
+            if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+            return false;
+          }, { passive: false, capture: true });
         });
       }
 
@@ -1436,7 +1385,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER (CENTER PLAY BUTTON & ALL NATIVE CONTROLS UNBLOCKED + CUSTOM SPEED ENABLED)
+      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED; ONLY TOP-RIGHT POP-OUT LOCKED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1455,7 +1404,8 @@
               id="gdriveIframe"
               src="${gdrivePreviewUrl}"
               class="gdrive-frame"
-              allow="autoplay; encrypted-media; picture-in-picture"
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
               oncontextmenu="return false;">
             </iframe>
