@@ -18,7 +18,7 @@
         if (
           e.key === 'F12' ||
           (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+          (e.ctrlKey && ['U', 'S', 'P'].includes(key))
         ) {
           e.preventDefault();
           return false;
@@ -35,7 +35,7 @@
   </script>
 
   <style>
-    * { box-sizing: border-box; }
+- { box-sizing: border-box; }
     body { 
       font-family: 'Rajdhani', sans-serif; 
       background-color: #04070b; 
@@ -179,6 +179,7 @@
             <select id="squadronSelect" style="color: #34d399;">
               <option value="cds-kilo">CDS OTA Squadron</option>
               <option value="cds-math">CDS Mathematics Specialist</option>
+              <option value="nda">NDA (National Defence Academy) Squadron</option>
               <option value="afcat">AFCAT Squadron</option>
               <option value="capf">CAPF Squadron</option>
             </select>
@@ -187,8 +188,8 @@
 
         <div class="grid-2">
           <div>
-            <label>MODULE / SUBJECT NAME</label>
-            <input id="subjectInput" type="text" placeholder="e.g. Physical Geography, Polity">
+            <label>MODULE / SUBJECT NAME (SELECT)</label>
+            <select id="subjectInput" style="color: #34d399;"></select>
           </div>
           <div>
             <label>CHAPTER NAME (Optional)</label>
@@ -199,7 +200,7 @@
         <div class="grid-2">
           <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px;">
             <div>
-              <label>CLASS #</label>
+              <label>CLASS # (AUTO)</label>
               <input id="orderInput" type="number" value="1" style="text-align: center;">
             </div>
             <div>
@@ -252,13 +253,14 @@
             <select id="bulkSquadron" style="color: #34d399;">
               <option value="cds-kilo">CDS OTA Squadron</option>
               <option value="cds-math">CDS Mathematics Specialist</option>
+              <option value="nda">NDA (National Defence Academy) Squadron</option>
               <option value="afcat">AFCAT Squadron</option>
               <option value="capf">CAPF Squadron</option>
             </select>
           </div>
           <div>
-            <label>MODULE / SUBJECT</label>
-            <input id="bulkSubject" type="text" placeholder="e.g. Mathematics">
+            <label>MODULE / SUBJECT (SELECT)</label>
+            <select id="bulkSubject" style="color: #34d399;"></select>
           </div>
         </div>
 
@@ -355,7 +357,7 @@
       <div id="managerSection" class="hidden">
         <div style="background: rgba(153, 27, 27, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
           <h3 class="font-orbitron" style="font-size: 14px; color: #f87171; margin: 0 0 4px 0;">⚠️ TACTICAL PURGE PROTOCOL</h3>
-          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select Access Tier, Squadron, Mode, Subject, and optional Chapter below to wipe out specific lectures from Firestore.</p>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select Access Tier, Squadron, Mode, Subject (Optional), and Class URL to delete matching lectures from Firestore.</p>
         </div>
 
         <div class="grid-3" style="margin-bottom: 12px;">
@@ -371,6 +373,7 @@
             <select id="purgeSquadron" style="color: #34d399;">
               <option value="cds-kilo">CDS OTA Squadron</option>
               <option value="cds-math">CDS Mathematics Specialist</option>
+              <option value="nda">NDA (National Defence Academy) Squadron</option>
               <option value="afcat">AFCAT Squadron</option>
               <option value="capf">CAPF Squadron</option>
             </select>
@@ -386,17 +389,17 @@
 
         <div class="grid-2">
           <div>
-            <label>MODULE / SUBJECT NAME</label>
-            <input id="purgeSubject" type="text" placeholder="e.g. Mathematics">
+            <label>MODULE / SUBJECT NAME (Optional if Class URL given)</label>
+            <select id="purgeSubject" style="color: #34d399;"></select>
           </div>
           <div>
-            <label>CHAPTER NAME (Optional)</label>
-            <input id="purgeChapter" type="text" placeholder="e.g. Ratio & Proportion">
+            <label>CLASS URL (Deletes records matching this URL)</label>
+            <input id="purgeUrl" type="text" placeholder="https://..." style="font-family: monospace;">
           </div>
         </div>
 
         <button onclick="executePurge()" id="purgeSubmitBtn" class="action-btn" style="background: #dc2626; color: #fff;">
-          WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE
+          WIPE SELECTED DATA FROM FIRESTORE
         </button>
       </div>
 
@@ -426,6 +429,199 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Exact subjects extracted from Subject HTML (preserving exact casing)
+    const SQUADRON_SUBJECTS = {
+      "cds-kilo": [
+        "Physical Geography",
+        "GS Breakfast",
+        "Indian Geography",
+        "Modern History",
+        "Medieval History",
+        "Ancient History",
+        "GS Muster",
+        "English Grammar",
+        "Vocabulary",
+        "Economics",
+        "Editorial",
+        "English Practice",
+        "Polity",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "English Breakfast",
+        "One Pager",
+        "Operation Surprise"
+      ],
+      "cds-math": [
+        "Lectures",
+        "Mock"
+      ],
+      "nda": [
+        "English breakfast",
+        "English vocabulary",
+        "Maths breakfast",
+        "Test discussion",
+        "One pager",
+        "G form explanation",
+        "English practice",
+        "Biology",
+        "Baat cheet",
+        "Maths",
+        "Physical geography",
+        "Math cheat code",
+        "Medieval history",
+        "GS master class",
+        "Modern history",
+        "Polity",
+        "English grammar",
+        "Physics",
+        "Ancient history",
+        "Indian geography",
+        "Chemistry",
+        "Mentor session"
+      ],
+      "afcat": [
+        "Math",
+        "Math Solution",
+        "Reasoning",
+        "English Grammar",
+        "Editorial",
+        "English Vocabulary",
+        "English Practice",
+        "General Awareness",
+        "Current Affairs",
+        "Gform Explanation"
+      ],
+      "capf": [
+        "Math",
+        "English",
+        "GS Breakfast",
+        "Editorial",
+        "Social Issues",
+        "Physical Geography",
+        "Indian Geography",
+        "Mentor Session",
+        "Environment",
+        "Internal Security",
+        "Modern History",
+        "Medieval History",
+        "Ancient History",
+        "English Grammar",
+        "Reasoning",
+        "Science and Tech",
+        "Economics",
+        "International Relations",
+        "Polity",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Governance",
+        "Answer Writing"
+      ]
+    };
+
+    function populateSubjectDropdown(selectEl, squadron, includeAnyOption = false) {
+      if (!selectEl) return;
+      const list = SQUADRON_SUBJECTS[squadron] || [];
+      const prevVal = selectEl.value;
+      selectEl.innerHTML = "";
+      if (includeAnyOption) {
+        const anyOpt = document.createElement("option");
+        anyOpt.value = "";
+        anyOpt.textContent = "-- Any Subject (Match by Class URL) --";
+        selectEl.appendChild(anyOpt);
+      }
+      list.forEach((subj) => {
+        const opt = document.createElement("option");
+        opt.value = subj;
+        opt.textContent = subj;
+        selectEl.appendChild(opt);
+      });
+      if (prevVal && Array.from(selectEl.options).some(o => o.value === prevVal)) {
+        selectEl.value = prevVal;
+      }
+    }
+
+    async function refreshNextClassNumber() {
+      const tierEl = document.getElementById("singleAccessTier");
+      const sqEl = document.getElementById("squadronSelect");
+      const subjEl = document.getElementById("subjectInput");
+      const modeEl = document.getElementById("modeSelect");
+      const orderEl = document.getElementById("orderInput");
+      if (!tierEl || !sqEl || !subjEl || !modeEl || !orderEl) return;
+
+      const accessTier = tierEl.value;
+      const squadron = sqEl.value;
+      const subject = subjEl.value;
+      const mode = modeEl.value;
+      if (!subject) {
+        orderEl.value = 1;
+        return;
+      }
+
+      const targetCollection = accessTier === 'free' ? "free_tactical_curriculum" : "tactical_curriculum";
+      try {
+        const snap = await getDocs(collection(db, targetCollection));
+        let maxOrder = 0;
+        let matchedCount = 0;
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (
+            d.squadron === squadron &&
+            String(d.mode || "").toLowerCase() === mode.toLowerCase() &&
+            String(d.subject || "").toLowerCase() === subject.toLowerCase()
+          ) {
+            matchedCount++;
+            const ord = Number(d.order);
+            if (!Number.isNaN(ord) && ord > maxOrder) {
+              maxOrder = ord;
+            }
+          }
+        });
+        const nextNum = Math.max(maxOrder, matchedCount) + 1;
+        orderEl.value = nextNum > 0 ? nextNum : 1;
+      } catch (e) {
+        console.warn("Auto class number lookup error:", e);
+      }
+    }
+
+    function initSquadronSubjectBindings() {
+      const sqSelect = document.getElementById("squadronSelect");
+      const subjSelect = document.getElementById("subjectInput");
+      const tierSelect = document.getElementById("singleAccessTier");
+      const modeSelect = document.getElementById("modeSelect");
+
+      const bulkSq = document.getElementById("bulkSquadron");
+      const bulkSubj = document.getElementById("bulkSubject");
+
+      const purgeSq = document.getElementById("purgeSquadron");
+      const purgeSubj = document.getElementById("purgeSubject");
+
+      populateSubjectDropdown(subjSelect, sqSelect.value, false);
+      populateSubjectDropdown(bulkSubj, bulkSq.value, false);
+      populateSubjectDropdown(purgeSubj, purgeSq.value, true);
+
+      sqSelect.addEventListener("change", () => {
+        populateSubjectDropdown(subjSelect, sqSelect.value, false);
+        refreshNextClassNumber();
+      });
+      subjSelect.addEventListener("change", refreshNextClassNumber);
+      tierSelect.addEventListener("change", refreshNextClassNumber);
+      modeSelect.addEventListener("change", refreshNextClassNumber);
+
+      bulkSq.addEventListener("change", () => {
+        populateSubjectDropdown(bulkSubj, bulkSq.value, false);
+      });
+
+      purgeSq.addEventListener("change", () => {
+        populateSubjectDropdown(purgeSubj, purgeSq.value, true);
+      });
+
+      refreshNextClassNumber();
+    }
+
+    initSquadronSubjectBindings();
+
     // GATE PASSCODE
     const TERMINAL_KEY = "Hima Phantom 74";
 
@@ -434,6 +630,7 @@
       if (entered === TERMINAL_KEY) {
         document.getElementById("authGate").classList.add("hidden");
         document.getElementById("adminConsole").classList.remove("hidden");
+        refreshNextClassNumber();
       } else {
         alert("CLEARANCE REFUSED: INVALID CREDENTIALS");
       }
@@ -473,6 +670,7 @@
       if (mode === 'single') {
         singleSec.classList.remove("hidden");
         sBtn.className = "tab-btn active-single";
+        refreshNextClassNumber();
       } else if (mode === 'bulk') {
         bulkSec.classList.remove("hidden");
         bBtn.className = "tab-btn active-bulk";
@@ -580,7 +778,7 @@
         document.getElementById("urlInput").value = "";
         document.getElementById("descriptionInput").value = "";
         document.getElementById("durationInput").value = "";
-        document.getElementById("orderInput").value = order + 1;
+        await refreshNextClassNumber();
       } catch (e) {
         showStatus(`[FAILURE] Firestore Error: ${e.message}`, false);
       } finally {
@@ -602,7 +800,8 @@
         return;
       }
 
-      const lines = tsv.split('\n');
+      const lines = tsv.split('
+');
       const btn = document.getElementById("bulkSubmitBtn");
       btn.innerText = "PROCESSING BULK...";
       btn.disabled = true;
@@ -617,7 +816,7 @@
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          const parts = line.split('\t');
+          const parts = line.split('	');
           if (parts.length < 3) continue;
 
           const sNo = parseInt(parts[0].trim()) || (i + 1);
@@ -645,6 +844,7 @@
         if (batchCount > 0) await batch.commit();
         showStatus(`[BULK SUCCESS] ${count} lectures dispatched to [${targetCollection.toUpperCase()}]!`, true);
         document.getElementById("bulkTsvData").value = "";
+        await refreshNextClassNumber();
       } catch (e) {
         showStatus(`[BULK FAILURE] Error: ${e.message}`, false);
       } finally {
@@ -673,7 +873,8 @@
             const linkType = item.linkType || "zoom";
             const proxy = (linkType === "vimeo") ? "https://vimpd.nexield.in" : "https://zoomp.nexield.in";
             const fullUrl = `${proxy}?title=${encodeURIComponent(title)}&link=${encodeURIComponent(zoomLink)}`;
-            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
+            tsvResult += `${count}	${title}	${fullUrl}
+`;
             count++;
           });
         } else {
@@ -684,7 +885,8 @@
             const title = regMatch[1];
             const token = regMatch[2];
             const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
+            tsvResult += `${count}	${title}	${fullUrl}
+`;
             count++;
           }
         }
@@ -699,15 +901,18 @@
       const tier = document.getElementById("purgeTier").value; // "free" or "paid"
       const squadron = document.getElementById("purgeSquadron").value;
       const subject = document.getElementById("purgeSubject").value.trim();
-      const chapter = document.getElementById("purgeChapter").value.trim();
+      const targetUrl = document.getElementById("purgeUrl").value.trim();
       const mode = document.getElementById("purgeMode").value;
 
-      if (!subject) {
-        alert("Please enter a Module/Subject name to purge.");
+      if (!targetUrl && !subject) {
+        alert("Please enter a Class URL or select a Module/Subject to purge.");
         return;
       }
 
-      if (!confirm(`WARNING: Are you sure you want to delete all lectures for subject "${subject}" from [${tier.toUpperCase()}] collection?`)) return;
+      const confirmLabel = targetUrl
+        ? `Class URL "${targetUrl}"`
+        : `subject "${subject}"`;
+      if (!confirm(`WARNING: Are you sure you want to delete matching records for ${confirmLabel} from [${tier.toUpperCase()}] collection?`)) return;
 
       const btn = document.getElementById("purgeSubmitBtn");
       btn.innerText = "WIPING DATA...";
@@ -723,8 +928,22 @@
 
         querySnapshot.forEach((docSnap) => {
           const d = docSnap.data();
-          if (d.squadron === squadron && d.subject.toLowerCase() === subject.toLowerCase() && d.mode === mode) {
-            if (!chapter || (d.chapter && d.chapter.toLowerCase() === chapter.toLowerCase())) {
+          const recUrl = String(d.url || d.videoUrl || "").trim();
+          const squadronMatches = !d.squadron || d.squadron === squadron;
+          const modeMatches = !d.mode || String(d.mode).toLowerCase() === mode.toLowerCase();
+
+          if (targetUrl) {
+            if (recUrl === targetUrl) {
+              batch.delete(docSnap.ref);
+              deletedCount++;
+            }
+          } else {
+            if (
+              squadronMatches &&
+              modeMatches &&
+              d.subject &&
+              String(d.subject).toLowerCase() === subject.toLowerCase()
+            ) {
               batch.delete(docSnap.ref);
               deletedCount++;
             }
@@ -733,14 +952,18 @@
 
         if (deletedCount > 0) {
           await batch.commit();
-          showStatus(`[PURGE SUCCESS] ${deletedCount} lectures wiped out from [${targetCollection.toUpperCase()}].`, true);
+          showStatus(`[PURGE SUCCESS] ${deletedCount} lecture record(s) wiped out from [${targetCollection.toUpperCase()}].`, true);
+          if (targetUrl) {
+            document.getElementById("purgeUrl").value = "";
+          }
+          await refreshNextClassNumber();
         } else {
           showStatus(`[NOTICE] No matching lectures found to purge in [${targetCollection.toUpperCase()}].`, false);
         }
       } catch (e) {
         showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
       } finally {
-        btn.innerText = "WIPE SELECTED SUBJECT/CHAPTER DATA FROM FIRESTORE";
+        btn.innerText = "WIPE SELECTED DATA FROM FIRESTORE";
         btn.disabled = false;
       }
     };
