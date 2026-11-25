@@ -15,10 +15,11 @@
     (() => {
       document.addEventListener('contextmenu', e => e.preventDefault());
       document.addEventListener('keydown', e => {
+        const k = (e.key || '').toUpperCase();
         if (
           e.key === 'F12' ||
-          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-          (e.ctrlKey && ['U', 'S', 'P'].includes(key))
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(k)) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(k))
         ) {
           e.preventDefault();
           return false;
@@ -35,7 +36,7 @@
   </script>
 
   <style>
-- { box-sizing: border-box; }
+    * { box-sizing: border-box; }
     body { 
       font-family: 'Rajdhani', sans-serif; 
       background-color: #04070b; 
@@ -357,7 +358,7 @@
       <div id="managerSection" class="hidden">
         <div style="background: rgba(153, 27, 27, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); padding: 16px; border-radius: 10px; margin-bottom: 16px;">
           <h3 class="font-orbitron" style="font-size: 14px; color: #f87171; margin: 0 0 4px 0;">⚠️ TACTICAL PURGE PROTOCOL</h3>
-          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select Access Tier, Squadron, Mode, Subject (Optional), and Class URL to delete matching lectures from Firestore.</p>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0;">Select Access Tier, Squadron, Mode, Subject (Optional), and Class URL to delete matching lectures from the selected squadron in Firestore.</p>
         </div>
 
         <div class="grid-3" style="margin-bottom: 12px;">
@@ -393,7 +394,7 @@
             <select id="purgeSubject" style="color: #34d399;"></select>
           </div>
           <div>
-            <label>CLASS URL (Deletes records matching this URL)</label>
+            <label>CLASS URL (Deletes records matching this URL in selected squadron)</label>
             <input id="purgeUrl" type="text" placeholder="https://..." style="font-family: monospace;">
           </div>
         </div>
@@ -429,94 +430,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Exact subjects extracted from Subject HTML (preserving exact casing)
     const SQUADRON_SUBJECTS = {
       "cds-kilo": [
-        "Physical Geography",
-        "GS Breakfast",
-        "Indian Geography",
-        "Modern History",
-        "Medieval History",
-        "Ancient History",
-        "GS Muster",
-        "English Grammar",
-        "Vocabulary",
-        "Economics",
-        "Editorial",
-        "English Practice",
-        "Polity",
-        "Biology",
-        "Chemistry",
-        "Physics",
-        "English Breakfast",
-        "One Pager",
+        "Physical Geography", "GS Breakfast", "Indian Geography", "Modern History",
+        "Medieval History", "Ancient History", "GS Muster", "English Grammar",
+        "Vocabulary", "Economics", "Editorial", "English Practice", "Polity",
+        "Biology", "Chemistry", "Physics", "English Breakfast", "One Pager",
         "Operation Surprise"
       ],
       "cds-math": [
-        "Lectures",
-        "Mock"
+        "Lectures", "Mock"
       ],
       "nda": [
-        "English breakfast",
-        "English vocabulary",
-        "Maths breakfast",
-        "Test discussion",
-        "One pager",
-        "G form explanation",
-        "English practice",
-        "Biology",
-        "Baat cheet",
-        "Maths",
-        "Physical geography",
-        "Math cheat code",
-        "Medieval history",
-        "GS master class",
-        "Modern history",
-        "Polity",
-        "English grammar",
-        "Physics",
-        "Ancient history",
-        "Indian geography",
-        "Chemistry",
-        "Mentor session"
+        "English breakfast", "English vocabulary", "Maths breakfast", "Test discussion",
+        "One pager", "G form explanation", "English practice", "Biology",
+        "Baat cheet", "Maths", "Physical geography", "Math cheat code",
+        "Medieval history", "GS master class", "Modern history", "Polity",
+        "English grammar", "Physics", "Ancient history", "Indian geography",
+        "Chemistry", "Mentor session"
       ],
       "afcat": [
-        "Math",
-        "Math Solution",
-        "Reasoning",
-        "English Grammar",
-        "Editorial",
-        "English Vocabulary",
-        "English Practice",
-        "General Awareness",
-        "Current Affairs",
+        "Math", "Math Solution", "Reasoning", "English Grammar", "Editorial",
+        "English Vocabulary", "English Practice", "General Awareness", "Current Affairs",
         "Gform Explanation"
       ],
       "capf": [
-        "Math",
-        "English",
-        "GS Breakfast",
-        "Editorial",
-        "Social Issues",
-        "Physical Geography",
-        "Indian Geography",
-        "Mentor Session",
-        "Environment",
-        "Internal Security",
-        "Modern History",
-        "Medieval History",
-        "Ancient History",
-        "English Grammar",
-        "Reasoning",
-        "Science and Tech",
-        "Economics",
-        "International Relations",
-        "Polity",
-        "Biology",
-        "Chemistry",
-        "Physics",
-        "Governance",
-        "Answer Writing"
+        "Math", "English", "GS Breakfast", "Editorial", "Social Issues",
+        "Physical Geography", "Indian Geography", "Mentor Session", "Environment",
+        "Internal Security", "Modern History", "Medieval History", "Ancient History",
+        "English Grammar", "Reasoning", "Science and Tech", "Economics",
+        "International Relations", "Polity", "Biology", "Chemistry", "Physics",
+        "Governance", "Answer Writing"
       ]
     };
 
@@ -701,8 +645,7 @@
         if (filename.includes('.')) {
           filename = filename.substring(0, filename.lastIndexOf('.'));
         }
-        const cleanTitle = filename.replace(/_/g, ' ');
-        titleInput.value = cleanTitle;
+        titleInput.value = filename.replace(/_/g, ' ');
       } catch (e) {
         let parts = urlInput.split('/');
         let lastPart = parts[parts.length - 1] || urlInput;
@@ -743,9 +686,9 @@
       });
     }
 
-    // Lecture Dispatch Logic (Supports both Free and Paid Collections)
+    // Lecture Dispatch Logic
     window.dispatchSingleLecture = async () => {
-      const accessTier = document.getElementById("singleAccessTier").value; // "free" or "paid"
+      const accessTier = document.getElementById("singleAccessTier").value;
       const squadron = document.getElementById("squadronSelect").value;
       const subject = document.getElementById("subjectInput").value.trim();
       const chapter = document.getElementById("chapterInput").value.trim() || "General";
@@ -800,8 +743,7 @@
         return;
       }
 
-      const lines = tsv.split('
-');
+      const lines = tsv.split(/\r?\n/);
       const btn = document.getElementById("bulkSubmitBtn");
       btn.innerText = "PROCESSING BULK...";
       btn.disabled = true;
@@ -816,10 +758,10 @@
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
-          const parts = line.split('	');
+          const parts = line.split("\t");
           if (parts.length < 3) continue;
 
-          const sNo = parseInt(parts[0].trim()) || (i + 1);
+          const sNo = parseInt(parts[0].trim(), 10) || (i + 1);
           const fullTitle = parts[1].trim();
           const url = parts[2].trim();
 
@@ -853,7 +795,7 @@
       }
     };
 
-    // 🔥 UPDATED EXTRACTOR LOGIC FOR NEW NEXIELD HTML STRUCTURE (LESSONS_DATA)
+    // EXTRACTOR LOGIC FOR NEXIELD HTML STRUCTURE (LESSONS_DATA)
     window.extractToTsv = () => {
       const html = document.getElementById('extractorHtmlInput').value;
       const outputEl = document.getElementById('extractorOutput');
@@ -863,42 +805,39 @@
       let count = 1;
 
       try {
-        // 1. Try parsing modern LESSONS_DATA array format
         const match = html.match(/const\s+LESSONS_DATA\s*=\s*(\[[\s\S]*?\]);/);
         if (match) {
-          const lessonsData = eval('(' + match[1] + ')');
+          const lessonsData = Function('"use strict"; return (' + match[1] + ');')();
+          if (!Array.isArray(lessonsData)) throw new Error("LESSONS_DATA is not an array");
           lessonsData.forEach(item => {
             const title = item.title || "Lecture";
             const zoomLink = item.zoomLink || item.url || "";
             const linkType = item.linkType || "zoom";
             const proxy = (linkType === "vimeo") ? "https://vimpd.nexield.in" : "https://zoomp.nexield.in";
             const fullUrl = `${proxy}?title=${encodeURIComponent(title)}&link=${encodeURIComponent(zoomLink)}`;
-            tsvResult += `${count}	${title}	${fullUrl}
-`;
+            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
             count++;
           });
         } else {
-          // 2. Fallback to old regex pattern if LESSONS_DATA not found
           const regex = /playLesson\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/g;
           let regMatch;
           while ((regMatch = regex.exec(html)) !== null) {
             const title = regMatch[1];
             const token = regMatch[2];
             const fullUrl = `https://vimpd.nexield.in/?title=${encodeURIComponent(title)}&link=${token}`;
-            tsvResult += `${count}	${title}	${fullUrl}
-`;
+            tsvResult += `${count}\t${title}\t${fullUrl}\n`;
             count++;
           }
         }
 
-        outputEl.value = count === 1 ? "❌ No lectures or links found in the pasted HTML!" : tsvResult;
+        outputEl.value = count === 1 ? "❌ No lectures or links found in the pasted HTML!" : tsvResult.trimEnd();
       } catch (err) {
         outputEl.value = "❌ Parsing Error: " + err.message;
       }
     };
 
     window.executePurge = async () => {
-      const tier = document.getElementById("purgeTier").value; // "free" or "paid"
+      const tier = document.getElementById("purgeTier").value;
       const squadron = document.getElementById("purgeSquadron").value;
       const subject = document.getElementById("purgeSubject").value.trim();
       const targetUrl = document.getElementById("purgeUrl").value.trim();
@@ -910,8 +849,8 @@
       }
 
       const confirmLabel = targetUrl
-        ? `Class URL "${targetUrl}"`
-        : `subject "${subject}"`;
+        ? `Class URL "${targetUrl}" in squadron "${squadron}"`
+        : `subject "${subject}" in squadron "${squadron}"`;
       if (!confirm(`WARNING: Are you sure you want to delete matching records for ${confirmLabel} from [${tier.toUpperCase()}] collection?`)) return;
 
       const btn = document.getElementById("purgeSubmitBtn");
@@ -929,8 +868,10 @@
         querySnapshot.forEach((docSnap) => {
           const d = docSnap.data();
           const recUrl = String(d.url || d.videoUrl || "").trim();
-          const squadronMatches = !d.squadron || d.squadron === squadron;
-          const modeMatches = !d.mode || String(d.mode).toLowerCase() === mode.toLowerCase();
+          const squadronMatches = d.squadron === squadron;
+          const modeMatches = String(d.mode || "").toLowerCase() === mode.toLowerCase();
+
+          if (!squadronMatches) return;
 
           if (targetUrl) {
             if (recUrl === targetUrl) {
@@ -939,7 +880,6 @@
             }
           } else {
             if (
-              squadronMatches &&
               modeMatches &&
               d.subject &&
               String(d.subject).toLowerCase() === subject.toLowerCase()
@@ -952,13 +892,13 @@
 
         if (deletedCount > 0) {
           await batch.commit();
-          showStatus(`[PURGE SUCCESS] ${deletedCount} lecture record(s) wiped out from [${targetCollection.toUpperCase()}].`, true);
+          showStatus(`[PURGE SUCCESS] ${deletedCount} lecture record(s) wiped out from [${squadron.toUpperCase()}] in [${targetCollection.toUpperCase()}].`, true);
           if (targetUrl) {
             document.getElementById("purgeUrl").value = "";
           }
           await refreshNextClassNumber();
         } else {
-          showStatus(`[NOTICE] No matching lectures found to purge in [${targetCollection.toUpperCase()}].`, false);
+          showStatus(`[NOTICE] No matching lectures found to purge for [${squadron.toUpperCase()}] in [${targetCollection.toUpperCase()}].`, false);
         }
       } catch (e) {
         showStatus(`[PURGE FAILURE] Error: ${e.message}`, false);
