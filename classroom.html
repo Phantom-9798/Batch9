@@ -438,6 +438,10 @@
                   <span class="text-white text-sm">CDS OTA Batch</span>
                 </label>
                 <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
+                  <input type="checkbox" name="authBatches" value="nda" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
+                  <span class="text-white text-sm">NDA (National Defence Academy)</span>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-neutral-900 border border-amber-900/60 hover:border-amber-400 cursor-pointer transition shadow-sm">
                   <input type="checkbox" name="authBatches" value="afcat" class="w-4 h-4 accent-amber-400 rounded cursor-pointer">
                   <span class="text-white text-sm">AFCAT</span>
                 </label>
@@ -457,7 +461,7 @@
                 <span>📱</span> 1. SUBMIT PAYMENT SCREENSHOT ON TELEGRAM
               </button>
               <button type="submit" id="authSubmitBtn" disabled class="w-full py-3.5 rounded-xl bg-neutral-800 text-neutral-500 font-orbitron font-extrabold text-xs uppercase tracking-wider cursor-not-allowed transition">
-                2. SUBMIT FOR ACCESS (Complete Step 1 First)
+2. SUBMIT FOR ACCESS (Complete Step 1 First)
               </button>
             </div>
           </div>
@@ -529,6 +533,9 @@
             </button>
             <button onclick="window.switchFreeExamTab('CAPF')" id="free-tab-CAPF" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
               ⭐ CAPF
+            </button>
+            <button onclick="window.switchFreeExamTab('NDA')" id="free-tab-NDA" class="px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn">
+              🎖️ NDA
             </button>
           </div>
 
@@ -649,6 +656,22 @@
               </div>
             </div>
             <div class="p-4 pt-0"><button id="btn-cds-kilo" class="w-full phantom-btn"></button></div>
+          </div>
+
+          <div id="card-nda" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
+            <div>
+              <div class="relative w-full h-48 overflow-hidden bg-black">
+                <img src="nda.jpg" alt="NDA (National Defence Academy)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300/000000/ffd700?text=NDA';"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0f16] via-transparent to-black/40"></div>
+                <div class="absolute top-3 left-3"><span class="px-2 py-0.5 rounded bg-black/85 border border-neutral-700 text-[10px] font-orbitron tracking-widest text-amber-400 font-bold uppercase shadow">COURSE #05</span></div>
+                <div class="absolute top-3 right-3" id="badge-nda"></div>
+              </div>
+              <div class="p-4">
+                <h3 class="font-stencil text-xl text-white mb-1 group-hover:text-amber-400 transition">NDA (National Defence Academy)</h3>
+                <p class="text-xs text-amber-400 font-rajdhani font-bold uppercase tracking-wider mb-2">National Defence Academy Curriculum</p>
+              </div>
+            </div>
+            <div class="p-4 pt-0"><button id="btn-nda" class="w-full phantom-btn"></button></div>
           </div>
 
           <div id="card-afcat" class="armor-panel rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 group hover:border-amber-400 shadow-lg">
@@ -899,8 +922,8 @@
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        radius: Math.random() * 2.0 + 1.0,      // Reduced bubble radius
-        starRadius: Math.random() * 2.5 + 1.5,  // Reduced star radius
+        radius: Math.random() * 2.0 + 1.0,
+        starRadius: Math.random() * 2.5 + 1.5,
         speedY: Math.random() * 0.8 + 0.3,
         speedX: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.8 + 0.2,
@@ -966,6 +989,32 @@
     }
     animateParticles();
 
+    // Dedicated NDA subjects list (completely separate from CDS)
+    const ndaSubjectsList = [
+      { name: "English breakfast", desc: "Daily quick vocabulary & grammar boost.", image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=400&q=80" },
+      { name: "English vocabulary", desc: "Synonyms, Antonyms & Idioms.", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80" },
+      { name: "Maths breakfast", desc: "Daily quick mathematics drill.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=400&q=80" },
+      { name: "Test discussion", desc: "Detailed test solutions & analysis.", image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&q=80" },
+      { name: "One pager", desc: "Concise summary revision sheets.", image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=400&q=80" },
+      { name: "G form explanation", desc: "G-form guidance & walkthrough.", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400&q=80" },
+      { name: "English practice", desc: "Sentence correction & drills.", image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=400&q=80" },
+      { name: "Biology", desc: "Human systems & plant science.", image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=400&q=80" },
+      { name: "Baat cheet", desc: "Interactive discussion & strategy.", image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=400&q=80" },
+      { name: "Maths", desc: "Arithmetic & advanced mathematics.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" },
+      { name: "Physical geography", desc: "Geomorphology & climatology.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" },
+      { name: "Math cheat code", desc: "Fast calculation & shortcut methods.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" },
+      { name: "Medieval history", desc: "Sultanate, Mughal & Regional Dynasties.", image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80" },
+      { name: "GS master class", desc: "Rapid revision & core GS facts.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" },
+      { name: "Modern history", desc: "Freedom Struggle & National Movement.", image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=400&q=80" },
+      { name: "Polity", desc: "Constitution, Rights & Parliament.", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80" },
+      { name: "English grammar", desc: "Rules, Syntax & Error Detection.", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80" },
+      { name: "Physics", desc: "Mechanics, optics & electronics.", image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?auto=format&fit=crop&w=400&q=80" },
+      { name: "NCERT history", desc: "NCERT history core concepts.", image: "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fae?auto=format&fit=crop&w=400&q=80" },
+      { name: "Indian geography", desc: "Drainage, Climate & Resources.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80" },
+      { name: "Chemistry", desc: "Elements, reactions & everyday chemistry.", image: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?auto=format&fit=crop&w=400&q=80" },
+      { name: "Mentor session", desc: "Mentorship & exam guidance.", image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=400&q=80" }
+    ];
+
     const squadronSubjectsMaster = {
       "cds-math": [
         { name: "Lectures", desc: "Theory & Concepts.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=300&q=80" },
@@ -991,6 +1040,7 @@
         { name: "One Pager", desc: "Concise summary revision sheets.", image: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=400&q=80", locked: true },
         { name: "Operation Surprise", desc: "Special tactical question sets.", image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80", locked: true }
       ],
+      "nda": ndaSubjectsList,
       "afcat": [
         { name: "Math", desc: "Numerical ability & arithmetic.", image: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=400&q=80" },
         { name: "Math Solution", desc: "Step-by-step problem solving.", image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" },
@@ -1023,7 +1073,7 @@
       ]
     };
 
-
+    // Separate Free Vault tabs: CDS, AFCAT, CAPF, and NDA
     const freeVaultData = {
       "CDS": [
         { title: "CDS MATHEMATICS", desc: "Specialist Arithmetic & Advanced Foundation Modules.", image: "math-ima.jpeg", batchId: "cds-math" },
@@ -1034,13 +1084,16 @@
       ],
       "CAPF": [
         { title: "CAPF ASSISTANT COMMANDANT", desc: "Paper-1 & Paper-2 Special Guidance & Practice Modules.", image: "capf-forces.jpeg", batchId: "capf" }
+      ],
+      "NDA": [
+        { title: "NDA (National Defence Academy)", desc: "National Defence Academy Foundation & Practice Modules.", image: "nda.jpg", batchId: "nda" }
       ]
     };
 
     window.switchFreeExamTab = function(examName) {
       if (activeFreeExamTab === examName) {
         activeFreeExamTab = "";
-        ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
+        ['CDS', 'AFCAT', 'CAPF', 'NDA'].forEach(tab => {
           const btn = document.getElementById('free-tab-' + tab);
           if (btn) btn.className = "px-8 py-4 sm:px-12 sm:py-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white font-orbitron font-extrabold text-sm sm:text-base uppercase tracking-wider transition cursor-pointer phantom-btn";
         });
@@ -1048,7 +1101,7 @@
         return;
       }
       activeFreeExamTab = examName;
-      ['CDS', 'AFCAT', 'CAPF'].forEach(tab => {
+      ['CDS', 'AFCAT', 'CAPF', 'NDA'].forEach(tab => {
         const btn = document.getElementById('free-tab-' + tab);
         if (btn) {
           if (tab === examName) {
@@ -1184,11 +1237,11 @@
         lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         const badgeStyles = [
-          { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" }, // Pink/Magenta
-          { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" }, // Blue
-          { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" }, // Purple
-          { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" }, // Emerald
-          { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }   // Amber
+          { bg: "linear-gradient(135deg, #ec4899, #be185d)", shadow: "rgba(236,72,153,0.4)" },
+          { bg: "linear-gradient(135deg, #3b82f6, #1d4ed8)", shadow: "rgba(59,130,246,0.4)" },
+          { bg: "linear-gradient(135deg, #8b5cf6, #6d28d9)", shadow: "rgba(139,92,246,0.4)" },
+          { bg: "linear-gradient(135deg, #10b981, #047857)", shadow: "rgba(16,185,129,0.4)" },
+          { bg: "linear-gradient(135deg, #f59e0b, #d97706)", shadow: "rgba(245,158,11,0.4)" }
         ];
 
         let html = "";
@@ -1544,7 +1597,7 @@
 
         const allowed = data.allowedBatches || [];
         const isCombo = allowed.includes("combo") || allowed.length >= 4;
-        const batchesList = ["cds-math", "cds-kilo", "afcat", "capf"];
+        const batchesList = ["cds-math", "cds-kilo", "nda", "afcat", "capf"];
         let hasPaidAccessAny = isCombo || batchesList.some(b => allowed.includes(b));
 
         const paidSection = document.getElementById("paidSquadronsSection");
@@ -1604,6 +1657,7 @@
       "afcat": "https://t.me/+Bz5FQ-ti5j9mNzll",
       "cds-math": "https://t.me/+vzk5GPt9mwwwMTc1",
       "cds-kilo": "https://t.me/+fbkHtdwcNF04OTll",
+      "nda": "-",
       "Free-batch": "https://t.me/+E2hXFyRiHLwwODFl",
       "capf": "https://t.me/+JmGvA3F25WY1YjA9"
     };
@@ -1616,6 +1670,7 @@
         { id: "afcat", name: "AFCAT SQUADRON GROUP" },
         { id: "cds-math", name: "CDS MATHEMATICS SQUADRON" },
         { id: "cds-kilo", name: "CDS OTA SQUADRON" },
+        { id: "nda", name: "NDA SQUADRON GROUP" },
         { id: "Free-batch", name: "FREE BATCH SQUADRON" },
         { id: "capf", name: "CAPF SQUADRON" }
       ];
@@ -1687,7 +1742,7 @@
 
     window.secureRedirect = async function(groupId, userId) {
       const targetUrl = secureTgRegistry[groupId];
-      if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer");
+      if (targetUrl && targetUrl !== "-") window.open(targetUrl, "_blank", "noopener,noreferrer");
       try {
         const cadetRef = doc(db, "cadets", userId);
         await updateDoc(cadetRef, {
