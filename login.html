@@ -110,8 +110,37 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const MAX_LOGINS_PER_24H = 4;
+    const WINDOW_24H_MS = 24 * 60 * 60 * 1000;
+
+    function getRecent24hTimestamps(rawList) {
+      const cutoff = Date.now() - WINDOW_24H_MS;
+      if (!Array.isArray(rawList)) return [];
+      return rawList
+        .map(t => Number(t))
+        .filter(t => Number.isFinite(t) && t > cutoff);
+    }
+
+    function showLoginLimitExceededNotice(statusAlert, submitBtn) {
+      const msg = "You have exceeded your 24-hour login limit of 4 logins for this account. Please try again after 24 hours.";
+      if (statusAlert) {
+        statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-red-950/90 border border-red-500/80 text-red-200 block text-left leading-relaxed font-body font-bold";
+        statusAlert.innerHTML = `<span class="font-black text-red-300">LOGIN LIMIT EXCEEDED:</span> ${msg}`;
+        statusAlert.classList.remove('hidden');
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = window.isRegisterMode ? "INITIALIZE SIGNUP" : "AUTHORIZE & LOGIN";
+      }
+    }
+
     window.authAction = async function(event) {
       event.preventDefault();
+      if (!window.rulesAgreed) {
+        openRulesPosterModal();
+        return;
+      }
+
       const email = document.getElementById('cadetEmail').value.trim();
       const password = document.getElementById('cadetPassword').value.trim();
       const statusAlert = document.getElementById('statusAlert');
@@ -146,6 +175,7 @@
             targetBatch: "Free Batch",
             status: accountStatus,
             allowedBatches: finalAllowed,
+            loginHistory24h: [],
             createdAt: new Date().toISOString()
           });
 
@@ -167,7 +197,15 @@
             throw new Error("Your account is currently pending administrative activation.");
           }
 
-          establishSessionAndEnter(user.uid);
+          const recentLogins = getRecent24hTimestamps(cadetData.loginHistory24h);
+          if (recentLogins.length >= MAX_LOGINS_PER_24H) {
+            try { await signOut(auth); } catch (e) {}
+            showLoginLimitExceededNotice(statusAlert, submitBtn);
+            return;
+          }
+
+          const updatedLogins = [...recentLogins, Date.now()];
+          await establishSessionAndEnter(user.uid, updatedLogins);
         }
       } catch (error) {
         statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-red-950/90 border border-red-500/80 text-red-200 block text-left leading-relaxed font-body font-bold";
@@ -178,7 +216,7 @@
       }
     };
 
-    async function establishSessionAndEnter(uid) {
+    async function establishSessionAndEnter(uid, updatedLogins = null) {
       const statusAlert = document.getElementById('statusAlert');
       try {
         const cadetRef = doc(db, "cadets", uid);
@@ -187,10 +225,15 @@
         localStorage.setItem("phantom_session_token", newSessionToken);
         localStorage.setItem("phantom_uid", uid);
 
-        await updateDoc(cadetRef, {
+        const payload = {
           activeSession: newSessionToken,
           lastLoginAt: new Date().toISOString()
-        });
+        };
+        if (Array.isArray(updatedLogins)) {
+          payload.loginHistory24h = updatedLogins;
+        }
+
+        await updateDoc(cadetRef, payload);
 
         statusAlert.className = "mt-3 p-3 rounded-xl text-xs bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 block text-center font-orbitron font-black tracking-wider shadow-lg";
         statusAlert.innerText = "ACCESS GRANTED. INITIALIZING DASHBOARD...";
@@ -232,7 +275,7 @@
   </script>
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -308,6 +351,59 @@
       transform: scale(0.96);
     }
 
+    /* RULES POSTER POPUP MODAL */
+    #rulesPosterOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #rulesPosterOverlay.hidden {
+      display: none !important;
+    }
+    .rules-poster-card {
+      width: 100%;
+      max-width: 460px;
+      background: linear-gradient(160deg, #071126 0%, #030712 100%);
+      border: 2px solid rgba(255, 215, 0, 0.85);
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.28), inset 0 0 24px rgba(14, 165, 233, 0.12);
+      border-radius: 18px;
+      padding: 20px 22px;
+      position: relative;
+    }
+    .rules-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 215, 0, 0.25);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #f8fafc;
+    }
+    .rules-num-badge {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f59e0b, #eab308);
+      color: #020617;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
     header, main, footer {
       position: relative;
       z-index: 10;
@@ -317,6 +413,50 @@
 </head>
 
 <body class="hud-grid text-white h-screen max-h-screen flex flex-col justify-between w-full overflow-hidden">
+
+  <!-- RULES POSTER POPUP (SHOWN ON EVERY VISIT TO LOGIN PAGE UNTIL I AGREE IS CLICKED) -->
+  <div id="rulesPosterOverlay" role="dialog" aria-modal="true" aria-labelledby="rulesPosterHeading">
+    <div class="rules-poster-card">
+      <div class="text-center mb-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/60 text-amber-300 font-orbitron text-[10px] tracking-widest uppercase mb-1.5">
+          TEAM PHANTOM DIRECTIVE
+        </div>
+        <h2 id="rulesPosterHeading" class="font-stencil text-2xl sm:text-3xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-cyan-300 uppercase">
+          RULES
+        </h2>
+        <p class="text-[11px] text-neutral-300 font-body mt-0.5">
+          Read all 5 operational rules carefully before entering Cadet Access Gateway.
+        </p>
+      </div>
+
+      <div class="space-y-2 mb-4 font-body">
+        <div class="rules-list-item">
+          <span class="rules-num-badge">1</span>
+          <span>A maximum of <b>4 logins</b> is allowed per account within a <b>24-hour</b> window.</span>
+        </div>
+        <div class="rules-list-item">
+          <span class="rules-num-badge">2</span>
+          <span>Sharing your account or login credentials with others can result in your <b>ID being blocked</b>.</span>
+        </div>
+        <div class="rules-list-item">
+          <span class="rules-num-badge">3</span>
+          <span>Screen recording, unauthorized downloading, or bypassing portal security is strictly prohibited.</span>
+        </div>
+        <div class="rules-list-item">
+          <span class="rules-num-badge">4</span>
+          <span>All lecture videos, notes, and test materials are exclusively for enrolled Team Phantom cadets.</span>
+        </div>
+        <div class="rules-list-item">
+          <span class="rules-num-badge">5</span>
+          <span>Any suspicious activity or policy violation may lead to immediate session termination and account suspension.</span>
+        </div>
+      </div>
+
+      <button type="button" id="agreeRulesBtn" onclick="acceptRulesPoster()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-black font-orbitron font-black tracking-wider uppercase text-xs shadow-[0_0_25px_rgba(255,215,0,0.45)] transition cursor-pointer phantom-btn">
+        I AGREE
+      </button>
+    </div>
+  </div>
 
   <!-- Background Canvas for Falling Stars & Bubbles -->
   <canvas id="starBubbleCanvas"></canvas>
@@ -425,6 +565,26 @@
   </footer>
 
   <script>
+    window.rulesAgreed = false;
+
+    function openRulesPosterModal() {
+      window.rulesAgreed = false;
+      const overlay = document.getElementById("rulesPosterOverlay");
+      if (overlay) overlay.classList.remove("hidden");
+    }
+
+    function acceptRulesPoster() {
+      window.rulesAgreed = true;
+      const overlay = document.getElementById("rulesPosterOverlay");
+      if (overlay) overlay.classList.add("hidden");
+    }
+
+    // Show RULES poster every time the login page is entered/loaded
+    openRulesPosterModal();
+    window.addEventListener("pageshow", () => {
+      openRulesPosterModal();
+    });
+
     // Vibrant Medium Bubbles & Glowing Stars Canvas Animation Engine (Small Radius)
     const canvas = document.getElementById("starBubbleCanvas");
     const ctx = canvas.getContext("2d");
