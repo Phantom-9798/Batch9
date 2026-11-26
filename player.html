@@ -783,8 +783,204 @@
 
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
+
+    /* PW-STYLE SLIM COMPACT CONTROL BAR — ACTIVE ONLY IN FULLSCREEN + YOUTUBE SOURCE */
+    .yt-fs-slim-bar {
+      display: none;
+    }
+
+    #phantomConsoleScreen.yt-fs-active:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen.yt-fs-active:-webkit-full-screen .phantom-bottom-deck,
+    #phantomConsoleScreen.yt-fs-active:-ms-fullscreen .phantom-bottom-deck {
+      display: none !important;
+    }
+
+    #phantomConsoleScreen.yt-fs-active:fullscreen .yt-fs-slim-bar,
+    #phantomConsoleScreen.yt-fs-active:-webkit-full-screen .yt-fs-slim-bar,
+    #phantomConsoleScreen.yt-fs-active:-ms-fullscreen .yt-fs-slim-bar {
+      display: flex !important;
+      flex-direction: column;
+      gap: 6px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 98;
+      padding: 8px 14px 10px;
+      background: linear-gradient(0deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 78%, rgba(2, 6, 23, 0) 100%);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #phantomConsoleScreen.yt-fs-active.fs-idle:fullscreen .yt-fs-slim-bar,
+    #phantomConsoleScreen.yt-fs-active.fs-idle:-webkit-full-screen .yt-fs-slim-bar,
+    #phantomConsoleScreen.yt-fs-active.fs-idle:-ms-fullscreen .yt-fs-slim-bar {
+      opacity: 0 !important;
+      transform: translateY(10px);
+      pointer-events: none !important;
+    }
+
+    .yt-slim-top-scrubber {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .yt-slim-speed-badge {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: #fbbf24;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .yt-slim-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.24);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+    }
+
+    .yt-slim-fill {
+      height: 100%;
+      width: 0%;
+      background: #ef4444;
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .yt-slim-fill::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
+    }
+
+    .yt-slim-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .yt-slim-left-group,
+    .yt-slim-right-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .yt-slim-icon-btn {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .yt-slim-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fbbf24;
+    }
+
+    .yt-slim-vol-slider {
+      width: 64px;
+      height: 4px;
+      accent-color: #fbbf24;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .yt-fs-slim-bar {
+        padding: 6px 10px 8px;
+        gap: 4px;
+      }
+      .yt-slim-vol-slider {
+        width: 46px;
+      }
+      .yt-slim-left-group,
+      .yt-slim-right-group {
+        gap: 6px;
+      }
+      .yt-slim-icon-btn {
+        font-size: 10px;
+        padding: 3px 5px;
+      }
+    }
+
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
+
+  <script>
+    (() => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
+      document.addEventListener('keydown', e => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+          (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+    })();
+
+    function detectDownloaderAndLogout() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
+        triggerLogoutWithWarning("1DM downloader detected, logging out.");
+      }
+    }
+
+    function triggerLogoutWithWarning(errorMessage) {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.body.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+            <div style="background: #1e293b; padding: 30px; border-radius: 8px; border: 1px solid #ef4444; max-width: 400px; width: 100%;">
+                <h2 style="margin-bottom: 15px; font-size: 22px; color: #f87171;">⚠️ Security Alert</h2>
+                <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px;">${errorMessage}</p>
+                <div style="font-size: 13px; color: #94a3b8;">Cleaning session and redirecting...</div>
+            </div>
+        </div>
+      `;
+      setTimeout(function() {
+          window.location.href = "login.html";
+      }, 2500);
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+        detectDownloaderAndLogout();
+    });
+  </script>
 </head>
 
 <body class="text-white h-screen max-h-screen flex flex-col justify-between w-full overflow-hidden" oncontextmenu="return false;">
@@ -936,6 +1132,39 @@
             </div>
             <div style="width:100%; height:6px; background:rgba(255,255,255,0.12); border-radius:999px; overflow:hidden;">
               <div id="dlProgressBar" style="width:0%; height:100%; background:#10b981; transition:width 0.2s ease;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PW-STYLE SLIM FULLSCREEN BAR (YOUTUBE ONLY IN FULLSCREEN) -->
+        <div class="yt-fs-slim-bar" id="ytFsSlimBar">
+          <div class="yt-slim-top-scrubber">
+            <span id="ytSlimCurTime">0:00</span>
+            <span class="yt-slim-speed-badge" id="ytSlimSpeedBadge">1x</span>
+            <div class="yt-slim-track" id="ytSlimTrack" onclick="seekVideoTrack(event)">
+              <div class="yt-slim-fill" id="ytSlimFill"></div>
+            </div>
+            <span id="ytSlimTotTime">0:00</span>
+          </div>
+
+          <div class="yt-slim-bottom-row">
+            <div class="yt-slim-left-group">
+              <button type="button" class="yt-slim-icon-btn" id="ytSlimPlayBtn" onclick="toggleVideoPlay()" title="Play / Pause">⏸</button>
+              <button type="button" class="yt-slim-icon-btn" id="ytSlimRewindBtn" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s">↺ 10s</button>
+              <button type="button" class="yt-slim-icon-btn" id="ytSlimForwardBtn" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s">10s ↻</button>
+              <button type="button" class="yt-slim-icon-btn" id="ytSlimMuteBtn" onclick="toggleYtSlimMute()" title="Mute / Unmute">🔊</button>
+              <input type="range" id="ytSlimVolumeSlider" class="yt-slim-vol-slider" min="0" max="100" value="100" oninput="setYtSlimVolume(this.value)" title="Volume" />
+            </div>
+
+            <div class="yt-slim-right-group">
+              <select id="ytSlimSpeedSelect" class="speed-pill-select" style="padding: 3px 8px; font-size: 10px; border-radius: 7px;" onchange="updateVideoSpeed(this.value)" title="Playback Speed">
+                <option value="1">1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2">2x</option>
+              </select>
+              <button type="button" class="yt-slim-icon-btn" id="ytSlimFsExitBtn" onclick="exitFullscreenOnly()" title="Exit Fullscreen">⛶</button>
             </div>
           </div>
         </div>
@@ -1167,7 +1396,18 @@
       else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
+    function syncYouTubeFullscreenModeClass() {
+      var screen = document.getElementById("phantomConsoleScreen");
+      if (!screen) return;
+      if (isYouTubeSource && isAnyFullscreen()) {
+        screen.classList.add("yt-fs-active");
+      } else {
+        screen.classList.remove("yt-fs-active");
+      }
+    }
+
     function syncFullscreenButtons(isFs) {
+      syncYouTubeFullscreenModeClass();
       var dockBtn = document.getElementById("dockFsBtn");
       if (!dockBtn) return;
       if (isGDriveEmbed) {
@@ -1179,6 +1419,38 @@
       dockBtn.disabled = false;
       dockBtn.classList.remove("is-disabled");
       dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
+    }
+
+    function setYtSlimVolume(val) {
+      var num = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
+      var slider = document.getElementById("ytSlimVolumeSlider");
+      var muteBtn = document.getElementById("ytSlimMuteBtn");
+      if (slider && String(slider.value) !== String(num)) slider.value = String(num);
+      if (isYouTubeSource && ytInstance && typeof ytInstance.setVolume === "function") {
+        if (num > 0 && typeof ytInstance.unMute === "function") ytInstance.unMute();
+        ytInstance.setVolume(num);
+      }
+      if (muteBtn) muteBtn.innerText = num === 0 ? "🔇" : "🔊";
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+    }
+
+    function toggleYtSlimMute() {
+      var slider = document.getElementById("ytSlimVolumeSlider");
+      if (!isYouTubeSource || !ytInstance) return;
+      var muted = typeof ytInstance.isMuted === "function" ? ytInstance.isMuted() : false;
+      if (muted || (slider && parseInt(slider.value, 10) === 0)) {
+        if (typeof ytInstance.unMute === "function") ytInstance.unMute();
+        var nextVol = (slider && parseInt(slider.value, 10) > 0) ? parseInt(slider.value, 10) : 100;
+        if (typeof ytInstance.setVolume === "function") ytInstance.setVolume(nextVol);
+        if (slider) slider.value = String(nextVol);
+        var muteBtn = document.getElementById("ytSlimMuteBtn");
+        if (muteBtn) muteBtn.innerText = "🔊";
+      } else {
+        if (typeof ytInstance.mute === "function") ytInstance.mute();
+        var muteBtn2 = document.getElementById("ytSlimMuteBtn");
+        if (muteBtn2) muteBtn2.innerText = "🔇";
+      }
+      if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function applyScreenLockForMode(mode) {
@@ -1410,6 +1682,7 @@
         });
         bindYouTubeDoubleTap(lockShield);
       }
+      bindYouTubeDoubleTap(document.getElementById("phantomConsoleScreen"));
 
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
@@ -1644,6 +1917,8 @@
     function updatePlayLabel() {
       const btn = document.getElementById("playTrigger");
       if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
+      const slimPlay = document.getElementById("ytSlimPlayBtn");
+      if (slimPlay) slimPlay.innerText = isPlaying ? "⏸" : "▶";
     }
 
     function activateStream() {
@@ -1682,6 +1957,12 @@
     function updateVideoSpeed(rate) {
       if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
+      const badge = document.getElementById("ytSlimSpeedBadge");
+      if (badge) badge.innerText = spd + "x";
+      const slimSel = document.getElementById("ytSlimSpeedSelect");
+      if (slimSel && String(slimSel.value) !== String(rate)) slimSel.value = String(rate);
+      const deckSel = document.getElementById("ytBottomSpeedSelector");
+      if (deckSel && String(deckSel.value) !== String(rate)) deckSel.value = String(rate);
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
@@ -1842,12 +2123,21 @@
           const c = ytInstance.getCurrentTime() || 0;
           const d = ytInstance.getDuration() || 0;
           if (d > 0) {
+            const pctStr = ((c / d) * 100) + "%";
             const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
+            if (fill) fill.style.width = pctStr;
+            const slimFill = document.getElementById("ytSlimFill");
+            if (slimFill) slimFill.style.width = pctStr;
+            var curStr = formatSeconds(c);
+            var totStr = formatSeconds(d);
             var curEl = document.getElementById("currentTimeLabel");
             var totEl = document.getElementById("totalTimeLabel");
-            if (curEl) curEl.innerText = formatSeconds(c);
-            if (totEl) totEl.innerText = formatSeconds(d);
+            if (curEl) curEl.innerText = curStr;
+            if (totEl) totEl.innerText = totStr;
+            var slimCur = document.getElementById("ytSlimCurTime");
+            var slimTot = document.getElementById("ytSlimTotTime");
+            if (slimCur) slimCur.innerText = curStr;
+            if (slimTot) slimTot.innerText = totStr;
           }
         }
       }, 400);
