@@ -3,59 +3,67 @@
 <head>
   <script>
   (() => {
+    let securityTriggered = false;
+
+    function autoLogoutOnThreat(reason) {
+      if (securityTriggered) return;
+      securityTriggered = true;
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {}
+      document.body.innerHTML =
+        '<div style="background:#020617;color:#ef4444;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;text-align:center;padding:20px;">' +
+        '<h2 style="font-size:20px;margin-bottom:8px;">SECURITY ALERT: ' + String(reason || 'RESTRICTED ACCESS') + '</h2>' +
+        '<p style="color:#cbd5e1;font-size:13px;">Session terminated. Logging out...</p>' +
+        '</div>';
+      setTimeout(() => {
+        try { window.location.replace(window.location.pathname); } catch (e) { window.location.reload(); }
+      }, 900);
+    }
+
     // 1. Right Click Disable
     document.addEventListener('contextmenu', e => e.preventDefault());
 
     // 2. Keyboard Shortcuts Block (F12, Inspect, View Source)
     document.addEventListener('keydown', e => {
+      const key = (e.key || '').toUpperCase();
       if (
         e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(key)) ||
+        (e.ctrlKey && ['U', 'S', 'P'].includes(key))
       ) {
         e.preventDefault();
         e.stopPropagation();
+        autoLogoutOnThreat('DEVTOOLS SHORTCUT DETECTED');
         return false;
       }
     });
 
-    // 3. DevTools Freezing Trap
+    // 3. DevTools & 1DM / Downloader Trap -> Auto Logout
     setInterval(() => {
+      if (securityTriggered) return;
+
+      const idmInjected = document.querySelector('[id*="idm" i], [class*="idm" i], [data-idm]');
+      if (idmInjected) {
+        autoLogoutOnThreat('1DM / DOWNLOADER DETECTED');
+        return;
+      }
+
       const start = performance.now();
       debugger;
       const end = performance.now();
       if (end - start > 100) {
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Security Alert: Developer Tools Detected. Access Denied.</h2>';
+        autoLogoutOnThreat('DEVELOPER TOOLS DETECTED');
       }
-    }, 1000);
+    }, 1500);
 
     // 4. Console Auto Clear
     setInterval(() => {
-      console.clear();
-    }, 1500);
-
-    // 5. 1DM / Downloader Detection & Auto-Logout Script
-    window.addEventListener('DOMContentLoaded', function() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.includes('1dm') || userAgent.includes('idm') || userAgent.includes('download manager')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        document.body.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; color: #ef4444; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999999; font-family: 'Rajdhani', sans-serif; text-align: center; padding: 20px;">
-            <div style="background: rgba(6, 12, 30, 0.96); padding: 35px; border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.8); box-shadow: 0 0 50px rgba(239, 68, 68, 0.3); max-width: 420px; width: 100%;">
-              <h2 style="margin-bottom: 15px; font-size: 24px; color: #f87171; font-weight: 900; letter-spacing: 1px;">⚠️ SECURITY ALERT</h2>
-              <p style="font-size: 16px; color: #f1f5f9; margin-bottom: 20px; font-weight: 700;">1DM downloader detected, logging out.</p>
-              <div style="font-size: 12px; color: #94a3b8; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Terminating session & redirecting...</div>
-            </div>
-          </div>
-        `;
-
-        setTimeout(function() {
-          window.location.reload();
-        }, 2500);
+      if (!securityTriggered) {
+        try { console.clear(); } catch (e) {}
       }
-    });
+    }, 2000);
   })();
   </script>
   <meta charset="UTF-8" />
