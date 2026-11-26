@@ -1643,18 +1643,18 @@
 
       const lockShield = document.getElementById("videoScreenLockShield");
       if (lockShield) {
+        // Non-YouTube modes (e.g. archive) keep existing shield behavior
         ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
           lockShield.addEventListener(ev, function(e) {
             if (!lockShield.classList.contains("lock-enabled")) return;
+            if (isYouTubeSource) return; // YouTube uses dedicated gesture surface below
             e.preventDefault();
             e.stopPropagation();
-            if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
             if (isAnyFullscreen()) {
               wakeFullscreenControlsFor5s();
             }
           }, { passive: false });
         });
-        bindYouTubeDoubleTap(lockShield);
       }
 
       const screenEl = document.getElementById("phantomConsoleScreen");
@@ -1840,6 +1840,9 @@
           <div class="yt-custom-container" id="ytPwContainer">
             <div id="ytPlayerFrame"></div>
 
+            <!-- DEDICATED YOUTUBE GESTURE SURFACE (SINGLE TAP = PLAY/PAUSE + SHOW HUD, DOUBLE TAP = -10s / +10s) -->
+            <div id="ytPwGestureSurface" style="position:absolute;inset:0;width:100%;height:100%;z-index:65;background:transparent;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;"></div>
+
             <!-- TOP BAR -->
             <div class="yt-pw-top-bar" id="ytPwTopBar">
               <button type="button" class="yt-pw-btn" onclick="if(isAnyFullscreen()){exitFullscreenOnly();}else{window.history.back();}" title="Back">
@@ -1887,7 +1890,7 @@
           </div>
         `;
 
-        // 5-second auto-hide HUD on activity inside YouTube frame (normal + fullscreen)
+        // 5-second auto-hide HUD on any activity on screen (normal + fullscreen)
         var ytHudTimer = null;
         window.wakeYtPwHudFor5s = function() {
           var box = document.getElementById("ytPwContainer");
@@ -1903,8 +1906,70 @@
 
         var ytBox = document.getElementById("ytPwContainer");
         if (ytBox) {
-          ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(ev) {
-            ytBox.addEventListener(ev, window.wakeYtPwHudFor5s);
+          ["pointerdown", "pointermove", "click", "mousemove", "touchstart", "touchmove", "keydown"].forEach(function(ev) {
+            ytBox.addEventListener(ev, window.wakeYtPwHudFor5s, { passive: true });
+          });
+        }
+        // Also wake YouTube HUD on any activity anywhere on document/screen
+        ["pointermove", "mousemove", "touchstart", "keydown"].forEach(function(ev) {
+          document.addEventListener(ev, function() {
+            if (isYouTubeSource && window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
+          }, { passive: true });
+        });
+
+        // Unified Single-Tap (Play/Pause + Show Controls) & Double-Tap (-10s Left / +10s Right) on YouTube Gesture Surface
+        var ytGesture = document.getElementById("ytPwGestureSurface");
+        if (ytGesture) {
+          var singleTapTimer = null;
+          var lastTapMs = 0;
+          var lastTapClientX = 0;
+          var ignoreMouseUntil = 0;
+
+          function handleSurfaceTap(clientX) {
+            window.wakeYtPwHudFor5s();
+            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+
+            var now = Date.now();
+            var rect = ytGesture.getBoundingClientRect();
+            var isLeft = (clientX - rect.left) < (rect.width / 2);
+
+            if (now - lastTapMs > 30 && now - lastTapMs < 330 && Math.abs(clientX - lastTapClientX) < 90) {
+              // DOUBLE TAP -> Seek -10s / +10s
+              if (singleTapTimer) {
+                clearTimeout(singleTapTimer);
+                singleTapTimer = null;
+              }
+              lastTapMs = 0;
+              triggerSideSeek(isLeft ? "left" : "right");
+            } else {
+              // POTENTIAL SINGLE TAP -> Wait briefly to confirm it's not a double tap, then toggle Play/Pause
+              lastTapMs = now;
+              lastTapClientX = clientX;
+              if (singleTapTimer) clearTimeout(singleTapTimer);
+              singleTapTimer = setTimeout(function() {
+                singleTapTimer = null;
+                toggleVideoPlay();
+                window.wakeYtPwHudFor5s();
+              }, 260);
+            }
+          }
+
+          ytGesture.addEventListener("touchend", function(e) {
+            if (!isYouTubeSource) return;
+            var t = e.changedTouches && e.changedTouches[0];
+            if (!t) return;
+            e.preventDefault();
+            e.stopPropagation();
+            ignoreMouseUntil = Date.now() + 500;
+            handleSurfaceTap(t.clientX);
+          }, { passive: false });
+
+          ytGesture.addEventListener("click", function(e) {
+            if (!isYouTubeSource) return;
+            if (Date.now() < ignoreMouseUntil) return;
+            e.preventDefault();
+            e.stopPropagation();
+            handleSurfaceTap(e.clientX);
           });
         }
 
