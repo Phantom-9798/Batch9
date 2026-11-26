@@ -866,33 +866,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- SESSION STORAGE CACHE HELPERS ---
-    const PHANTOM_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour for dashboard/cadet profile
-    const PHANTOM_FREE_LECTURE_TTL_MS = 60 * 60 * 1000; // 1 hour for free lectures list
 
-    function readSessionCache(key, ttlMs = PHANTOM_CACHE_TTL_MS, allowExpired = false) {
-      try {
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object" || !("ts" in parsed) || !("data" in parsed) || parsed.data === null || typeof parsed.data !== "object") {
-          try { sessionStorage.removeItem(key); } catch (_) {}
-          return null;
-        }
-        const age = Date.now() - Number(parsed.ts || 0);
-        if (!allowExpired && age > ttlMs) return null;
-        return parsed.data;
-      } catch (e) {
-        try { sessionStorage.removeItem(key); } catch (_) {}
-        return null;
-      }
-    }
-
-    function writeSessionCache(key, data) {
-      try {
-        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch (e) {}
-    }
 
     const FOCUS_TIMER_KEY = "phantom_daily_seconds";
     let phantomSessionSeconds = 0;
@@ -1287,13 +1261,6 @@
       const container = document.getElementById("freeLecturesListContainer");
       if (!container) return;
 
-      const freeLecCacheKey = `phantom_free_lectures_v1_${String(batchId).toLowerCase().trim()}_${String(modeVal).toLowerCase().trim()}_${subjectName.trim().toLowerCase()}`;
-      const cachedFreeLectures = readSessionCache(freeLecCacheKey, PHANTOM_FREE_LECTURE_TTL_MS, false);
-      if (Array.isArray(cachedFreeLectures)) {
-        renderFreeLecturesListItems(container, cachedFreeLectures, subjectName, batchId);
-        return;
-      }
-
       container.innerHTML = `<div class="text-center text-amber-400 font-orbitron text-xs py-8 animate-pulse">LOADING LECTURES DOSSIER...</div>`;
 
       try {
@@ -1319,15 +1286,9 @@
         }
 
         lectures.sort((a, b) => (a.order || 0) - (b.order || 0));
-        writeSessionCache(freeLecCacheKey, lectures);
         renderFreeLecturesListItems(container, lectures, subjectName, batchId);
       } catch (err) {
         console.error("Error loading free lectures: ", err);
-        const staleFree = readSessionCache(freeLecCacheKey, PHANTOM_FREE_LECTURE_TTL_MS, true);
-        if (Array.isArray(staleFree)) {
-          renderFreeLecturesListItems(container, staleFree, subjectName, batchId);
-          return;
-        }
         container.innerHTML = `
           <div class="armor-panel rounded-2xl p-6 text-center w-full">
             <h3 class="font-orbitron font-extrabold text-sm text-red-400 mb-1">Error Loading Content</h3>
@@ -1480,7 +1441,6 @@
         alertBox.classList.add("hidden");
         if (cachedCadetData) {
           cachedCadetData = { ...cachedCadetData, fullName: name, targetBatch: finalTargetBatch, paymentName, paymentDate, utrNumber: utr, paymentSubmittedAt: requestSubmittedAt, accessRequestSubmitted: true, accessRequestBaselineBatches: requestBaselineBatches };
-          if (uid) writeSessionCache("phantom_cadet_cache_" + uid, cachedCadetData);
         }
         authStatusShouldShow = true;
         if (cachedCadetData && typeof updatePaidAuthRequestNotice === "function") updatePaidAuthRequestNotice(cachedCadetData);
@@ -1604,13 +1564,6 @@
       document.getElementById("mockListView").classList.remove("hidden");
 
       let container = document.getElementById("mockItemsContainer");
-      const testsCacheKey = `phantom_tests_v1_${String(currentExam).toLowerCase().trim()}_${String(currentSection).toLowerCase().trim()}`;
-      const cachedTests = readSessionCache(testsCacheKey, PHANTOM_CACHE_TTL_MS, false);
-      if (Array.isArray(cachedTests)) {
-        renderMockItemsList(container, cachedTests);
-        return;
-      }
-
       container.innerHTML = `<div style="text-align:center; color: #94a3b8; padding: 20px;" class="font-orbitron">Loading tests...</div>`;
 
       try {
@@ -1624,14 +1577,9 @@
         querySnapshot.forEach((docSnap) => {
           fetchedItems.push(docSnap.data());
         });
-        writeSessionCache(testsCacheKey, fetchedItems);
         renderMockItemsList(container, fetchedItems);
       } catch (e) {
         console.error("Error fetching tests: ", e);
-        const staleTests = readSessionCache(testsCacheKey, PHANTOM_CACHE_TTL_MS, true);
-        if (Array.isArray(staleTests)) {
-          renderMockItemsList(container, staleTests);
-        }
       }
     }
 
@@ -1700,27 +1648,15 @@
     if (!localUid || !localToken) {
       window.location.href = "intro.html";
     } else {
-      const cadetCacheKey = "phantom_cadet_cache_" + localUid;
-      const cachedCadet = readSessionCache(cadetCacheKey, PHANTOM_CACHE_TTL_MS, false);
-      if (cachedCadet) {
-        applyDashboardCadetState(cachedCadet, localUid, localToken);
-      }
-
       unsubscribeSnapshot = onSnapshot(doc(db, "cadets", localUid), (docSnap) => {
         if (!docSnap.exists()) {
-          try { sessionStorage.removeItem(cadetCacheKey); } catch (e) {}
           window.location.href = "intro.html";
           return;
         }
         const data = docSnap.data();
-        writeSessionCache(cadetCacheKey, data);
         applyDashboardCadetState(data, localUid, localToken);
       }, (err) => {
-        console.warn("Cadet dashboard snapshot fallback:", err);
-        const staleCadet = readSessionCache(cadetCacheKey, PHANTOM_CACHE_TTL_MS, true);
-        if (staleCadet) {
-          applyDashboardCadetState(staleCadet, localUid, localToken);
-        }
+        console.warn("Cadet dashboard snapshot error:", err);
       });
     }
 
@@ -1852,35 +1788,8 @@
     }
 
     window.openBatchLectures = function(batchId) {
-      if (!batchId) return;
-      const cleanBatch = String(batchId).toLowerCase().trim();
-      try {
-        sessionStorage.setItem("phantom_active_squadron", cleanBatch);
-        localStorage.setItem("phantom_active_squadron", cleanBatch);
-      } catch (_) {}
-      window.location.assign("batch-mode.html?batch=" + encodeURIComponent(cleanBatch));
+      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
     }
-
-    function rehydrateClassroomFromCache() {
-      const uid = localStorage.getItem("phantom_uid");
-      const tok = localStorage.getItem("phantom_session_token");
-      if (!uid || !tok) return;
-      const key = "phantom_cadet_cache_" + uid;
-      const cached = cachedCadetData || readSessionCache(key, PHANTOM_CACHE_TTL_MS, true);
-      if (cached && typeof cached === "object") {
-        applyDashboardCadetState(cached, uid, tok);
-      }
-      ["cds-math", "cds-kilo", "nda", "afcat", "capf"].forEach((bId) => {
-        const btn = document.getElementById("btn-" + bId);
-        if (btn && !btn.disabled && btn.innerText && btn.innerText.includes("ACCESS CLASSROOM")) {
-          btn.onclick = () => window.openBatchLectures(bId);
-        }
-      });
-    }
-
-    window.addEventListener("pageshow", () => {
-      rehydrateClassroomFromCache();
-    });
 
     window.logoutCadet = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
