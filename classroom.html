@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☠️𝕋𝔼𝔸𝕄 ℙℍ𝔸ℕ𝕋𝕆𝕄☠️ | Cadet Tactical Dashboard</title>
+  <title>☠️𝕿𝔼𝔸𝕄 ℙℍ𝔸ℕ𝕋𝕆𝕄☠️ | Cadet Tactical Dashboard</title>
   <script>
   (() => {
     let securityTriggered = false;
@@ -875,11 +875,15 @@
         const raw = sessionStorage.getItem(key);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object" || !("ts" in parsed)) return null;
+        if (!parsed || typeof parsed !== "object" || !("ts" in parsed) || !("data" in parsed) || parsed.data === null || typeof parsed.data !== "object") {
+          try { sessionStorage.removeItem(key); } catch (_) {}
+          return null;
+        }
         const age = Date.now() - Number(parsed.ts || 0);
         if (!allowExpired && age > ttlMs) return null;
         return parsed.data;
       } catch (e) {
+        try { sessionStorage.removeItem(key); } catch (_) {}
         return null;
       }
     }
@@ -1848,8 +1852,35 @@
     }
 
     window.openBatchLectures = function(batchId) {
-      window.location.href = "batch-mode.html?batch=" + encodeURIComponent(batchId);
+      if (!batchId) return;
+      const cleanBatch = String(batchId).toLowerCase().trim();
+      try {
+        sessionStorage.setItem("phantom_active_squadron", cleanBatch);
+        localStorage.setItem("phantom_active_squadron", cleanBatch);
+      } catch (_) {}
+      window.location.assign("batch-mode.html?batch=" + encodeURIComponent(cleanBatch));
     }
+
+    function rehydrateClassroomFromCache() {
+      const uid = localStorage.getItem("phantom_uid");
+      const tok = localStorage.getItem("phantom_session_token");
+      if (!uid || !tok) return;
+      const key = "phantom_cadet_cache_" + uid;
+      const cached = cachedCadetData || readSessionCache(key, PHANTOM_CACHE_TTL_MS, true);
+      if (cached && typeof cached === "object") {
+        applyDashboardCadetState(cached, uid, tok);
+      }
+      ["cds-math", "cds-kilo", "nda", "afcat", "capf"].forEach((bId) => {
+        const btn = document.getElementById("btn-" + bId);
+        if (btn && !btn.disabled && btn.innerText && btn.innerText.includes("ACCESS CLASSROOM")) {
+          btn.onclick = () => window.openBatchLectures(bId);
+        }
+      });
+    }
+
+    window.addEventListener("pageshow", () => {
+      rehydrateClassroomFromCache();
+    });
 
     window.logoutCadet = function() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
