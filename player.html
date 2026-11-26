@@ -508,16 +508,68 @@
       pointer-events: none !important;
     }
 
-    /* NEW PW-STYLE YOUTUBE FRAME ENGINE (NORMAL + FULLSCREEN) */
+    /* NEW PW-STYLE YOUTUBE FRAME ENGINE (NORMAL + FULLSCREEN — ZERO YOUTUBE BRANDING ON PAUSE/PLAY) */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none !important; }
+    #ytPlayerFrame {
+      position: absolute !important;
+      width: 112% !important;
+      height: 168% !important;
+      top: -34% !important;
+      left: -6% !important;
+      pointer-events: none !important;
+    }
 
     #phantomConsoleScreen:fullscreen #ytPlayerFrame,
-    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
-      width: 100vw !important;
-      height: 100vh !important;
-      top: 0 !important;
-      left: 0 !important;
+    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame,
+    #phantomConsoleScreen:-ms-fullscreen #ytPlayerFrame {
+      width: 112vw !important;
+      height: 168vh !important;
+      top: -34vh !important;
+      left: -6vw !important;
+      pointer-events: none !important;
+    }
+
+    @media (max-width: 768px) {
+      #ytPlayerFrame {
+        width: 118% !important;
+        height: 184% !important;
+        top: -42% !important;
+        left: -9% !important;
+      }
+      #phantomConsoleScreen:fullscreen #ytPlayerFrame,
+      #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame,
+      #phantomConsoleScreen:-ms-fullscreen #ytPlayerFrame {
+        width: 118vw !important;
+        height: 184vh !important;
+        top: -42vh !important;
+        left: -9vw !important;
+      }
+    }
+
+    /* Clean subtle pause indicator pill in center when paused so user gets instant visual feedback with zero YouTube clutter */
+    .yt-pw-paused-pill {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 68;
+      background: rgba(2, 6, 23, 0.78);
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      color: #fbbf24;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      pointer-events: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.75);
+    }
+    .yt-custom-container.is-paused .yt-pw-paused-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* Hide old bottom deck when YouTube source is active; use PW-style overlay bar inside YouTube frame */
@@ -1848,8 +1900,11 @@
               <button type="button" class="yt-pw-btn" onclick="if(isAnyFullscreen()){exitFullscreenOnly();}else{window.history.back();}" title="Back">
                 &larr; <span id="ytPwTopTitle" style="max-width:72vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${decodedTitle}</span>
               </button>
-              <span style="font-family:'Orbitron',sans-serif;font-size:9px;color:#fbbf24;letter-spacing:1px;">PHANTOM YT</span>
+              
             </div>
+
+            <!-- CLEAN PAUSED INDICATOR -->
+            <div class="yt-pw-paused-pill" id="ytPwPausedPill">⏸ PAUSED</div>
 
             <!-- DOUBLE-TAP SEEK BADGES -->
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
@@ -1975,6 +2030,7 @@
 
         window.onYouTubeIframeAPIReady = () => {
           ytInstance = new YT.Player('ytPlayerFrame', {
+            host: 'https://www.youtube-nocookie.com',
             videoId: PLAYER.ytId,
             playerVars: {
               autoplay: 0,
@@ -1985,7 +2041,9 @@
               rel: 0,
               showinfo: 0,
               iv_load_policy: 3,
-              playsinline: 1
+              cc_load_policy: 0,
+              playsinline: 1,
+              origin: window.location.origin
             },
             events: {
               onReady: () => {
@@ -2023,6 +2081,11 @@
       if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
       const pwPlay = document.getElementById("ytPwPlayBtn");
       if (pwPlay) pwPlay.innerText = isPlaying ? "⏸" : "▶";
+      const ytContainer = document.getElementById("ytPwContainer");
+      if (ytContainer) {
+        if (isPlaying) ytContainer.classList.remove("is-paused");
+        else ytContainer.classList.add("is-paused");
+      }
     }
 
     function setYtPwVolume(val) {
