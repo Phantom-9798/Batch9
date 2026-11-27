@@ -79,7 +79,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -532,6 +532,202 @@
 
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
+
+    /* NEW PW-STYLE SLIM CONTROL BAR FOR DOWNLOADED LECTURE PLAYER */
+    #phantomConsoleScreen .phantom-bottom-deck {
+      display: none !important;
+    }
+
+    .dl-pw-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 92;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(2, 6, 23, 0) 100%);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: auto;
+    }
+
+    .dl-pw-hud-idle .dl-pw-top-bar,
+    #phantomConsoleScreen.fs-idle .dl-pw-top-bar {
+      opacity: 0 !important;
+      transform: translateY(-10px);
+      pointer-events: none !important;
+    }
+
+    .dl-pw-bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 96;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px 10px;
+      background: linear-gradient(0deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0.78) 76%, rgba(2, 6, 23, 0) 100%);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: auto;
+    }
+
+    .dl-pw-hud-idle .dl-pw-bottom-bar,
+    #phantomConsoleScreen.fs-idle .dl-pw-bottom-bar {
+      opacity: 0 !important;
+      transform: translateY(12px);
+      pointer-events: none !important;
+    }
+
+    .dl-pw-scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .dl-pw-speed-badge {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      color: #fbbf24;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .dl-pw-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.26);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+    }
+
+    .dl-pw-fill {
+      height: 100%;
+      width: 0%;
+      background: #0ea5e9;
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .dl-pw-fill::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: #38bdf8;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.95);
+    }
+
+    .dl-pw-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .dl-pw-left,
+    .dl-pw-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dl-pw-btn {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .dl-pw-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fbbf24;
+    }
+
+    .dl-pw-vol {
+      width: 64px;
+      height: 4px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    .dl-pw-speed-select {
+      background: rgba(15, 23, 42, 0.92);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.5);
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      outline: none;
+    }
+    .dl-pw-speed-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    #phantomConsoleScreen .frame-locked-brand-tag {
+      bottom: 66px !important;
+      right: 16px !important;
+      font-size: 15px !important;
+    }
+    #phantomConsoleScreen.dl-pw-hud-idle .frame-locked-brand-tag,
+    #phantomConsoleScreen.fs-idle .frame-locked-brand-tag {
+      bottom: 16px !important;
+      right: 16px !important;
+    }
+
+    @media (max-width: 640px) {
+      .dl-pw-bottom-bar {
+        padding: 8px 10px 8px;
+        gap: 4px;
+      }
+      .dl-pw-vol {
+        width: 44px;
+      }
+      .dl-pw-left,
+      .dl-pw-right {
+        gap: 6px;
+      }
+      .dl-pw-btn {
+        font-size: 10px;
+        padding: 3px 5px;
+      }
+    }
+
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 </head>
@@ -659,6 +855,45 @@
           </div>
         </div>
 
+        <!-- NEW PW-STYLE SLIM CONTROL BAR WITH 5s AUTO-HIDE -->
+        <div class="dl-pw-top-bar" id="dlPwTopBar">
+          <button type="button" class="dl-pw-btn" onclick="if(isAnyFullscreen()){exitFullscreenOnly();}else{window.history.back();}" title="Back">
+            &larr; <span id="dlPwTopTitle" style="max-width:76vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Downloaded Lecture</span>
+          </button>
+        </div>
+
+        <div class="dl-pw-bottom-bar" id="dlPwBottomBar">
+          <div class="dl-pw-scrubber-row">
+            <span id="dlPwCurTime">0:00</span>
+            <span class="dl-pw-speed-badge" id="dlPwSpeedBadge">1x</span>
+            <div class="dl-pw-track" id="dlPwTrack" onclick="seekDownloadedTrack(event)">
+              <div class="dl-pw-fill" id="dlPwFill"></div>
+            </div>
+            <span id="dlPwTotTime">0:00</span>
+          </div>
+
+          <div class="dl-pw-controls-row">
+            <div class="dl-pw-left">
+              <button type="button" class="dl-pw-btn" id="dlPwPlayBtn" onclick="toggleDownloadedPlay()" title="Play / Pause">▶</button>
+              <button type="button" class="dl-pw-btn" onclick="skipDownloadedSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s">↺ 10s</button>
+              <button type="button" class="dl-pw-btn" onclick="skipDownloadedSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s">10s ↻</button>
+              <button type="button" class="dl-pw-btn" id="dlPwMuteBtn" onclick="toggleDlPwMute()" title="Mute / Unmute">🔊</button>
+              <input type="range" class="dl-pw-vol" id="dlPwVolSlider" min="0" max="100" value="100" oninput="setDlPwVolume(this.value)" title="Volume" />
+            </div>
+
+            <div class="dl-pw-right">
+              <select id="dlPwSpeedSelect" class="dl-pw-speed-select" onchange="updateDownloadedSpeed(this.value)" title="Playback Speed">
+                <option value="1">1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2">2x</option>
+              </select>
+              <button type="button" class="dl-pw-btn" id="dlPwFsBtn" onclick="toggleTacticalFullscreen()" title="Fullscreen">⛶</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- LECTURE INFO SECTION DISPLAYED CLEARLY INSIDE PANEL -->
@@ -756,6 +991,21 @@
       document.getElementById("lectureDetailTitle").innerText = clean;
       var fsTitleEl = document.getElementById("fsLectureTitle");
       if (fsTitleEl) fsTitleEl.innerText = clean;
+      var pwTopTitle = document.getElementById("dlPwTopTitle");
+      if (pwTopTitle) pwTopTitle.innerText = clean;
+    }
+
+    var dlHudTimer = null;
+    function wakeDlPwHudFor5s() {
+      var screen = document.getElementById("phantomConsoleScreen");
+      if (!screen) return;
+      screen.classList.remove("dl-pw-hud-idle");
+      clearTimeout(dlHudTimer);
+      dlHudTimer = setTimeout(function() {
+        if (isPlaying && screen) {
+          screen.classList.add("dl-pw-hud-idle");
+        }
+      }, 5000);
     }
 
     function renderUnavailableState(messageText) {
@@ -785,26 +1035,101 @@
       }
 
       const lockShield = document.getElementById("videoScreenLockShield");
+      const screenEl = document.getElementById("phantomConsoleScreen");
+
       if (lockShield) {
-        ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
+        var singleTapTimer = null;
+        var lastTapMs = 0;
+        var lastTapX = 0;
+        var ignoreMouseUntil = 0;
+
+        function handleDlTap(clientX) {
+          wakeDlPwHudFor5s();
+          if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+
+          var now = Date.now();
+          var rect = lockShield.getBoundingClientRect();
+          var isLeft = (clientX - rect.left) < (rect.width / 2);
+
+          if (now - lastTapMs > 30 && now - lastTapMs < 330 && Math.abs(clientX - lastTapX) < 90) {
+            if (singleTapTimer) {
+              clearTimeout(singleTapTimer);
+              singleTapTimer = null;
+            }
+            lastTapMs = 0;
+            skipDownloadedSeconds(isLeft ? -10 : 10);
+            triggerBadge(isLeft ? "skipLeftBadge" : "skipRightBadge");
+          } else {
+            lastTapMs = now;
+            lastTapX = clientX;
+            if (singleTapTimer) clearTimeout(singleTapTimer);
+            singleTapTimer = setTimeout(function() {
+              singleTapTimer = null;
+              toggleDownloadedPlay();
+              wakeDlPwHudFor5s();
+            }, 260);
+          }
+        }
+
+        ["mousedown", "mouseup", "touchstart"].forEach(function(ev) {
           lockShield.addEventListener(ev, function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (isAnyFullscreen()) {
-              wakeFullscreenControlsFor5s();
-            }
+            wakeDlPwHudFor5s();
+            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
           }, { passive: false });
+        });
+
+        lockShield.addEventListener("touchend", function(e) {
+          var t = e.changedTouches && e.changedTouches[0];
+          if (!t) return;
+          e.preventDefault();
+          e.stopPropagation();
+          ignoreMouseUntil = Date.now() + 500;
+          handleDlTap(t.clientX);
+        }, { passive: false });
+
+        lockShield.addEventListener("click", function(e) {
+          if (Date.now() < ignoreMouseUntil) return;
+          e.preventDefault();
+          e.stopPropagation();
+          handleDlTap(e.clientX);
         });
       }
 
-      const screenEl = document.getElementById("phantomConsoleScreen");
-      ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
-        screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
+      ["pointerdown", "pointermove", "click", "mousemove", "touchstart", "touchmove", "keydown"].forEach(function(evtName){
+        screenEl.addEventListener(evtName, function() {
+          wakeDlPwHudFor5s();
+          wakeFullscreenControlsFor5s();
+        }, { passive: true });
         document.addEventListener(evtName, function(){
+          wakeDlPwHudFor5s();
           if (isAnyFullscreen()) {
             wakeFullscreenControlsFor5s();
           }
-        });
+        }, { passive: true });
+      });
+
+      document.addEventListener("keydown", function(e) {
+        var tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        var key = (e.key || "").toLowerCase();
+        if (e.key === "ArrowLeft" || key === "j") {
+          e.preventDefault();
+          skipDownloadedSeconds(-10);
+          triggerBadge("skipLeftBadge");
+          wakeDlPwHudFor5s();
+        } else if (e.key === "ArrowRight" || key === "l") {
+          e.preventDefault();
+          skipDownloadedSeconds(10);
+          triggerBadge("skipRightBadge");
+          wakeDlPwHudFor5s();
+        } else if (e.key === " " || key === "k") {
+          e.preventDefault();
+          toggleDownloadedPlay();
+          wakeDlPwHudFor5s();
+        }
       });
 
       var record = await fetchDownloadedRecord(reqId, reqTitle);
@@ -923,6 +1248,40 @@
     function updatePlayLabel() {
       const btn = document.getElementById("playTrigger");
       if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
+      const pwPlay = document.getElementById("dlPwPlayBtn");
+      if (pwPlay) pwPlay.innerText = isPlaying ? "⏸" : "▶";
+    }
+
+    function setDlPwVolume(val) {
+      var num = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
+      var slider = document.getElementById("dlPwVolSlider");
+      var muteBtn = document.getElementById("dlPwMuteBtn");
+      var vid = document.getElementById("downloadedVideo");
+      if (slider && String(slider.value) !== String(num)) slider.value = String(num);
+      if (vid) {
+        vid.volume = num / 100;
+        vid.muted = num === 0;
+      }
+      if (muteBtn) muteBtn.innerText = num === 0 ? "🔇" : "🔊";
+      wakeDlPwHudFor5s();
+    }
+
+    function toggleDlPwMute() {
+      var vid = document.getElementById("downloadedVideo");
+      var slider = document.getElementById("dlPwVolSlider");
+      var muteBtn = document.getElementById("dlPwMuteBtn");
+      if (!vid) return;
+      if (vid.muted || vid.volume === 0) {
+        vid.muted = false;
+        var nextVol = (slider && parseInt(slider.value, 10) > 0) ? parseInt(slider.value, 10) : 100;
+        vid.volume = nextVol / 100;
+        if (slider) slider.value = String(nextVol);
+        if (muteBtn) muteBtn.innerText = "🔊";
+      } else {
+        vid.muted = true;
+        if (muteBtn) muteBtn.innerText = "🔇";
+      }
+      wakeDlPwHudFor5s();
     }
 
     function activateDownloadedStream() {
@@ -964,8 +1323,14 @@
     }
 
     function updateDownloadedSpeed(rate) {
+      var spd = parseFloat(rate);
+      var badge = document.getElementById("dlPwSpeedBadge");
+      if (badge) badge.innerText = spd + "x";
+      var sel = document.getElementById("dlPwSpeedSelect");
+      if (sel && String(sel.value) !== String(rate)) sel.value = String(rate);
       var vid = document.getElementById("downloadedVideo");
-      if (vid) vid.playbackRate = parseFloat(rate);
+      if (vid) vid.playbackRate = spd;
+      wakeDlPwHudFor5s();
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
@@ -985,12 +1350,21 @@
         if (vid && vid.duration > 0) {
           const c = vid.currentTime || 0;
           const d = vid.duration || 0;
+          var pctStr = ((c / d) * 100) + "%";
           const fill = document.getElementById("trackFill");
-          if (fill) fill.style.width = ((c / d) * 100) + "%";
+          if (fill) fill.style.width = pctStr;
+          const pwFill = document.getElementById("dlPwFill");
+          if (pwFill) pwFill.style.width = pctStr;
+          var curStr = formatSeconds(c);
+          var totStr = formatSeconds(d);
           var curEl = document.getElementById("currentTimeLabel");
           var totEl = document.getElementById("totalTimeLabel");
-          if (curEl) curEl.innerText = formatSeconds(c);
-          if (totEl) totEl.innerText = formatSeconds(d);
+          if (curEl) curEl.innerText = curStr;
+          if (totEl) totEl.innerText = totStr;
+          var pwCur = document.getElementById("dlPwCurTime");
+          var pwTot = document.getElementById("dlPwTotTime");
+          if (pwCur) pwCur.innerText = curStr;
+          if (pwTot) pwTot.innerText = totStr;
         }
       }, 400);
     }
