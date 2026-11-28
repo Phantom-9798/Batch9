@@ -302,6 +302,79 @@
       pointer-events: none !important;
     }
 
+    /* IN NEXSHIELD MODE: COMPLETELY REMOVE CUSTOM BOTTOM CONTROL DECK (NORMAL & FULLSCREEN) */
+    #phantomConsoleScreen.nexshield-mode .phantom-bottom-deck,
+    #phantomConsoleScreen.nexshield-mode:fullscreen .phantom-bottom-deck,
+    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .phantom-bottom-deck {
+      display: none !important;
+    }
+
+    /* NEXSHIELD FULLSCREEN SHIELD + NATIVE-MATCHING VIMEO FULLSCREEN BUTTON */
+    .nexshield-fs-shield {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 38px;
+      height: 36px;
+      z-index: 99998;
+      background: transparent;
+      pointer-events: auto;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    .nexshield-native-fs-btn {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 18, 26, 0.86);
+      border: none;
+      border-radius: 4px;
+      color: #ffffff;
+      cursor: pointer;
+      padding: 0;
+      z-index: 99999;
+      transition: background 0.16s ease, transform 0.12s ease;
+    }
+
+    .nexshield-native-fs-btn:hover {
+      background: rgba(20, 26, 38, 0.96);
+    }
+
+    .nexshield-native-fs-btn:active {
+      transform: scale(0.94);
+    }
+
+    .nexshield-native-fs-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #ffffff;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .nexshield-fs-shield {
+        right: 4px;
+        bottom: 4px;
+        width: 34px;
+        height: 32px;
+      }
+      .nexshield-native-fs-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
     .fs-back-btn {
       background: linear-gradient(135deg, #f59e0b, #ea580c);
       color: #ffffff;
@@ -465,14 +538,18 @@
     }
     #phantomConsoleScreen.fs-idle .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
-    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
-      bottom: 22px;
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag,
+    #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
+    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
+      bottom: 48px;
       right: 56px;
       font-size: 20px;
     }
     @media (max-width: 768px) {
       #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
-      #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
+      #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag,
+      #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
+      #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
         bottom: 52px;
         right: 16px;
         font-size: 15px;
@@ -1327,6 +1404,7 @@
     let isDirectArchiveVideo = false;
     let isGDriveEmbed = false;
     let isYouTubeSource = false;
+    let isNexShieldEmbed = false;
     let fsIdleTimer = null;
     let isCurrentLectureDownloaded = false;
     let isWatchingDownloadedLecture = false;
@@ -1454,8 +1532,20 @@
       else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
+    function renderNexShieldFsIcon(isFs) {
+      if (isFs) {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline></svg>';
+      }
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><polyline points="21 15 21 21 15 21"></polyline><polyline points="3 9 3 3 9 3"></polyline></svg>';
+    }
+
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
+      var nexFsBtn = document.getElementById("nexShieldNativeFsBtn");
+      if (nexFsBtn) {
+        nexFsBtn.innerHTML = renderNexShieldFsIcon(isFs);
+        nexFsBtn.title = isFs ? "Exit Fullscreen" : "Fullscreen";
+      }
       if (!dockBtn) return;
       if (isGDriveEmbed) {
         dockBtn.disabled = true;
@@ -1483,6 +1573,11 @@
           screen.classList.add("yt-mode");
         } else {
           screen.classList.remove("yt-mode");
+        }
+        if (mode === 'nexashield') {
+          screen.classList.add("nexshield-mode");
+        } else {
+          screen.classList.remove("nexshield-mode");
         }
         screen.classList.remove("fs-idle");
       }
@@ -1742,6 +1837,7 @@
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
         isYouTubeSource = false;
+        isNexShieldEmbed = false;
         PLAYER.mode = 'gdrive';
         PLAYER.gdriveId = gdriveId;
         var gdrivePreviewUrl = "https://drive.google.com/file/d/" + gdriveId + "/preview";
@@ -1791,6 +1887,7 @@
         isDirectArchiveVideo = true;
         isGDriveEmbed = false;
         isYouTubeSource = false;
+        isNexShieldEmbed = false;
         PLAYER.mode = 'archive';
         applyScreenLockForMode('archive');
         applySourceButtonPermissions('archive');
@@ -1839,30 +1936,64 @@
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (NO CROP, CUSTOM DECK REMOVED, VIMEO NATIVE FULLSCREEN BLOCKED BY SHIELD + MATCHING CUSTOM FULLSCREEN BUTTON)
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = false;
+        isNexShieldEmbed = true;
         PLAYER.mode = 'nexashield';
         applyScreenLockForMode('nexashield');
         applySourceButtonPermissions('nexashield');
+        var bottomDeckEl = document.getElementById("phantomBottomDeck");
+        if (bottomDeckEl) bottomDeckEl.remove();
+
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
               id="archiveIframe" 
               src="${finalVideo}" 
               class="archive-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture"
+              allowfullscreen
+              webkitallowfullscreen
+              mozallowfullscreen>
             </iframe>
+            <div class="nexshield-fs-shield" id="nexShieldFsShield" oncontextmenu="return false;">
+              <button type="button" class="nexshield-native-fs-btn" id="nexShieldNativeFsBtn" title="Fullscreen" aria-label="Fullscreen">${renderNexShieldFsIcon(false)}</button>
+            </div>
           </div>
         `;
+
+        var nxShield = document.getElementById("nexShieldFsShield");
+        var nxFsBtn = document.getElementById("nexShieldNativeFsBtn");
+        if (nxShield) {
+          ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
+            nxShield.addEventListener(ev, function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+              if (ev === "click" || ev === "touchend") {
+                toggleTacticalFullscreen();
+              }
+              return false;
+            }, { passive: false, capture: true });
+          });
+        }
+        if (nxFsBtn) {
+          nxFsBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTacticalFullscreen();
+          });
+        }
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = false;
+        isNexShieldEmbed = false;
         PLAYER.mode = 'zoom';
         applyScreenLockForMode('zoom');
         applySourceButtonPermissions('zoom');
@@ -1877,6 +2008,7 @@
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = true;
+        isNexShieldEmbed = false;
         PLAYER.mode = 'youtube';
         PLAYER.ytId = ytId || finalVideo;
         applyScreenLockForMode('youtube');
