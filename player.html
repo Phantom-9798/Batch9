@@ -309,85 +309,92 @@
       display: none !important;
     }
 
-    /* NEXSHIELD FULLSCREEN SHIELD + EXACT VIMEO NATIVE-STYLE FULLSCREEN BUTTON OVERLAY */
+    /* NEXSHIELD TRANSPARENT SHIELD + EXACT VIMEO-DESIGN CUSTOM FULLSCREEN BUTTON ON TOP */
     .nexshield-fs-shield {
       display: none;
       position: absolute;
       right: 8px;
       bottom: 8px;
-      width: 44px;
-      height: 40px;
+      width: 40px;
+      height: 38px;
       z-index: 2147483646;
-      background: #0b0e14;
-      border-radius: 6px;
-      pointer-events: auto;
+      background: transparent !important;
+      border: none !important;
+      pointer-events: auto !important;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
     }
 
-    /* Half-screen (normal console viewport) */
+    /* Half-screen position matching Vimeo's bottom-right fullscreen icon */
     #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
-      display: block !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
       right: 8px;
       bottom: 8px;
-      width: 44px;
-      height: 40px;
+      width: 40px;
+      height: 38px;
     }
 
-    /* Full-screen console viewport — auto-adjusts to Vimeo's fullscreen control bar corner */
+    /* Full-screen position matching Vimeo's bottom-right fullscreen icon */
     #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
     #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
     #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
-      display: block !important;
-      right: 12px;
-      bottom: 12px;
-      width: 48px;
-      height: 44px;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      right: 10px;
+      bottom: 10px;
+      width: 44px;
+      height: 42px;
     }
 
     #phantomConsoleScreen.nexshield-mode .frame-locked-brand-tag {
       bottom: 14px !important;
-      right: 60px !important;
+      right: 56px !important;
       font-size: 14px !important;
     }
 
     #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
       bottom: 18px !important;
-      right: 68px !important;
+      right: 64px !important;
       font-size: 16px !important;
     }
 
+    /* Custom fullscreen button sitting directly on top of the transparent shield with exact Vimeo [ ] icon design */
     .nexshield-native-fs-btn {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      position: relative;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(15, 20, 28, 0.94);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 5px;
+      background: rgba(10, 14, 22, 0.72);
+      border: none;
+      border-radius: 4px;
       color: #ffffff;
       cursor: pointer;
       padding: 0;
+      margin: 0;
       z-index: 2147483647;
-      pointer-events: auto;
+      pointer-events: auto !important;
       transition: background 0.15s ease, transform 0.1s ease;
     }
 
     .nexshield-native-fs-btn:hover {
-      background: rgba(26, 34, 48, 0.98);
+      background: rgba(20, 26, 38, 0.92);
+      transform: scale(1.06);
     }
 
     .nexshield-native-fs-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.95);
     }
 
     .nexshield-native-fs-btn svg {
+      display: block !important;
       width: 16px;
       height: 16px;
       stroke: #ffffff;
@@ -403,16 +410,20 @@
       #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
         right: 6px;
         bottom: 6px;
-        width: 40px;
-        height: 36px;
+        width: 36px;
+        height: 34px;
       }
       #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
       #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
       #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
         right: 8px;
         bottom: 8px;
-        width: 42px;
-        height: 38px;
+        width: 38px;
+        height: 36px;
+      }
+      .nexshield-native-fs-btn {
+        width: 28px;
+        height: 28px;
       }
       .nexshield-native-fs-btn svg {
         width: 14px;
