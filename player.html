@@ -309,14 +309,14 @@
       display: none !important;
     }
 
-    /* NEXSHIELD TRANSPARENT SHIELD + EXACT VIMEO-DESIGN CUSTOM FULLSCREEN BUTTON ON TOP */
+    /* NEXSHIELD TRANSPARENT SHIELD + ALIGNED VIMEO-DESIGN FULLSCREEN BUTTON */
     .nexshield-fs-shield {
       display: none;
       position: absolute;
-      right: 8px;
-      bottom: 8px;
-      width: 40px;
-      height: 38px;
+      right: 14px;
+      bottom: 10px;
+      width: 38px;
+      height: 36px;
       z-index: 2147483646;
       background: transparent !important;
       border: none !important;
@@ -327,44 +327,68 @@
       -webkit-touch-callout: none;
     }
 
-    /* Half-screen position matching Vimeo's bottom-right fullscreen icon */
+    /* Half-screen position shifted left to match Vimeo's native fullscreen button */
     #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
       display: flex !important;
       align-items: center;
       justify-content: center;
-      right: 8px;
-      bottom: 8px;
-      width: 40px;
-      height: 38px;
+      right: 14px;
+      bottom: 10px;
+      width: 38px;
+      height: 36px;
     }
 
-    /* Full-screen position matching Vimeo's bottom-right fullscreen icon */
+    /* Full-screen position auto-adjusted to match Vimeo's native fullscreen button */
     #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
     #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
-    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
+    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield,
+    #phantomConsoleScreen.nexshield-mode.fs-fallback-active .nexshield-fs-shield {
       display: flex !important;
       align-items: center;
       justify-content: center;
-      right: 10px;
-      bottom: 10px;
-      width: 44px;
-      height: 42px;
+      right: 18px;
+      bottom: 14px;
+      width: 42px;
+      height: 40px;
+    }
+
+    /* Fallback viewport fullscreen when browser Fullscreen API is restricted */
+    #phantomConsoleScreen.fs-fallback-active {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 2147483640 !important;
+      overflow: hidden !important;
+    }
+
+    #phantomConsoleScreen.fs-fallback-active .video-viewport-box {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      position: absolute !important;
+      inset: 0 !important;
     }
 
     #phantomConsoleScreen.nexshield-mode .frame-locked-brand-tag {
       bottom: 14px !important;
-      right: 56px !important;
+      right: 62px !important;
       font-size: 14px !important;
     }
 
     #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
+    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag,
+    #phantomConsoleScreen.nexshield-mode.fs-fallback-active .frame-locked-brand-tag {
       bottom: 18px !important;
-      right: 64px !important;
+      right: 70px !important;
       font-size: 16px !important;
     }
 
-    /* Custom fullscreen button sitting directly on top of the transparent shield with exact Vimeo [ ] icon design */
     .nexshield-native-fs-btn {
       position: relative;
       width: 32px;
@@ -372,7 +396,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(10, 14, 22, 0.72);
+      background: rgba(12, 16, 24, 0.78);
       border: none;
       border-radius: 4px;
       color: #ffffff;
@@ -385,8 +409,8 @@
     }
 
     .nexshield-native-fs-btn:hover {
-      background: rgba(20, 26, 38, 0.92);
-      transform: scale(1.06);
+      background: rgba(24, 30, 44, 0.94);
+      transform: scale(1.05);
     }
 
     .nexshield-native-fs-btn:active {
@@ -408,18 +432,19 @@
     @media (max-width: 768px) {
       .nexshield-fs-shield,
       #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
-        right: 6px;
-        bottom: 6px;
-        width: 36px;
-        height: 34px;
+        right: 10px;
+        bottom: 8px;
+        width: 34px;
+        height: 32px;
       }
       #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
       #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
-      #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
-        right: 8px;
-        bottom: 8px;
-        width: 38px;
-        height: 36px;
+      #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield,
+      #phantomConsoleScreen.nexshield-mode.fs-fallback-active .nexshield-fs-shield {
+        right: 12px;
+        bottom: 10px;
+        width: 36px;
+        height: 34px;
       }
       .nexshield-native-fs-btn {
         width: 28px;
@@ -1565,7 +1590,9 @@
     }
 
     function isAnyFullscreen() {
-      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+      var screen = document.getElementById("phantomConsoleScreen");
+      var fallbackFs = !!(screen && screen.classList.contains("fs-fallback-active"));
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || fallbackFs);
     }
 
     function wakeFullscreenControlsFor5s() {
@@ -1587,10 +1614,22 @@
     }
 
     function exitFullscreenOnly() {
+      var screen = document.getElementById("phantomConsoleScreen");
+      if (screen && screen.classList.contains("fs-fallback-active")) {
+        screen.classList.remove("fs-fallback-active");
+        PLAYER.isFullscreen = false;
+        syncFullscreenButtons(false);
+        return;
+      }
       if (!isAnyFullscreen()) return;
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      else if (document.msExitFullscreen) document.msExitFullscreen();
+      try {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+      } catch (e) {
+        if (screen) screen.classList.remove("fs-fallback-active");
+        syncFullscreenButtons(false);
+      }
     }
 
     function renderNexShieldFsIcon(isFs) {
@@ -2024,27 +2063,25 @@
         var nxFsBtn = document.getElementById("nexShieldNativeFsBtn");
         if (nxFsBtn) {
           nxFsBtn.innerHTML = renderNexShieldFsIcon(isAnyFullscreen());
-          ["click", "touchend"].forEach(function(ev) {
-            nxFsBtn.addEventListener(ev, function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-              toggleTacticalFullscreen();
-              return false;
-            }, { passive: false, capture: true });
-          });
+          nxFsBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTacticalFullscreen();
+          };
         }
         if (nxShield) {
-          ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
+          ["dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
             nxShield.addEventListener(ev, function(e) {
+              if (e.target && e.target.id === "nexShieldNativeFsBtn") return;
               e.preventDefault();
               e.stopPropagation();
-              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-              if ((ev === "click" || ev === "touchend") && (!e.target || e.target.id !== "nexShieldNativeFsBtn")) {
-                toggleTacticalFullscreen();
-              }
-              return false;
-            }, { passive: false, capture: true });
+            }, { passive: false });
+          });
+          nxShield.addEventListener("click", function(e) {
+            if (e.target && e.target.id === "nexShieldNativeFsBtn") return;
+            e.preventDefault();
+            e.stopPropagation();
+            toggleTacticalFullscreen();
           });
         }
       }
@@ -2352,15 +2389,33 @@
     function toggleTacticalFullscreen() {
       if (isGDriveEmbed) return;
       const target = document.getElementById("phantomConsoleScreen");
+      if (!target) return;
 
       if (!isAnyFullscreen()) {
-        if (target.requestFullscreen) {
-          target.requestFullscreen();
-        } else if (target.webkitRequestFullscreen) {
-          target.webkitRequestFullscreen();
-        } else if (target.msRequestFullscreen) {
-          target.msRequestFullscreen();
+        try {
+          var req = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen || target.msRequestFullscreen;
+          if (req) {
+            var prom = req.call(target);
+            if (prom && typeof prom.catch === "function") {
+              prom.catch(function() {
+                target.classList.add("fs-fallback-active");
+                syncFullscreenButtons(true);
+              });
+            }
+          } else {
+            target.classList.add("fs-fallback-active");
+          }
+        } catch (err) {
+          target.classList.add("fs-fallback-active");
         }
+        setTimeout(function() {
+          if (!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement)) {
+            if (target.classList.contains("nexshield-mode")) {
+              target.classList.add("fs-fallback-active");
+              syncFullscreenButtons(true);
+            }
+          }
+        }, 120);
         syncFullscreenButtons(true);
       } else {
         exitFullscreenOnly();
