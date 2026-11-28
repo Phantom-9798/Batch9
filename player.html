@@ -508,16 +508,258 @@
       pointer-events: none !important;
     }
 
-    /* YOUTUBE ENGINE */
+    /* NORMAL YOUTUBE FRAME ENGINE + PAUSE SHIELD OVER BOTTOM-RIGHT YOUTUBE LOGO */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none !important; }
+    #ytPlayerFrame {
+      position: absolute !important;
+      width: 100% !important;
+      height: 126% !important;
+      top: -13% !important;
+      left: 0 !important;
+      pointer-events: none !important;
+    }
 
     #phantomConsoleScreen:fullscreen #ytPlayerFrame,
-    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
+    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame,
+    #phantomConsoleScreen:-ms-fullscreen #ytPlayerFrame {
       width: 100vw !important;
       height: 100vh !important;
       top: 0 !important;
       left: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Black shield active ONLY while YouTube video is paused, hiding bottom-right YouTube text/logo */
+    .yt-pause-brand-shield {
+      display: none;
+      position: absolute;
+      right: 8px;
+      bottom: 62px;
+      width: 145px;
+      height: 38px;
+      background: #020617;
+      border-radius: 6px;
+      z-index: 70;
+      pointer-events: none;
+    }
+    .yt-custom-container.is-paused .yt-pause-brand-shield {
+      display: block;
+    }
+    #phantomConsoleScreen:fullscreen .yt-pause-brand-shield,
+    #phantomConsoleScreen:-webkit-full-screen .yt-pause-brand-shield,
+    #phantomConsoleScreen:-ms-fullscreen .yt-pause-brand-shield {
+      right: 14px;
+      bottom: 70px;
+      width: 165px;
+      height: 42px;
+    }
+    @media (max-width: 768px) {
+      .yt-pause-brand-shield {
+        right: 6px;
+        bottom: 56px;
+        width: 120px;
+        height: 32px;
+      }
+      #phantomConsoleScreen:fullscreen .yt-pause-brand-shield,
+      #phantomConsoleScreen:-webkit-full-screen .yt-pause-brand-shield,
+      #phantomConsoleScreen:-ms-fullscreen .yt-pause-brand-shield {
+        right: 8px;
+        bottom: 60px;
+        width: 130px;
+        height: 34px;
+      }
+    }
+
+    #phantomConsoleScreen.yt-mode .phantom-bottom-deck {
+      display: none !important;
+    }
+
+    .yt-pw-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 92;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(2, 6, 23, 0) 100%);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: auto;
+    }
+
+    .yt-pw-hud-idle .yt-pw-top-bar {
+      opacity: 0 !important;
+      transform: translateY(-10px);
+      pointer-events: none !important;
+    }
+
+    .yt-pw-bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 96;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px 10px;
+      background: linear-gradient(0deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0.78) 76%, rgba(2, 6, 23, 0) 100%);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: auto;
+    }
+
+    .yt-pw-hud-idle .yt-pw-bottom-bar {
+      opacity: 0 !important;
+      transform: translateY(12px);
+      pointer-events: none !important;
+    }
+
+    .yt-pw-scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .yt-pw-speed-badge {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      color: #fbbf24;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .yt-pw-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.26);
+      border-radius: 999px;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+    }
+
+    .yt-pw-fill {
+      height: 100%;
+      width: 0%;
+      background: #0ea5e9;
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .yt-pw-fill::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: #38bdf8;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.95);
+    }
+
+    .yt-pw-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .yt-pw-left,
+    .yt-pw-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .yt-pw-btn {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .yt-pw-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fbbf24;
+    }
+
+    .yt-pw-vol {
+      width: 64px;
+      height: 4px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    .yt-pw-speed-select {
+      background: rgba(15, 23, 42, 0.92);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.5);
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      outline: none;
+    }
+    .yt-pw-speed-select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    #phantomConsoleScreen.yt-mode .frame-locked-brand-tag {
+      bottom: 66px !important;
+      right: 16px !important;
+      font-size: 15px !important;
+    }
+    #phantomConsoleScreen.yt-mode .yt-pw-hud-idle .frame-locked-brand-tag,
+    #phantomConsoleScreen.yt-mode.fs-idle .frame-locked-brand-tag {
+      bottom: 16px !important;
+      right: 16px !important;
+    }
+
+    @media (max-width: 640px) {
+      .yt-pw-bottom-bar {
+        padding: 8px 10px 8px;
+        gap: 4px;
+      }
+      .yt-pw-vol {
+        width: 44px;
+      }
+      .yt-pw-left,
+      .yt-pw-right {
+        gap: 6px;
+      }
+      .yt-pw-btn {
+        font-size: 10px;
+        padding: 3px 5px;
+      }
     }
 
     .skip-alert-badge {
@@ -783,96 +1025,6 @@
 
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
 
-
-    /* NEXSHIELD MODE: REMOVE CUSTOM BOTTOM DECK, BLOCK TOP TITLE/DATE CLICK (KEEP VISIBLE), & SHOW 5s AUTO-HIDE TOP-RIGHT FS ICON */
-    #phantomConsoleScreen.nexshield-mode .phantom-bottom-deck,
-    #phantomConsoleScreen.nexshield-mode:fullscreen .phantom-bottom-deck,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .phantom-bottom-deck {
-      display: none !important;
-    }
-
-    /* Transparent click-blocker over top title/date area (stays visible underneath, cannot be clicked) */
-    .nexshield-top-title-shield {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 64px;
-      height: 58px;
-      z-index: 2147483645;
-      background: transparent !important;
-      pointer-events: auto !important;
-      cursor: default !important;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    #phantomConsoleScreen.nexshield-mode .nexshield-top-title-shield,
-    #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-top-title-shield,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-top-title-shield,
-    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-top-title-shield {
-      display: block !important;
-    }
-
-    /* Small semi-transparent top-right Fullscreen / Exit icon button (shows for 5s on activity, then auto-hides) */
-    .nexshield-top-fs-btn {
-      display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 34px;
-      height: 34px;
-      z-index: 2147483647;
-      background: rgba(15, 23, 42, 0.56);
-      color: rgba(248, 250, 252, 0.94);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-radius: 8px;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      pointer-events: auto !important;
-      user-select: none;
-      -webkit-user-select: none;
-      opacity: 1;
-      transition: opacity 0.25s ease, transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
-    }
-
-    .nexshield-top-fs-btn:hover {
-      background: rgba(15, 23, 42, 0.78);
-      border-color: rgba(251, 191, 36, 0.6);
-      color: #ffffff;
-    }
-
-    .nexshield-top-fs-btn:active {
-      transform: scale(0.94);
-    }
-
-    .nexshield-top-fs-btn svg {
-      width: 15px;
-      height: 15px;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      pointer-events: none;
-    }
-
-    #phantomConsoleScreen.nexshield-mode .nexshield-top-fs-btn,
-    #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-top-fs-btn,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-top-fs-btn,
-    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-top-fs-btn {
-      display: inline-flex !important;
-    }
-
-    #phantomConsoleScreen.nexshield-mode.nexshield-hud-idle .nexshield-top-fs-btn {
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
     header, main, footer { position: relative; z-index: 10; width: 100%; }
   </style>
 
@@ -978,12 +1130,6 @@
 
       <!-- UNIFIED FULLSCREEN CONTAINER -->
       <div id="phantomConsoleScreen">
-
-        <!-- TRANSPARENT SHIELD OVER TOP TITLE/DATE (KEEPS VISIBLE, BLOCKS CLICKS TO VIMEO/NEXSHIELD PROFILE) -->
-        <div class="nexshield-top-title-shield" id="nexShieldTopTitleShield" oncontextmenu="return false;"></div>
-
-        <!-- SMALL SEMI-TRANSPARENT TOP-RIGHT FULLSCREEN / EXIT ICON (5s AUTO-HIDE ON ACTIVITY) -->
-        <button type="button" class="nexshield-top-fs-btn" id="nexShieldTopFsBtn" onclick="toggleTacticalFullscreen()" title="Fullscreen" aria-label="Fullscreen"></button>
 
         <!-- FULLSCREEN TOP BAR (BACK + LECTURE TITLE) -->
         <div class="fs-top-bar" id="fsTopBar">
@@ -1181,8 +1327,6 @@
     let isDirectArchiveVideo = false;
     let isGDriveEmbed = false;
     let isYouTubeSource = false;
-    let isNexShieldMode = false;
-    var nexHudTimer = null;
     let fsIdleTimer = null;
     let isCurrentLectureDownloaded = false;
     let isWatchingDownloadedLecture = false;
@@ -1310,21 +1454,8 @@
       else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
-    function renderNexShieldIcon(isFs) {
-      if (isFs) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline></svg>';
-      }
-      return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><polyline points="21 15 21 21 15 21"></polyline><polyline points="3 9 3 3 9 3"></polyline></svg>';
-    }
-
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      var topFsBtn = document.getElementById("nexShieldTopFsBtn");
-      if (topFsBtn) {
-        topFsBtn.innerHTML = renderNexShieldIcon(isFs);
-        topFsBtn.title = isFs ? "Exit Fullscreen" : "Fullscreen";
-        topFsBtn.setAttribute("aria-label", isFs ? "Exit Fullscreen" : "Fullscreen");
-      }
       if (!dockBtn) return;
       if (isGDriveEmbed) {
         dockBtn.disabled = true;
@@ -1348,12 +1479,10 @@
         } else {
           screen.classList.remove("gdrive-mode");
         }
-        if (mode === 'nexashield') {
-          screen.classList.add("nexshield-mode");
-          if (window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
+        if (mode === 'youtube') {
+          screen.classList.add("yt-mode");
         } else {
-          screen.classList.remove("nexshield-mode");
-          screen.classList.remove("nexshield-hud-idle");
+          screen.classList.remove("yt-mode");
         }
         screen.classList.remove("fs-idle");
       }
@@ -1424,6 +1553,7 @@
       refreshCurrentDownloadButtonState();
     }
 
+    // DOUBLE-TAP + KEYBOARD SEEK HELPER FOR YOUTUBE & GOOGLE DRIVE FRAMES
     function triggerSideSeek(side) {
       if (side === "left") {
         skipSeconds(-10);
@@ -1563,6 +1693,7 @@
         ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
           lockShield.addEventListener(ev, function(e) {
             if (!lockShield.classList.contains("lock-enabled")) return;
+            if (isYouTubeSource) return;
             e.preventDefault();
             e.stopPropagation();
             if (isAnyFullscreen()) {
@@ -1570,7 +1701,6 @@
             }
           }, { passive: false });
         });
-        bindYouTubeDoubleTap(lockShield);
       }
 
       const screenEl = document.getElementById("phantomConsoleScreen");
@@ -1583,6 +1713,7 @@
         });
       });
 
+      // KEYBOARD SHORTCUTS FOR YOUTUBE & GOOGLE DRIVE FRAMES (10s SEEK + PLAY/PAUSE)
       document.addEventListener("keydown", function(e) {
         if (!isYouTubeSource && !isGDriveEmbed) return;
         var tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : "";
@@ -1606,7 +1737,7 @@
       const ytId = extractYouTubeId(finalVideo);
       const gdriveId = !ytId ? extractGoogleDriveId(finalVideo) : null;
 
-      // 0. GOOGLE DRIVE EMBED PLAYER
+      // 0. GOOGLE DRIVE EMBED PLAYER (ALL NATIVE BUTTONS & FULLSCREEN ENABLED ON DESKTOP & MOBILE; ONLY TOP-RIGHT POP-OUT LOCKED)
       if (gdriveId) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
@@ -1708,81 +1839,24 @@
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (NO CUSTOM DECK, TOP TITLE CLICK BLOCKED, 5s AUTO-HIDE TOP-RIGHT FS/EXIT ICON)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = false;
-        isNexShieldMode = true;
         PLAYER.mode = 'nexashield';
         applyScreenLockForMode('nexashield');
         applySourceButtonPermissions('nexashield');
-
-        var bottomDeckEl = document.getElementById("phantomBottomDeck");
-        if (bottomDeckEl) bottomDeckEl.remove();
-
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
               id="archiveIframe" 
               src="${finalVideo}" 
               class="archive-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture">
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
-
-        var topTitleShield = document.getElementById("nexShieldTopTitleShield");
-        if (topTitleShield) {
-          ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
-            topTitleShield.addEventListener(ev, function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-              if (window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
-              return false;
-            }, { passive: false, capture: true });
-          });
-        }
-
-        window.wakeNexShieldHudFor5s = function() {
-          var box = document.getElementById("phantomConsoleScreen");
-          if (!box || !box.classList.contains("nexshield-mode")) return;
-          box.classList.remove("nexshield-hud-idle");
-          clearTimeout(nexHudTimer);
-          nexHudTimer = setTimeout(function() {
-            if (box && box.classList.contains("nexshield-mode")) {
-              box.classList.add("nexshield-hud-idle");
-            }
-          }, 5000);
-        };
-
-        var consoleBox = document.getElementById("phantomConsoleScreen");
-        if (consoleBox) {
-          ["pointerdown", "pointermove", "click", "mousemove", "touchstart", "touchmove", "keydown"].forEach(function(ev) {
-            consoleBox.addEventListener(ev, function() {
-              if (isNexShieldMode && window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
-            }, { passive: true });
-          });
-        }
-        ["pointermove", "mousemove", "touchstart", "keydown"].forEach(function(ev) {
-          document.addEventListener(ev, function() {
-            if (isNexShieldMode && window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
-          }, { passive: true });
-        });
-
-        var topFsBtn = document.getElementById("nexShieldTopFsBtn");
-        if (topFsBtn) {
-          topFsBtn.innerHTML = renderNexShieldIcon(isAnyFullscreen());
-          topFsBtn.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleTacticalFullscreen();
-            if (window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
-          };
-        }
-
-        if (window.wakeNexShieldHudFor5s) window.wakeNexShieldHudFor5s();
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
@@ -1798,7 +1872,7 @@
           </div>
         `;
       }
-      // 4. YOUTUBE PLAYER
+      // 4. YOUTUBE PLAYER WITH NORMAL FRAMING + PAUSE SHIELD OVER BOTTOM-RIGHT YOUTUBE LOGO
       else {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1809,15 +1883,142 @@
         applySourceButtonPermissions('youtube');
 
         playerRoot.innerHTML = `
-          <div class="yt-custom-container">
+          <div class="yt-custom-container is-paused" id="ytPwContainer">
             <div id="ytPlayerFrame"></div>
+
+            <!-- DEDICATED YOUTUBE GESTURE SURFACE (SINGLE TAP = PLAY/PAUSE + SHOW HUD, DOUBLE TAP = -10s / +10s) -->
+            <div id="ytPwGestureSurface" style="position:absolute;inset:0;width:100%;height:100%;z-index:65;background:transparent;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;"></div>
+
+            <!-- BLACK SHIELD SHOWN ONLY WHEN PAUSED OVER BOTTOM-RIGHT YOUTUBE LOGO -->
+            <div class="yt-pause-brand-shield" id="ytPauseBrandShield"></div>
+
+            <!-- TOP BAR -->
+            <div class="yt-pw-top-bar" id="ytPwTopBar">
+              <button type="button" class="yt-pw-btn" onclick="if(isAnyFullscreen()){exitFullscreenOnly();}else{window.history.back();}" title="Back">
+                &larr; <span id="ytPwTopTitle" style="max-width:76vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${decodedTitle}</span>
+              </button>
+            </div>
+
+            <!-- DOUBLE-TAP SEEK BADGES -->
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
+
+            <!-- PW-STYLE COMPACT BOTTOM BAR -->
+            <div class="yt-pw-bottom-bar" id="ytPwBottomBar">
+              <div class="yt-pw-scrubber-row">
+                <span id="ytPwCurTime">0:00</span>
+                <span class="yt-pw-speed-badge" id="ytPwSpeedBadge">1x</span>
+                <div class="yt-pw-track" id="ytPwTrack" onclick="seekVideoTrack(event)">
+                  <div class="yt-pw-fill" id="ytPwFill"></div>
+                </div>
+                <span id="ytPwTotTime">0:00</span>
+              </div>
+
+              <div class="yt-pw-controls-row">
+                <div class="yt-pw-left">
+                  <button type="button" class="yt-pw-btn" id="ytPwPlayBtn" onclick="toggleVideoPlay()" title="Play / Pause">▶</button>
+                  <button type="button" class="yt-pw-btn" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s">↺ 10s</button>
+                  <button type="button" class="yt-pw-btn" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s">10s ↻</button>
+                  <button type="button" class="yt-pw-btn" id="ytPwMuteBtn" onclick="toggleYtPwMute()" title="Mute / Unmute">🔊</button>
+                  <input type="range" class="yt-pw-vol" id="ytPwVolSlider" min="0" max="100" value="100" oninput="setYtPwVolume(this.value)" title="Volume" />
+                </div>
+
+                <div class="yt-pw-right">
+                  <select id="ytPwSpeedSelect" class="yt-pw-speed-select" onchange="updateVideoSpeed(this.value)" title="Playback Speed">
+                    <option value="1">1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2">2x</option>
+                  </select>
+                  <button type="button" class="yt-pw-btn" id="ytPwFsBtn" onclick="toggleTacticalFullscreen()" title="Fullscreen">⛶</button>
+                </div>
+              </div>
+            </div>
           </div>
         `;
 
+        var ytHudTimer = null;
+        window.wakeYtPwHudFor5s = function() {
+          var box = document.getElementById("ytPwContainer");
+          if (!box) return;
+          box.classList.remove("yt-pw-hud-idle");
+          clearTimeout(ytHudTimer);
+          ytHudTimer = setTimeout(function() {
+            if (isPlaying && box) {
+              box.classList.add("yt-pw-hud-idle");
+            }
+          }, 5000);
+        };
+
+        var ytBox = document.getElementById("ytPwContainer");
+        if (ytBox) {
+          ["pointerdown", "pointermove", "click", "mousemove", "touchstart", "touchmove", "keydown"].forEach(function(ev) {
+            ytBox.addEventListener(ev, window.wakeYtPwHudFor5s, { passive: true });
+          });
+        }
+        ["pointermove", "mousemove", "touchstart", "keydown"].forEach(function(ev) {
+          document.addEventListener(ev, function() {
+            if (isYouTubeSource && window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
+          }, { passive: true });
+        });
+
+        var ytGesture = document.getElementById("ytPwGestureSurface");
+        if (ytGesture) {
+          var singleTapTimer = null;
+          var lastTapMs = 0;
+          var lastTapClientX = 0;
+          var ignoreMouseUntil = 0;
+
+          function handleSurfaceTap(clientX) {
+            window.wakeYtPwHudFor5s();
+            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
+
+            var now = Date.now();
+            var rect = ytGesture.getBoundingClientRect();
+            var isLeft = (clientX - rect.left) < (rect.width / 2);
+
+            if (now - lastTapMs > 30 && now - lastTapMs < 330 && Math.abs(clientX - lastTapClientX) < 90) {
+              if (singleTapTimer) {
+                clearTimeout(singleTapTimer);
+                singleTapTimer = null;
+              }
+              lastTapMs = 0;
+              triggerSideSeek(isLeft ? "left" : "right");
+            } else {
+              lastTapMs = now;
+              lastTapClientX = clientX;
+              if (singleTapTimer) clearTimeout(singleTapTimer);
+              singleTapTimer = setTimeout(function() {
+                singleTapTimer = null;
+                toggleVideoPlay();
+                window.wakeYtPwHudFor5s();
+              }, 260);
+            }
+          }
+
+          ytGesture.addEventListener("touchend", function(e) {
+            if (!isYouTubeSource) return;
+            var t = e.changedTouches && e.changedTouches[0];
+            if (!t) return;
+            e.preventDefault();
+            e.stopPropagation();
+            ignoreMouseUntil = Date.now() + 500;
+            handleSurfaceTap(t.clientX);
+          }, { passive: false });
+
+          ytGesture.addEventListener("click", function(e) {
+            if (!isYouTubeSource) return;
+            if (Date.now() < ignoreMouseUntil) return;
+            e.preventDefault();
+            e.stopPropagation();
+            handleSurfaceTap(e.clientX);
+          });
+        }
+
         window.onYouTubeIframeAPIReady = () => {
           ytInstance = new YT.Player('ytPlayerFrame', {
+            host: 'https://www.youtube-nocookie.com',
             videoId: PLAYER.ytId,
             playerVars: {
               autoplay: 0,
@@ -1828,7 +2029,9 @@
               rel: 0,
               showinfo: 0,
               iv_load_policy: 3,
-              playsinline: 1
+              cc_load_policy: 0,
+              playsinline: 1,
+              origin: window.location.origin
             },
             events: {
               onReady: () => {
@@ -1840,10 +2043,12 @@
                   isPlaying = true;
                   updatePlayLabel();
                   document.getElementById('securityOverlay').classList.add('hidden');
+                  if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
                   if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 } else {
                   isPlaying = false;
                   updatePlayLabel();
+                  if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
                   if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 }
               }
@@ -1862,6 +2067,44 @@
     function updatePlayLabel() {
       const btn = document.getElementById("playTrigger");
       if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
+      const pwPlay = document.getElementById("ytPwPlayBtn");
+      if (pwPlay) pwPlay.innerText = isPlaying ? "⏸" : "▶";
+      const ytContainer = document.getElementById("ytPwContainer");
+      if (ytContainer) {
+        if (isPlaying) ytContainer.classList.remove("is-paused");
+        else ytContainer.classList.add("is-paused");
+      }
+    }
+
+    function setYtPwVolume(val) {
+      const num = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
+      const slider = document.getElementById("ytPwVolSlider");
+      const muteBtn = document.getElementById("ytPwMuteBtn");
+      if (slider && String(slider.value) !== String(num)) slider.value = String(num);
+      if (isYouTubeSource && ytInstance && typeof ytInstance.setVolume === "function") {
+        if (num > 0 && typeof ytInstance.unMute === "function") ytInstance.unMute();
+        ytInstance.setVolume(num);
+      }
+      if (muteBtn) muteBtn.innerText = num === 0 ? "🔇" : "🔊";
+      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
+    }
+
+    function toggleYtPwMute() {
+      if (!isYouTubeSource || !ytInstance) return;
+      const slider = document.getElementById("ytPwVolSlider");
+      const muteBtn = document.getElementById("ytPwMuteBtn");
+      const muted = typeof ytInstance.isMuted === "function" ? ytInstance.isMuted() : false;
+      if (muted || (slider && parseInt(slider.value, 10) === 0)) {
+        if (typeof ytInstance.unMute === "function") ytInstance.unMute();
+        const nextVol = (slider && parseInt(slider.value, 10) > 0) ? parseInt(slider.value, 10) : 100;
+        if (typeof ytInstance.setVolume === "function") ytInstance.setVolume(nextVol);
+        if (slider) slider.value = String(nextVol);
+        if (muteBtn) muteBtn.innerText = "🔊";
+      } else {
+        if (typeof ytInstance.mute === "function") ytInstance.mute();
+        if (muteBtn) muteBtn.innerText = "🔇";
+      }
+      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
     }
 
     function activateStream() {
@@ -1900,12 +2143,17 @@
     function updateVideoSpeed(rate) {
       if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
+      const badge = document.getElementById("ytPwSpeedBadge");
+      if (badge) badge.innerText = spd + "x";
+      const pwSel = document.getElementById("ytPwSpeedSelect");
+      if (pwSel && String(pwSel.value) !== String(rate)) pwSel.value = String(rate);
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
       } else if (isYouTubeSource && ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
+      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
@@ -2060,12 +2308,21 @@
           const c = ytInstance.getCurrentTime() || 0;
           const d = ytInstance.getDuration() || 0;
           if (d > 0) {
+            const pctStr = ((c / d) * 100) + "%";
             const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = ((c / d) * 100) + "%";
+            if (fill) fill.style.width = pctStr;
+            const pwFill = document.getElementById("ytPwFill");
+            if (pwFill) pwFill.style.width = pctStr;
+            var curStr = formatSeconds(c);
+            var totStr = formatSeconds(d);
             var curEl = document.getElementById("currentTimeLabel");
             var totEl = document.getElementById("totalTimeLabel");
-            if (curEl) curEl.innerText = formatSeconds(c);
-            if (totEl) totEl.innerText = formatSeconds(d);
+            if (curEl) curEl.innerText = curStr;
+            if (totEl) totEl.innerText = totStr;
+            var pwCur = document.getElementById("ytPwCurTime");
+            var pwTot = document.getElementById("ytPwTotTime");
+            if (pwCur) pwCur.innerText = curStr;
+            if (pwTot) pwTot.innerText = totStr;
           }
         }
       }, 400);
