@@ -1729,66 +1729,7 @@
             </button>
           </div>
         `;
-
-        // Nexashield-only fullscreen icon and 5-second idle auto-hide.
-        (() => {
-          const box = document.getElementById("nexashieldBox");
-          const toggle = document.getElementById("nexashieldFsToggle");
-          if (!box || !toggle) return;
-          let nxIdleTimer = null;
-          const enterIcon = toggle.querySelector(".nx-enter-icon");
-          const exitIcon = toggle.querySelector(".nx-exit-icon");
-          const isBoxFullscreen = () =>
-            document.fullscreenElement === box ||
-            document.webkitFullscreenElement === box ||
-            document.msFullscreenElement === box;
-          const updateIcon = () => {
-            const active = isBoxFullscreen();
-            enterIcon.style.display = active ? "none" : "block";
-            exitIcon.style.display = active ? "block" : "none";
-            toggle.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
-            toggle.title = active ? "Exit fullscreen" : "Fullscreen";
-          };
-          const showIcon = () => {
-            if (!isBoxFullscreen()) return;
-            box.classList.remove("nx-controls-idle");
-            box.classList.add("nx-controls-visible");
-            clearTimeout(nxIdleTimer);
-            nxIdleTimer = setTimeout(() => {
-              if (isBoxFullscreen()) {
-                box.classList.remove("nx-controls-visible");
-                box.classList.add("nx-controls-idle");
-              }
-            }, 5000);
-          };
-          toggle.addEventListener("click", async (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            try {
-              if (isBoxFullscreen()) {
-                if (document.exitFullscreen) await document.exitFullscreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                else if (document.msExitFullscreen) document.msExitFullscreen();
-              } else if (box.requestFullscreen) {
-                await box.requestFullscreen();
-              } else if (box.webkitRequestFullscreen) {
-                box.webkitRequestFullscreen();
-              } else if (box.msRequestFullscreen) {
-                box.msRequestFullscreen();
-              }
-            } catch (error) {
-              console.warn("Nexashield fullscreen could not be changed:", error);
-            }
-          });
-          ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(type => {
-            document.addEventListener(type, () => {
-              clearTimeout(nxIdleTimer);
-              box.classList.remove("nx-controls-idle", "nx-controls-visible");
-              updateIcon();
-              if (isBoxFullscreen()) showIcon();
-            });
-          });
-          // Parent-page activity is detected here. Cross-origin iframe-internal
+        // Parent-page activity is detected here. Cross-origin iframe-internal
           // activity cannot be observed by the containing page due to browser security.
           ["pointermove", "pointerdown", "touchstart", "mousemove", "keydown"].forEach(type => {
             box.addEventListener(type, showIcon, { passive: true });
