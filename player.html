@@ -311,18 +311,43 @@
 
     /* NEXSHIELD FULLSCREEN SHIELD + NATIVE-MATCHING VIMEO FULLSCREEN BUTTON */
     .nexshield-fs-shield {
+      display: none;
       position: absolute;
-      right: 6px;
-      bottom: 6px;
-      width: 38px;
-      height: 36px;
-      z-index: 99998;
+      right: 10px;
+      bottom: 10px;
+      width: 34px;
+      height: 32px;
+      z-index: 2147483646;
       background: transparent;
       pointer-events: auto;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
+    }
+
+    #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield,
+    #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
+    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
+    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
+      display: block !important;
+      right: 12px;
+      bottom: 12px;
+      width: 36px;
+      height: 34px;
+    }
+
+    #phantomConsoleScreen.nexshield-mode .frame-locked-brand-tag {
+      bottom: 12px !important;
+      right: 54px !important;
+      font-size: 14px !important;
+    }
+
+    #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
+    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
+      bottom: 14px !important;
+      right: 58px !important;
+      font-size: 16px !important;
     }
 
     .nexshield-native-fs-btn {
@@ -333,18 +358,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(14, 18, 26, 0.86);
-      border: none;
-      border-radius: 4px;
+      background: rgba(15, 20, 28, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 5px;
       color: #ffffff;
       cursor: pointer;
       padding: 0;
-      z-index: 99999;
-      transition: background 0.16s ease, transform 0.12s ease;
+      z-index: 2147483647;
+      pointer-events: auto;
+      transition: background 0.15s ease, transform 0.1s ease;
     }
 
     .nexshield-native-fs-btn:hover {
-      background: rgba(20, 26, 38, 0.96);
+      background: rgba(24, 32, 46, 0.98);
     }
 
     .nexshield-native-fs-btn:active {
@@ -352,10 +378,10 @@
     }
 
     .nexshield-native-fs-btn svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       stroke: #ffffff;
-      stroke-width: 2;
+      stroke-width: 2.1;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -363,15 +389,16 @@
     }
 
     @media (max-width: 768px) {
-      .nexshield-fs-shield {
-        right: 4px;
-        bottom: 4px;
-        width: 34px;
-        height: 32px;
+      .nexshield-fs-shield,
+      #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
+        right: 6px;
+        bottom: 6px;
+        width: 32px;
+        height: 30px;
       }
       .nexshield-native-fs-btn svg {
-        width: 14px;
-        height: 14px;
+        width: 13px;
+        height: 13px;
       }
     }
 
@@ -1242,6 +1269,11 @@
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
         </div>
 
+        <!-- NEXSHIELD FULLSCREEN SHIELD + MATCHING CUSTOM FULLSCREEN BUTTON -->
+        <div class="nexshield-fs-shield" id="nexShieldFsShield" oncontextmenu="return false;">
+          <button type="button" class="nexshield-native-fs-btn" id="nexShieldNativeFsBtn" title="Fullscreen" aria-label="Fullscreen"></button>
+        </div>
+
         <!-- BOTTOM CONTROL DECK -->
         <div class="phantom-bottom-deck" id="phantomBottomDeck">
           <div class="seek-row">
@@ -1959,32 +1991,34 @@
               webkitallowfullscreen
               mozallowfullscreen>
             </iframe>
-            <div class="nexshield-fs-shield" id="nexShieldFsShield" oncontextmenu="return false;">
-              <button type="button" class="nexshield-native-fs-btn" id="nexShieldNativeFsBtn" title="Fullscreen" aria-label="Fullscreen">${renderNexShieldFsIcon(false)}</button>
-            </div>
           </div>
         `;
 
         var nxShield = document.getElementById("nexShieldFsShield");
         var nxFsBtn = document.getElementById("nexShieldNativeFsBtn");
+        if (nxFsBtn) {
+          nxFsBtn.innerHTML = renderNexShieldFsIcon(isAnyFullscreen());
+          ["click", "touchend"].forEach(function(ev) {
+            nxFsBtn.addEventListener(ev, function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+              toggleTacticalFullscreen();
+              return false;
+            }, { passive: false, capture: true });
+          });
+        }
         if (nxShield) {
           ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
             nxShield.addEventListener(ev, function(e) {
               e.preventDefault();
               e.stopPropagation();
               if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-              if (ev === "click" || ev === "touchend") {
+              if ((ev === "click" || ev === "touchend") && (!e.target || e.target.id !== "nexShieldNativeFsBtn")) {
                 toggleTacticalFullscreen();
               }
               return false;
             }, { passive: false, capture: true });
-          });
-        }
-        if (nxFsBtn) {
-          nxFsBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleTacticalFullscreen();
           });
         }
       }
