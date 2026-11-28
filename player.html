@@ -309,16 +309,17 @@
       display: none !important;
     }
 
-    /* NEXSHIELD FULLSCREEN SHIELD + NATIVE-MATCHING VIMEO FULLSCREEN BUTTON */
+    /* NEXSHIELD FULLSCREEN SHIELD + EXACT VIMEO NATIVE-STYLE FULLSCREEN BUTTON OVERLAY */
     .nexshield-fs-shield {
       display: none;
       position: absolute;
-      right: 10px;
-      bottom: 10px;
-      width: 34px;
-      height: 32px;
+      right: 8px;
+      bottom: 8px;
+      width: 44px;
+      height: 40px;
       z-index: 2147483646;
-      background: transparent;
+      background: #0b0e14;
+      border-radius: 6px;
       pointer-events: auto;
       cursor: pointer;
       user-select: none;
@@ -326,27 +327,36 @@
       -webkit-touch-callout: none;
     }
 
-    #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield,
+    /* Half-screen (normal console viewport) */
+    #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
+      display: block !important;
+      right: 8px;
+      bottom: 8px;
+      width: 44px;
+      height: 40px;
+    }
+
+    /* Full-screen console viewport — auto-adjusts to Vimeo's fullscreen control bar corner */
     #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
     #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
     #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
       display: block !important;
       right: 12px;
       bottom: 12px;
-      width: 36px;
-      height: 34px;
+      width: 48px;
+      height: 44px;
     }
 
     #phantomConsoleScreen.nexshield-mode .frame-locked-brand-tag {
-      bottom: 12px !important;
-      right: 54px !important;
+      bottom: 14px !important;
+      right: 60px !important;
       font-size: 14px !important;
     }
 
     #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
     #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
-      bottom: 14px !important;
-      right: 58px !important;
+      bottom: 18px !important;
+      right: 68px !important;
       font-size: 16px !important;
     }
 
@@ -358,7 +368,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(15, 20, 28, 0.92);
+      background: rgba(15, 20, 28, 0.94);
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 5px;
       color: #ffffff;
@@ -370,7 +380,7 @@
     }
 
     .nexshield-native-fs-btn:hover {
-      background: rgba(24, 32, 46, 0.98);
+      background: rgba(26, 34, 48, 0.98);
     }
 
     .nexshield-native-fs-btn:active {
@@ -378,10 +388,10 @@
     }
 
     .nexshield-native-fs-btn svg {
-      width: 15px;
-      height: 15px;
+      width: 16px;
+      height: 16px;
       stroke: #ffffff;
-      stroke-width: 2.1;
+      stroke-width: 2.2;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -393,12 +403,20 @@
       #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
         right: 6px;
         bottom: 6px;
-        width: 32px;
-        height: 30px;
+        width: 40px;
+        height: 36px;
+      }
+      #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
+      #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
+      #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield {
+        right: 8px;
+        bottom: 8px;
+        width: 42px;
+        height: 38px;
       }
       .nexshield-native-fs-btn svg {
-        width: 13px;
-        height: 13px;
+        width: 14px;
+        height: 14px;
       }
     }
 
@@ -1986,10 +2004,7 @@
               id="archiveIframe" 
               src="${finalVideo}" 
               class="archive-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture"
-              allowfullscreen
-              webkitallowfullscreen
-              mozallowfullscreen>
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
           </div>
         `;
