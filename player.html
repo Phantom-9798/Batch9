@@ -82,7 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    * {
+- {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -327,37 +327,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    /* NEXPLAYER TOP-RIGHT FULLSCREEN ICON ONLY (NO BUTTON BOX, AUTO-HIDE 5s ON ACTIVITY) */
-    .nex-top-right-fs-icon {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 99999;
-      background: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
-      color: #ffffff;
-      font-size: 24px;
-      line-height: 1;
-      cursor: pointer;
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.85);
-      transition: opacity 0.25s ease, transform 0.2s ease;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .nex-top-right-fs-icon:hover {
-      transform: scale(1.1);
-      color: #fbbf24;
-    }
-    .nex-top-right-fs-icon.nex-icon-hidden {
-      opacity: 0 !important;
-      pointer-events: none !important;
     }
 
     /* SECURITY OVERLAY STYLING */
@@ -1359,7 +1328,6 @@
     let isGDriveEmbed = false;
     let isYouTubeSource = false;
     let fsIdleTimer = null;
-    let nexActivityHideTimer = null;
     let isCurrentLectureDownloaded = false;
     let isWatchingDownloadedLecture = false;
     let activeDownloadController = null;
@@ -1381,46 +1349,6 @@
         squadron: getCurrentPlayerSquadron()
       }
     };
-
-    function syncNexIconText(isFs) {
-      var iconEl = document.getElementById("nexTopRightFsIcon");
-      if (!iconEl) return;
-      iconEl.innerText = isFs ? "✕" : "⛶";
-      iconEl.title = isFs ? "Exit Fullscreen" : "Fullscreen";
-      iconEl.setAttribute("aria-label", isFs ? "Exit Fullscreen" : "Fullscreen");
-    }
-
-    function showNexIconFor5s() {
-      var iconEl = document.getElementById("nexTopRightFsIcon");
-      if (!iconEl || PLAYER.mode !== "nexashield") return;
-      iconEl.classList.remove("nex-icon-hidden");
-      clearTimeout(nexActivityHideTimer);
-      nexActivityHideTimer = setTimeout(function() {
-        var el = document.getElementById("nexTopRightFsIcon");
-        if (el && PLAYER.mode === "nexashield") {
-          el.classList.add("nex-icon-hidden");
-        }
-      }, 5000);
-    }
-
-    function toggleNexFrameFullscreen() {
-      if (PLAYER.mode !== "nexashield") return;
-      showNexIconFor5s();
-      var target = document.getElementById("phantomConsoleScreen");
-      if (!isAnyFullscreen()) {
-        if (target && target.requestFullscreen) {
-          target.requestFullscreen().catch(() => {});
-        } else if (target && target.webkitRequestFullscreen) {
-          target.webkitRequestFullscreen();
-        } else if (target && target.msRequestFullscreen) {
-          target.msRequestFullscreen();
-        }
-        syncNexIconText(true);
-      } else {
-        exitFullscreenOnly();
-        syncNexIconText(false);
-      }
-    }
 
     function showStayPopupOnce() {
       var popup = document.getElementById("downloadStayPopup");
@@ -1777,15 +1705,11 @@
 
       const screenEl = document.getElementById("phantomConsoleScreen");
       ["pointerdown", "click", "mousemove", "touchstart", "keydown"].forEach(function(evtName){
-        screenEl.addEventListener(evtName, function() {
-          wakeFullscreenControlsFor5s();
-          if (PLAYER.mode === "nexashield") showNexIconFor5s();
-        });
+        screenEl.addEventListener(evtName, wakeFullscreenControlsFor5s);
         document.addEventListener(evtName, function(){
           if (isAnyFullscreen()) {
             wakeFullscreenControlsFor5s();
           }
-          if (PLAYER.mode === "nexashield") showNexIconFor5s();
         });
       });
 
@@ -1915,7 +1839,7 @@
         }
         startTimerSync();
       }
-      // 2. NEXPLAYER / EXTERNAL IFRAME PLAYER (SAME FRAME, NO CUSTOM BUTTONS, ONLY TOP-RIGHT FS ICON WITH 5s ACTIVITY AUTO-HIDE)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1929,14 +1853,10 @@
               id="archiveIframe" 
               src="${finalVideo}" 
               class="archive-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowfullscreen>
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <span id="nexTopRightFsIcon" class="nex-top-right-fs-icon" role="button" tabindex="0" onclick="toggleNexFrameFullscreen()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleNexFrameFullscreen();}" title="Fullscreen" aria-label="Fullscreen">⛶</span>
           </div>
         `;
-        syncNexIconText(isAnyFullscreen());
-        showNexIconFor5s();
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
@@ -2261,8 +2181,6 @@
       var fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
       const nowFs = isAnyFullscreen();
       PLAYER.isFullscreen = nowFs;
-      syncNexIconText(nowFs);
-      if (PLAYER.mode === "nexashield") showNexIconFor5s();
 
       if (screen) {
         if (nowFs && fsEl && fsEl.id === "gdriveIframe") {
