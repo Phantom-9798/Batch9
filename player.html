@@ -944,52 +944,6 @@
     }
     .phantom-watermark-layer { position: absolute; top: 30%; left: 25%; z-index: 46; pointer-events: none; user-select: none; display: flex; flex-direction: column; align-items: center; opacity: 0.08; transform: rotate(-22deg); }
     header, main, footer { position: relative; z-index: 10; width: 100%; }
-
-    /* NEXASHIELD: fullscreen icon only; isolated from all other player modes */
-    .nexashield-box { position: relative; }
-    .nexashield-fs-icon {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 2147483647;
-      width: 42px;
-      height: 42px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      border: 0;
-      outline: 0;
-      border-radius: 50%;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.58);
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nexashield-box:fullscreen .nexashield-fs-icon,
-    .nexashield-box:-webkit-full-screen .nexashield-fs-icon,
-    .nexashield-box:-ms-fullscreen .nexashield-fs-icon { display: flex; }
-    .nexashield-box.nx-controls-visible .nexashield-fs-icon { opacity: 1; }
-    .nexashield-box.nx-controls-idle .nexashield-fs-icon {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .nexashield-box:fullscreen,
-    .nexashield-box:-webkit-full-screen,
-    .nexashield-box:-ms-fullscreen {
-      width: 100vw !important;
-      height: 100vh !important;
-      background: #000 !important;
-    }
-    .nexashield-box:fullscreen .archive-frame,
-    .nexashield-box:-webkit-full-screen .archive-frame,
-    .nexashield-box:-ms-fullscreen .archive-frame {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .nexashield-fs-icon svg { width: 21px; height: 21px; display: block; }
   </style>
   <script>
     (() => {
@@ -1712,30 +1666,15 @@
         applyScreenLockForMode('nexashield');
         applySourceButtonPermissions('nexashield');
         playerRoot.innerHTML = `
-          <div class="archive-box nexashield-box" id="nexashieldBox">
+          <div class="archive-box">
             <iframe
               id="archiveIframe"
               src="${finalVideo}"
               class="archive-frame"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <button type="button" class="nexashield-fs-icon" id="nexashieldFsToggle" aria-label="Enter fullscreen" title="Fullscreen">
-              <svg class="nx-enter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" />
-              </svg>
-              <svg class="nx-exit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
-                <path d="M8 3v5H3M16 3v5h5M21 16h-5v5M3 16h5v5" />
-              </svg>
-            </button>
           </div>
         `;
-        // Parent-page activity is detected here. Cross-origin iframe-internal
-          // activity cannot be observed by the containing page due to browser security.
-          ["pointermove", "pointerdown", "touchstart", "mousemove", "keydown"].forEach(type => {
-            box.addEventListener(type, showIcon, { passive: true });
-          });
-          updateIcon();
-        })();
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
