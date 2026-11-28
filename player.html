@@ -302,161 +302,6 @@
       pointer-events: none !important;
     }
 
-    /* IN NEXSHIELD MODE: COMPLETELY REMOVE CUSTOM BOTTOM CONTROL DECK (NORMAL & FULLSCREEN) */
-    #phantomConsoleScreen.nexshield-mode .phantom-bottom-deck,
-    #phantomConsoleScreen.nexshield-mode:fullscreen .phantom-bottom-deck,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .phantom-bottom-deck {
-      display: none !important;
-    }
-
-    /* NEXSHIELD TRANSPARENT SHIELD OVER ONLY FULLSCREEN ICON — SPEED BUTTON 100% FREE */
-    .nexshield-fs-shield {
-      display: none;
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      width: 32px;
-      height: 32px;
-      z-index: 2147483646;
-      background: transparent !important;
-      border: none !important;
-      pointer-events: auto !important;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    /* Half-screen position matching Vimeo's native fullscreen button only */
-    #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      right: 10px;
-      bottom: 10px;
-      width: 32px;
-      height: 32px;
-    }
-
-    /* Full-screen position auto-adjusted strictly to Vimeo's fullscreen button (leaves Speed button free) */
-    #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
-    #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield,
-    #phantomConsoleScreen.nexshield-mode.fs-fallback-active .nexshield-fs-shield {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      right: 12px;
-      bottom: 12px;
-      width: 34px;
-      height: 34px;
-    }
-
-    /* Fallback viewport fullscreen when browser Fullscreen API is restricted */
-    #phantomConsoleScreen.fs-fallback-active {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: none !important;
-      max-height: none !important;
-      border-radius: 0 !important;
-      background: #000000 !important;
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 2147483640 !important;
-      overflow: hidden !important;
-    }
-
-    #phantomConsoleScreen.fs-fallback-active .video-viewport-box {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-height: none !important;
-      aspect-ratio: auto !important;
-      position: absolute !important;
-      inset: 0 !important;
-    }
-
-    /* Keep brand tag above bottom control bar so it never hides Vimeo's Speed button */
-    #phantomConsoleScreen.nexshield-mode .frame-locked-brand-tag {
-      bottom: 46px !important;
-      right: 14px !important;
-      font-size: 13px !important;
-    }
-
-    #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag,
-    #phantomConsoleScreen.nexshield-mode.fs-fallback-active .frame-locked-brand-tag {
-      bottom: 54px !important;
-      right: 18px !important;
-      font-size: 15px !important;
-    }
-
-    .nexshield-native-fs-btn {
-      position: relative;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(12, 16, 24, 0.72);
-      border: none;
-      border-radius: 4px;
-      color: #ffffff;
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      z-index: 2147483647;
-      pointer-events: auto !important;
-      transition: background 0.15s ease, transform 0.1s ease;
-    }
-
-    .nexshield-native-fs-btn:hover {
-      background: rgba(24, 30, 44, 0.92);
-      transform: scale(1.05);
-    }
-
-    .nexshield-native-fs-btn:active {
-      transform: scale(0.95);
-    }
-
-    .nexshield-native-fs-btn svg {
-      display: block !important;
-      width: 15px;
-      height: 15px;
-      stroke: #ffffff;
-      stroke-width: 2.2;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-      .nexshield-fs-shield,
-      #phantomConsoleScreen.nexshield-mode .nexshield-fs-shield {
-        right: 8px;
-        bottom: 8px;
-        width: 30px;
-        height: 30px;
-      }
-      #phantomConsoleScreen.nexshield-mode:fullscreen .nexshield-fs-shield,
-      #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .nexshield-fs-shield,
-      #phantomConsoleScreen.nexshield-mode:-ms-fullscreen .nexshield-fs-shield,
-      #phantomConsoleScreen.nexshield-mode.fs-fallback-active .nexshield-fs-shield {
-        right: 10px;
-        bottom: 10px;
-        width: 32px;
-        height: 32px;
-      }
-      .nexshield-native-fs-btn {
-        width: 28px;
-        height: 28px;
-      }
-      .nexshield-native-fs-btn svg {
-        width: 14px;
-        height: 14px;
-      }
-    }
-
     .fs-back-btn {
       background: linear-gradient(135deg, #f59e0b, #ea580c);
       color: #ffffff;
@@ -620,18 +465,14 @@
     }
     #phantomConsoleScreen.fs-idle .frame-locked-brand-tag,
     #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
-    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag,
-    #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
-    #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
-      bottom: 48px;
+    #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
+      bottom: 22px;
       right: 56px;
       font-size: 20px;
     }
     @media (max-width: 768px) {
       #phantomConsoleScreen.gdrive-mode:fullscreen .frame-locked-brand-tag,
-      #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag,
-      #phantomConsoleScreen.nexshield-mode:fullscreen .frame-locked-brand-tag,
-      #phantomConsoleScreen.nexshield-mode:-webkit-full-screen .frame-locked-brand-tag {
+      #phantomConsoleScreen.gdrive-mode:-webkit-full-screen .frame-locked-brand-tag {
         bottom: 52px;
         right: 16px;
         font-size: 15px;
@@ -667,258 +508,16 @@
       pointer-events: none !important;
     }
 
-    /* NORMAL YOUTUBE FRAME ENGINE + PAUSE SHIELD OVER BOTTOM-RIGHT YOUTUBE LOGO */
+    /* YOUTUBE ENGINE */
     .yt-custom-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    #ytPlayerFrame {
-      position: absolute !important;
-      width: 100% !important;
-      height: 126% !important;
-      top: -13% !important;
-      left: 0 !important;
-      pointer-events: none !important;
-    }
+    #ytPlayerFrame { position: absolute; width: 100% !important; height: 136% !important; top: -18% !important; left: 0; pointer-events: none !important; }
 
     #phantomConsoleScreen:fullscreen #ytPlayerFrame,
-    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame,
-    #phantomConsoleScreen:-ms-fullscreen #ytPlayerFrame {
+    #phantomConsoleScreen:-webkit-full-screen #ytPlayerFrame {
       width: 100vw !important;
       height: 100vh !important;
       top: 0 !important;
       left: 0 !important;
-      pointer-events: none !important;
-    }
-
-    /* Black shield active ONLY while YouTube video is paused, hiding bottom-right YouTube text/logo */
-    .yt-pause-brand-shield {
-      display: none;
-      position: absolute;
-      right: 8px;
-      bottom: 62px;
-      width: 145px;
-      height: 38px;
-      background: #020617;
-      border-radius: 6px;
-      z-index: 70;
-      pointer-events: none;
-    }
-    .yt-custom-container.is-paused .yt-pause-brand-shield {
-      display: block;
-    }
-    #phantomConsoleScreen:fullscreen .yt-pause-brand-shield,
-    #phantomConsoleScreen:-webkit-full-screen .yt-pause-brand-shield,
-    #phantomConsoleScreen:-ms-fullscreen .yt-pause-brand-shield {
-      right: 14px;
-      bottom: 70px;
-      width: 165px;
-      height: 42px;
-    }
-    @media (max-width: 768px) {
-      .yt-pause-brand-shield {
-        right: 6px;
-        bottom: 56px;
-        width: 120px;
-        height: 32px;
-      }
-      #phantomConsoleScreen:fullscreen .yt-pause-brand-shield,
-      #phantomConsoleScreen:-webkit-full-screen .yt-pause-brand-shield,
-      #phantomConsoleScreen:-ms-fullscreen .yt-pause-brand-shield {
-        right: 8px;
-        bottom: 60px;
-        width: 130px;
-        height: 34px;
-      }
-    }
-
-    #phantomConsoleScreen.yt-mode .phantom-bottom-deck {
-      display: none !important;
-    }
-
-    .yt-pw-top-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 92;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: linear-gradient(180deg, rgba(2, 6, 23, 0.9) 0%, rgba(2, 6, 23, 0) 100%);
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      pointer-events: auto;
-    }
-
-    .yt-pw-hud-idle .yt-pw-top-bar {
-      opacity: 0 !important;
-      transform: translateY(-10px);
-      pointer-events: none !important;
-    }
-
-    .yt-pw-bottom-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 96;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 10px 14px 10px;
-      background: linear-gradient(0deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0.78) 76%, rgba(2, 6, 23, 0) 100%);
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      pointer-events: auto;
-    }
-
-    .yt-pw-hud-idle .yt-pw-bottom-bar {
-      opacity: 0 !important;
-      transform: translateY(12px);
-      pointer-events: none !important;
-    }
-
-    .yt-pw-scrubber-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
-      font-weight: 800;
-      color: #f8fafc;
-    }
-
-    .yt-pw-speed-badge {
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px solid rgba(251, 191, 36, 0.55);
-      color: #fbbf24;
-      border-radius: 5px;
-      padding: 1px 6px;
-      font-size: 9px;
-      font-weight: 900;
-      line-height: 1.3;
-    }
-
-    .yt-pw-track {
-      flex: 1;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.26);
-      border-radius: 999px;
-      cursor: pointer;
-      position: relative;
-      overflow: visible;
-    }
-
-    .yt-pw-fill {
-      height: 100%;
-      width: 0%;
-      background: #0ea5e9;
-      border-radius: 999px;
-      position: relative;
-    }
-
-    .yt-pw-fill::after {
-      content: '';
-      position: absolute;
-      right: -5px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 11px;
-      height: 11px;
-      border-radius: 999px;
-      background: #38bdf8;
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.95);
-    }
-
-    .yt-pw-controls-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .yt-pw-left,
-    .yt-pw-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .yt-pw-btn {
-      background: transparent;
-      border: none;
-      color: #f8fafc;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 7px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      line-height: 1;
-      transition: background 0.18s ease, color 0.18s ease;
-    }
-
-    .yt-pw-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-      color: #fbbf24;
-    }
-
-    .yt-pw-vol {
-      width: 64px;
-      height: 4px;
-      accent-color: #38bdf8;
-      cursor: pointer;
-    }
-
-    .yt-pw-speed-select {
-      background: rgba(15, 23, 42, 0.92);
-      color: #fbbf24;
-      border: 1px solid rgba(251, 191, 36, 0.5);
-      border-radius: 7px;
-      padding: 4px 8px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
-      font-weight: 900;
-      cursor: pointer;
-      outline: none;
-    }
-    .yt-pw-speed-select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    #phantomConsoleScreen.yt-mode .frame-locked-brand-tag {
-      bottom: 66px !important;
-      right: 16px !important;
-      font-size: 15px !important;
-    }
-    #phantomConsoleScreen.yt-mode .yt-pw-hud-idle .frame-locked-brand-tag,
-    #phantomConsoleScreen.yt-mode.fs-idle .frame-locked-brand-tag {
-      bottom: 16px !important;
-      right: 16px !important;
-    }
-
-    @media (max-width: 640px) {
-      .yt-pw-bottom-bar {
-        padding: 8px 10px 8px;
-        gap: 4px;
-      }
-      .yt-pw-vol {
-        width: 44px;
-      }
-      .yt-pw-left,
-      .yt-pw-right {
-        gap: 6px;
-      }
-      .yt-pw-btn {
-        font-size: 10px;
-        padding: 3px 5px;
-      }
     }
 
     .skip-alert-badge {
@@ -1324,11 +923,6 @@
           <div class="frame-locked-brand-tag">☠️𝕿𝖊𝖆𝖒 𝕻𝖍𝖆𝖓𝖙𝖔𝖒☠️</div>
         </div>
 
-        <!-- NEXSHIELD FULLSCREEN SHIELD + MATCHING CUSTOM FULLSCREEN BUTTON -->
-        <div class="nexshield-fs-shield" id="nexShieldFsShield" oncontextmenu="return false;">
-          <button type="button" class="nexshield-native-fs-btn" id="nexShieldNativeFsBtn" title="Fullscreen" aria-label="Fullscreen"></button>
-        </div>
-
         <!-- BOTTOM CONTROL DECK -->
         <div class="phantom-bottom-deck" id="phantomBottomDeck">
           <div class="seek-row">
@@ -1491,7 +1085,6 @@
     let isDirectArchiveVideo = false;
     let isGDriveEmbed = false;
     let isYouTubeSource = false;
-    let isNexShieldEmbed = false;
     let fsIdleTimer = null;
     let isCurrentLectureDownloaded = false;
     let isWatchingDownloadedLecture = false;
@@ -1591,9 +1184,7 @@
     }
 
     function isAnyFullscreen() {
-      var screen = document.getElementById("phantomConsoleScreen");
-      var fallbackFs = !!(screen && screen.classList.contains("fs-fallback-active"));
-      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || fallbackFs);
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
     }
 
     function wakeFullscreenControlsFor5s() {
@@ -1615,38 +1206,14 @@
     }
 
     function exitFullscreenOnly() {
-      var screen = document.getElementById("phantomConsoleScreen");
-      if (screen && screen.classList.contains("fs-fallback-active")) {
-        screen.classList.remove("fs-fallback-active");
-        PLAYER.isFullscreen = false;
-        syncFullscreenButtons(false);
-        return;
-      }
       if (!isAnyFullscreen()) return;
-      try {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if (document.msExitFullscreen) document.msExitFullscreen();
-      } catch (e) {
-        if (screen) screen.classList.remove("fs-fallback-active");
-        syncFullscreenButtons(false);
-      }
-    }
-
-    function renderNexShieldFsIcon(isFs) {
-      if (isFs) {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline></svg>';
-      }
-      return '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><polyline points="21 15 21 21 15 21"></polyline><polyline points="3 9 3 3 9 3"></polyline></svg>';
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      var nexFsBtn = document.getElementById("nexShieldNativeFsBtn");
-      if (nexFsBtn) {
-        nexFsBtn.innerHTML = renderNexShieldFsIcon(isFs);
-        nexFsBtn.title = isFs ? "Exit Fullscreen" : "Fullscreen";
-      }
       if (!dockBtn) return;
       if (isGDriveEmbed) {
         dockBtn.disabled = true;
@@ -1669,16 +1236,6 @@
           screen.classList.add("gdrive-mode");
         } else {
           screen.classList.remove("gdrive-mode");
-        }
-        if (mode === 'youtube') {
-          screen.classList.add("yt-mode");
-        } else {
-          screen.classList.remove("yt-mode");
-        }
-        if (mode === 'nexashield') {
-          screen.classList.add("nexshield-mode");
-        } else {
-          screen.classList.remove("nexshield-mode");
         }
         screen.classList.remove("fs-idle");
       }
@@ -1889,7 +1446,6 @@
         ["click", "dblclick", "mousedown", "mouseup", "touchstart", "touchend"].forEach(function(ev) {
           lockShield.addEventListener(ev, function(e) {
             if (!lockShield.classList.contains("lock-enabled")) return;
-            if (isYouTubeSource) return;
             e.preventDefault();
             e.stopPropagation();
             if (isAnyFullscreen()) {
@@ -1897,6 +1453,7 @@
             }
           }, { passive: false });
         });
+        bindYouTubeDoubleTap(lockShield);
       }
 
       const screenEl = document.getElementById("phantomConsoleScreen");
@@ -1938,7 +1495,6 @@
         isDirectArchiveVideo = false;
         isGDriveEmbed = true;
         isYouTubeSource = false;
-        isNexShieldEmbed = false;
         PLAYER.mode = 'gdrive';
         PLAYER.gdriveId = gdriveId;
         var gdrivePreviewUrl = "https://drive.google.com/file/d/" + gdriveId + "/preview";
@@ -1988,7 +1544,6 @@
         isDirectArchiveVideo = true;
         isGDriveEmbed = false;
         isYouTubeSource = false;
-        isNexShieldEmbed = false;
         PLAYER.mode = 'archive';
         applyScreenLockForMode('archive');
         applySourceButtonPermissions('archive');
@@ -2037,18 +1592,14 @@
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (NO CROP, CUSTOM DECK REMOVED, VIMEO NATIVE FULLSCREEN BLOCKED BY SHIELD + MATCHING CUSTOM FULLSCREEN BUTTON)
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = false;
-        isNexShieldEmbed = true;
         PLAYER.mode = 'nexashield';
         applyScreenLockForMode('nexashield');
         applySourceButtonPermissions('nexashield');
-        var bottomDeckEl = document.getElementById("phantomBottomDeck");
-        if (bottomDeckEl) bottomDeckEl.remove();
-
         playerRoot.innerHTML = `
           <div class="archive-box">
             <iframe 
@@ -2059,39 +1610,12 @@
             </iframe>
           </div>
         `;
-
-        var nxShield = document.getElementById("nexShieldFsShield");
-        var nxFsBtn = document.getElementById("nexShieldNativeFsBtn");
-        if (nxFsBtn) {
-          nxFsBtn.innerHTML = renderNexShieldFsIcon(isAnyFullscreen());
-          nxFsBtn.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleTacticalFullscreen();
-          };
-        }
-        if (nxShield) {
-          ["dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
-            nxShield.addEventListener(ev, function(e) {
-              if (e.target && e.target.id === "nexShieldNativeFsBtn") return;
-              e.preventDefault();
-              e.stopPropagation();
-            }, { passive: false });
-          });
-          nxShield.addEventListener("click", function(e) {
-            if (e.target && e.target.id === "nexShieldNativeFsBtn") return;
-            e.preventDefault();
-            e.stopPropagation();
-            toggleTacticalFullscreen();
-          });
-        }
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = false;
-        isNexShieldEmbed = false;
         PLAYER.mode = 'zoom';
         applyScreenLockForMode('zoom');
         applySourceButtonPermissions('zoom');
@@ -2101,154 +1625,26 @@
           </div>
         `;
       }
-      // 4. YOUTUBE PLAYER WITH NORMAL FRAMING + PAUSE SHIELD OVER BOTTOM-RIGHT YOUTUBE LOGO
+      // 4. YOUTUBE PLAYER
       else {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
         isYouTubeSource = true;
-        isNexShieldEmbed = false;
         PLAYER.mode = 'youtube';
         PLAYER.ytId = ytId || finalVideo;
         applyScreenLockForMode('youtube');
         applySourceButtonPermissions('youtube');
 
         playerRoot.innerHTML = `
-          <div class="yt-custom-container is-paused" id="ytPwContainer">
+          <div class="yt-custom-container">
             <div id="ytPlayerFrame"></div>
-
-            <!-- DEDICATED YOUTUBE GESTURE SURFACE (SINGLE TAP = PLAY/PAUSE + SHOW HUD, DOUBLE TAP = -10s / +10s) -->
-            <div id="ytPwGestureSurface" style="position:absolute;inset:0;width:100%;height:100%;z-index:65;background:transparent;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;"></div>
-
-            <!-- BLACK SHIELD SHOWN ONLY WHEN PAUSED OVER BOTTOM-RIGHT YOUTUBE LOGO -->
-            <div class="yt-pause-brand-shield" id="ytPauseBrandShield"></div>
-
-            <!-- TOP BAR -->
-            <div class="yt-pw-top-bar" id="ytPwTopBar">
-              <button type="button" class="yt-pw-btn" onclick="if(isAnyFullscreen()){exitFullscreenOnly();}else{window.history.back();}" title="Back">
-                &larr; <span id="ytPwTopTitle" style="max-width:76vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${decodedTitle}</span>
-              </button>
-            </div>
-
-            <!-- DOUBLE-TAP SEEK BADGES -->
             <div class="skip-alert-badge left" id="skipLeftBadge">&#171; 10s</div>
             <div class="skip-alert-badge right" id="skipRightBadge">10s &#187;</div>
-
-            <!-- PW-STYLE COMPACT BOTTOM BAR -->
-            <div class="yt-pw-bottom-bar" id="ytPwBottomBar">
-              <div class="yt-pw-scrubber-row">
-                <span id="ytPwCurTime">0:00</span>
-                <span class="yt-pw-speed-badge" id="ytPwSpeedBadge">1x</span>
-                <div class="yt-pw-track" id="ytPwTrack" onclick="seekVideoTrack(event)">
-                  <div class="yt-pw-fill" id="ytPwFill"></div>
-                </div>
-                <span id="ytPwTotTime">0:00</span>
-              </div>
-
-              <div class="yt-pw-controls-row">
-                <div class="yt-pw-left">
-                  <button type="button" class="yt-pw-btn" id="ytPwPlayBtn" onclick="toggleVideoPlay()" title="Play / Pause">▶</button>
-                  <button type="button" class="yt-pw-btn" onclick="skipSeconds(-10); triggerBadge('skipLeftBadge')" title="Rewind 10s">↺ 10s</button>
-                  <button type="button" class="yt-pw-btn" onclick="skipSeconds(10); triggerBadge('skipRightBadge')" title="Forward 10s">10s ↻</button>
-                  <button type="button" class="yt-pw-btn" id="ytPwMuteBtn" onclick="toggleYtPwMute()" title="Mute / Unmute">🔊</button>
-                  <input type="range" class="yt-pw-vol" id="ytPwVolSlider" min="0" max="100" value="100" oninput="setYtPwVolume(this.value)" title="Volume" />
-                </div>
-
-                <div class="yt-pw-right">
-                  <select id="ytPwSpeedSelect" class="yt-pw-speed-select" onchange="updateVideoSpeed(this.value)" title="Playback Speed">
-                    <option value="1">1x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="1.75">1.75x</option>
-                    <option value="2">2x</option>
-                  </select>
-                  <button type="button" class="yt-pw-btn" id="ytPwFsBtn" onclick="toggleTacticalFullscreen()" title="Fullscreen">⛶</button>
-                </div>
-              </div>
-            </div>
           </div>
         `;
 
-        var ytHudTimer = null;
-        window.wakeYtPwHudFor5s = function() {
-          var box = document.getElementById("ytPwContainer");
-          if (!box) return;
-          box.classList.remove("yt-pw-hud-idle");
-          clearTimeout(ytHudTimer);
-          ytHudTimer = setTimeout(function() {
-            if (isPlaying && box) {
-              box.classList.add("yt-pw-hud-idle");
-            }
-          }, 5000);
-        };
-
-        var ytBox = document.getElementById("ytPwContainer");
-        if (ytBox) {
-          ["pointerdown", "pointermove", "click", "mousemove", "touchstart", "touchmove", "keydown"].forEach(function(ev) {
-            ytBox.addEventListener(ev, window.wakeYtPwHudFor5s, { passive: true });
-          });
-        }
-        ["pointermove", "mousemove", "touchstart", "keydown"].forEach(function(ev) {
-          document.addEventListener(ev, function() {
-            if (isYouTubeSource && window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
-          }, { passive: true });
-        });
-
-        var ytGesture = document.getElementById("ytPwGestureSurface");
-        if (ytGesture) {
-          var singleTapTimer = null;
-          var lastTapMs = 0;
-          var lastTapClientX = 0;
-          var ignoreMouseUntil = 0;
-
-          function handleSurfaceTap(clientX) {
-            window.wakeYtPwHudFor5s();
-            if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
-
-            var now = Date.now();
-            var rect = ytGesture.getBoundingClientRect();
-            var isLeft = (clientX - rect.left) < (rect.width / 2);
-
-            if (now - lastTapMs > 30 && now - lastTapMs < 330 && Math.abs(clientX - lastTapClientX) < 90) {
-              if (singleTapTimer) {
-                clearTimeout(singleTapTimer);
-                singleTapTimer = null;
-              }
-              lastTapMs = 0;
-              triggerSideSeek(isLeft ? "left" : "right");
-            } else {
-              lastTapMs = now;
-              lastTapClientX = clientX;
-              if (singleTapTimer) clearTimeout(singleTapTimer);
-              singleTapTimer = setTimeout(function() {
-                singleTapTimer = null;
-                toggleVideoPlay();
-                window.wakeYtPwHudFor5s();
-              }, 260);
-            }
-          }
-
-          ytGesture.addEventListener("touchend", function(e) {
-            if (!isYouTubeSource) return;
-            var t = e.changedTouches && e.changedTouches[0];
-            if (!t) return;
-            e.preventDefault();
-            e.stopPropagation();
-            ignoreMouseUntil = Date.now() + 500;
-            handleSurfaceTap(t.clientX);
-          }, { passive: false });
-
-          ytGesture.addEventListener("click", function(e) {
-            if (!isYouTubeSource) return;
-            if (Date.now() < ignoreMouseUntil) return;
-            e.preventDefault();
-            e.stopPropagation();
-            handleSurfaceTap(e.clientX);
-          });
-        }
-
         window.onYouTubeIframeAPIReady = () => {
           ytInstance = new YT.Player('ytPlayerFrame', {
-            host: 'https://www.youtube-nocookie.com',
             videoId: PLAYER.ytId,
             playerVars: {
               autoplay: 0,
@@ -2259,9 +1655,7 @@
               rel: 0,
               showinfo: 0,
               iv_load_policy: 3,
-              cc_load_policy: 0,
-              playsinline: 1,
-              origin: window.location.origin
+              playsinline: 1
             },
             events: {
               onReady: () => {
@@ -2273,12 +1667,10 @@
                   isPlaying = true;
                   updatePlayLabel();
                   document.getElementById('securityOverlay').classList.add('hidden');
-                  if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
                   if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 } else {
                   isPlaying = false;
                   updatePlayLabel();
-                  if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
                   if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
                 }
               }
@@ -2297,44 +1689,6 @@
     function updatePlayLabel() {
       const btn = document.getElementById("playTrigger");
       if (btn) btn.innerText = isPlaying ? "⏸ PAUSE" : "▶ PLAY";
-      const pwPlay = document.getElementById("ytPwPlayBtn");
-      if (pwPlay) pwPlay.innerText = isPlaying ? "⏸" : "▶";
-      const ytContainer = document.getElementById("ytPwContainer");
-      if (ytContainer) {
-        if (isPlaying) ytContainer.classList.remove("is-paused");
-        else ytContainer.classList.add("is-paused");
-      }
-    }
-
-    function setYtPwVolume(val) {
-      const num = Math.max(0, Math.min(100, parseInt(val, 10) || 0));
-      const slider = document.getElementById("ytPwVolSlider");
-      const muteBtn = document.getElementById("ytPwMuteBtn");
-      if (slider && String(slider.value) !== String(num)) slider.value = String(num);
-      if (isYouTubeSource && ytInstance && typeof ytInstance.setVolume === "function") {
-        if (num > 0 && typeof ytInstance.unMute === "function") ytInstance.unMute();
-        ytInstance.setVolume(num);
-      }
-      if (muteBtn) muteBtn.innerText = num === 0 ? "🔇" : "🔊";
-      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
-    }
-
-    function toggleYtPwMute() {
-      if (!isYouTubeSource || !ytInstance) return;
-      const slider = document.getElementById("ytPwVolSlider");
-      const muteBtn = document.getElementById("ytPwMuteBtn");
-      const muted = typeof ytInstance.isMuted === "function" ? ytInstance.isMuted() : false;
-      if (muted || (slider && parseInt(slider.value, 10) === 0)) {
-        if (typeof ytInstance.unMute === "function") ytInstance.unMute();
-        const nextVol = (slider && parseInt(slider.value, 10) > 0) ? parseInt(slider.value, 10) : 100;
-        if (typeof ytInstance.setVolume === "function") ytInstance.setVolume(nextVol);
-        if (slider) slider.value = String(nextVol);
-        if (muteBtn) muteBtn.innerText = "🔊";
-      } else {
-        if (typeof ytInstance.mute === "function") ytInstance.mute();
-        if (muteBtn) muteBtn.innerText = "🔇";
-      }
-      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
     }
 
     function activateStream() {
@@ -2373,50 +1727,27 @@
     function updateVideoSpeed(rate) {
       if (isGDriveEmbed) return;
       const spd = parseFloat(rate);
-      const badge = document.getElementById("ytPwSpeedBadge");
-      if (badge) badge.innerText = spd + "x";
-      const pwSel = document.getElementById("ytPwSpeedSelect");
-      if (pwSel && String(pwSel.value) !== String(rate)) pwSel.value = String(rate);
       if (isDirectArchiveVideo) {
         const vid = document.getElementById("archiveVideo");
         if (vid) vid.playbackRate = spd;
       } else if (isYouTubeSource && ytInstance && ytInstance.setPlaybackRate) {
         ytInstance.setPlaybackRate(spd);
       }
-      if (window.wakeYtPwHudFor5s) window.wakeYtPwHudFor5s();
       if (isAnyFullscreen()) wakeFullscreenControlsFor5s();
     }
 
     function toggleTacticalFullscreen() {
       if (isGDriveEmbed) return;
       const target = document.getElementById("phantomConsoleScreen");
-      if (!target) return;
 
       if (!isAnyFullscreen()) {
-        try {
-          var req = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen || target.msRequestFullscreen;
-          if (req) {
-            var prom = req.call(target);
-            if (prom && typeof prom.catch === "function") {
-              prom.catch(function() {
-                target.classList.add("fs-fallback-active");
-                syncFullscreenButtons(true);
-              });
-            }
-          } else {
-            target.classList.add("fs-fallback-active");
-          }
-        } catch (err) {
-          target.classList.add("fs-fallback-active");
+        if (target.requestFullscreen) {
+          target.requestFullscreen();
+        } else if (target.webkitRequestFullscreen) {
+          target.webkitRequestFullscreen();
+        } else if (target.msRequestFullscreen) {
+          target.msRequestFullscreen();
         }
-        setTimeout(function() {
-          if (!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement)) {
-            if (target.classList.contains("nexshield-mode")) {
-              target.classList.add("fs-fallback-active");
-              syncFullscreenButtons(true);
-            }
-          }
-        }, 120);
         syncFullscreenButtons(true);
       } else {
         exitFullscreenOnly();
@@ -2556,21 +1887,12 @@
           const c = ytInstance.getCurrentTime() || 0;
           const d = ytInstance.getDuration() || 0;
           if (d > 0) {
-            const pctStr = ((c / d) * 100) + "%";
             const fill = document.getElementById("trackFill");
-            if (fill) fill.style.width = pctStr;
-            const pwFill = document.getElementById("ytPwFill");
-            if (pwFill) pwFill.style.width = pctStr;
-            var curStr = formatSeconds(c);
-            var totStr = formatSeconds(d);
+            if (fill) fill.style.width = ((c / d) * 100) + "%";
             var curEl = document.getElementById("currentTimeLabel");
             var totEl = document.getElementById("totalTimeLabel");
-            if (curEl) curEl.innerText = curStr;
-            if (totEl) totEl.innerText = totStr;
-            var pwCur = document.getElementById("ytPwCurTime");
-            var pwTot = document.getElementById("ytPwTotTime");
-            if (pwCur) pwCur.innerText = curStr;
-            if (pwTot) pwTot.innerText = totStr;
+            if (curEl) curEl.innerText = formatSeconds(c);
+            if (totEl) totEl.innerText = formatSeconds(d);
           }
         }
       }, 400);
