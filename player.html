@@ -419,6 +419,41 @@
       z-index: 99999 !important;
     }
 
+    /* NEXASHIELD TOP-RIGHT TITLE SHIELD & BOTTOM-RIGHT NATIVE FULLSCREEN SHIELD */
+    .nexashield-top-title-shield {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 340px;
+      height: 46px;
+      z-index: 85;
+      background: transparent;
+      pointer-events: auto;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    @media (max-width: 768px) {
+      .nexashield-top-title-shield {
+        width: 220px;
+        height: 38px;
+      }
+    }
+
+    .nexashield-bottom-fs-shield {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 48px;
+      height: 44px;
+      z-index: 86;
+      background: transparent;
+      pointer-events: auto;
+      cursor: not-allowed;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     /* LOCKED TEAM PHANTOM LOGO INSIDE VIDEO FRAME BOTTOM-RIGHT (LARGER & ALWAYS VISIBLE IN NORMAL & FULLSCREEN) */
     .frame-locked-brand-tag {
       position: absolute;
@@ -506,41 +541,6 @@
     }
     .archive-frame.locked-media, .gdrive-frame.locked-media {
       pointer-events: none !important;
-    }
-
-    /* CUSTOM FULLSCREEN BUTTON FOR NEXASHIELD FRAME (TOP RIGHT) */
-    .archive-box.nexashield-mode .nexashield-custom-fs-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 88;
-      width: 28px;
-      height: 28px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: rgba(2, 6, 23, 0.85);
-      color: #f8fafc;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 13px;
-      font-weight: 900;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      pointer-events: auto !important;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
-      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-    }
-    .archive-box.nexashield-mode .nexashield-custom-fs-btn:hover {
-      background: rgba(14, 165, 233, 0.92);
-      border-color: #38bdf8;
-      color: #ffffff;
-      transform: scale(1.05);
-    }
-    #phantomConsoleScreen.nexashield-fullscreen-active .archive-box.nexashield-mode .nexashield-custom-fs-btn {
-      top: 14px;
-      right: 14px;
     }
 
     /* NORMAL YOUTUBE FRAME ENGINE + PAUSE SHIELD OVER BOTTOM-RIGHT YOUTUBE LOGO */
@@ -1489,32 +1489,18 @@
       else if (document.msExitFullscreen) document.msExitFullscreen();
     }
 
-    function syncNexashieldFullscreenButton(isFs) {
-      var btn = document.getElementById("nexashieldFsBtn");
-      if (!btn) return;
-      if (PLAYER.mode !== "nexashield") {
-        btn.style.display = "none";
-        return;
-      }
-      btn.style.display = "inline-flex";
-      btn.innerText = isFs ? "✕" : "⛶";
-      btn.title = isFs ? "Exit Fullscreen" : "Fullscreen";
-    }
-
     function syncFullscreenButtons(isFs) {
       var dockBtn = document.getElementById("dockFsBtn");
-      if (dockBtn) {
-        if (isGDriveEmbed) {
-          dockBtn.disabled = true;
-          dockBtn.classList.add("is-disabled");
-          dockBtn.innerText = "⛶ Fullscreen";
-        } else {
-          dockBtn.disabled = false;
-          dockBtn.classList.remove("is-disabled");
-          dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
-        }
+      if (!dockBtn) return;
+      if (isGDriveEmbed) {
+        dockBtn.disabled = true;
+        dockBtn.classList.add("is-disabled");
+        dockBtn.innerText = "⛶ Fullscreen";
+        return;
       }
-      syncNexashieldFullscreenButton(isFs);
+      dockBtn.disabled = false;
+      dockBtn.classList.remove("is-disabled");
+      dockBtn.innerText = isFs ? "✕ Exit Fullscreen" : "⛶ Fullscreen";
     }
 
     function applyScreenLockForMode(mode) {
@@ -1600,6 +1586,18 @@
       }
 
       refreshCurrentDownloadButtonState();
+    }
+
+    function blockShieldEvents(el) {
+      if (!el) return;
+      ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
+        el.addEventListener(ev, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+          return false;
+        }, { passive: false, capture: true });
+      });
     }
 
     function triggerSideSeek(side) {
@@ -1818,18 +1816,7 @@
           </div>
         `;
 
-        const popoutLock = document.getElementById("gdrivePopoutLock");
-        if (popoutLock) {
-          ["click", "dblclick", "mousedown", "mouseup", "pointerdown", "pointerup", "touchstart", "touchend"].forEach(function(ev) {
-            popoutLock.addEventListener(ev, function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-              return false;
-            }, { passive: false, capture: true });
-          });
-        }
-
+        blockShieldEvents(document.getElementById("gdrivePopoutLock"));
         bindGDriveEdgeDoubleTap(document.getElementById("gdriveLeftTapZone"), "left");
         bindGDriveEdgeDoubleTap(document.getElementById("gdriveRightTapZone"), "right");
       }
@@ -1886,7 +1873,7 @@
         }
         startTimerSync();
       }
-      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER
+      // 2. NEXASHIELD / EXTERNAL IFRAME PLAYER (SHIELD OVER TOP TITLE & BOTTOM NATIVE FULLSCREEN ONLY)
       else if (!ytId && (finalVideo && finalVideo.startsWith("http://") && !finalVideo.includes("zoom") || finalVideo && finalVideo.startsWith("https://") && !finalVideo.includes("zoom") && !finalVideo.includes("youtube") && !finalVideo.includes("youtu.be"))) {
         isDirectArchiveVideo = false;
         isGDriveEmbed = false;
@@ -1895,24 +1882,19 @@
         applyScreenLockForMode('nexashield');
         applySourceButtonPermissions('nexashield');
         playerRoot.innerHTML = `
-          <div class="archive-box nexashield-mode">
+          <div class="archive-box">
             <iframe 
               id="archiveIframe" 
               src="${finalVideo}" 
               class="archive-frame" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowfullscreen>
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
-            <button
-              type="button"
-              id="nexashieldFsBtn"
-              class="nexashield-custom-fs-btn"
-              onclick="toggleTacticalFullscreen()"
-              title="Fullscreen"
-              aria-label="Fullscreen">⛶</button>
+            <div class="nexashield-top-title-shield" id="nexashieldTopTitleShield" oncontextmenu="return false;"></div>
+            <div class="nexashield-bottom-fs-shield" id="nexashieldBottomFsShield" oncontextmenu="return false;"></div>
           </div>
         `;
-        syncNexashieldFullscreenButton(isAnyFullscreen());
+        blockShieldEvents(document.getElementById("nexashieldTopTitleShield"));
+        blockShieldEvents(document.getElementById("nexashieldBottomFsShield"));
       }
       // 3. ZOOM IFRAME PLAYER
       else if (!ytId && finalVideo && finalVideo.includes("zoom")) {
@@ -2243,11 +2225,6 @@
           screen.classList.add("gdrive-iframe-fs");
         } else {
           screen.classList.remove("gdrive-iframe-fs");
-        }
-        if (nowFs && PLAYER.mode === "nexashield") {
-          screen.classList.add("nexashield-fullscreen-active");
-        } else {
-          screen.classList.remove("nexashield-fullscreen-active");
         }
       }
 
